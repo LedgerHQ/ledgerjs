@@ -97,7 +97,7 @@ ByteString.prototype.bytes = function(offset, count) {
 		else 
 		if (typeof count == "undefined") {
 			result = new Buffer(this.value.length - offset);
-			this.value.copy(result, 0, offset, this.value.length - offset);
+			this.value.copy(result, 0, offset, this.value.length - offset + 1);
 		}
 		else {
 			throw "Invalid count";

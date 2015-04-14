@@ -519,7 +519,7 @@ BTChip.prototype.startP2SHUntrustedHashTransactionInput_async = function(newTran
           var outpoint = currentObject.reverseBytestring(inputs[i][1]);
           console.log("txhash " + txhash.toString(GP.HEX));
           console.log("outpoint " + outpoint.toString(GP.HEX));
-          data = data.concat(new ByteString(txhash, GP.HEX)).concat(new ByteString(outpoint, GP.HEX));
+          data = data.concat(txhash).concat(outpoint);
           if (i == currentIndex) {
             script = redeemScript;
           } else {
@@ -570,7 +570,7 @@ BTChip.prototype.untrustedHashTransactionInputFinalizeFullRaw_async = function(l
 
 BTChip.prototype.untrustedHashTransactionInputFinalizeFull_async = function(numOutputs, output) {
     var currentObject = this;
-    var data = currentObject.createVarint(numOutputs);
+    var data = currentObject.createVarint(numOutputs);    
     var deferred = Q.defer();
     return currentObject.untrustedHashTransactionInputFinalizeFullRaw_async(false, data).then(function (result) {
       var data = output;
@@ -905,7 +905,7 @@ BTChip.prototype.signP2SHTransaction_async = function(inputs, scripts, numOutput
       function(input, finishedCallback) {
         currentObject.startP2SHUntrustedHashTransactionInput_async(firstRun, defaultVersion, inputs, scripts[currentIndex], currentIndex).then(function (result) {
           currentObject.untrustedHashTransactionInputFinalizeFull_async(numOutputs, output).then(function (result) {
-            currentObject.signTransaction_async(paths[currentIndex], authorization, lockTime, sigHashType).then(function (result) {
+            currentObject.signTransaction_async(paths[currentIndex], authorization, lockTime, sigHashType).then(function (result) {            		
               signatures.push(result);
               firstRun = false;
               currentIndex++;
