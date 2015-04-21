@@ -30,7 +30,7 @@ var GP = require('./GP');
 */
 var ByteString = function(value, encoding) {
 		this.encoding = encoding;
-		this.hasBuffer = (typeof Buffer2 != 'undefined');
+		this.hasBuffer = (typeof Buffer != 'undefined');
 		if (this.hasBuffer && (value instanceof Buffer)) {
 			this.value = value;
 			this.encoding = GP.HEX;			
