@@ -30,23 +30,34 @@ var GP = require('./GP');
 */
 var ByteString = function(value, encoding) {
 		this.encoding = encoding;
-		if (!(value instanceof Buffer)) {
+		this.hasBuffer = (typeof Buffer2 != 'undefined');
+		if (this.hasBuffer && (value instanceof Buffer)) {
+			this.value = value;
+			this.encoding = GP.HEX;			
+		}
+		else {
 			switch(encoding) {
 				case GP.HEX:
-					this.value = new Buffer(value, 'hex'); 
+					if (!this.hasBuffer) {
+						this.value = Convert.hexToBin(value);
+					}
+					else {
+						this.value = new Buffer(value, 'hex'); 
+					}
 					break;
 			
 				case GP.ASCII:
-					this.value = new Buffer(value, 'ascii'); 
+					if (!this.hasBuffer) {
+						this.value = value;
+					}
+					else {
+						this.value = new Buffer(value, 'ascii'); 
+					}
 					break;
 				
 				default:
 					throw "Invalid arguments"; 
 			}
-		}
-		else {
-			this.value = value;
-			this.encoding = GP.HEX;
 		}
 		this.length = this.value.length;
 }
@@ -66,7 +77,12 @@ ByteString.prototype.byteAt = function(index) {
 		if ((index < 0) || (index >= this.value.length)) {
 			throw "Invalid index offset";
 		}
-		return this.value[index];
+		if (!this.hasBuffer) {
+			return Convert.readHexDigit(Convert.stringToHex(this.value.substring(index, index + 1)));
+		}
+		else {
+			return this.value[index];
+		}
 }
 	
 /**
@@ -91,18 +107,34 @@ ByteString.prototype.bytes = function(offset, count) {
 			if (count < 0) {
 				throw "Invalid count";
 			}
-			result = new Buffer(count);
-			this.value.copy(result, 0, offset, offset + count);
+			if (!this.hasBuffer) {
+				result = new ByteString(this.value.substring(offset, offset + count), GP.ASCII);
+			}
+			else {
+				result = new Buffer(count);
+				this.value.copy(result, 0, offset, offset + count);
+			}
 		}
 		else 
 		if (typeof count == "undefined") {
-			result = new Buffer(this.value.length - offset);
-			this.value.copy(result, 0, offset, this.value.length - offset + 1);
+			if (!this.hasBuffer) {
+				result = new ByteString(this.value.substring(offset), GP.ASCII);
+			}
+			else {
+				result = new Buffer(this.value.length - offset);
+				this.value.copy(result, 0, offset, this.value.length - offset + 1);
+			}
 		}
 		else {
 			throw "Invalid count";
 		}
-		return new ByteString(result, GP.HEX);
+		if (!this.hasBuffer) {
+			result.encoding = this.encoding;
+			return result;			
+		}
+		else {
+			return new ByteString(result, GP.HEX);
+		}
 }
 
 /**
@@ -117,8 +149,16 @@ ByteString.prototype.concat = function(target) {
 		if (!(target instanceof ByteString)) {
 			throw "Invalid argument";
 		}
-		var result = Buffer.concat([this.value, target.value]);
-		return new ByteString(result, GP.HEX);
+		if (!this.hasBuffer) {
+			var result = this.value + target.value;
+			var x = new ByteString(result, GP.ASCII);
+			x.encoding = this.encoding;
+			return x;					
+		}
+		else {
+			var result = Buffer.concat([this.value, target.value]);
+			return new ByteString(result, GP.HEX);
+		}
 }
 	
 /**
@@ -133,7 +173,12 @@ ByteString.prototype.equals = function(target) {
 		if (!(target instanceof ByteString)) {
 			throw "Invalid argument";
 		}
-		return Buffer.equals(this.value, target.value);
+		if (!this.hasBuffer) {
+			return (this.value == target.value);
+		}
+		else {
+			return Buffer.equals(this.value, target.value);
+		}
 }
 	
 	
@@ -161,9 +206,19 @@ ByteString.prototype.toString = function(encoding) {
 		}
 		switch(targetEncoding) {
 			case GP.HEX:
-				return this.value.toString('hex');
+				if (!this.hasBuffer) {
+					return Convert.stringToHex(this.value);
+				}
+				else {
+					return this.value.toString('hex');
+				}
 			case GP.ASCII:
-				return this.value.toString();
+				if (!this.hasBuffer) {
+					return this.value;
+				}
+				else {
+					return this.value.toString();
+				}
 			default:
 				throw "Unsupported";
 		}		
