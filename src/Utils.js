@@ -26,7 +26,7 @@ var BTChip = require('./BTChip');
 var Crypto = require('bitcoinjs-lib/src/crypto');
 var base58check = require('bs58check');
 
-Utils.getXpub_async = function(btchip, path, testnet) {
+Utils.getXpub_async = function(btchip, path) {
 	var getXpubFingerprint_async = function(btchip, path) {
 		var parsedPath = btchip.parseBIP32Path(path);
 		if (parsedPath.length > 1) {
@@ -60,6 +60,7 @@ Utils.getXpub_async = function(btchip, path, testnet) {
 	}	
 	return getXpubFingerprint_async(btchip, path).then(function(fingerprint) {
 		return btchip.getWalletPublicKey_async(path).then(function(res) {
+			var testnet = res['bitcoinAddress'].byteAt(0) != 0x31;
 			var compressedKey = btchip.compressPublicKey(res['publicKey']);
 			var parsedPath = btchip.parseBIP32Path(path);
 			var depth = parsedPath.length;
