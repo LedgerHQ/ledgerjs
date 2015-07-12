@@ -25,6 +25,7 @@ var NodeHIDCardTerminalFactory = require('./NodeHIDCardTerminalFactory');
 var BTChip = require('./BTChip');
 var Crypto = require('bitcoinjs-lib/src/crypto');
 var base58check = require('bs58check');
+var Q = require('q');
 
 Utils.getXpub_async = function(btchip, path) {
 	var getXpubFingerprint_async = function(btchip, path) {
