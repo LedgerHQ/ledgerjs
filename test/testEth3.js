@@ -16,7 +16,7 @@
 ********************************************************************************/
 
 if (typeof ledger == "undefined") {
-        ledger = require('ledger');
+        ledger = require('ledgerco');
         comm = ledger.comm_node;
         browser = false;
 }
