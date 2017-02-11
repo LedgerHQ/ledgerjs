@@ -135,6 +135,4 @@ eth.signTransaction_async("44'/60'/0'/0'/0", "e8018504e3b292008252089428ee52a8f3
 		console.log(result);
 }).fail(function(ex) {console.log(ex);});
 
-}).fail(function(ex) {console.log(ex);});
-
 ```
