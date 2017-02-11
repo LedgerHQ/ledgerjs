@@ -15,11 +15,30 @@
 *  limitations under the License.
 ********************************************************************************/
 
-var ledger = module.exports;
+if (typeof ledger == "undefined") {
+        ledger = require('ledger');
+        comm = ledger.comm_node;
+        browser = false;
+}
+else {
+        browser = true;
+        comm = ledger.comm_u2f;
+}
 
-ledger.comm_node = require('./ledger-comm-node');
-ledger.comm_u2f = require('./ledger-comm-u2f');
-ledger.btc = require('./ledger-btc');
-ledger.eth = require('./ledger-eth');
+function runTest() {
 
-module.exports = ledger;
+ledger.comm_node.create_async(0, true).then(function(comm) {
+
+	var eth = new ledger.eth(comm);
+	eth.getAppConfiguration_async().then(function(result) {
+		console.log(result);
+	}).fail(function(ex) {console.log(ex);});
+
+}).fail(function(ex) {console.log(ex);});
+
+}
+
+if (!browser) {
+	runTest();
+}
+
