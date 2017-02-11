@@ -19,7 +19,7 @@ You can also use list_async and create the communication object manually to pick
 
 ## Initialization on a browser
 
-The communication API is compatible with every browser supporting FIDO U2F either directly (Chrome, Opera) or through a third party extension (Firefox)
+The communication API is compatible with every browser supporting FIDO U2F either directly (Chrome, Opera) or through a third party extension (Firefox). Pages shall be served from an HTTPS connection as a requirement of the U2F API.
 
 Make sure to include browser/ledger.min.js and browser/u2f-api.js in your web page and initialize with 
 
