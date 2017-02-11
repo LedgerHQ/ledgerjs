@@ -1,5 +1,5 @@
 {
-  "name": "ledger",
+  "name": "ledgerco",
   "version": "1.1.0",
   "description": "Node API for Ledger Wallet and HW.1 Bitcoin Hardware Wallets",
   "main": "./src/index.js",
