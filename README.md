@@ -111,6 +111,17 @@ btc.signP2SHTransaction_async(
 );
 ``` 
 
+You can sign a message according to the Bitcoin Signature format and retrieve v, r, s given the message and the BIP 32 path of the account to sign.
+
+```javascript
+btc.signMessageNew_async("44'/60'/0'/0'/0", Buffer.from("test").toString("hex")).then(function(result) {
+  var v = result['v'] + 27 + 4;
+  var signature = Buffer.from(v.toString(16) + result['r'] + result['s'], 'hex').toString('base64');
+  console.log("Signature : " + signature);
+}).fail(function(ex) {console.log(ex);});
+
+```
+
 ## Using with Ethereum 
 
 Create an application object after opening the device
@@ -133,6 +144,21 @@ You can sign a transaction and retrieve v, r, s given the raw transaction and th
 ```javascript
 eth.signTransaction_async("44'/60'/0'/0'/0", "e8018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a2487400080").then(function(result) {
 		console.log(result);
+}).fail(function(ex) {console.log(ex);});
+
+```
+
+You can sign a message according to eth_sign RPC call and retrieve v, r, s given the message and the BIP 32 path of the account to sign.
+
+```javascript
+eth.signPersonalMessage_async("44'/60'/0'/0'/0", Buffer.from("test").toString("hex")).then(function(result) {
+    var v = result['v'] - 27;
+    v = v.toString(16);
+    if (v.length < 2) {
+      v = "0" + v;
+    }
+    console.log("Signature 0x" + result['r'] + result['s'] + v);
+
 }).fail(function(ex) {console.log(ex);});
 
 ```

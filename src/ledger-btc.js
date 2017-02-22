@@ -318,6 +318,68 @@ LedgerBtc.prototype.signTransaction_async = function (path, lockTime, sigHashTyp
 	})
 }
 
+LedgerBtc.prototype.signMessageNew_async = function(path, messageHex) {
+	var splitPath = utils.splitPath(path);
+	var offset = 0;
+	var message = new Buffer(messageHex, 'hex');
+	var apdus = [];
+	var response = [];
+	var self = this;	
+	while (offset != message.length) {
+		var maxChunkSize = (offset == 0 ? (LedgerBtc.MAX_SCRIPT_BLOCK - 1 - splitPath.length * 4 - 4) : LedgerBtc.MAX_SCRIPT_BLOCK);
+		var chunkSize = (offset + maxChunkSize > message.length ? message.length - offset : maxChunkSize);
+		var buffer = new Buffer(offset == 0 ? 5 + 1 + splitPath.length * 4 + 2 + chunkSize : 5 + chunkSize);
+		buffer[0] = 0xe0;
+		buffer[1] = 0x4e;
+		buffer[2] = 0x00;
+		buffer[3] = (offset == 0 ? 0x01 : 0x80);
+		buffer[4] = (offset == 0 ? 1 + splitPath.length * 4 + 2 + chunkSize : chunkSize);
+		if (offset == 0) {
+			buffer[5] = splitPath.length;
+			splitPath.forEach(function (element, index) {
+				buffer.writeUInt32BE(element, 6 + 4 * index);
+			});
+			buffer.writeUInt16BE(message.length, 6 + 4 * splitPath.length);
+			message.copy(buffer, 6 + 4 * splitPath.length + 2, offset, offset + chunkSize);
+		}
+		else {
+			message.copy(buffer, 5, offset, offset + chunkSize);
+		}
+		apdus.push(buffer.toString('hex'));
+		offset += chunkSize;
+	}
+	return utils.foreach(apdus, function(apdu) {
+		return self.comm.exchange(apdu, [0x9000]).then(function(apduResponse) {
+			response = apduResponse;
+		})
+	}).then(function() {		
+		buffer = Buffer.alloc(6);
+		buffer[0] = 0xe0;
+		buffer[1] = 0x4e;
+		buffer[2] = 0x80;
+		buffer[3] = 0x00;
+		buffer[4] = 0x01;
+		buffer[5] = 0x00;
+		return self.comm.exchange(buffer.toString('hex'), [0x9000]).then(function(apduResponse) {
+				var response = Buffer.from(apduResponse, 'hex');
+				var result = {};
+				result['v'] = response[0] - 0x30;
+				var r = response.slice(4, 4 + response[3]);
+				if (r[0] == 0) {
+					r = r.slice(1);
+				}
+				result['r'] = r.toString('hex');
+				var offset = 4 + response[3] + 2;
+				var s = response.slice(offset, offset + response[offset - 1]);
+				if (s[0] == 0) {
+					s = s.slice(1);
+				}				
+				result['s'] = s.toString('hex');
+				return result;
+		})
+	})		
+}
+
 LedgerBtc.prototype.createPaymentTransactionNew_async = function(inputs, associatedKeysets, changePath, outputScript, lockTime, sigHashType) {
 	// Inputs are provided as arrays of [transaction, output_index, optional redeem script, optional sequence]
 	// associatedKeysets are provided as arrays of [path]	
