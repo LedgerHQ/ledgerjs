@@ -164,7 +164,7 @@ LedgerNode.prototype.exchange = function(apduHex, statusList) {
 				if (cardObject.debug) {
 					console.log('=>' + content.toString('hex'));
 				}
-				var data = [];
+				var data = [ 0x00 ];
 				for (var i=0; i<content.length; i++) {
 					data.push(content[i]);
 				}
