@@ -27,7 +27,7 @@ else {
 
 function runTest() {
 
-ledger.comm_node.create_async(0, true).then(function(comm) {
+comm.create_async(0, true).then(function(comm) {
 
 	var btc = new ledger.btc(comm);
 	btc.signMessageNew_async("44'/0'/0'/0", Buffer.from("test").toString('hex')).then(function(result) {

@@ -27,7 +27,7 @@ else {
 
 function runTest() {
 
-ledger.comm_node.create_async(0, true).then(function(comm) {
+comm.create_async(0, true).then(function(comm) {
 
 	var eth = new ledger.eth(comm);
 	eth.getAppConfiguration_async().then(function(result) {

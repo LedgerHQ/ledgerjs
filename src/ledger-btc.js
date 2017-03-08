@@ -676,6 +676,22 @@ LedgerBtc.prototype.splitTransaction = function(transaction) {
 	return result;
 }
 
+LedgerBtc.prototype.serializeTransactionOutputs = function (transaction) {
+	var self = this;
+	var outputBuffer = Buffer.alloc(0);
+	if (typeof transaction['outputs'] != "undefined") {
+		outputBuffer = Buffer.concat([outputBuffer, self.createVarint(transaction['outputs'].length)]);
+		transaction['outputs'].forEach(function (output) {
+			outputBuffer = Buffer.concat([outputBuffer,
+				output['amount'],
+				self.createVarint(output['script'].length),
+				output['script']]);
+		});
+	}
+	return outputBuffer;
+}
+
+
 LedgerBtc.prototype.serializeTransaction = function (transaction) {
 	var self = this;
 	var inputBuffer = Buffer.alloc(0);	
@@ -688,15 +704,8 @@ LedgerBtc.prototype.serializeTransaction = function (transaction) {
 			]);
 	});
 
-	var outputBuffer = Buffer.alloc(0);
+	var outputBuffer = self.serializeTransactionOutputs(transaction);
 	if (typeof transaction['outputs'] != "undefined") {
-		outputBuffer = Buffer.concat([outputBuffer, self.createVarint(transaction['outputs'].length)]);
-		transaction['outputs'].forEach(function (output) {
-			outputBuffer = Buffer.concat([outputBuffer,
-				output['amount'],
-				self.createVarint(output['script'].length),
-				output['script']]);
-		});
 		outputBuffer = Buffer.concat([outputBuffer, transaction['locktime']]);
 	}
 
