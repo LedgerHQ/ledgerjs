@@ -1,3 +1,5 @@
+[![npm version](https://badge.fury.io/js/ledgerco.svg)](https://badge.fury.io/js/ledgerco)
+
 # ledger-node-js-api
 Node and browser communication APIs for Ledger Nano / Nano S / Blue application 
 
