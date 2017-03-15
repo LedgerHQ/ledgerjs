@@ -142,7 +142,7 @@ var eth = new ledger.eth(comm);
 You can retrieve a public key and an address given its BIP 32 path
 
 ```javascript
-eth.getAddress_async("44'/0'/0'/0").then(
+eth.getAddress_async("44'/60'/0'/0'/0").then(
      function(result) { console.log(result);}).fail(
      function(error) { console.log(error); });
 );
