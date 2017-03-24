@@ -200,7 +200,7 @@ LedgerNode.prototype.exchange = function(apduHex, statusList) {
 						var block = deferred.promise.transport.slice(offsetSent, offsetSent + blockSize);
 						var paddingSize = 64 - block.length;
 						if (paddingSize != 0) {
-							padding = Buffer.alloc(paddingSize).fill(0);
+							var padding = Buffer.alloc(paddingSize).fill(0);
 							block = Buffer.concat([block, padding], block.length + paddingSize);
 						}
 						return send_async(currentObject, block).then(
@@ -290,13 +290,13 @@ LedgerNode.prototype.exchange = function(apduHex, statusList) {
 					deferred.reject("Invalid status " + status.toString(16));
 				}
 				// build the response
-				if (this.timeout != 0) {
+				if (currentObject.timeout != 0) {
 					clearTimeout(exchangeTimeout);
 				}
 				deferred.resolve(deferred.promise.response);
 			})
 			.fail(function(err) { 
-				if (this.timeout != 0) {
+				if (currentObject.timeout != 0) {
 					clearTimeout(exchangeTimeout);
 				}					
 				deferred.reject(err);
