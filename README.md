@@ -12,9 +12,9 @@ When using in a browser, make sure to set up "Browser mode" in the application s
 The communication API relies on node-hid
 
 ```javascript
-ledger.comm_node.create_async().then(function(comm)) {
+ledger.comm_node.create_async().then(function(comm) {
 	 ...
-}
+});
 ```
 
 You can also use list_async and create the communication object manually to pick one specific device if several are connected
@@ -26,9 +26,9 @@ The communication API is compatible with every browser supporting FIDO U2F eithe
 Make sure to include browser/ledger.min.js and browser/u2f-api.js in your web page and initialize with 
 
 ```javascript
-ledger.comm_u2f.create_async().then(function(comm)) {
+ledger.comm_u2f.create_async().then(function(comm) {
 	 ...
-}
+});
 ```
 
 To re-create the browser bindings, use
@@ -52,7 +52,6 @@ You can retrieve a public key and an address given its BIP 32 path
 btc.getWalletPublicKey_async("44'/0'/0'/0").then(
      function(result) { console.log(result);}).fail(
      function(error) { console.log(error); });
-);
 ```
 
 For each UTXO included in your transaction, create a transaction object from the raw serialized version of the transaction used in this UTXO
@@ -60,7 +59,7 @@ For each UTXO included in your transaction, create a transaction object from the
 ```javascript
 var tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc4af009f4d4dc57ae597ed0420b71010000008a47304402201f36a12c240dbf9e566bc04321050b1984cd6eaf6caee8f02bb0bfec08e3354b022012ee2aeadcbbfd1e92959f57c15c1c6debb757b798451b104665aa3010569b49014104090b15bde569386734abf2a2b99f9ca6a50656627e77de663ca7325702769986cf26cc9dd7fdea0af432c8e2becc867c932e1b9dd742f2a108997c2252e2bdebffffffff0281b72e00000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88aca0860100000000001976a9144533f5fb9b4817f713c48f0bfe96b9f50c476c9b88ac00000000");
 
-var tx2 = btc.splitTransaction("...")
+var tx2 = btc.splitTransaction("...");
 ```
 
 To sign a transaction involving standard (P2PKH) inputs, call createPaymentTransactionNew_async with the folowing parameters 
@@ -86,7 +85,6 @@ btc.createPaymentTransactionNew_async(
    "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac").then(
      function(result) { console.log(result);}).fail(
      function(error) { console.log(error); });
-);
 ```
 
 You can also retrieve the serialized output script as follows
@@ -94,7 +92,7 @@ You can also retrieve the serialized output script as follows
 ```javascript
 var tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc4af009f4d4dc57ae597ed0420b71010000008a47304402201f36a12c240dbf9e566bc04321050b1984cd6eaf6caee8f02bb0bfec08e3354b022012ee2aeadcbbfd1e92959f57c15c1c6debb757b798451b104665aa3010569b49014104090b15bde569386734abf2a2b99f9ca6a50656627e77de663ca7325702769986cf26cc9dd7fdea0af432c8e2becc867c932e1b9dd742f2a108997c2252e2bdebffffffff0281b72e00000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88aca0860100000000001976a9144533f5fb9b4817f713c48f0bfe96b9f50c476c9b88ac00000000");
 
-var outputScript = btc.serializeTransactionOutputs(tx1).toString('hex')
+var outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
 
 ```
 
@@ -119,7 +117,6 @@ btc.signP2SHTransaction_async(
    "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac").then(
      function(result) { console.log(result);}).fail(
      function(error) { console.log(error); });
-);
 ``` 
 
 You can sign a message according to the Bitcoin Signature format and retrieve v, r, s given the message and the BIP 32 path of the account to sign.
@@ -130,7 +127,6 @@ btc.signMessageNew_async("44'/60'/0'/0'/0", Buffer.from("test").toString("hex"))
   var signature = Buffer.from(v.toString(16) + result['r'] + result['s'], 'hex').toString('base64');
   console.log("Signature : " + signature);
 }).fail(function(ex) {console.log(ex);});
-
 ```
 
 ## Using with Ethereum 
@@ -147,7 +143,6 @@ You can retrieve a public key and an address given its BIP 32 path
 eth.getAddress_async("44'/60'/0'/0'/0").then(
      function(result) { console.log(result);}).fail(
      function(error) { console.log(error); });
-);
 ```
 
 You can sign a transaction and retrieve v, r, s given the raw transaction and the BIP 32 path of the account to sign 
