@@ -18,6 +18,7 @@
 'use strict';
 
 var Q = require('q');
+var u2f = require('./u2f-api');
 
 var Ledger3 = function(timeoutSeconds) {
 	this.timeoutSeconds = timeoutSeconds;
