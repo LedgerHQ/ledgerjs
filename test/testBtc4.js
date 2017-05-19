@@ -15,32 +15,18 @@
 *  limitations under the License.
 ********************************************************************************/
 
-if (typeof ledger == "undefined") {
-        ledger = require('ledgerco');
-        comm = ledger.comm_node;
-        browser = false;
-}
-else {
-        browser = true;
-        comm = ledger.comm_u2f;
-}
+function runTest(comm, ledger) {
 
-function runTest() {
-
-comm.create_async(0, true).then(function(comm) {
-
-	var btc = new ledger.btc(comm);
-	btc.signMessageNew_async("44'/0'/0'/0", Buffer.from("test").toString('hex')).then(function(result) {
-		var v = result['v'] + 27 + 4;
-		var signature = Buffer.from(v.toString(16) + result['r'] + result['s'], 'hex').toString('base64');
-		console.log("Signature : " + signature);
-	}).fail(function(ex) {console.log(ex);});
-
-}).fail(function(ex) {console.log(ex);});
+    return comm.create_async(0, true).then(function (comm) {
+        var btc = new ledger.btc(comm);
+        return btc.signMessageNew_async("44'/0'/0'/0", Buffer.from("test").toString('hex')).then(function (result) {
+            var v = result['v'] + 27 + 4;
+            var signature = Buffer.from(v.toString(16) + result['r'] + result['s'], 'hex').toString('base64');
+            console.log("Signature : " + signature);
+        })
+    })
 
 }
 
-if (!browser) {
-	runTest();
-}
+module.exports = runTest;
 
