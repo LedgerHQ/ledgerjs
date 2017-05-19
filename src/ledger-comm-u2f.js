@@ -91,9 +91,9 @@ Ledger3.prototype.close_async = function() {
 }
 
 
-Ledger3.create_async = function() {
+Ledger3.create_async = function(timeout) {
 	return Q.fcall(function() {
-		return new Ledger3(20);
+		return new Ledger3(timeout || 20);
 	});	
 }
 

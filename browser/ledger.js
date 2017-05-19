@@ -7464,6 +7464,10 @@ process.off = noop;
 process.removeListener = noop;
 process.removeAllListeners = noop;
 process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
@@ -10393,9 +10397,9 @@ Ledger3.prototype.close_async = function() {
 }
 
 
-Ledger3.create_async = function() {
+Ledger3.create_async = function(timeout) {
 	return Q.fcall(function() {
-		return new Ledger3(20);
+		return new Ledger3(timeout || 20);
 	});	
 }
 
