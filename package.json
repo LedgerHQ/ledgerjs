@@ -33,7 +33,7 @@
   "scripts": {
     "test": "node test/tests-node.js",
     "browserify-test": "browserify --im --standalone runTests -o test/tests-browser.js test/tests-node.js",
-    "browserify": "browserify --im -o browser/ledger.js src/index-browserify.js",
+    "browserify": "browserify --im --s=ledger -o browser/ledger.js src/index-browserify.js",
     "uglify": "uglifyjs -o browser/ledger.min.js browser/ledger.js",
     "clean": "rm -f browser/ledger.js browser/ledger.min.js"
   },
