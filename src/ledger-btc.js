@@ -18,7 +18,6 @@
 'use strict';
 
 var Q = require('q');
-var async = require('async');
 var utils = require('./utils');
 
 var LedgerBtc = function(comm) {	
@@ -76,9 +75,7 @@ LedgerBtc.prototype.getTrustedInputRaw_async = function(firstRound, indexLookup,
 
 LedgerBtc.prototype.getTrustedInput_async = function(indexLookup, transaction) {
 	var currentObject = this;
-	var deferred = Q.defer();
-	var processScriptBlocks = function(script, sequence) {          	
-		var internalPromise = Q.defer();
+	var processScriptBlocks = function(script, sequence) {
 		var scriptBlocks = [];
 		var offset = 0;
 		while (offset != script.length) {
@@ -92,68 +89,49 @@ LedgerBtc.prototype.getTrustedInput_async = function(indexLookup, transaction) {
 			}
 			offset += blockSize;
 		}
-		async.eachSeries(
+		return utils.eachSeries(
 			scriptBlocks,
-			function(scriptBlock, finishedCallback) {
-				currentObject.getTrustedInputRaw_async(false, undefined, scriptBlock).then(function (result) {
-					finishedCallback();
-				}).fail(function (err) { internalPromise.reject(err); });
-			},
-			function(finished) {          	  		
-				internalPromise.resolve();
+			function(scriptBlock) {
+				return currentObject.getTrustedInputRaw_async(false, undefined, scriptBlock)
 			}
 		);
-		return internalPromise.promise;
 	}
 	var processInputs = function() {
-		async.eachSeries(
+		return utils.eachSeries(
 			transaction['inputs'], 
-			function (input, finishedCallback) {
+			function (input) {
 				data = Buffer.concat([input['prevout'], currentObject.createVarint(input['script'].length)]);   
-				currentObject.getTrustedInputRaw_async(false, undefined, data).then(function (result) {
+				return currentObject.getTrustedInputRaw_async(false, undefined, data).then(function (result) {
 					// iteration (eachSeries) ended
 					// TODO notify progress
 					// deferred.notify("input");
-					processScriptBlocks(input['script'], input['sequence']).then(function (result) {  	
-						finishedCallback();
-					}).fail(function(err) { deferred.reject(err); });
-				}).fail(function (err) { deferred.reject(err); });
-			},
-			function(finished) {
+					return processScriptBlocks(input['script'], input['sequence'])
+				})
+			}).then(function() {
 				data = currentObject.createVarint(transaction['outputs'].length);
-				currentObject.getTrustedInputRaw_async(false, undefined, data).then(function (result) {
-					processOutputs();
-				}).fail(function (err) { deferred.reject(err); });
-			}
-		);          	
+				return currentObject.getTrustedInputRaw_async(false, undefined, data)
+			});
 	}
 	var processOutputs = function() {
-		async.eachSeries(
+		return utils.eachSeries(
 			transaction['outputs'],
-			function(output, finishedCallback) {
+			function(output) {
 				data = output['amount'];
 				data = Buffer.concat([data, currentObject.createVarint(output['script'].length), output['script']]);
-				currentObject.getTrustedInputRaw_async(false, undefined, data).then(function(result) {
+				return currentObject.getTrustedInputRaw_async(false, undefined, data).then(function(result) {
 					// iteration (eachSeries) ended
 					// TODO notify progress
 					// deferred.notify("output");
-					finishedCallback();
-				}).fail(function (err) { deferred.reject(err); });
-			},
-			function(finished) {
-				data = transaction['locktime'];
-				currentObject.getTrustedInputRaw_async(false, undefined, data).then (function(result) {
-					deferred.resolve(result);
-				}).fail(function (err) { deferred.reject(err); });
-			}
-		);          	
+				})
+			}).then(function() {
+            data = transaction['locktime'];
+            return currentObject.getTrustedInputRaw_async(false, undefined, data)
+        })
 	}
 	var data = Buffer.concat([transaction['version'], currentObject.createVarint(transaction['inputs'].length)]);
-	currentObject.getTrustedInputRaw_async(true, indexLookup, data).then(function (result) {
-		processInputs();
-	}).fail(function (err) { deferred.reject(err); });
-	// return the promise to be resolve when the trusted input has been processed completely
-	return deferred.promise;
+	return currentObject.getTrustedInputRaw_async(true, indexLookup, data)
+        .then(processInputs)
+        .then(processOutputs)
 }
 
 LedgerBtc.prototype.getVarint = function(data, offset) {
@@ -184,12 +162,11 @@ LedgerBtc.prototype.startUntrustedHashTransactionInput_async = function (newTran
 	var currentObject = this;
 	var data = Buffer.concat([transaction['version'],
 	currentObject.createVarint(transaction['inputs'].length)]);
-	var deferred = Q.defer();
-	currentObject.startUntrustedHashTransactionInputRaw_async(newTransaction, true, data).then(function (result) {
+	return currentObject.startUntrustedHashTransactionInputRaw_async(newTransaction, true, data).then(function (result) {
 		var i = 0;
-		async.eachSeries(
+		return utils.eachSeries(
 			transaction['inputs'],
-			function (input, finishedCallback) {
+			function (input) {
 				var inputKey;
 				// TODO : segwit
 				var prefix;
@@ -203,16 +180,16 @@ LedgerBtc.prototype.startUntrustedHashTransactionInput_async = function (newTran
 					prefix[0] = 0x00;
 				}
 				data = Buffer.concat([prefix, inputs[i]['value'], currentObject.createVarint(input['script'].length)]);
-				currentObject.startUntrustedHashTransactionInputRaw_async(newTransaction, false, data).then(function (result) {
+				return currentObject.startUntrustedHashTransactionInputRaw_async(newTransaction, false, data).then(function (result) {
 
 					var scriptBlocks = [];
 					var offset = 0;
 					if (input['script'].length == 0) {
-						scriptBlocks.push(input['sequence']);						
+						scriptBlocks.push(input['sequence']);
 					}
 					else {
 						while (offset != input['script'].length) {
-							var blockSize = (input['script'].length - offset > LedgerBtc.MAX_SCRIPT_BLOCK ? 
+							var blockSize = (input['script'].length - offset > LedgerBtc.MAX_SCRIPT_BLOCK ?
 								LedgerBtc.MAX_SCRIPT_BLOCK : input['script'].length - offset);
 							if ((offset + blockSize) != input['script'].length) {
 								scriptBlocks.push(input['script'].slice(offset, offset + blockSize));
@@ -223,31 +200,16 @@ LedgerBtc.prototype.startUntrustedHashTransactionInput_async = function (newTran
 							offset += blockSize;
 						}
 					}
-					async.eachSeries(
+					return utils.eachSeries(
 						scriptBlocks,
-						function(scriptBlock, blockFinishedCallback) {
-							currentObject.startUntrustedHashTransactionInputRaw_async(newTransaction, false, scriptBlock).then(function (result) {
-							blockFinishedCallback();
-							}).fail(function (err) { deferred.reject(err); });
-						},
-						function(finished) { 
-							i++;
-							finishedCallback();
-						}
-					);
-				}).fail(function (err) {
-					deferred.reject(err);
-				});
-			},
-			function (finished) {
-				deferred.resolve(finished);
-			}
-		)
-	}).fail(function (err) {
-		deferred.reject(err);
-	});
-	// return the notified object at end of the loop
-	return deferred.promise;
+						function(scriptBlock) {
+							return currentObject.startUntrustedHashTransactionInputRaw_async(newTransaction, false, scriptBlock)
+                        }).then(function () {
+                            i++;
+                        })
+				})
+			})
+	})
 }
 
 LedgerBtc.prototype.provideOutputFullChangePath_async = function(path) {

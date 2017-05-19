@@ -21,6 +21,10 @@ var Q = require('q');
 
 var LedgerUtils = {}
 
+LedgerUtils.eachSeries = function (arr, fun) {
+    return arr.reduce( function (p, e) { return p.then(function () { return fun(e) }) }, Q.resolve())
+}
+
 LedgerUtils.splitPath = function(path) {
 	var result = [];
 	var components = path.split('/');
