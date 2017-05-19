@@ -15,9 +15,9 @@
 *  limitations under the License.
 ********************************************************************************/
 
-function runTest(comm, ledger) {
+function runTest(comm, ledger, timeout) {
 
-    return comm.create_async(0, true).then(function (comm) {
+    return comm.create_async(timeout, true).then(function (comm) {
         var eth = new ledger.eth(comm);
         return eth.signPersonalMessage_async("44'/60'/0'/0'/0", Buffer.from('test').toString('hex')).then(function (result) {
             var v = result['v'] - 27;

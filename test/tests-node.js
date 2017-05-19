@@ -9,6 +9,8 @@ else {
     comm = ledger.comm_u2f;
 }
 
+var TIMEOUT = 20;
+
 var tests = [
     {name:'testBtc' , test: require('./testBtc')},
     {name:'testBtc2' , test: require('./testBtc2')},
@@ -26,7 +28,7 @@ function runTests() {
     tests.reduce(function (a, test) {
         return a.then(function () {
             console.warn('Running test', test.name);
-            return (test.test)(comm, ledger);
+            return (test.test)(comm, ledger, TIMEOUT);
         }).fail(function (err) {
             console.error('Failed test', test.name, err);
         })

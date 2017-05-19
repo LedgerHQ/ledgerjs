@@ -15,9 +15,9 @@
 *  limitations under the License.
 ********************************************************************************/
 
-function runTest(comm, ledger) {
+function runTest(comm, ledger, timeout) {
 
-    return comm.create_async(0, true).then(function (comm) {
+    return comm.create_async(timeout, true).then(function (comm) {
         var eth = new ledger.eth(comm);
         return eth.getAppConfiguration_async().then(function (result) {
             console.log(result);

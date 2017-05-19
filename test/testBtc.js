@@ -15,9 +15,9 @@
 *  limitations under the License.
 ********************************************************************************/
 
-function runTest(comm, ledger) {
+function runTest(comm, ledger, timeout) {
 
-    return comm.create_async(0, true).then(function (comm) {
+    return comm.create_async(timeout, true).then(function (comm) {
         var btc = new ledger.btc(comm);
         return btc.getWalletPublicKey_async("44'/0'/0'/0").then(function (result) {
             console.log(result);

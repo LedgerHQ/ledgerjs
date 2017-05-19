@@ -15,9 +15,9 @@
 *  limitations under the License.
 ********************************************************************************/
 
-function runTest(comm, ledger) {
+function runTest(comm, ledger, timeout) {
 
-    return comm.create_async(0, true).then(function (comm) {
+    return comm.create_async(timeout, true).then(function (comm) {
         var eth = new ledger.eth(comm);
         eth.signTransaction_async("44'/60'/0'/0'/0", "e8018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a2487400080").then(function (result) {
             console.log(result);
