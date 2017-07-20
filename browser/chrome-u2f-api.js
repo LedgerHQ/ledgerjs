@@ -472,7 +472,7 @@ u2f.WrappedAuthenticatorPort_.prototype.onRequestUpdate_ =
 /*
 u2f.WrappedAuthenticatorPort_.INTENT_URL_BASE_ =
   'intent:#Intent;action=com.google.android.apps.authenticator.AUTHENTICATE';
-*/  
+*/
 u2f.WrappedAuthenticatorPort_.INTENT_URL_BASE_ =
   'intent:#Intent;action=com.ledger.android.u2f.bridge.AUTHENTICATE';
 

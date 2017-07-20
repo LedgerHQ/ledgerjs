@@ -21,7 +21,8 @@ var Q = require('q');
 // Default to global u2f in order to support Firefox u2f plugin that injects it into
 // the browser window object, but fallback to Chrome u2f-api to support modern
 // build systems.
-var u2f = global.u2f ? global.u2f : require('./u2f-api');
+var chromeU2FApi = require('./chrome-u2f-api');
+var u2f = global.u2f ? global.u2f : chromeU2FApi;
 
 var Ledger3 = function(timeoutSeconds) {
 	this.timeoutSeconds = timeoutSeconds;
