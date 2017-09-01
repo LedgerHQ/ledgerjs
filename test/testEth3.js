@@ -15,30 +15,15 @@
 *  limitations under the License.
 ********************************************************************************/
 
-if (typeof ledger == "undefined") {
-        ledger = require('ledgerco');
-        comm = ledger.comm_node;
-        browser = false;
-}
-else {
-        browser = true;
-        comm = ledger.comm_u2f;
-}
+function runTest(comm, ledger, timeout) {
 
-function runTest() {
-
-comm.create_async(0, true).then(function(comm) {
-
-	var eth = new ledger.eth(comm);
-	eth.signTransaction_async("44'/60'/0'/0'/0", "e8018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a2487400080").then(function(result) {
-		console.log(result);
-	}).fail(function(ex) {console.log(ex);});
-
-}).fail(function(ex) {console.log(ex);});
+    return comm.create_async(timeout, true).then(function (comm) {
+        var eth = new ledger.eth(comm);
+        eth.signTransaction_async("44'/60'/0'/0'/0", "e8018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a2487400080").then(function (result) {
+            console.log(result);
+        })
+    })
 
 }
 
-if (!browser) {
-	runTest();
-}
-
+module.exports = runTest;

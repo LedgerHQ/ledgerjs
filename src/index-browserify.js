@@ -21,6 +21,4 @@ ledger.comm_u2f = require('./ledger-comm-u2f');
 ledger.btc = require('./ledger-btc');
 ledger.eth = require('./ledger-eth');
 
-window.ledger = ledger;
-
 module.exports = ledger;
