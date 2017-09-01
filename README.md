@@ -36,6 +36,7 @@ To re-create the browser bindings, use
 ```
 npm run browserify
 npm run uglify
+npm run browserify-test (to run browser tests)
 ```
 
 ## Using with Bitcoin
