@@ -18,7 +18,11 @@
 'use strict';
 
 var Q = require('q');
-var u2f = require('./u2f-api');
+// Default to global u2f in order to support Firefox u2f plugin that injects it into
+// the browser window object, but fallback to Chrome's u2f-api to support modern
+// build systems.
+var chromeU2FApi = require('./chrome-u2f-api');
+var u2f = global.u2f ? global.u2f : chromeU2FApi;
 
 var Ledger3 = function(timeoutSeconds) {
 	this.timeoutSeconds = timeoutSeconds;
@@ -71,18 +75,18 @@ Ledger3.prototype.exchange = function(apduHex, statusList) {
 	var challenge = Buffer.from("0000000000000000000000000000000000000000000000000000000000000000", 'hex');
 	var key = {};
 	key['version'] = 'U2F_V2';
-	key['keyHandle'] = Ledger3.webSafe64(keyHandle.toString('base64'));	
+	key['keyHandle'] = Ledger3.webSafe64(keyHandle.toString('base64'));
 	var self = this;
 	var deferred = Q.defer();
 	var localCallback = function(result) {
 		self.u2fCallback(result, deferred, statusList);
 	}
-	u2f.sign(location.origin, Ledger3.webSafe64(challenge.toString('base64')), [key], localCallback, this.timeoutSeconds);	
+	u2f.sign(location.origin, Ledger3.webSafe64(challenge.toString('base64')), [key], localCallback, this.timeoutSeconds);
 	return deferred.promise;
 }
 
 Ledger3.prototype.setScrambleKey = function(scrambleKey) {
-	this.scrambleKey = Buffer.from(scrambleKey, 'ascii');	
+	this.scrambleKey = Buffer.from(scrambleKey, 'ascii');
 }
 
 Ledger3.prototype.close_async = function() {
@@ -94,7 +98,7 @@ Ledger3.prototype.close_async = function() {
 Ledger3.create_async = function() {
 	return Q.fcall(function() {
 		return new Ledger3(20);
-	});	
+	});
 }
 
 module.exports = Ledger3
