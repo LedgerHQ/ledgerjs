@@ -1,4 +1,4 @@
-const ledger = require('../src/index');
+const ledger = require('../src');
 ledger
 	.comm_node
 	.create_async()
