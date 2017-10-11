@@ -11,7 +11,7 @@ else {
 
 var Q = require('q');
 
-var TIMEOUT = 20;
+var TIMEOUT = 5 * 1000;
 
 var tests = [
     {name: 'testBtc', run: require('./testBtc')},

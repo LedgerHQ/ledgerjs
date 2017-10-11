@@ -21,6 +21,7 @@ function runTest(comm, ledger, timeout) {
         var eth = new ledger.eth(comm);
         return eth.getAppConfiguration_async().then(function (result) {
             console.log(result);
+            comm.close_async()
         })
     })
 

@@ -21,6 +21,7 @@ function runTest(comm, ledger, timeout) {
         var btc = new ledger.btc(comm);
         return btc.getWalletPublicKey_async("44'/0'/0'/0").then(function (result) {
             console.log(result);
+            comm.close_async()
         })
     })
 
