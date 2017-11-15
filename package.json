@@ -12,7 +12,7 @@
     "Wallet",
     "HW.1",
     "Bitcoin",
-    "Ethereum",    
+    "Ethereum",
     "Hardware Wallet"
   ],
   "author": "Nicolas Bacca",
@@ -22,8 +22,8 @@
   },
   "homepage": "https://github.com/LedgerHQ/ledger-node-js-api",
   "dependencies": {
-	  "node-hid": "0.5.4",
-	  "q": "1.4.1"
+    "node-hid": "0.5.7",
+    "q": "1.4.1"
   },
   "devDependencies": {
     "browserify": "13.1.0",
@@ -40,4 +40,3 @@
     "node-hid": false
   }
 }
-

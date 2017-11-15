@@ -23,6 +23,7 @@ function runTest(comm, ledger, timeout) {
             var v = result['v'] + 27 + 4;
             var signature = Buffer.from(v.toString(16) + result['r'] + result['s'], 'hex').toString('base64');
             console.log("Signature : " + signature);
+            comm.close_async()
         })
     })
 

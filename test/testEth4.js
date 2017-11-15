@@ -26,6 +26,7 @@ function runTest(comm, ledger, timeout) {
                 v = "0" + v;
             }
             console.log("Signature 0x" + result['r'] + result['s'] + v);
+            comm.close_async()
         })
     })
 

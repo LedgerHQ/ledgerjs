@@ -21,6 +21,7 @@ function runTest(comm, ledger, timeout) {
         var eth = new ledger.eth(comm);
         return eth.getAddress_async("44'/60'/0'/0'/0").then(function (result) {
             console.log(result);
+            comm.close_async()
         })
     })
 
