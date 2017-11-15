@@ -17,7 +17,6 @@
 
 'use strict';
 
-var Q = require('q');
 // Default to global u2f in order to support Firefox u2f plugin that injects it into
 // the browser window object, but fallback to Chrome's u2f-api to support modern
 // build systems.
@@ -46,28 +45,30 @@ Ledger3.normal64 = function(base64) {
     return base64.replace(/\-/g, '+').replace(/_/g, '/') + '=='.substring(0, (3*base64.length)%4);
 }
 
-Ledger3.prototype.u2fCallback = function(response, deferred, statusList) {
-	if (typeof response['signatureData'] != "undefined") {
-		var data = Buffer.from((Ledger3.normal64(response['signatureData'])), 'base64');
-		if (typeof statusList != "undefined") {
-			var statusFound = false;
-			var sw = data.readUInt16BE(data.length - 2);
-			for (var index in statusList) {
-				if (statusList[index] == sw) {
-					statusFound = true;
-					break;
-				}
-			}
-			if (!statusFound) {
-				deferred.reject("Invalid status " + sw.toString(16));
-			}
-		}
-		deferred.resolve(data.toString('hex', 5));
-	}
-	else {
-		deferred.reject(response);
-	}
-}
+Ledger3.prototype.u2fPromise = function (response, statusList) {
+    return new Promise(function (resolve, reject) {
+        if (typeof response['signatureData'] != "undefined") {
+            var data = Buffer.from((Ledger3.normal64(response['signatureData'])), 'base64');
+            if (typeof statusList != "undefined") {
+                var statusFound = false;
+                var sw = data.readUInt16BE(data.length - 2);
+                for (var index in statusList) {
+                    if (statusList[index] == sw) {
+                        statusFound = true;
+                        break;
+                    }
+                }
+                if (!statusFound) {
+                    reject("Invalid status " + sw.toString(16));
+                }
+            }
+            resolve(data.toString('hex', 5));
+        }
+        else {
+            reject(response);
+        }
+    })
+};
 
 Ledger3.prototype.exchange = function(apduHex, statusList) {
 	var apdu = Buffer.from(apduHex, 'hex');
@@ -77,12 +78,11 @@ Ledger3.prototype.exchange = function(apduHex, statusList) {
 	key['version'] = 'U2F_V2';
 	key['keyHandle'] = Ledger3.webSafe64(keyHandle.toString('base64'));
 	var self = this;
-	var deferred = Q.defer();
-	var localCallback = function(result) {
-		self.u2fCallback(result, deferred, statusList);
-	}
-	u2f.sign(location.origin, Ledger3.webSafe64(challenge.toString('base64')), [key], localCallback, this.timeoutSeconds);
-	return deferred.promise;
+    return new Promise(function (resolve) {
+        u2f.sign(location.origin, Ledger3.webSafe64(challenge.toString('base64')), [key], resolve, self.timeoutSeconds);
+    }).then(function (result) {
+        return self.u2fPromise(result, statusList)
+    })
 }
 
 Ledger3.prototype.setScrambleKey = function(scrambleKey) {
@@ -90,15 +90,12 @@ Ledger3.prototype.setScrambleKey = function(scrambleKey) {
 }
 
 Ledger3.prototype.close_async = function() {
-		return Q.fcall(function() {
-		});
+    return Promise.resolve()
 }
 
 
 Ledger3.create_async = function(timeout) {
-	return Q.fcall(function() {
-		return new Ledger3(timeout || 20);
-	});	
+    return Promise.resolve(new Ledger3(timeout || 20))
 }
 
 module.exports = Ledger3

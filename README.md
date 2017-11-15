@@ -23,7 +23,7 @@ You can also use list_async and create the communication object manually to pick
 
 The communication API is compatible with every browser supporting FIDO U2F either directly (Chrome, Opera) or through a third party extension (Firefox). Pages shall be served from an HTTPS connection as a requirement of the U2F API.
 
-Make sure to include browser/ledger.min.js and browser/u2f-api.js in your web page and initialize with 
+Make sure to include browser/ledger.min.js in your web page and initialize with 
 
 ```javascript
 ledger.comm_u2f.create_async().then(function(comm) {
@@ -51,7 +51,7 @@ You can retrieve a public key and an address given its BIP 32 path
 
 ```javascript
 btc.getWalletPublicKey_async("44'/0'/0'/0").then(
-     function(result) { console.log(result);}).fail(
+     function(result) { console.log(result);}).catch(
      function(error) { console.log(error); });
 ```
 
@@ -84,7 +84,7 @@ btc.createPaymentTransactionNew_async(
    ["0'/0/0"], 
    undefined, 
    "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac").then(
-     function(result) { console.log(result);}).fail(
+     function(result) { console.log(result);}).catch(
      function(error) { console.log(error); });
 ```
 
@@ -116,7 +116,7 @@ btc.signP2SHTransaction_async(
    [ [tx, 1, "52210289b4a3ad52a919abd2bdd6920d8a6879b1e788c38aa76f0440a6f32a9f1996d02103a3393b1439d1693b063482c04bd40142db97bdf139eedd1b51ffb7070a37eac321030b9a409a1e476b0d5d17b804fcdb81cf30f9b99c6f3ae1178206e08bc500639853ae"] ], 
    ["0'/0/0"], 
    "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac").then(
-     function(result) { console.log(result);}).fail(
+     function(result) { console.log(result);}).catch(
      function(error) { console.log(error); });
 ``` 
 
@@ -127,7 +127,7 @@ btc.signMessageNew_async("44'/60'/0'/0'/0", Buffer.from("test").toString("hex"))
   var v = result['v'] + 27 + 4;
   var signature = Buffer.from(v.toString(16) + result['r'] + result['s'], 'hex').toString('base64');
   console.log("Signature : " + signature);
-}).fail(function(ex) {console.log(ex);});
+}).catch(function(ex) {console.log(ex);});
 ```
 
 ## Using with Ethereum 
@@ -142,7 +142,7 @@ You can retrieve a public key and an address given its BIP 32 path
 
 ```javascript
 eth.getAddress_async("44'/60'/0'/0'/0").then(
-     function(result) { console.log(result);}).fail(
+     function(result) { console.log(result);}).catch(
      function(error) { console.log(error); });
 ```
 
@@ -151,7 +151,7 @@ You can sign a transaction and retrieve v, r, s given the raw transaction and th
 ```javascript
 eth.signTransaction_async("44'/60'/0'/0'/0", "e8018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a2487400080").then(function(result) {
 		console.log(result);
-}).fail(function(ex) {console.log(ex);});
+}).catch(function(ex) {console.log(ex);});
 
 ```
 
@@ -166,6 +166,6 @@ eth.signPersonalMessage_async("44'/60'/0'/0'/0", Buffer.from("test").toString("h
     }
     console.log("Signature 0x" + result['r'] + result['s'] + v);
 
-}).fail(function(ex) {console.log(ex);});
+}).catch(function(ex) {console.log(ex);});
 
 ```

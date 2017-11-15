@@ -1,4 +1,3 @@
-
 if (typeof ledger == 'undefined') {
     ledger = require('../src');
     comm = ledger.comm_node;
@@ -9,8 +8,6 @@ else {
     comm = ledger.comm_u2f;
 }
 
-var Q = require('q');
-
 var TIMEOUT = 5 * 1000;
 
 var tests = [
@@ -20,18 +17,18 @@ var tests = [
     {name: 'testBtc4', run: require('./testBtc4')},
     {
         run: function () {
-            var deferred = Q.defer();
-            var s = 15;
-            console.info('You have ' + s + ' seconds to switch to eth app ...');
-            var interval = setInterval(function () {
-                if (--s) {
-                    console.log(s + ' ...');
-                } else {
-                    clearInterval(interval);
-                    deferred.resolve();
-                }
-            }, 1000);
-            return deferred.promise;
+            return new Promise(function (resolve, reject) {
+                var s = 15;
+                console.info('You have ' + s + ' seconds to switch to eth app ...');
+                var interval = setInterval(function () {
+                    if (--s) {
+                        console.log(s + ' ...');
+                    } else {
+                        clearInterval(interval);
+                        resolve();
+                    }
+                }, 1000);
+            })
         }
     },
     {name: 'testEth', run: require('./testEth')},
@@ -45,10 +42,10 @@ function runTests() {
         return a.then(function () {
             console.info(step.name ? 'Running test ' + step.name : '');
             return (step.run)(comm, ledger, TIMEOUT);
-        }).fail(function (err) {
+        }).catch(function (err) {
             console.error('Failed test', step.name, err);
         })
-    }, Q.resolve());
+    }, Promise.resolve());
 }
 
 if (!browser) {
