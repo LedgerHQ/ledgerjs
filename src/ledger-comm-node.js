@@ -16,7 +16,15 @@
 ********************************************************************************/
 
 var HID = require('node-hid');
-var Q = require('q');
+
+var _defer = function () {
+		var _resolve, _reject;
+		var _promise = new Promise(function (resolve, reject) {
+			_resolve = resolve;
+			_reject = reject;
+		})
+		return {promise: _promise, resolve: _resolve, reject: _reject}
+	}
 
 var LedgerNode = function(device, ledgerTransport, timeout, debug) {
 	if (typeof timeout == "undefined") {
@@ -38,9 +46,7 @@ LedgerNode.list_async = function() {
 			deviceList.push(devices[i].path);
 		}
 	}
-	return Q.fcall(function() {
-		return deviceList;
-	});
+	return Promise.resolve(deviceList)
 }
 
 LedgerNode.prototype.exchange = function(apduHex, statusList) {
@@ -135,7 +141,7 @@ LedgerNode.prototype.exchange = function(apduHex, statusList) {
 	var currentObject = this;
 	var apdu = Buffer.from(apduHex, 'hex');
 
-	var deferred = Q.defer();
+	var deferred = _defer();
 	var exchangeTimeout;
 	deferred.promise.apdu = apdu;
 	if (!this.ledgerTransport) {
@@ -169,24 +175,26 @@ LedgerNode.prototype.exchange = function(apduHex, statusList) {
 					data.push(content[i]);
 				}
 				cardObject.device.write(data);
-        			return Q.fcall(function() {
-             				return content.length;
-        			});
+                return Promise.resolve(content.length);
 			}
 
 			var recv_async = function(cardObject, size) {
-				return Q.ninvoke(cardObject.device, "read").then(function(res) {
-					var buffer = Buffer.from(res);
-					if (cardObject.debug) {
-						console.log('<=' + buffer.toString('hex'));
-					}
-					return buffer;
-				});	
+                return new Promise(function (resolve, reject) {
+                    cardObject.device.read(function (err, res) {
+                    	if(err) reject(err);
+                    	else {
+                            var buffer = Buffer.from(res);
+                            if (cardObject.debug) {
+                                console.log('<=' + buffer.toString('hex'));
+                            }
+                            resolve(buffer);
+						}
+                    })
+                })
 			}
                 
 			var performExchange = function() {
 
-					var deferredHidSend = Q.defer();
 					var offsetSent = 0;
 					var firstReceived = true;
 					var toReceive = 0;
@@ -208,10 +216,9 @@ LedgerNode.prototype.exchange = function(apduHex, statusList) {
 								offsetSent += blockSize;
 								return sendPart();
 							}
-						).fail(function(error) {
-							deferredHidSend.reject(error);
-						});
+						)
 					}
+
 					var receivePart = function() {
 						if (!currentObject.ledgerTransport) {
 							return recv_async(currentObject, 64).then(function(result) {
@@ -219,63 +226,59 @@ LedgerNode.prototype.exchange = function(apduHex, statusList) {
 								if (firstReceived) {
 									firstReceived = false;
 									if ((received.length == 2) || (received[0] != 0x61)) {
-										deferredHidSend.resolve(received);									
+										return received;
 									}
 									else {									
 										toReceive = received[1];
 										if (toReceive == 0) {
-											toReceive == 256;
+                                            toReceive = 256;
 										}
 										toReceive += 2;
 									}								
 								}
 								if (toReceive < 64) {
-									deferredHidSend.resolve(received);									
+									return received;
 								}
 								else {
 									toReceive -= 64;
 									return receivePart();
 								}
-							}).fail(function(error) {
-								deferredHidSend.reject(error);
-							});
+							})
 						}
 						else {
 							return recv_async(currentObject, 64).then(function(result) {
 								received = Buffer.concat([received, result], received.length + result.length);
 								var response = ledgerUnwrap(0x0101, received, 64);
 								if (typeof response != "undefined") {
-									deferredHidSend.resolve(response);
+									return response;
 								}
 								else {
 									return receivePart();
 								}
-							}).fail(function(error) {
-								deferredHidSend.reject(error);
-							});
+							})
 						}
 					}
-					sendPart();
-					return deferredHidSend.promise;
+					return sendPart();
 			}
+
 			performExchange().then(function(result) {
-				var resultBin = result; 
+				var status, response, resultBin = result;
 				if (!currentObject.ledgerTransport) {
 					if (resultBin.length == 2 || resultBin[0] != 0x61) {
 						status = (resultBin[0] << 8) | (resultBin[1]);
-						deferred.promise.response = resultBin.toString('hex');
+						response = resultBin.toString('hex');
 					}
 					else {
 						var size = resultBin.byteAt(1);
 						// fake T0 
 						if (size == 0) { size = 256; }
 
-						deferred.promise.response = resultBin.toString('hex', 2);
+						response = resultBin.toString('hex', 2);
 						status = (resultBin[2 + size] << 8) | (resultBin[2 + size + 1]);
 					}
 				}
 				else {
-					deferred.promise.response = resultBin.toString('hex');
+					response = resultBin.toString('hex');
 					status = (resultBin[resultBin.length - 2] << 8) | (resultBin[resultBin.length - 1]);
 				}
 				// Check the status
@@ -293,15 +296,15 @@ LedgerNode.prototype.exchange = function(apduHex, statusList) {
 				if (currentObject.timeout != 0) {
 					clearTimeout(exchangeTimeout);
 				}
-				deferred.resolve(deferred.promise.response);
+				deferred.resolve(response);
 			})
-			.fail(function(err) { 
+			.catch(function(err) {
 				if (currentObject.timeout != 0) {
 					clearTimeout(exchangeTimeout);
 				}					
 				deferred.reject(err);
 			})
-			.finally(function () { 
+			.then(function () {
 
 				// consume current promise
 				currentObject.exchangeStack.shift();
@@ -326,9 +329,7 @@ LedgerNode.prototype.setScrambleKey = function(scrambleKey) {
 
 LedgerNode.prototype.close_async = function() {
 		this.device.close();
-		return Q.fcall(function() {
-		});
-
+        return Promise.resolve();
 }
 
 LedgerNode.create_async = function(timeout, debug) {

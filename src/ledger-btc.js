@@ -17,10 +17,9 @@
 
 'use strict';
 
-var Q = require('q');
 var utils = require('./utils');
 
-var LedgerBtc = function(comm) {	
+var LedgerBtc = function(comm) {
 	this.comm = comm;
 	this.comm.setScrambleKey('BTC');
 }
@@ -366,9 +365,7 @@ LedgerBtc.prototype.createPaymentTransactionNew_async = function(inputs, associa
 		sigHashType = LedgerBtc.SIGHASH_ALL;
 	}
 
-	var deferred = Q.defer();
-
-	utils.foreach(inputs, function (input, i) {
+	return utils.foreach(inputs, function (input, i) {
 		return utils.doIf(!resuming, function () {
 			return self.getTrustedInput_async(input[1], input[0])
 				.then(function (trustedInput) {
@@ -459,15 +456,7 @@ LedgerBtc.prototype.createPaymentTransactionNew_async = function(inputs, associa
 			lockTimeBuffer]);
 
 		return result.toString('hex');
-	}).fail(function (failure) {
-		throw failure;
-	}).then(function (result) {
-		deferred.resolve(result);
-	}).fail(function (error) {
-		deferred.reject(error);
-	});
-
-	return deferred.promise;
+	})
 }
 
 LedgerBtc.prototype.signP2SHTransaction_async = function(inputs, associatedKeysets, outputScript, lockTime, sigHashType) {
@@ -492,11 +481,9 @@ LedgerBtc.prototype.signP2SHTransaction_async = function(inputs, associatedKeyse
 	}
 	if (typeof sigHashType == "undefined") {
 		sigHashType = LedgerBtc.SIGHASH_ALL;
-	}	
+	}
 
-	var deferred = Q.defer();
-
-	utils.foreach(inputs, function (input, i) {
+	return utils.foreach(inputs, function (input, i) {
 		return utils.doIf(!resuming, function () {
 			return self.getTrustedInput_async(input[1], input[0])
 				.then(function (trustedInput) {
@@ -553,15 +540,7 @@ LedgerBtc.prototype.signP2SHTransaction_async = function(inputs, associatedKeyse
 	}).then(function () {
 		// Return the signatures
 		return signatures;
-	}).fail(function (failure) {
-		throw failure;
-	}).then(function (result) {
-		deferred.resolve(result);
-	}).fail(function (error) {
-		deferred.reject(error);
-	});
-
-	return deferred.promise;
+	})
 }
 
 
@@ -570,7 +549,7 @@ LedgerBtc.prototype.compressPublicKey = function (publicKey) {
 	var prefixBuffer = Buffer.alloc(1);
 	prefixBuffer[0] = prefix;
 	return Buffer.concat([prefixBuffer, publicKey.slice(1, 1 + 32)]);
-},
+}
 
 LedgerBtc.prototype.createVarint = function(value) {
 	if (value < 0xfd) {

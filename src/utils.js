@@ -17,12 +17,10 @@
 
 'use strict';
 
-var Q = require('q');
-
 var LedgerUtils = {}
 
 LedgerUtils.eachSeries = function (arr, fun) {
-    return arr.reduce( function (p, e) { return p.then(function () { return fun(e) }) }, Q.resolve())
+    return arr.reduce( function (p, e) { return p.then(function () { return fun(e) }) }, Promise.resolve())
 }
 
 LedgerUtils.splitPath = function(path) {
@@ -42,49 +40,42 @@ LedgerUtils.splitPath = function(path) {
 }
 
 LedgerUtils.foreach = function (arr, callback) {
-	var deferred = Q.defer();
-	var iterate = function (index, array, result) {
+	function iterate(index, array, result) {
 		if (index >= array.length) {
-			deferred.resolve(result);
-			return ;
+			return result
 		}
-		callback(array[index], index).then(function (res) {
+		else return callback(array[index], index).then(function (res) {
 			result.push(res);
-			iterate(index + 1, array, result);
-		}).fail(function (ex) {
-			deferred.reject(ex);
-		}).done();
-	};
-	iterate(0, arr, []);
-	return deferred.promise;
+			return iterate(index + 1, array, result);
+		})
+	}
+    return Promise.resolve().then(function () {
+        return iterate(0, arr, []);
+    });
 }
 
 LedgerUtils.doIf = function(condition, callback) {
-	var deferred = Q.defer();
-	if (condition) {
-		deferred.resolve(callback())
-	} else {
-		deferred.resolve();
-	}
-	return deferred.promise;
+	return Promise.resolve()
+		.then(function () {
+            if (condition) {
+                return callback()
+            }
+        })
 }
 
 LedgerUtils.asyncWhile = function(condition, callback) {
-	var deferred = Q.defer();
-	var iterate = function (result) {
+	function iterate(result) {
 		if (!condition()) {
-			deferred.resolve(result);
-			return ;
+            return result
 		}
-		callback().then(function (res) {
-			result.push(res);
-			iterate(result);
-		}).fail(function (ex) {
-			deferred.reject(ex);
-		}).done();
-	};
-	iterate([]);
-	return deferred.promise;
+        else {
+			return callback().then(function (res) {
+                result.push(res);
+                return iterate(result);
+            })
+        }
+	}
+	return Promise.resolve([]).then(iterate);
 }
 
 

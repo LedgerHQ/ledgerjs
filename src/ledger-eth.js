@@ -17,7 +17,6 @@
 
 'use strict';
 
-var Q = require('q');
 var utils = require('./utils');
 
 var LedgerEth = function(comm) {
