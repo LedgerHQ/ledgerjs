@@ -16,15 +16,13 @@
  ********************************************************************************/
 
 function runTest(comm, ledger, timeout) {
-
-    return comm.create_async(timeout, true).then(function (comm) {
-        var eth = new ledger.eth(comm);
-        return eth.getAddress_async("44'/60'/0'/0'/0").then(function (result) {
-            console.log(result);
-            comm.close_async()
-        })
-    })
-
+  return comm.create_async(timeout, true).then(function(comm) {
+    var eth = new ledger.eth(comm);
+    return eth.getAddress_async("44'/60'/0'/0'/0").then(function(result) {
+      console.log(result);
+      comm.close_async();
+    });
+  });
 }
 
 module.exports = runTest;

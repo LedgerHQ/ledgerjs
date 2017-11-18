@@ -1,4 +1,4 @@
-(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.ledger = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.runTests = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 (function (Buffer){
 "use strict";
 
@@ -3806,5 +3806,354 @@ makeDefault( 'register' );
 makeDefault( 'sign' );
 
 }).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./google-u2f-api":11}]},{},[5])(5)
+},{"./google-u2f-api":11}],13:[function(require,module,exports){
+/********************************************************************************
+ *   Ledger Node JS API
+ *   (c) 2016-2017 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
+
+function runTest(comm, ledger, timeout) {
+  return comm.create_async(timeout, true).then(function(comm) {
+    var btc = new ledger.btc(comm);
+    return btc.getWalletPublicKey_async("44'/0'/0'/0").then(function(result) {
+      console.log(result);
+      comm.close_async();
+    });
+  });
+}
+
+module.exports = runTest;
+
+},{}],14:[function(require,module,exports){
+/********************************************************************************
+ *   Ledger Node JS API
+ *   (c) 2016-2017 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
+
+function runTest(comm, ledger, timeout) {
+  return comm.create_async(timeout, true).then(function(comm) {
+    var btc = new ledger.btc(comm);
+    var tx1 = btc.splitTransaction(
+      "01000000014ea60aeac5252c14291d428915bd7ccd1bfc4af009f4d4dc57ae597ed0420b71010000008a47304402201f36a12c240dbf9e566bc04321050b1984cd6eaf6caee8f02bb0bfec08e3354b022012ee2aeadcbbfd1e92959f57c15c1c6debb757b798451b104665aa3010569b49014104090b15bde569386734abf2a2b99f9ca6a50656627e77de663ca7325702769986cf26cc9dd7fdea0af432c8e2becc867c932e1b9dd742f2a108997c2252e2bdebffffffff0281b72e00000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88aca0860100000000001976a9144533f5fb9b4817f713c48f0bfe96b9f50c476c9b88ac00000000"
+    );
+    return btc
+      .createPaymentTransactionNew_async(
+        [[tx1, 1]],
+        ["0'/0/0"],
+        undefined,
+        "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac"
+      )
+      .then(function(result) {
+        console.log(result);
+        comm.close_async();
+      });
+  });
+}
+
+module.exports = runTest;
+
+},{}],15:[function(require,module,exports){
+/********************************************************************************
+ *   Ledger Node JS API
+ *   (c) 2016-2017 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
+
+function runTest(comm, ledger, timeout) {
+  return comm.create_async(timeout, true).then(function(comm) {
+    var btc = new ledger.btc(comm);
+    var tx1 = btc.splitTransaction(
+      "01000000014ea60aeac5252c14291d428915bd7ccd1bfc4af009f4d4dc57ae597ed0420b71010000008a47304402201f36a12c240dbf9e566bc04321050b1984cd6eaf6caee8f02bb0bfec08e3354b022012ee2aeadcbbfd1e92959f57c15c1c6debb757b798451b104665aa3010569b49014104090b15bde569386734abf2a2b99f9ca6a50656627e77de663ca7325702769986cf26cc9dd7fdea0af432c8e2becc867c932e1b9dd742f2a108997c2252e2bdebffffffff0281b72e00000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88aca0860100000000001976a9144533f5fb9b4817f713c48f0bfe96b9f50c476c9b88ac00000000"
+    );
+    return btc
+      .signP2SHTransaction_async(
+        [
+          [
+            tx1,
+            1,
+            "52210289b4a3ad52a919abd2bdd6920d8a6879b1e788c38aa76f0440a6f32a9f1996d02103a3393b1439d1693b063482c04bd40142db97bdf139eedd1b51ffb7070a37eac321030b9a409a1e476b0d5d17b804fcdb81cf30f9b99c6f3ae1178206e08bc500639853ae"
+          ]
+        ],
+        ["0'/0/0"],
+        "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac"
+      )
+      .then(function(result) {
+        console.log(result);
+        comm.close_async();
+      });
+  });
+}
+
+module.exports = runTest;
+
+},{}],16:[function(require,module,exports){
+(function (Buffer){
+/********************************************************************************
+ *   Ledger Node JS API
+ *   (c) 2016-2017 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
+
+function runTest(comm, ledger, timeout) {
+  return comm.create_async(timeout, true).then(function(comm) {
+    var btc = new ledger.btc(comm);
+    return btc
+      .signMessageNew_async("44'/0'/0'/0", Buffer.from("test").toString("hex"))
+      .then(function(result) {
+        var v = result["v"] + 27 + 4;
+        var signature = Buffer.from(
+          v.toString(16) + result["r"] + result["s"],
+          "hex"
+        ).toString("base64");
+        console.log("Signature : " + signature);
+        comm.close_async();
+      });
+  });
+}
+
+module.exports = runTest;
+
+}).call(this,require("buffer").Buffer)
+},{"buffer":8}],17:[function(require,module,exports){
+/********************************************************************************
+ *   Ledger Node JS API
+ *   (c) 2016-2017 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
+
+function runTest(comm, ledger, timeout) {
+  return comm.create_async(timeout, true).then(function(comm) {
+    var eth = new ledger.eth(comm);
+    return eth.getAppConfiguration_async().then(function(result) {
+      console.log(result);
+      comm.close_async();
+    });
+  });
+}
+
+module.exports = runTest;
+
+},{}],18:[function(require,module,exports){
+/********************************************************************************
+ *   Ledger Node JS API
+ *   (c) 2016-2017 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
+
+function runTest(comm, ledger, timeout) {
+  return comm.create_async(timeout, true).then(function(comm) {
+    var eth = new ledger.eth(comm);
+    return eth.getAddress_async("44'/60'/0'/0'/0").then(function(result) {
+      console.log(result);
+      comm.close_async();
+    });
+  });
+}
+
+module.exports = runTest;
+
+},{}],19:[function(require,module,exports){
+/********************************************************************************
+ *   Ledger Node JS API
+ *   (c) 2016-2017 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
+
+function runTest(comm, ledger, timeout) {
+  return comm.create_async(timeout, true).then(function(comm) {
+    var eth = new ledger.eth(comm);
+    return eth
+      .signTransaction_async(
+        "44'/60'/0'/0'/0",
+        "e8018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a2487400080"
+      )
+      .then(function(result) {
+        console.log(result);
+        comm.close_async();
+      });
+  });
+}
+
+module.exports = runTest;
+
+},{}],20:[function(require,module,exports){
+(function (Buffer){
+/********************************************************************************
+ *   Ledger Node JS API
+ *   (c) 2016-2017 Ledger
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ ********************************************************************************/
+
+function runTest(comm, ledger, timeout) {
+  return comm.create_async(timeout, true).then(function(comm) {
+    var eth = new ledger.eth(comm);
+    return eth
+      .signPersonalMessage_async(
+        "44'/60'/0'/0'/0",
+        Buffer.from("test").toString("hex")
+      )
+      .then(function(result) {
+        var v = result["v"] - 27;
+        v = v.toString(16);
+        if (v.length < 2) {
+          v = "0" + v;
+        }
+        console.log("Signature 0x" + result["r"] + result["s"] + v);
+        comm.close_async();
+      });
+  });
+}
+
+module.exports = runTest;
+
+}).call(this,require("buffer").Buffer)
+},{"buffer":8}],21:[function(require,module,exports){
+if (typeof ledger == "undefined") {
+  ledger = require("..");
+  comm = ledger.comm_node;
+  browser = false;
+} else {
+  browser = true;
+  comm = ledger.comm_u2f;
+}
+
+var TIMEOUT = 5 * 1000;
+
+var tests = [
+  { name: "testBtc", run: require("./testBtc") },
+  { name: "testBtc2", run: require("./testBtc2") },
+  { name: "testBtc3", run: require("./testBtc3") },
+  { name: "testBtc4", run: require("./testBtc4") },
+  {
+    run: function() {
+      return new Promise(function(resolve, reject) {
+        var s = 15;
+        console.info("You have " + s + " seconds to switch to eth app ...");
+        var interval = setInterval(function() {
+          if (--s) {
+            console.log(s + " ...");
+          } else {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 1000);
+      });
+    }
+  },
+  { name: "testEth", run: require("./testEth") },
+  { name: "testEth2", run: require("./testEth2") },
+  { name: "testEth3", run: require("./testEth3") },
+  { name: "testEth4", run: require("./testEth4") }
+];
+
+function runTests() {
+  tests.reduce(function(a, step) {
+    return a
+      .then(function() {
+        console.info(step.name ? "Running test " + step.name : "");
+        return step.run(comm, ledger, TIMEOUT);
+      })
+      .catch(function(err) {
+        console.error("Failed test", step.name, err);
+      });
+  }, Promise.resolve());
+}
+
+if (!browser) {
+  runTests();
+}
+
+module.exports = runTests;
+
+},{"..":5,"./testBtc":13,"./testBtc2":14,"./testBtc3":15,"./testBtc4":16,"./testEth":17,"./testEth2":18,"./testEth3":19,"./testEth4":20}]},{},[21])(21)
 });
