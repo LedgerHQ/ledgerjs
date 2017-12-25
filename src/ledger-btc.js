@@ -564,7 +564,7 @@ LedgerBtc.prototype.createVarint = function(value) {
 		buffer[2] = ((value >> 8) & 0xff);
 		return buffer;
 	}
-	var buffer = Buffer.alloc(4);
+	var buffer = Buffer.alloc(5);
 	buffer[0] = 0xfe;
 	buffer[1] = (value & 0xff);
 	buffer[2] = ((value >> 8) & 0xff);
