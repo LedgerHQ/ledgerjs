@@ -14,25 +14,17 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
+//@flow
 
-function runTest(comm, ledger, timeout) {
-  return comm.create_async(timeout, true).then(function(comm) {
-    var eth = new ledger.eth(comm);
-    return eth
-      .signPersonalMessage_async(
-        "44'/60'/0'/0'/0",
-        Buffer.from("test").toString("hex")
-      )
-      .then(function(result) {
-        var v = result["v"] - 27;
-        v = v.toString(16);
-        if (v.length < 2) {
-          v = "0" + v;
-        }
-        console.log("Signature 0x" + result["r"] + result["s"] + v);
-        comm.close_async();
-      });
-  });
-}
+import LedgerComm from "./LedgerCommU2F";
+import LedgerBtc from "./LedgerBtc";
+import LedgerEth from "./LedgerEth";
 
-module.exports = runTest;
+// TODO IMO in the future:
+//export { LedgerComm, LedgerBtc, LedgerEth };
+// for now, non breaking version:
+module.exports = {
+  comm_u2f: LedgerComm,
+  btc: LedgerBtc,
+  eth: LedgerEth
+};
