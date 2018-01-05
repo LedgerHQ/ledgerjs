@@ -1,15 +1,11 @@
 {
   "name": "ledgerco",
   "version": "1.2.1",
-  "description": "Node API for Ledger Hardware Wallets (HW.1 / Nano / Nano S / Blue)",
+  "description":
+    "Node API for Ledger Hardware Wallets (HW.1 / Nano / Nano S / Blue)",
   "main": "./lib/index-node",
   "browser": "./lib/index-browser",
-  "files": [
-    "lib",
-    "src",
-    "browser",
-    "scripts"
-  ],
+  "files": ["lib", "src", "browser", "scripts"],
   "repository": {
     "type": "git",
     "url": "https://github.com/LedgerHQ/ledger-node-js-api"
@@ -52,6 +48,7 @@
     "test": "node test/tests-node.js",
     "build": "./scripts/build.sh",
     "prepare": "npm run build",
+    "prepublishOnly": "npm run build",
     "watch": "babel src -d lib -w",
     "prettier": "prettier --write 'src/**/*.js'",
     "lint": "eslint src",
