@@ -29,7 +29,7 @@
   },
   "homepage": "https://github.com/LedgerHQ/ledger-node-js-api",
   "dependencies": {
-    "node-hid": "0.5.7",
+    "node-hid": "0.6.0",
     "u2f-api": "0.2.7"
   },
   "devDependencies": {
