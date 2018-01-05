@@ -1,6 +1,6 @@
 {
   "name": "ledgerco",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Node API for Ledger Hardware Wallets (HW.1 / Nano / Nano S / Blue)",
   "main": "./lib/index-node",
   "browser": "./lib/index-browser",
