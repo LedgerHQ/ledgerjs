@@ -16,9 +16,10 @@
  ********************************************************************************/
 //@flow
 
-import HID from "node-hid";
+// import HID from "node-hid";
+import HID from "ledger-node-js-hid";
 
-import { defer } from "./utils";
+import { defer, isLedgerDevice } from "./utils";
 import LedgerComm from "./LedgerComm";
 
 export default class LedgerNode extends LedgerComm {
@@ -45,11 +46,7 @@ export default class LedgerNode extends LedgerComm {
   static list_async = (): Promise<Array<string>> =>
     Promise.resolve(
       HID.devices()
-        .filter(
-          device =>
-            (device.vendorId === 0x2581 && device.productId === 0x3b7c) ||
-            device.vendorId === 0x2c97
-        )
+        .filter(isLedgerDevice)
         .map(d => d.path)
     );
 
