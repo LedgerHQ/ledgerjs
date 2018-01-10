@@ -1,13 +1,13 @@
 {
   "private": true,
   "name": "@ledgerhq/example-node",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-btc": "^1.0.1",
-    "@ledgerhq/hw-comm-node-hid": "^1.0.1",
-    "@ledgerhq/hw-eth": "^1.0.1"
+    "@ledgerhq/hw-btc": "^1.0.2",
+    "@ledgerhq/hw-comm-node-hid": "^1.0.2",
+    "@ledgerhq/hw-eth": "^1.0.2"
   },
   "devDependencies": {
     "flow-bin": "^0.59.0",
