@@ -1,8 +1,6 @@
 node_modules
-package-lock.json
 .DS_Store
 *.pem
-test/tests-browser.js
 browser/
-lib/
+packages/*/lib/
 flow-typed/

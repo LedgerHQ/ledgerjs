@@ -1,57 +1,43 @@
 {
-  "name": "ledgerco",
-  "version": "1.2.1",
-  "description":
-    "Node API for Ledger Hardware Wallets (HW.1 / Nano / Nano S / Blue)",
-  "main": "./lib/index-node",
-  "browser": "./lib/index-browser",
-  "files": ["lib", "src", "browser", "scripts"],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/LedgerHQ/ledger-node-js-api"
+  "private": true,
+  "name": "ledger-libs",
+  "version": "0.0.0",
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "postinstall":
+      "flow-mono create-symlinks packages/comm/.flowconfig && flow-mono install-types --overwrite --ignoreDeps=peer",
+    "test": "echo 'There are no headless tests yet.'",
+    "test-node": "cd packages/test && yarn run test-node",
+    "test-browser": "cd packages/test && yarn run test-browser",
+    "documentation":
+      "documentation build packages/*/src/** -f md -o API.md --config documentation.yml",
+    "prettier": "prettier --write 'packages/**/src/*.{js}'",
+    "lint": "eslint packages/**/src",
+    "flow": "lerna run flow",
+    "build": "lerna run build && yarn run documentation",
+    "watch": "lerna run --parallel watch",
+    "clean":
+      "rm -rf node_modules packages/*/node_modules/ packages/*/flow-typed/ packages/*/lib flow-typed",
+    "rebuild": "lerna run clean && lerna run build",
+    "publish":
+      "yarn && lerna run clean && lerna run build && lerna publish --registry=https://registry.npmjs.org/"
   },
-  "keywords": [
-    "Ledger",
-    "Wallet",
-    "HW.1",
-    "Bitcoin",
-    "Ethereum",
-    "Hardware Wallet"
-  ],
-  "author": "Nicolas Bacca",
-  "license": "Apache-2.0",
-  "bugs": {
-    "url": "https://github.com/LedgerHQ/ledger-node-js-api/issues"
-  },
-  "homepage": "https://github.com/LedgerHQ/ledger-node-js-api",
   "dependencies": {
-    "node-hid": "0.6.0",
-    "u2f-api": "0.2.7"
-  },
-  "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-eslint": "^8.0.2",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-flow": "^6.23.0",
-    "babel-preset-stage-2": "^6.24.1",
+    "babel-preset-stage-0": "^6.24.1",
     "browserify": "^14.5.0",
+    "documentation": "^5.3.5",
     "eslint": "^4.11.0",
     "eslint-config-prettier": "^2.7.0",
     "flow-bin": "^0.59.0",
     "flow-copy-source": "^1.2.1",
+    "flow-mono-cli": "^1.3.0",
     "flow-typed": "^2.2.3",
+    "lerna": "^2.6.0",
     "prettier": "^1.8.2",
     "uglify-js": "^3.1.9"
-  },
-  "scripts": {
-    "bootstrap": "flow-typed install -s",
-    "test": "node test/tests-node.js",
-    "build": "./scripts/build.sh",
-    "prepare": "npm run build",
-    "prepublishOnly": "npm run build",
-    "watch": "babel src -d lib -w",
-    "prettier": "prettier --write 'src/**/*.js'",
-    "lint": "eslint src",
-    "flow": "flow src"
   }
 }

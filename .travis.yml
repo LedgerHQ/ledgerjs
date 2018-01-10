@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+  - "8"
+script:
+  - npm run build
+  - npm test
+  - npm run lint
+  - npm run flow
+addons:
+  apt:
+    packages:
+      - libusb-1.0-0-dev
+      - libudev-dev

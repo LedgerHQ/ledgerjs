@@ -1,0 +1,278 @@
+0 silly input [ 'flow' ]
+1 silly flags { _: [ 'run' ],
+1 silly flags   'reject-cycles': false,
+1 silly flags   rejectCycles: false,
+1 silly flags   script: 'flow',
+1 silly flags   args: [] }
+2 verbose rootPath /Users/gre/dev/ledger-node-js-api
+3 info version 2.6.0
+4 silly existsSync /Users/gre/dev/ledger-node-js-api/VERSION
+5 silly initialize attempt
+6 silly initialize success
+7 silly execute attempt
+8 silly runScriptInDir flow [] comm
+9 silly getExecOpts { cwd: '/Users/gre/dev/ledger-node-js-api/packages/comm' }
+10 silly runScriptInDir flow [] btc
+11 silly getExecOpts { cwd: '/Users/gre/dev/ledger-node-js-api/packages/btc' }
+12 silly runScriptInDir flow [] comm-node-hid
+13 silly getExecOpts { cwd: '/Users/gre/dev/ledger-node-js-api/packages/comm-node-hid' }
+14 silly runScriptInDir flow [] comm-u2f
+15 silly getExecOpts { cwd: '/Users/gre/dev/ledger-node-js-api/packages/comm-u2f' }
+16 silly runScriptInDir flow [] eth
+17 silly getExecOpts { cwd: '/Users/gre/dev/ledger-node-js-api/packages/eth' }
+18 error flow Errored while running script in '@ledgerhq/btc'
+19 error execute callback with error
+20 error Error: Command failed: npm run flow
+20 error npm ERR! code ELIFECYCLE
+20 error npm ERR! errno 2
+20 error npm ERR! @ledgerhq/btc@1.0.0 flow: `flow`
+20 error npm ERR! Exit status 2
+20 error npm ERR!
+20 error npm ERR! Failed at the @ledgerhq/btc@1.0.0 flow script.
+20 error npm ERR! This is probably not a problem with npm. There is likely additional logging output above.
+20 error
+20 error npm ERR! A complete log of this run can be found in:
+20 error npm ERR!     /Users/gre/.npm/_logs/2018-01-10T14_43_13_725Z-debug.log
+20 error
+20 error > @ledgerhq/btc@1.0.0 flow /Users/gre/dev/ledger-node-js-api/packages/btc
+20 error > flow
+20 error
+20 error Error: lib/Btc.js.flow:319
+20 error 319:     return this.comm.exchange(buffer.toString("hex"), [0x9000]);
+20 error                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ type application of identifier `Promise`. This type is incompatible with the expected return type of
+20 error 307:   provideOutputFullChangePath(path: string): Promise<string> {
+20 error                                                   ^^^^^^^^^^^^^^^ type application of identifier `Promise`
+20 error   Type argument `R` is incompatible:
+20 error      41:   +exchange: (apduHex: Buffer, statusList: Array<number>) => Promise<Buffer>;
+20 error                                                                               ^^^^^^ Buffer. This type is incompatible with. See: ../comm/lib/Comm.js.flow:41
+20 error     307:   provideOutputFullChangePath(path: string): Promise<string> {
+20 error                                                               ^^^^^^ string
+20 error
+20 error Error: lib/Btc.js.flow:319
+20 error 319:     return this.comm.exchange(buffer.toString("hex"), [0x9000]);
+20 error                                    ^^^^^^^^^^^^^^^^^^^^^^ string. This type is incompatible with the expected param type of
+20 error  41:   +exchange: (apduHex: Buffer, statusList: Array<number>) => Promise<Buffer>;
+20 error                             ^^^^^^ Buffer. See: ../comm/lib/Comm.js.flow:41
+20 error
+20 error Error: lib/Btc.js.flow:342
+20 error 342:         return this.comm.exchange(data.toString("hex"), [0x9000]).then(() => {
+20 error                                        ^^^^^^^^^^^^^^^^^^^^ string. This type is incompatible with the expected param type of
+20 error  41:   +exchange: (apduHex: Buffer, statusList: Array<number>) => Promise<Buffer>;
+20 error                             ^^^^^^ Buffer. See: ../comm/lib/Comm.js.flow:41
+20 error
+20 error Error: lib/Btc.js.flow:372
+20 error 372:       .exchange(buffer.toString("hex"), [0x9000])
+20 error                      ^^^^^^^^^^^^^^^^^^^^^^ string. This type is incompatible with the expected param type of
+20 error  41:   +exchange: (apduHex: Buffer, statusList: Array<number>) => Promise<Buffer>;
+20 error                             ^^^^^^ Buffer. See: ../comm/lib/Comm.js.flow:41
+20 error
+20 error Error: lib/Btc.js.flow:374
+20 error 374:         const result = Buffer.from(signature, "hex");
+20 error                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ call of method `from`. Function cannot be called on any member of intersection type
+20 error 374:         const result = Buffer.from(signature, "hex");
+20 error                             ^^^^^^^^^^^ intersection
+20 error   Member 1:
+20 error   108:   static from(value: Buffer): Buffer;
+20 error          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:108
+20 error   Error:
+20 error   374:         const result = Buffer.from(signature, "hex");
+20 error                                                      ^^^^^ unused function argument
+20 error     108:   static from(value: Buffer): Buffer;
+20 error            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type expects no more than 1 argument. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:108
+20 error   Member 2:
+20 error   109:   static from(value: string, encoding?: buffer$Encoding): Buffer;
+20 error          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:109
+20 error   Error:
+20 error   374:         const result = Buffer.from(signature, "hex");
+20 error                                           ^^^^^^^^^ Buffer. This type is incompatible with the expected param type of
+20 error   109:   static from(value: string, encoding?: buffer$Encoding): Buffer;
+20 error                             ^^^^^^ string. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:109
+20 error   Member 3:
+20 error   110:   static from(value: ArrayBuffer, byteOffset?: number, length?: number): Buffer;
+20 error          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:110
+20 error   Error:
+20 error   374:         const result = Buffer.from(signature, "hex");
+20 error                                           ^^^^^^^^^ Buffer. This type is incompatible with the expected param type of
+20 error   110:   static from(value: ArrayBuffer, byteOffset?: number, length?: number): Buffer;
+20 error                             ^^^^^^^^^^^ ArrayBuffer. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:110
+20 error   Member 4:
+20 error   111:   static from(value: Iterable<number>): this;
+20 error          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:111
+20 error   Error:
+20 error   374:         const result = Buffer.from(signature, "hex");
+20 error                                                      ^^^^^ unused function argument
+20 error     111:   static from(value: Iterable<number>): this;
+20 error            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type expects no more than 1 argument. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:111
+20 error
+20 error Error: lib/Btc.js.flow:424
+20 error 424:     return foreach(apdus, apdu => this.comm.exchange(apdu, [0x9000])).then(
+20 error                                                           ^^^^ string. This type is incompatible with the expected param type of
+20 error  41:   +exchange: (apduHex: Buffer, statusList: Array<number>) => Promise<Buffer>;
+20 error                             ^^^^^^ Buffer. See: ../comm/lib/Comm.js.flow:41
+20 error
+20 error Error: lib/Btc.js.flow:434
+20 error 434:           .exchange(buffer.toString("hex"), [0x9000])
+20 error                          ^^^^^^^^^^^^^^^^^^^^^^ string. This type is incompatible with the expected param type of
+20 error  41:   +exchange: (apduHex: Buffer, statusList: Array<number>) => Promise<Buffer>;
+20 error                             ^^^^^^ Buffer. See: ../comm/lib/Comm.js.flow:41
+20 error
+20 error Error: lib/Btc.js.flow:436
+20 error 436:             const response = Buffer.from(apduResponse, "hex");
+20 error                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ call of method `from`. Function cannot be called on any member of intersection type
+20 error 436:             const response = Buffer.from(apduResponse, "hex");
+20 error                                   ^^^^^^^^^^^ intersection
+20 error   Member 1:
+20 error   108:   static from(value: Buffer): Buffer;
+20 error          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:108
+20 error   Error:
+20 error   436:             const response = Buffer.from(apduResponse, "hex");
+20 error                                                               ^^^^^ unused function argument
+20 error     108:   static from(value: Buffer): Buffer;
+20 error            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type expects no more than 1 argument. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:108
+20 error   Member 2:
+20 error   109:   static from(value: string, encoding?: buffer$Encoding): Buffer;
+20 error          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:109
+20 error   Error:
+20 error   436:             const response = Buffer.from(apduResponse, "hex");
+20 error                                                 ^^^^^^^^^^^^ Buffer. This type is incompatible with the expected param type of
+20 error   109:   static from(value: string, encoding?: buffer$Encoding): Buffer;
+20 error                             ^^^^^^ string. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:109
+20 error   Member 3:
+20 error   110:   static from(value: ArrayBuffer, byteOffset?: number, length?: number): Buffer;
+20 error          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:110
+20 error   Error:
+20 error   436:             const response = Buffer.from(apduResponse, "hex");
+20 error                                                 ^^^^^^^^^^^^ Buffer. This type is incompatible with the expected param type of
+20 error   110:   static from(value: ArrayBuffer, byteOffset?: number, length?: number): Buffer;
+20 error                             ^^^^^^^^^^^ ArrayBuffer. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:110
+20 error   Member 4:
+20 error   111:   static from(value: Iterable<number>): this;
+20 error          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:111
+20 error   Error:
+20 error   436:             const response = Buffer.from(apduResponse, "hex");
+20 error                                                               ^^^^^ unused function argument
+20 error     111:   static from(value: Iterable<number>): this;
+20 error            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type expects no more than 1 argument. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:111
+20 error
+20 error Error: src/Btc.js:319
+20 error 319:     return this.comm.exchange(buffer.toString("hex"), [0x9000]);
+20 error                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ type application of identifier `Promise`. This type is incompatible with the expected return type of
+20 error 307:   provideOutputFullChangePath(path: string): Promise<string> {
+20 error                                                   ^^^^^^^^^^^^^^^ type application of identifier `Promise`
+20 error   Type argument `R` is incompatible:
+20 error      41:   +exchange: (apduHex: Buffer, statusList: Array<number>) => Promise<Buffer>;
+20 error                                                                               ^^^^^^ Buffer. This type is incompatible with. See: ../comm/lib/Comm.js.flow:41
+20 error     307:   provideOutputFullChangePath(path: string): Promise<string> {
+20 error                                                               ^^^^^^ string
+20 error
+20 error Error: src/Btc.js:319
+20 error 319:     return this.comm.exchange(buffer.toString("hex"), [0x9000]);
+20 error                                    ^^^^^^^^^^^^^^^^^^^^^^ string. This type is incompatible with the expected param type of
+20 error  41:   +exchange: (apduHex: Buffer, statusList: Array<number>) => Promise<Buffer>;
+20 error                             ^^^^^^ Buffer. See: ../comm/lib/Comm.js.flow:41
+20 error
+20 error Error: src/Btc.js:342
+20 error 342:         return this.comm.exchange(data.toString("hex"), [0x9000]).then(() => {
+20 error                                        ^^^^^^^^^^^^^^^^^^^^ string. This type is incompatible with the expected param type of
+20 error  41:   +exchange: (apduHex: Buffer, statusList: Array<number>) => Promise<Buffer>;
+20 error                             ^^^^^^ Buffer. See: ../comm/lib/Comm.js.flow:41
+20 error
+20 error Error: src/Btc.js:372
+20 error 372:       .exchange(buffer.toString("hex"), [0x9000])
+20 error                      ^^^^^^^^^^^^^^^^^^^^^^ string. This type is incompatible with the expected param type of
+20 error  41:   +exchange: (apduHex: Buffer, statusList: Array<number>) => Promise<Buffer>;
+20 error                             ^^^^^^ Buffer. See: ../comm/lib/Comm.js.flow:41
+20 error
+20 error Error: src/Btc.js:374
+20 error 374:         const result = Buffer.from(signature, "hex");
+20 error                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ call of method `from`. Function cannot be called on any member of intersection type
+20 error 374:         const result = Buffer.from(signature, "hex");
+20 error                             ^^^^^^^^^^^ intersection
+20 error   Member 1:
+20 error   108:   static from(value: Buffer): Buffer;
+20 error          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:108
+20 error   Error:
+20 error   374:         const result = Buffer.from(signature, "hex");
+20 error                                                      ^^^^^ unused function argument
+20 error     108:   static from(value: Buffer): Buffer;
+20 error            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type expects no more than 1 argument. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:108
+20 error   Member 2:
+20 error   109:   static from(value: string, encoding?: buffer$Encoding): Buffer;
+20 error          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:109
+20 error   Error:
+20 error   374:         const result = Buffer.from(signature, "hex");
+20 error                                           ^^^^^^^^^ Buffer. This type is incompatible with the expected param type of
+20 error   109:   static from(value: string, encoding?: buffer$Encoding): Buffer;
+20 error                             ^^^^^^ string. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:109
+20 error   Member 3:
+20 error   110:   static from(value: ArrayBuffer, byteOffset?: number, length?: number): Buffer;
+20 error          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:110
+20 error   Error:
+20 error   374:         const result = Buffer.from(signature, "hex");
+20 error                                           ^^^^^^^^^ Buffer. This type is incompatible with the expected param type of
+20 error   110:   static from(value: ArrayBuffer, byteOffset?: number, length?: number): Buffer;
+20 error                             ^^^^^^^^^^^ ArrayBuffer. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:110
+20 error   Member 4:
+20 error   111:   static from(value: Iterable<number>): this;
+20 error          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:111
+20 error   Error:
+20 error   374:         const result = Buffer.from(signature, "hex");
+20 error                                                      ^^^^^ unused function argument
+20 error     111:   static from(value: Iterable<number>): this;
+20 error            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type expects no more than 1 argument. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:111
+20 error
+20 error Error: src/Btc.js:424
+20 error 424:     return foreach(apdus, apdu => this.comm.exchange(apdu, [0x9000])).then(
+20 error                                                           ^^^^ string. This type is incompatible with the expected param type of
+20 error  41:   +exchange: (apduHex: Buffer, statusList: Array<number>) => Promise<Buffer>;
+20 error                             ^^^^^^ Buffer. See: ../comm/lib/Comm.js.flow:41
+20 error
+20 error Error: src/Btc.js:434
+20 error 434:           .exchange(buffer.toString("hex"), [0x9000])
+20 error                          ^^^^^^^^^^^^^^^^^^^^^^ string. This type is incompatible with the expected param type of
+20 error  41:   +exchange: (apduHex: Buffer, statusList: Array<number>) => Promise<Buffer>;
+20 error                             ^^^^^^ Buffer. See: ../comm/lib/Comm.js.flow:41
+20 error
+20 error Error: src/Btc.js:436
+20 error 436:             const response = Buffer.from(apduResponse, "hex");
+20 error                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ call of method `from`. Function cannot be called on any member of intersection type
+20 error 436:             const response = Buffer.from(apduResponse, "hex");
+20 error                                   ^^^^^^^^^^^ intersection
+20 error   Member 1:
+20 error   108:   static from(value: Buffer): Buffer;
+20 error          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:108
+20 error   Error:
+20 error   436:             const response = Buffer.from(apduResponse, "hex");
+20 error                                                               ^^^^^ unused function argument
+20 error     108:   static from(value: Buffer): Buffer;
+20 error            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type expects no more than 1 argument. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:108
+20 error   Member 2:
+20 error   109:   static from(value: string, encoding?: buffer$Encoding): Buffer;
+20 error          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:109
+20 error   Error:
+20 error   436:             const response = Buffer.from(apduResponse, "hex");
+20 error                                                 ^^^^^^^^^^^^ Buffer. This type is incompatible with the expected param type of
+20 error   109:   static from(value: string, encoding?: buffer$Encoding): Buffer;
+20 error                             ^^^^^^ string. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:109
+20 error   Member 3:
+20 error   110:   static from(value: ArrayBuffer, byteOffset?: number, length?: number): Buffer;
+20 error          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:110
+20 error   Error:
+20 error   436:             const response = Buffer.from(apduResponse, "hex");
+20 error                                                 ^^^^^^^^^^^^ Buffer. This type is incompatible with the expected param type of
+20 error   110:   static from(value: ArrayBuffer, byteOffset?: number, length?: number): Buffer;
+20 error                             ^^^^^^^^^^^ ArrayBuffer. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:110
+20 error   Member 4:
+20 error   111:   static from(value: Iterable<number>): this;
+20 error          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:111
+20 error   Error:
+20 error   436:             const response = Buffer.from(apduResponse, "hex");
+20 error                                                               ^^^^^ unused function argument
+20 error     111:   static from(value: Iterable<number>): this;
+20 error            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ function type expects no more than 1 argument. See lib: /private/tmp/flow/flowlib_dc6be48/node.js:111
+20 error
+20 error
+20 error Found 16 errors
+20 error
+20 error     at Promise.all.then.arr (/Users/gre/dev/ledger-node-js-api/node_modules/execa/index.js:236:11)
+20 error     at <anonymous>

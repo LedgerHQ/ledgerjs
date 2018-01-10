@@ -1,0 +1,42 @@
+{
+  "name": "@ledgerhq/eth",
+  "version": "1.0.0",
+  "description": "Ledger Hardware Wallet Ethereum Application API",
+  "keywords": [
+    "Ledger",
+    "LedgerWallet",
+    "Ethereum",
+    "eth",
+    "NanoS",
+    "Blue",
+    "Hardware Wallet"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LedgerHQ/ledger-node-js-api"
+  },
+  "bugs": {
+    "url": "https://github.com/LedgerHQ/ledger-node-js-api/issues"
+  },
+  "homepage": "https://github.com/LedgerHQ/ledger-node-js-api",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "lib/Eth.js",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@ledgerhq/comm": "^1.0.0"
+  },
+  "devDependencies": {
+    "flow-bin": "^0.59.0",
+    "flow-typed": "^2.2.3"
+  },
+  "scripts": {
+    "flow": "flow",
+    "clean": "rm -rf lib/",
+    "build":
+      "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src && flow-copy-source -v src lib",
+    "watch":
+      "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src"
+  }
+}
