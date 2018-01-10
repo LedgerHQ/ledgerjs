@@ -1,13 +1,13 @@
 {
   "private": true,
   "name": "@ledgerhq/example-node",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/eth": "^1.0.0",
-    "@ledgerhq/btc": "^1.0.0",
-    "@ledgerhq/comm-node-hid": "^1.0.0"
+    "@ledgerhq/btc": "^1.0.1",
+    "@ledgerhq/comm-node-hid": "^1.0.1",
+    "@ledgerhq/eth": "^1.0.1"
   },
   "devDependencies": {
     "flow-bin": "^0.59.0",
@@ -17,9 +17,7 @@
     "start": "node lib/index.js",
     "flow": "flow",
     "clean": "rm -rf lib/",
-    "build":
-      "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src",
-    "watch":
-      "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src"
+    "build": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src",
+    "watch": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src"
   }
 }
