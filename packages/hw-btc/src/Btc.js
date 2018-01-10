@@ -18,7 +18,7 @@
 
 // FIXME drop:
 import { foreach, doIf, asyncWhile, splitPath, eachSeries } from "./utils";
-import type LedgerComm from "@ledgerhq/comm";
+import type LedgerComm from "@ledgerhq/hw-comm";
 
 const MAX_SCRIPT_BLOCK = 50;
 const DEFAULT_LOCKTIME = 0;
@@ -46,7 +46,7 @@ type Transaction = {
  * Bitcoin API.
  *
  * @example
- * import Btc from "@ledgerhq/btc";
+ * import Btc from "@ledgerhq/hw-btc";
  * const btc = new Btc(comm)
  */
 export default class Btc {

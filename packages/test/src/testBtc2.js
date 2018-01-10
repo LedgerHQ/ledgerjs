@@ -1,4 +1,4 @@
-import Btc from "@ledgerhq/btc";
+import Btc from "@ledgerhq/hw-btc";
 
 export default async comm => {
   const btc = new Btc(comm);

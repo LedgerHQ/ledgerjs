@@ -17,7 +17,7 @@
 //@flow
 
 import HID from "node-hid";
-import Comm from "@ledgerhq/comm";
+import Comm from "@ledgerhq/hw-comm";
 
 // FIXME drop
 type Defer<T> = {
@@ -38,7 +38,7 @@ function defer<T>(): Defer<T> {
 /**
  * node-hid Comm implementation
  * @example
- * import CommNodeHid from "@ledgerhq/comm-node-u2f";
+ * import CommNodeHid from "@ledgerhq/hw-comm-node-u2f";
  * ...
  * CommNodeHid.create().then(comm => ...)
  */

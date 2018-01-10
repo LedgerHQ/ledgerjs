@@ -5,9 +5,9 @@
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/btc": "^1.0.1",
-    "@ledgerhq/comm-node-hid": "^1.0.1",
-    "@ledgerhq/eth": "^1.0.1"
+    "@ledgerhq/hw-btc": "^1.0.1",
+    "@ledgerhq/hw-comm-node-hid": "^1.0.1",
+    "@ledgerhq/hw-eth": "^1.0.1"
   },
   "devDependencies": {
     "flow-bin": "^0.59.0",

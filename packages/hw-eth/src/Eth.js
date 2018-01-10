@@ -18,13 +18,13 @@
 
 // FIXME drop:
 import { splitPath, foreach } from "./utils";
-import type Comm from "@ledgerhq/comm";
+import type Comm from "@ledgerhq/hw-comm";
 
 /**
  * Ethereum API
  *
  * @example
- * import Eth from "@ledgerhq/eth";
+ * import Eth from "@ledgerhq/hw-eth";
  * const eth = new Eth(comm)
  */
 export default class Eth {

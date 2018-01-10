@@ -1,4 +1,4 @@
-import Eth from "@ledgerhq/eth";
+import Eth from "@ledgerhq/hw-eth";
 
 export default async comm => {
   const eth = new Eth(comm);

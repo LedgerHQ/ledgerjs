@@ -1,12 +1,10 @@
 {
-  "name": "@ledgerhq/comm-node-hid",
+  "name": "@ledgerhq/hw-comm",
   "version": "1.0.1",
-  "description": "Ledger Hardware Wallet Node implementation of the communication layer, using node-hid",
+  "description": "Ledger Hardware Wallet common interface of the communication layer",
   "keywords": [
     "Ledger",
     "LedgerWallet",
-    "hid",
-    "node-hid",
     "NanoS",
     "Blue",
     "Hardware Wallet"
@@ -22,11 +20,10 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "lib/CommNodeHid.js",
+  "main": "lib/Comm.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/comm": "^1.0.1",
-    "node-hid": "^0.7.2"
+    "invariant": "^2.2.0"
   },
   "devDependencies": {
     "flow-bin": "^0.59.0",

@@ -1,12 +1,13 @@
 {
-  "name": "@ledgerhq/eth",
+  "name": "@ledgerhq/hw-comm-u2f",
   "version": "1.0.1",
-  "description": "Ledger Hardware Wallet Ethereum Application API",
+  "description": "Ledger Hardware Wallet Web implementation of the communication layer, using U2F api",
   "keywords": [
     "Ledger",
     "LedgerWallet",
-    "Ethereum",
-    "eth",
+    "U2F",
+    "browser",
+    "web",
     "NanoS",
     "Blue",
     "Hardware Wallet"
@@ -22,10 +23,11 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "lib/Eth.js",
+  "main": "lib/CommU2F.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/comm": "^1.0.1"
+    "@ledgerhq/hw-comm": "^1.0.1",
+    "u2f-api": "^0.2.7"
   },
   "devDependencies": {
     "flow-bin": "^0.59.0",

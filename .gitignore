@@ -4,3 +4,5 @@ node_modules
 browser/
 packages/*/lib/
 flow-typed/
+lerna-debug.log
+lerna-error.log

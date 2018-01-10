@@ -1,10 +1,12 @@
 {
-  "name": "@ledgerhq/comm",
+  "name": "@ledgerhq/hw-btc",
   "version": "1.0.1",
-  "description": "Ledger Hardware Wallet common interface of the communication layer",
+  "description": "Ledger Hardware Wallet Bitcoin Application API",
   "keywords": [
     "Ledger",
     "LedgerWallet",
+    "btc",
+    "Bitcoin",
     "NanoS",
     "Blue",
     "Hardware Wallet"
@@ -20,10 +22,10 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "lib/Comm.js",
+  "main": "lib/Btc.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "invariant": "^2.2.0"
+    "@ledgerhq/hw-comm": "^1.0.1"
   },
   "devDependencies": {
     "flow-bin": "^0.59.0",
