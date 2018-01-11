@@ -19,6 +19,8 @@
 import HID from "node-hid";
 import Comm from "@ledgerhq/hw-transport";
 
+import getDevices from "./getDevices";
+
 // FIXME drop
 type Defer<T> = {
   promise: Promise<T>,
@@ -43,14 +45,14 @@ function defer<T>(): Defer<T> {
  * CommNodeHid.create().then(comm => ...)
  */
 export default class CommNodeHid extends Comm {
-  device: HID.HID | string;
+  device: HID.HID;
   ledgerTransport: boolean;
   timeout: number;
   debug: boolean;
   exchangeStack: Array<*>;
 
   constructor(
-    device: HID.HID | string,
+    device: string | HID.HID,
     ledgerTransport: boolean,
     timeout: number = 0,
     debug: boolean = false
