@@ -43,20 +43,26 @@ function defer<T>(): Defer<T> {
  * CommNodeHid.create().then(comm => ...)
  */
 export default class CommNodeHid extends Comm {
-  device: HID.HID;
+  device: HID.HID | string;
   ledgerTransport: boolean;
   timeout: number;
   debug: boolean;
   exchangeStack: Array<*>;
 
   constructor(
-    device: HID.HID,
+    device: HID.HID | string,
     ledgerTransport: boolean,
     timeout: number = 0,
     debug: boolean = false
   ) {
     super();
-    this.device = device;
+
+    if (typeof device === "string") {
+      this.device = new HID.HID(device);
+    } else {
+      this.device = device;
+    }
+
     this.ledgerTransport = ledgerTransport;
     this.timeout = timeout;
     this.exchangeStack = [];
@@ -65,7 +71,7 @@ export default class CommNodeHid extends Comm {
 
   static list = (): Promise<Array<string>> =>
     Promise.resolve(
-      HID.devices()
+      getDevices()
         .filter(
           device =>
             (device.vendorId === 0x2581 && device.productId === 0x3b7c) ||
@@ -76,7 +82,7 @@ export default class CommNodeHid extends Comm {
 
   /**
    * static function to create a new Comm from the first connected Ledger device found in USB
-   
+
    */
   static create(timeout?: number, debug?: boolean): Promise<CommNodeHid> {
     return CommNodeHid.list().then(result => {
