@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-app-btc",
-  "version": "0.0.0",
+  "version": "1.0.4",
   "description": "Ledger Hardware Wallet Bitcoin Application API",
   "keywords": [
     "Ledger",
