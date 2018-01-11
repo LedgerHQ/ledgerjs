@@ -1,4 +1,4 @@
-import CommHid from "@ledgerhq/hw-comm-node-hid";
+import CommHid from "@ledgerhq/hw-transport-node-hid";
 import runTests from "./runTests";
 
 // test node hid

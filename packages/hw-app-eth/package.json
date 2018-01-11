@@ -1,10 +1,12 @@
 {
-  "name": "@ledgerhq/hw-comm",
-  "version": "1.0.4",
-  "description": "Ledger Hardware Wallet common interface of the communication layer",
+  "name": "@ledgerhq/hw-app-eth",
+  "version": "0.0.0",
+  "description": "Ledger Hardware Wallet Ethereum Application API",
   "keywords": [
     "Ledger",
     "LedgerWallet",
+    "Ethereum",
+    "eth",
     "NanoS",
     "Blue",
     "Hardware Wallet"
@@ -20,10 +22,10 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "lib/Comm.js",
+  "main": "lib/Eth.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "invariant": "^2.2.0"
+    "@ledgerhq/hw-transport": "^0.0.0"
   },
   "devDependencies": {
     "flow-bin": "^0.63.1",

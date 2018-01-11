@@ -17,7 +17,7 @@
 //@flow
 
 import { sign } from "u2f-api";
-import Comm from "@ledgerhq/hw-comm";
+import Comm from "@ledgerhq/hw-transport";
 
 function wrapApdu(apdu: Buffer, key: Buffer) {
   const result = Buffer.alloc(apdu.length);
@@ -61,7 +61,7 @@ function u2fPromise(response, statusList) {
 /**
  * U2F web Comm implementation
  * @example
- * import CommU2F from "@ledgerhq/hw-comm-u2f";
+ * import CommU2F from "@ledgerhq/hw-transport-u2f";
  * ...
  * CommU2F.create().then(comm => ...)
  */
