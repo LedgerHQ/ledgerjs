@@ -37,7 +37,7 @@ Bitcoin API.
 **Examples**
 
 ```javascript
-import Btc from "@ledgerhq/hw-btc";
+import Btc from "@ledgerhq/hw-app-btc";
 const btc = new Btc(comm)
 ```
 
@@ -187,7 +187,7 @@ Ethereum API
 **Examples**
 
 ```javascript
-import Eth from "@ledgerhq/hw-eth";
+import Eth from "@ledgerhq/hw-app-eth";
 const eth = new Eth(comm)
 ```
 
@@ -334,7 +334,7 @@ node-hid Comm implementation
 **Examples**
 
 ```javascript
-import CommNodeHid from "@ledgerhq/hw-comm-node-u2f";
+import CommNodeHid from "@ledgerhq/hw-transport-node-u2f";
 ...
 CommNodeHid.create().then(comm => ...)
 ```
@@ -363,7 +363,7 @@ U2F web Comm implementation
 **Examples**
 
 ```javascript
-import CommU2F from "@ledgerhq/hw-comm-u2f";
+import CommU2F from "@ledgerhq/hw-transport-u2f";
 ...
 CommU2F.create().then(comm => ...)
 ```
