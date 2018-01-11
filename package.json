@@ -11,7 +11,8 @@
     "test-browser": "cd packages/test && yarn run test-browser",
     "documentation":
       "documentation build packages/*/src/** -f md -o API.md --config documentation.yml",
-    "prettier": "prettier --write 'packages/**/src/*.{js}'",
+    "prettier": "prettier --write 'packages/*/src/**/*.js'",
+    "prettier-diff": "prettier --list-different 'packages/*/src/**/*.js'",
     "lint": "eslint packages/**/src",
     "flow": "lerna run flow",
     "build": "lerna run build && yarn run documentation",

@@ -6,6 +6,7 @@ script:
   - npm test
   - npm run lint
   - npm run flow
+  - npm run prettier-diff
 addons:
   apt:
     packages:
