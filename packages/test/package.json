@@ -8,11 +8,10 @@
     "@ledgerhq/hw-btc": "^1.0.2",
     "@ledgerhq/hw-comm-node-hid": "^1.0.2",
     "@ledgerhq/hw-eth": "^1.0.2",
-    "babel-polyfill": "^6.26.0",
     "budo": "^10.0.4"
   },
   "devDependencies": {
-    "flow-bin": "^0.59.0",
+    "flow-bin": "^0.63.1",
     "flow-typed": "^2.2.3"
   },
   "scripts": {
