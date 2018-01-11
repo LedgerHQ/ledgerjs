@@ -1,13 +1,13 @@
 {
   "private": true,
   "name": "@ledgerhq/example-browser",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-btc": "^1.0.2",
-    "@ledgerhq/hw-comm-u2f": "^1.0.2",
-    "@ledgerhq/hw-eth": "^1.0.2"
+    "@ledgerhq/hw-btc": "^1.0.3",
+    "@ledgerhq/hw-comm-u2f": "^1.0.3",
+    "@ledgerhq/hw-eth": "^1.0.3"
   },
   "devDependencies": {
     "flow-bin": "^0.63.1",

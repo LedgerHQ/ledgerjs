@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-comm",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Ledger Hardware Wallet common interface of the communication layer",
   "keywords": [
     "Ledger",
