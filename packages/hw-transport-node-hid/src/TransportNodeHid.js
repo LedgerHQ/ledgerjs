@@ -68,7 +68,7 @@ export default class TransportNodeHid extends Transport<string> {
     this.list().then(paths => {
       for (const path of paths) {
         if (!unsubscribed) {
-          observer.onNext(path);
+          observer.next(path);
         }
       }
     });

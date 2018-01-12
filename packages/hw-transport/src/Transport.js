@@ -5,9 +5,9 @@ import EventEmitter from "events";
 
 export type Subscription = { unsubscribe: () => void };
 export type Observer<T> = {
-  onNext: (descriptor: T) => void,
-  onError: (e: ?Error) => void,
-  onDone: () => void
+  next: (descriptor: T) => void,
+  error: (e: ?Error) => void,
+  complete: () => void
 };
 
 /**
@@ -30,7 +30,7 @@ export default class Transport<Descriptor> {
    * Listen all descriptors that can be opened. This will call cb() with all available descriptors
    * and then the new ones that gets discovered in the future until unsubscribe is called.
    * events can come over times, for instance if you plug a USB device after listen() or a bluetooth device become discoverable
-   * @param observer is an object with a onNext, onError and onDone function (compatible with observer pattern)
+   * @param observer is an object with a next, error and complete function (compatible with observer pattern)
    * @return a Subscription object on which you can `.unsubscribe()` to stop discovering descriptors.
    * @example
 const sub = TransportFoo.discover(async descriptor => {
