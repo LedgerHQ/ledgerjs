@@ -98,3 +98,17 @@ yarn run test-browser
 ```
 
 > make sure to configure your device app with "Browser support" set to "YES".
+
+### Deploy
+
+deploy a new release
+
+```
+ yarn run publish
+```
+
+deploy a canary release (beta, etc)
+
+```
+ yarn run publish -- -c beta
+```
