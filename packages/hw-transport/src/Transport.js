@@ -19,7 +19,7 @@ export default class Transport<Descriptor> {
    * @example
    * TransportFoo.list().then(descriptors => ...)
    */
-  static list: () => Promise<Array<Descriptor>>;
+  static +list: () => Promise<Array<Descriptor>>;
 
   /**
    * Listen all descriptors that can be opened. This will call cb() with all available descriptors
@@ -34,7 +34,7 @@ const sub = TransportFoo.discover(async descriptor => {
   ...
 })
    */
-  static discover: (cb: (descriptor: Descriptor) => void) => Subscription;
+  static +discover: (cb: (descriptor: Descriptor) => void) => Subscription;
 
   /**
    * attempt to create a Transport instance with potentially a descriptor.
@@ -44,7 +44,7 @@ const sub = TransportFoo.discover(async descriptor => {
    * @example
 TransportFoo.open(descriptor).then(transport => ...)
    */
-  static open: (
+  static +open: (
     descriptor: Descriptor,
     timeout?: number
   ) => Promise<Transport<Descriptor>>;
@@ -56,20 +56,20 @@ TransportFoo.open(descriptor).then(transport => ...)
    * @param statusList an array of accepted status code to be considered successful
    * @return a Promise of hex string response data
    */
-  exchange: (apduHex: string, statusList: Array<number>) => Promise<string>;
+  +exchange: (apduHex: string, statusList: Array<number>) => Promise<string>;
 
   /**
    * set the "scramble key" for the next exchanges with the device.
    * Each App can have a different scramble key and they internally will set it at instanciation.
    * @param key the scramble key
    */
-  setScrambleKey: (key: string) => void;
+  +setScrambleKey: (key: string) => void;
 
   /**
    * close the exchange with the device.
    * @return a Promise that ends when the comm is closed.
    */
-  close: () => Promise<void>;
+  +close: () => Promise<void>;
 
   _events = new EventEmitter();
 
