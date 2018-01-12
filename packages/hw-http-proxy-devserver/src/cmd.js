@@ -29,9 +29,9 @@ TransportNodeHid.create(5000, process.env.DEBUG || false).then(
         error = e.toString();
       }
       pending = false;
-      const res = { data, error };
-      console.log(req.body, " => ", res);
-      res.json(res);
+      const result = { data, error };
+      console.log(req.body, " => ", result);
+      res.json(result);
     });
 
     app.listen(PORT, () => {
