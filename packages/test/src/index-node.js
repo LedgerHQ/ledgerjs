@@ -1,3 +1,5 @@
+import "babel-polyfill";
+
 import CommHid from "@ledgerhq/hw-transport-node-hid";
 import runTests from "./runTests";
 

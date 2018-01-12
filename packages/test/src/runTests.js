@@ -33,20 +33,21 @@ var tests = [
   { name: "testEth4", run: testEth4 }
 ];
 
-export default (Comm, timeout = 5000) =>
+export default (Transport, timeout = 5000) =>
   tests.reduce(async (p, step) => {
     await p;
     if (step.name) {
       console.info("Running test " + step.name);
     }
-    const comm = await Comm.create(timeout, true);
+    const comm = await Transport.create(timeout, true);
     try {
       const result = await step.run(comm);
       if (result) {
         console.log(result);
       }
     } catch (err) {
-      console.error("Failed test", step.name, err);
+      console.error("Failed test " + step.name + ":", err);
+      throw err;
     } finally {
       comm.close();
     }
