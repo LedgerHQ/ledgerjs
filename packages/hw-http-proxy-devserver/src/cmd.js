@@ -12,6 +12,10 @@ TransportNodeHid.create(5000, process.env.DEBUG || false).then(
   transport => {
     app.use(cors());
 
+    app.get("/", (req, res) => {
+      res.sendStatus(200);
+    });
+
     let pending = false;
     app.post("/", bodyParser.json(), async (req, res) => {
       if (!req.body) return res.sendStatus(400);
