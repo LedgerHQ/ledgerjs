@@ -363,7 +363,7 @@ Listen all descriptors that can be opened. This will call cb() with all availabl
 and then the new ones that gets discovered in the future until unsubscribe is called.
 events can come over times, for instance if you plug a USB device after listen() or a bluetooth device become discoverable
 
-Type: function (cb: function (descriptor: Descriptor): void): Subscription
+Type: function (onNext: function (descriptor: Descriptor): void, onError: function (e: [Error](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Error)): void, onDone: function (): void): Subscription
 
 **Parameters**
 

@@ -34,7 +34,11 @@ const sub = TransportFoo.discover(async descriptor => {
   ...
 })
    */
-  static +discover: (cb: (descriptor: Descriptor) => void) => Subscription;
+  static +discover: (
+    onNext: (descriptor: Descriptor) => void,
+    onError?: (e: Error) => void,
+    onDone?: () => void
+  ) => Subscription;
 
   /**
    * attempt to create a Transport instance with potentially a descriptor.
