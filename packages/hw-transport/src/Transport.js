@@ -1,6 +1,7 @@
 //@flow
 
 import invariant from "invariant";
+import EventEmitter from "events";
 
 type Subscription = { unsubscribe: () => void };
 
@@ -16,7 +17,7 @@ export default class Transport<Descriptor> {
    * List once all available descriptors. For a better granularity, checkout `scan()`.
    * @return a promise of descriptors
    */
-  static +list: () => Promise<Array<Descriptor>>;
+  static list: () => Promise<Array<Descriptor>>;
 
   /**
    * Listen all descriptors that can be opened. This will call cb() with all available descriptors
@@ -25,7 +26,7 @@ export default class Transport<Descriptor> {
    * @param cb is a function called each time a descriptor is found
    * @return a Subscription object on which you can `.unsubscribe()` to stop discovering descriptors.
    */
-  static +discover: (cb: (descriptor: Descriptor) => void) => Subscription;
+  static discover: (cb: (descriptor: Descriptor) => void) => Subscription;
 
   /**
    * attempt to create a Transport instance with potentially a descriptor.
@@ -33,22 +34,10 @@ export default class Transport<Descriptor> {
    * @param timeout: an optional timeout
    * @return a Promise of Transport instance
    */
-  static +open: (
+  static open: (
     descriptor: Descriptor,
     timeout?: number
   ) => Promise<Transport<Descriptor>>;
-
-  /**
-   * Listen to an event on an instance of transport.
-   * Transport implementation can have specific events. Here is the common events:
-   * * `"disconnect"` : triggered if Transport is disconnected
-   */
-  +on: (eventName: string, cb: Function) => void;
-
-  /**
-   * Stop listening to an event on an instance of transport.
-   */
-  +off: (eventName: string, cb: Function) => void;
 
   /**
    * low level api to communicate with the device
@@ -57,20 +46,42 @@ export default class Transport<Descriptor> {
    * @param statusList an array of accepted status code to be considered successful
    * @return a Promise of hex string response data
    */
-  +exchange: (apduHex: string, statusList: Array<number>) => Promise<string>;
+  exchange: (apduHex: string, statusList: Array<number>) => Promise<string>;
 
   /**
    * set the "scramble key" for the next exchanges with the device.
    * Each App can have a different scramble key and they internally will set it at instanciation.
    * @param key the scramble key
    */
-  +setScrambleKey: (key: string) => void;
+  setScrambleKey: (key: string) => void;
 
   /**
    * close the exchange with the device.
    * @return a Promise that ends when the comm is closed.
    */
-  +close: () => Promise<void>;
+  close: () => Promise<void>;
+
+  _events = new EventEmitter();
+
+  /**
+   * Listen to an event on an instance of transport.
+   * Transport implementation can have specific events. Here is the common events:
+   * * `"disconnect"` : triggered if Transport is disconnected
+   */
+  on(eventName: string, cb: Function) {
+    this._events.on(eventName, cb);
+  }
+
+  /**
+   * Stop listening to an event on an instance of transport.
+   */
+  off(eventName: string, cb: Function) {
+    this._events.removeListener(eventName, cb);
+  }
+
+  emit(event: string, ...args: *) {
+    this._events.emit(event, ...args);
+  }
 
   /**
    * Enable or not logs of the binary exchange

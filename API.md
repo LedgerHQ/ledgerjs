@@ -16,11 +16,11 @@
     -   [getAppConfiguration](#getappconfiguration)
     -   [signPersonalMessage](#signpersonalmessage)
 -   [Transport](#transport)
-    -   [on](#on)
-    -   [off](#off)
     -   [exchange](#exchange)
     -   [setScrambleKey](#setscramblekey)
     -   [close](#close)
+    -   [on](#on)
+    -   [off](#off)
     -   [setDebugMode](#setdebugmode)
     -   [send](#send)
     -   [list](#list)
@@ -267,21 +267,6 @@ Transport defines the generic interface to share between node/u2f impl
 A **Descriptor** is a parametric type that is up to be determined for the implementation.
 it can be for instance an ID, an file path, a URL,...
 
-### on
-
-Listen to an event on an instance of transport.
-Transport implementation can have specific events. Here is the common events:
-
--   `"disconnect"` : triggered if Transport is disconnected
-
-Type: function (eventName: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), cb: [Function](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function)): void
-
-### off
-
-Stop listening to an event on an instance of transport.
-
-Type: function (eventName: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), cb: [Function](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function)): void
-
 ### exchange
 
 low level api to communicate with the device
@@ -314,6 +299,27 @@ close the exchange with the device.
 Type: function (): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;void>
 
 Returns **any** a Promise that ends when the comm is closed.
+
+### on
+
+Listen to an event on an instance of transport.
+Transport implementation can have specific events. Here is the common events:
+
+-   `"disconnect"` : triggered if Transport is disconnected
+
+**Parameters**
+
+-   `eventName` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `cb` **[Function](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function)** 
+
+### off
+
+Stop listening to an event on an instance of transport.
+
+**Parameters**
+
+-   `eventName` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `cb` **[Function](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function)** 
 
 ### setDebugMode
 
