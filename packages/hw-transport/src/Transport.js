@@ -14,8 +14,10 @@ export default class Transport<Descriptor> {
   debug: boolean = false;
 
   /**
-   * List once all available descriptors. For a better granularity, checkout `scan()`.
+   * List once all available descriptors. For a better granularity, checkout `discover()`.
    * @return a promise of descriptors
+   * @example
+   * TransportFoo.list().then(descriptors => ...)
    */
   static list: () => Promise<Array<Descriptor>>;
 
@@ -25,6 +27,12 @@ export default class Transport<Descriptor> {
    * events can come over times, for instance if you plug a USB device after listen() or a bluetooth device become discoverable
    * @param cb is a function called each time a descriptor is found
    * @return a Subscription object on which you can `.unsubscribe()` to stop discovering descriptors.
+   * @example
+const sub = TransportFoo.discover(async descriptor => {
+  sub.unsubscribe();
+  const transport = await TransportFoo.open(descriptor);
+  ...
+})
    */
   static discover: (cb: (descriptor: Descriptor) => void) => Subscription;
 
@@ -33,6 +41,8 @@ export default class Transport<Descriptor> {
    * @param descriptor: the descriptor to open the transport with.
    * @param timeout: an optional timeout
    * @return a Promise of Transport instance
+   * @example
+TransportFoo.open(descriptor).then(transport => ...)
    */
   static open: (
     descriptor: Descriptor,
