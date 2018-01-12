@@ -7,7 +7,7 @@ var app = express();
 
 const PORT = process.env.PORT || 8435;
 
-TransportNodeHid.create(5000, process.env.DEBUG || false).then(comm => {
+TransportNodeHid.create(5000, process.env.DEBUG || false).then(transport => {
   app.use(cors());
 
   let pending = false;
@@ -21,7 +21,7 @@ TransportNodeHid.create(5000, process.env.DEBUG || false).then(comm => {
     }
     pending = true;
     try {
-      data = await comm.exchange(req.body.apduHex, req.body.statusList);
+      data = await transport.exchange(req.body.apduHex, req.body.statusList);
     } catch (e) {
       error = e.toString();
     }

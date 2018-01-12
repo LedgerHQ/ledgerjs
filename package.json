@@ -2,24 +2,26 @@
   "private": true,
   "name": "ledger-libs",
   "version": "0.0.0",
-  "workspaces": [
-    "packages/*"
-  ],
+  "workspaces": ["packages/*"],
   "scripts": {
-    "postinstall": "flow-mono create-symlinks packages/comm/.flowconfig && flow-mono install-types --overwrite --ignoreDeps=peer",
+    "postinstall":
+      "flow-mono create-symlinks packages/hw-transport/.flowconfig && flow-mono install-types --overwrite --ignoreDeps=peer",
     "test": "echo 'There are no headless tests yet.'",
     "test-node": "cd packages/test && yarn run test-node",
     "test-browser": "cd packages/test && yarn run test-browser",
-    "documentation": "documentation build packages/*/src/** -f md -o API.md --config documentation.yml",
+    "documentation":
+      "documentation build packages/*/src/** -f md -o API.md --config documentation.yml",
     "prettier": "prettier --write 'packages/*/src/**/*.js'",
     "prettier-diff": "prettier --list-different 'packages/*/src/**/*.js'",
     "lint": "eslint packages/**/src",
     "flow": "lerna run flow",
     "build": "lerna run build && yarn run documentation",
     "watch": "lerna run --parallel watch",
-    "clean": "rm -rf node_modules packages/*/node_modules/ packages/*/flow-typed/ packages/*/lib flow-typed",
+    "clean":
+      "rm -rf node_modules packages/*/node_modules/ packages/*/flow-typed/ packages/*/lib flow-typed",
     "rebuild": "lerna run clean && lerna run build",
-    "publish": "yarn && lerna run clean && lerna run build && lerna publish --registry=https://registry.npmjs.org/"
+    "publish":
+      "yarn && lerna run clean && lerna run build && lerna publish --registry=https://registry.npmjs.org/"
   },
   "dependencies": {
     "babel-cli": "^6.26.0",

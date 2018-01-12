@@ -67,7 +67,7 @@ TransportFoo.open(descriptor).then(transport => ...)
 
   /**
    * close the exchange with the device.
-   * @return a Promise that ends when the comm is closed.
+   * @return a Promise that ends when the transport is closed.
    */
   +close: () => Promise<void>;
 

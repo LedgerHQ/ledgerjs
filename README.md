@@ -10,25 +10,27 @@ applications. There are implementations for Node and Browser.
 
 ### Published Packages
 
-| Package                                                              | Version                                                                                                                              | Description                                                                                         |
-| -------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| [`@ledgerhq/hw-app-eth`](/packages/hw-app-eth)                       | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-eth.svg)](https://www.npmjs.com/package/@ledgerhq/hw-app-eth)                      | Ethereum Application API                                                                            |
-| [`@ledgerhq/hw-app-btc`](/packages/hw-app-btc)                       | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-btc.svg)](https://www.npmjs.com/package/@ledgerhq/hw-app-btc)                      | Bitcoin Application API                                                                             |
-| [`@ledgerhq/hw-transport-node-hid`](/packages/hw-transport-node-hid) | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-comm-node-hid.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-node-hid) | Node implementation of the communication layer, using `node-hid` (USB)                              |
-| [`@ledgerhq/hw-transport-u2f`](/packages/hw-transport-u2f)           | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-comm-u2f.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-u2f)           | Web implementation of the communication layer, using [U2F api](https://github.com/grantila/u2f-api) |
-| [`@ledgerhq/hw-transport`](/packages/hw-transport)                   | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-comm.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport)                   | The generic interface of the communication layer                                                    |
+| Package                                                              | Version                                                                                                                                   | Description                                                                                         |
+| -------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| [`@ledgerhq/hw-app-eth`](/packages/hw-app-eth)                       | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-eth.svg)](https://www.npmjs.com/package/@ledgerhq/hw-app-eth)                           | Ethereum Application API                                                                            |
+| [`@ledgerhq/hw-app-btc`](/packages/hw-app-btc)                       | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-btc.svg)](https://www.npmjs.com/package/@ledgerhq/hw-app-btc)                           | Bitcoin Application API                                                                             |
+| [`@ledgerhq/hw-transport-node-hid`](/packages/hw-transport-node-hid) | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-node-hid.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-node-hid) | Node implementation of the communication layer, using `node-hid` (USB)                              |
+| [`@ledgerhq/hw-transport-u2f`](/packages/hw-transport-u2f)           | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-u2f.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-u2f)           | Web implementation of the communication layer, using [U2F api](https://github.com/grantila/u2f-api) |
+| [`@ledgerhq/hw-transport`](/packages/hw-transport)                   | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport)                   | The generic interface of the communication layer                                                    |
 
 ## Examples
 
 **Basic example:**
 
 ```js
-import Comm from "@ledgerhq/hw-transport-node-hid";
-// import Comm from "@ledgerhq/hw-comm-u2f"; // for browser
-import Btc from "@ledgerhq/hw-app-btc";
+import Transport from "@ledgerhq/hw-transport-node-hid";
+// import Transport from "@ledgerhq/hw-comm-u2f"; // for browser
+import AppBtc from "@ledgerhq/hw-app-btc";
 const getBtcAddress = async () => {
-  const comm = await Comm.create();
-  const btc = new Btc(comm);
+  const devices = await Transport.list();
+  if (devices.length === 0) throw "no device";
+  const transport = await Transport.open(devices[0]);
+  const btc = new AppBtc(transport);
   const result = await btc.getWalletPublicKey("44'/0'/0'/0");
   return result.bitcoinAddress;
 };

@@ -39,9 +39,9 @@ export default (Transport, timeout = 5000) =>
     if (step.name) {
       console.info("Running test " + step.name);
     }
-    const comm = await Transport.create(timeout, true);
+    const transport = await Transport.create(timeout, true);
     try {
-      const result = await step.run(comm);
+      const result = await step.run(transport);
       if (result) {
         console.log(result);
       }
@@ -49,6 +49,6 @@ export default (Transport, timeout = 5000) =>
       console.error("Failed test " + step.name + ":", err);
       throw err;
     } finally {
-      comm.close();
+      transport.close();
     }
   }, Promise.resolve());

@@ -298,7 +298,7 @@ close the exchange with the device.
 
 Type: function (): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;void>
 
-Returns **any** a Promise that ends when the comm is closed.
+Returns **any** a Promise that ends when the transport is closed.
 
 ### on
 
@@ -345,9 +345,15 @@ Returns **any** a Promise of response buffer
 
 ### list
 
-List once all available descriptors. For a better granularity, checkout `scan()`.
+List once all available descriptors. For a better granularity, checkout `discover()`.
 
 Type: function (): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;Descriptor>>
+
+**Examples**
+
+```javascript
+TransportFoo.list().then(descriptors => ...)
+```
 
 Returns **any** a promise of descriptors
 
@@ -363,6 +369,16 @@ Type: function (cb: function (descriptor: Descriptor): void): Subscription
 
 -   `cb`  is a function called each time a descriptor is found
 
+**Examples**
+
+```javascript
+const sub = TransportFoo.discover(async descriptor => {
+sub.unsubscribe();
+const transport = await TransportFoo.open(descriptor);
+...
+})
+```
+
 Returns **any** a Subscription object on which you can `.unsubscribe()` to stop discovering descriptors.
 
 ### open
@@ -375,6 +391,12 @@ Type: function (descriptor: Descriptor, timeout: [number](https://developer.mozi
 
 -   `descriptor`  : the descriptor to open the transport with.
 -   `timeout`  : an optional timeout
+
+**Examples**
+
+```javascript
+TransportFoo.open(descriptor).then(transport => ...)
+```
 
 Returns **any** a Promise of Transport instance
 
