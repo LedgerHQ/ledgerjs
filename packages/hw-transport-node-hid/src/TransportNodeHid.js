@@ -1,23 +1,7 @@
-/********************************************************************************
- *   Ledger Node JS API
- *   (c) 2016-2017 Ledger
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- ********************************************************************************/
 //@flow
 
 import HID from "node-hid";
-import Comm from "@ledgerhq/hw-transport";
+import Transport from "@ledgerhq/hw-transport";
 
 import getDevices from "./getDevices";
 
@@ -38,13 +22,13 @@ function defer<T>(): Defer<T> {
 }
 
 /**
- * node-hid Comm implementation
+ * node-hid Transport implementation
  * @example
- * import CommNodeHid from "@ledgerhq/hw-transport-node-u2f";
+ * import TransportNodeHid from "@ledgerhq/hw-transport-node-u2f";
  * ...
- * CommNodeHid.create().then(comm => ...)
+ * TransportNodeHid.create().then(transport => ...)
  */
-export default class CommNodeHid extends Comm {
+export default class TransportNodeHid extends Transport<string> {
   device: HID.HID;
   ledgerTransport: boolean;
   timeout: number;
@@ -52,26 +36,20 @@ export default class CommNodeHid extends Comm {
   exchangeStack: Array<*>;
 
   constructor(
-    device: string | HID.HID,
-    ledgerTransport: boolean,
+    device: HID.HID,
+    ledgerTransport: boolean = true,
     timeout: number = 0,
     debug: boolean = false
   ) {
     super();
-
-    if (typeof device === "string") {
-      this.device = new HID.HID(device);
-    } else {
-      this.device = device;
-    }
-
+    this.device = device;
     this.ledgerTransport = ledgerTransport;
     this.timeout = timeout;
     this.exchangeStack = [];
     this.debug = debug;
   }
 
-  static list = (): Promise<Array<string>> =>
+  static list = () =>
     Promise.resolve(
       getDevices()
         .filter(
@@ -82,16 +60,36 @@ export default class CommNodeHid extends Comm {
         .map(d => d.path)
     );
 
+  static discover = cb => {
+    let unsubscribed = false;
+    function unsubscribe() {
+      unsubscribed = true;
+    }
+    this.list().then(paths => {
+      for (const path of paths) {
+        if (!unsubscribed) {
+          cb(path);
+        }
+      }
+    });
+    // TODO needs to also discover new plugged connection...
+    return { unsubscribe };
+  };
+
+  static async open(path: string) {
+    return Promise.resolve(new TransportNodeHid(new HID.HID(path)));
+  }
+
   /**
-   * static function to create a new Comm from the first connected Ledger device found in USB
+   * static function to create a new Transport from the first connected Ledger device found in USB
 
    */
-  static create(timeout?: number, debug?: boolean): Promise<CommNodeHid> {
-    return CommNodeHid.list().then(result => {
+  static create(timeout?: number, debug?: boolean): Promise<TransportNodeHid> {
+    return TransportNodeHid.list().then(result => {
       if (result.length === 0) {
         throw "No device found";
       }
-      return new CommNodeHid(new HID.HID(result[0]), true, timeout, debug);
+      return new TransportNodeHid(new HID.HID(result[0]), true, timeout, debug);
     });
   }
 

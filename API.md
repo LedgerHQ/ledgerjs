@@ -15,16 +15,23 @@
     -   [signTransaction](#signtransaction-1)
     -   [getAppConfiguration](#getappconfiguration)
     -   [signPersonalMessage](#signpersonalmessage)
--   [Comm](#comm)
+-   [Transport](#transport)
+    -   [on](#on)
+    -   [off](#off)
     -   [exchange](#exchange)
     -   [setScrambleKey](#setscramblekey)
     -   [close](#close)
+    -   [setDebugMode](#setdebugmode)
     -   [send](#send)
+    -   [list](#list)
+    -   [discover](#discover)
+    -   [open](#open)
     -   [create](#create)
--   [CommNodeHid](#commnodehid)
+-   [HttpTransport](#httptransport)
+-   [TransportNodeHid](#transportnodehid)
     -   [create](#create-1)
--   [CommU2F](#commu2f)
-    -   [create](#create-2)
+-   [TransportU2F](#transportu2f)
+    -   [open](#open-1)
 
 ## Btc
 
@@ -32,13 +39,13 @@ Bitcoin API.
 
 **Parameters**
 
--   `comm` **LedgerComm** 
+-   `transport` **[Transport](#transport)&lt;any>** 
 
 **Examples**
 
 ```javascript
 import Btc from "@ledgerhq/hw-app-btc";
-const btc = new Btc(comm)
+const btc = new Btc(transport)
 ```
 
 ### getWalletPublicKey
@@ -182,13 +189,13 @@ Ethereum API
 
 **Parameters**
 
--   `comm` **[Comm](#comm)** 
+-   `transport` **[Transport](#transport)&lt;any>** 
 
 **Examples**
 
 ```javascript
 import Eth from "@ledgerhq/hw-app-eth";
-const eth = new Eth(comm)
+const eth = new Eth(transport)
 ```
 
 ### getAddress
@@ -254,9 +261,26 @@ console.log("Signature 0x" + result['r'] + result['s'] + v);
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{v: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), s: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), r: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** 
 
-## Comm
+## Transport
 
-Comm defines the generic interface to share between node/u2f impl
+Transport defines the generic interface to share between node/u2f impl
+A **Descriptor** is a parametric type that is up to be determined for the implementation.
+it can be for instance an ID, an file path, a URL,...
+
+### on
+
+Listen to an event on an instance of transport.
+Transport implementation can have specific events. Here is the common events:
+
+-   `"disconnect"` : triggered if Transport is disconnected
+
+Type: function (eventName: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), cb: [Function](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function)): void
+
+### off
+
+Stop listening to an event on an instance of transport.
+
+Type: function (eventName: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), cb: [Function](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function)): void
 
 ### exchange
 
@@ -291,6 +315,14 @@ Type: function (): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/R
 
 Returns **any** a Promise that ends when the comm is closed.
 
+### setDebugMode
+
+Enable or not logs of the binary exchange
+
+**Parameters**
+
+-   `debug` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** 
+
 ### send
 
 wrapper on top of exchange to simplify work of the implementation.
@@ -305,56 +337,100 @@ wrapper on top of exchange to simplify work of the implementation.
 
 Returns **any** a Promise of response buffer
 
+### list
+
+List once all available descriptors. For a better granularity, checkout `scan()`.
+
+Type: function (): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;Descriptor>>
+
+Returns **any** a promise of descriptors
+
+### discover
+
+Listen all descriptors that can be opened. This will call cb() with all available descriptors
+and then the new ones that gets discovered in the future until unsubscribe is called.
+events can come over times, for instance if you plug a USB device after listen() or a bluetooth device become discoverable
+
+Type: function (cb: function (descriptor: Descriptor): void): Subscription
+
+**Parameters**
+
+-   `cb`  is a function called each time a descriptor is found
+
+Returns **any** a Subscription object on which you can `.unsubscribe()` to stop discovering descriptors.
+
+### open
+
+attempt to create a Transport instance with potentially a descriptor.
+
+Type: function (descriptor: Descriptor, timeout: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Transport](#transport)&lt;Descriptor>>
+
+**Parameters**
+
+-   `descriptor`  : the descriptor to open the transport with.
+-   `timeout`  : an optional timeout
+
+Returns **any** a Promise of Transport instance
+
 ### create
 
-attempt to create a Comm instance
-
-Type: function (timeout: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), debug: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Comm](#comm)>
-
-**Parameters**
-
--   `timeout`  a maximum time in milliseconds to wait
--   `debug`  enable debug logging mode
-
-Returns **any** a Promise of Comm instance
-
-## CommNodeHid
-
-**Extends Comm**
-
-node-hid Comm implementation
+create() allows to open the first descriptor available or throw if there is none.
+**DEPRECATED**: use `list()` or `discover()` and `open()` instead.
 
 **Parameters**
 
--   `device` **([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | HID.HID)** 
--   `ledgerTransport` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** 
+-   `timeout` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+-   `debug` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)**  (optional, default `false`)
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Transport](#transport)&lt;Descriptor>>** 
+
+## HttpTransport
+
+**Extends Transport**
+
+HTTP transport implementation
+
+**Parameters**
+
+-   `url` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+
+## TransportNodeHid
+
+**Extends Transport**
+
+node-hid Transport implementation
+
+**Parameters**
+
+-   `device` **HID.HID** 
+-   `ledgerTransport` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)**  (optional, default `true`)
 -   `timeout` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)**  (optional, default `0`)
 -   `debug` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)**  (optional, default `false`)
 
 **Examples**
 
 ```javascript
-import CommNodeHid from "@ledgerhq/hw-transport-node-u2f";
+import TransportNodeHid from "@ledgerhq/hw-transport-node-u2f";
 ...
-CommNodeHid.create().then(comm => ...)
+TransportNodeHid.create().then(transport => ...)
 ```
 
 ### create
 
-static function to create a new Comm from the first connected Ledger device found in USB
+static function to create a new Transport from the first connected Ledger device found in USB
 
 **Parameters**
 
 -   `timeout` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 -   `debug` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** 
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[CommNodeHid](#commnodehid)>** 
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[TransportNodeHid](#transportnodehid)>** 
 
-## CommU2F
+## TransportU2F
 
-**Extends Comm**
+**Extends Transport**
 
-U2F web Comm implementation
+U2F web Transport implementation
 
 **Parameters**
 
@@ -363,17 +439,18 @@ U2F web Comm implementation
 **Examples**
 
 ```javascript
-import CommU2F from "@ledgerhq/hw-transport-u2f";
+import TransportU2F from "@ledgerhq/hw-transport-u2f";
 ...
-CommU2F.create().then(comm => ...)
+TransportU2F.create().then(transport => ...)
 ```
 
-### create
+### open
 
-static function to create a new Comm from a connected Ledger device discoverable via U2F (browser support)
+static function to create a new Transport from a connected Ledger device discoverable via U2F (browser support)
 
 **Parameters**
 
+-   `_` **any** 
 -   `timeout` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[CommU2F](#commu2f)>** 
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[TransportU2F](#transportu2f)>** 

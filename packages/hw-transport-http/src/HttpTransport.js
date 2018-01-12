@@ -4,10 +4,10 @@ import Transport from "@ledgerhq/hw-transport";
 /**
  * HTTP transport implementation
  */
-export default class HttpTransport extends Transport {
-  static async create(): Promise<Transport> {
-    throw "HttpProxyTransport.create not available";
-  }
+export default class HttpTransport extends Transport<string> {
+  // this transport is not discoverable
+  static list = (): * => Promise.resolve([]);
+  static discover = () => ({ unsubscribe: () => {} });
 
   url: string;
 

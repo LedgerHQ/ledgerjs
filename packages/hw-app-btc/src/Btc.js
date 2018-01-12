@@ -18,7 +18,7 @@
 
 // FIXME drop:
 import { foreach, doIf, asyncWhile, splitPath, eachSeries } from "./utils";
-import type LedgerComm from "@ledgerhq/hw-transport";
+import type Transport from "@ledgerhq/hw-transport";
 
 const MAX_SCRIPT_BLOCK = 50;
 const DEFAULT_LOCKTIME = 0;
@@ -47,14 +47,14 @@ type Transaction = {
  *
  * @example
  * import Btc from "@ledgerhq/hw-app-btc";
- * const btc = new Btc(comm)
+ * const btc = new Btc(transport)
  */
 export default class Btc {
-  comm: LedgerComm;
+  transport: Transport<*>;
 
-  constructor(comm: LedgerComm) {
-    this.comm = comm;
-    comm.setScrambleKey("BTC");
+  constructor(transport: Transport<*>) {
+    this.transport = transport;
+    transport.setScrambleKey("BTC");
   }
 
   /**
@@ -80,7 +80,7 @@ export default class Btc {
     paths.forEach((element, index) => {
       buffer.writeUInt32BE(element, 6 + 4 * index);
     });
-    return this.comm
+    return this.transport
       .exchange(buffer.toString("hex"), [0x9000])
       .then(responseHex => {
         const response = Buffer.from(responseHex, "hex");
@@ -129,7 +129,7 @@ export default class Btc {
     buffer[3] = 0x00;
     buffer[4] = data.length;
     buffer = Buffer.concat([buffer, data], 5 + data.length);
-    return this.comm
+    return this.transport
       .exchange(buffer.toString("hex"), [0x9000])
       .then(trustedInput => trustedInput.substring(0, trustedInput.length - 4));
   }
@@ -242,7 +242,7 @@ export default class Btc {
       [buffer, transactionData],
       5 + transactionData.length
     );
-    return this.comm.exchange(buffer.toString("hex"), [0x9000]);
+    return this.transport.exchange(buffer.toString("hex"), [0x9000]);
   }
 
   startUntrustedHashTransactionInput(
@@ -332,7 +332,7 @@ export default class Btc {
     paths.forEach((element, index) => {
       buffer.writeUInt32BE(element, 6 + 4 * index);
     });
-    return this.comm.exchange(buffer.toString("hex"), [0x9000]);
+    return this.transport.exchange(buffer.toString("hex"), [0x9000]);
   }
 
   hashOutputFull(outputScript: Buffer): Promise<*> {
@@ -355,9 +355,11 @@ export default class Btc {
           prefix,
           outputScript.slice(offset, offset + blockSize)
         ]);
-        return this.comm.exchange(data.toString("hex"), [0x9000]).then(() => {
-          offset += blockSize;
-        });
+        return this.transport
+          .exchange(data.toString("hex"), [0x9000])
+          .then(() => {
+            offset += blockSize;
+          });
       }
     );
   }
@@ -386,7 +388,7 @@ export default class Btc {
     buffer.writeUInt32LE(lockTime, offset);
     offset += 4;
     buffer[offset++] = sigHashType;
-    return this.comm
+    return this.transport
       .exchange(buffer.toString("hex"), [0x9000])
       .then(signature => {
         const result = Buffer.from(signature, "hex");
@@ -448,7 +450,7 @@ export default class Btc {
       apdus.push(buffer.toString("hex"));
       offset += chunkSize;
     }
-    return foreach(apdus, apdu => this.comm.exchange(apdu, [0x9000])).then(
+    return foreach(apdus, apdu => this.transport.exchange(apdu, [0x9000])).then(
       () => {
         const buffer = Buffer.alloc(6);
         buffer[0] = 0xe0;
@@ -457,7 +459,7 @@ export default class Btc {
         buffer[3] = 0x00;
         buffer[4] = 0x01;
         buffer[5] = 0x00;
-        return this.comm
+        return this.transport
           .exchange(buffer.toString("hex"), [0x9000])
           .then(apduResponse => {
             const response = Buffer.from(apduResponse, "hex");

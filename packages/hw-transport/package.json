@@ -1,14 +1,9 @@
 {
   "name": "@ledgerhq/hw-transport",
   "version": "1.0.8",
-  "description": "Ledger Hardware Wallet common interface of the communication layer",
-  "keywords": [
-    "Ledger",
-    "LedgerWallet",
-    "NanoS",
-    "Blue",
-    "Hardware Wallet"
-  ],
+  "description":
+    "Ledger Hardware Wallet common interface of the communication layer",
+  "keywords": ["Ledger", "LedgerWallet", "NanoS", "Blue", "Hardware Wallet"],
   "repository": {
     "type": "git",
     "url": "https://github.com/LedgerHQ/ledger-node-js-api"
@@ -20,7 +15,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "lib/Comm.js",
+  "main": "lib/Transport.js",
   "license": "Apache-2.0",
   "dependencies": {
     "invariant": "^2.2.0"
@@ -32,7 +27,9 @@
   "scripts": {
     "flow": "flow",
     "clean": "rm -rf lib/",
-    "build": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src && flow-copy-source -v src lib",
-    "watch": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src"
+    "build":
+      "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src && flow-copy-source -v src lib",
+    "watch":
+      "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src"
   }
 }

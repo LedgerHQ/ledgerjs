@@ -18,21 +18,21 @@
 
 // FIXME drop:
 import { splitPath, foreach } from "./utils";
-import type Comm from "@ledgerhq/hw-transport";
+import type Transport from "@ledgerhq/hw-transport";
 
 /**
  * Ethereum API
  *
  * @example
  * import Eth from "@ledgerhq/hw-app-eth";
- * const eth = new Eth(comm)
+ * const eth = new Eth(transport)
  */
 export default class Eth {
-  comm: Comm;
+  transport: Transport<*>;
 
-  constructor(comm: Comm) {
-    this.comm = comm;
-    comm.setScrambleKey("w0w");
+  constructor(transport: Transport<*>) {
+    this.transport = transport;
+    transport.setScrambleKey("w0w");
   }
 
   /**
@@ -64,7 +64,7 @@ export default class Eth {
     paths.forEach((element, index) => {
       buffer.writeUInt32BE(element, 6 + 4 * index);
     });
-    return this.comm
+    return this.transport
       .exchange(buffer.toString("hex"), [0x9000])
       .then(responseHex => {
         let result = {};
@@ -139,7 +139,7 @@ export default class Eth {
       offset += chunkSize;
     }
     return foreach(apdus, apdu =>
-      this.comm.exchange(apdu, [0x9000]).then(apduResponse => {
+      this.transport.exchange(apdu, [0x9000]).then(apduResponse => {
         response = apduResponse;
       })
     ).then(() => {
@@ -163,7 +163,7 @@ export default class Eth {
     buffer[2] = 0x00;
     buffer[3] = 0x00;
     buffer[4] = 0x00;
-    return this.comm
+    return this.transport
       .exchange(buffer.toString("hex"), [0x9000])
       .then(responseHex => {
         let result = {};
@@ -234,7 +234,7 @@ eth.signPersonalMessage("44'/60'/0'/0'/0", Buffer.from("test").toString("hex")).
       offset += chunkSize;
     }
     return foreach(apdus, apdu =>
-      this.comm.exchange(apdu, [0x9000]).then(apduResponse => {
+      this.transport.exchange(apdu, [0x9000]).then(apduResponse => {
         response = apduResponse;
       })
     ).then(() => {

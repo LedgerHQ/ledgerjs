@@ -16,8 +16,8 @@
  ********************************************************************************/
 //@flow
 
-import { sign } from "u2f-api";
-import Comm from "@ledgerhq/hw-transport";
+import { sign, isSupported } from "u2f-api";
+import Transport from "@ledgerhq/hw-transport";
 
 function wrapApdu(apdu: Buffer, key: Buffer) {
   const result = Buffer.alloc(apdu.length);
@@ -59,13 +59,30 @@ function u2fPromise(response, statusList) {
 }
 
 /**
- * U2F web Comm implementation
+ * U2F web Transport implementation
  * @example
- * import CommU2F from "@ledgerhq/hw-transport-u2f";
+ * import TransportU2F from "@ledgerhq/hw-transport-u2f";
  * ...
- * CommU2F.create().then(comm => ...)
+ * TransportU2F.create().then(transport => ...)
  */
-export default class CommU2F extends Comm {
+export default class TransportU2F extends Transport<null> {
+  // this transport is not discoverable but we are going to guess if it is here with isSupported()
+
+  static list = (): * =>
+    isSupported().then(supported => (supported ? [null] : []));
+
+  static discover = cb => {
+    let unsubscribed = false;
+    isSupported().then(supported => {
+      if (!unsubscribed && supported) cb(null);
+    });
+    return {
+      unsubscribe: () => {
+        unsubscribed = true;
+      }
+    };
+  };
+
   timeoutSeconds: number;
   scrambleKey: Buffer;
 
@@ -75,10 +92,10 @@ export default class CommU2F extends Comm {
   }
 
   /**
-   * static function to create a new Comm from a connected Ledger device discoverable via U2F (browser support)
+   * static function to create a new Transport from a connected Ledger device discoverable via U2F (browser support)
    */
-  static create(timeout?: number): Promise<CommU2F> {
-    return Promise.resolve(new CommU2F(timeout));
+  static open(_: *, timeout?: number): Promise<TransportU2F> {
+    return Promise.resolve(new TransportU2F(timeout));
   }
 
   exchange(apduHex: string, statusList: Array<number>): Promise<string> {

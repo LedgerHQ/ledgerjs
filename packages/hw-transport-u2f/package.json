@@ -1,7 +1,8 @@
 {
   "name": "@ledgerhq/hw-transport-u2f",
   "version": "1.0.8",
-  "description": "Ledger Hardware Wallet Web implementation of the communication layer, using U2F api",
+  "description":
+    "Ledger Hardware Wallet Web implementation of the communication layer, using U2F api",
   "keywords": [
     "Ledger",
     "LedgerWallet",
@@ -23,7 +24,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "lib/CommU2F.js",
+  "main": "lib/TransportU2F.js",
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/hw-transport": "^1.0.8",
@@ -36,7 +37,9 @@
   "scripts": {
     "flow": "flow",
     "clean": "rm -rf lib/",
-    "build": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src && flow-copy-source -v src lib",
-    "watch": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src"
+    "build":
+      "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src && flow-copy-source -v src lib",
+    "watch":
+      "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src"
   }
 }
