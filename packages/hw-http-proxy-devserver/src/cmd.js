@@ -30,7 +30,15 @@ TransportNodeHid.create(5000, process.env.DEBUG || false).then(
       }
       pending = false;
       const result = { data, error };
-      console.log(req.body, " => ", result);
+      if (data) console.log("APDU:", req.body.apduHex, "=>", data);
+      else
+        console.log(
+          "APDU failed:",
+          req.body.apduHex,
+          req.body.statusList,
+          "=>",
+          error
+        );
       res.json(result);
     });
 
