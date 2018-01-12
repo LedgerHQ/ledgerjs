@@ -8,7 +8,9 @@ import Transport from "@ledgerhq/hw-transport";
 export default class HttpTransport extends Transport<string> {
   // this transport is not discoverable
   static list = (): * => Promise.resolve([]);
-  static discover = (_cb: *) => ({ unsubscribe: () => {} });
+  static discover = (_observer: *) => ({
+    unsubscribe: () => {}
+  });
 
   static async open(url: string, timeout?: number) {
     const response = await fetch(url, { timeout });

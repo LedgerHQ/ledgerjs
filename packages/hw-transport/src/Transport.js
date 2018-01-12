@@ -3,7 +3,12 @@
 import invariant from "invariant";
 import EventEmitter from "events";
 
-type Subscription = { unsubscribe: () => void };
+export type Subscription = { unsubscribe: () => void };
+export type Observer<T> = {
+  onNext: (descriptor: T) => void,
+  onError: (e: ?Error) => void,
+  onDone: () => void
+};
 
 /**
  * Transport defines the generic interface to share between node/u2f impl
@@ -25,7 +30,7 @@ export default class Transport<Descriptor> {
    * Listen all descriptors that can be opened. This will call cb() with all available descriptors
    * and then the new ones that gets discovered in the future until unsubscribe is called.
    * events can come over times, for instance if you plug a USB device after listen() or a bluetooth device become discoverable
-   * @param cb is a function called each time a descriptor is found
+   * @param observer is an object with a onNext, onError and onDone function (compatible with observer pattern)
    * @return a Subscription object on which you can `.unsubscribe()` to stop discovering descriptors.
    * @example
 const sub = TransportFoo.discover(async descriptor => {
@@ -34,11 +39,7 @@ const sub = TransportFoo.discover(async descriptor => {
   ...
 })
    */
-  static +discover: (
-    onNext: (descriptor: Descriptor) => void,
-    onError?: (e: Error) => void,
-    onDone?: () => void
-  ) => Subscription;
+  static +discover: (observer: Observer<Descriptor>) => Subscription;
 
   /**
    * attempt to create a Transport instance with potentially a descriptor.

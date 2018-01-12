@@ -60,7 +60,7 @@ export default class TransportNodeHid extends Transport<string> {
         .map(d => d.path)
     );
 
-  static discover = cb => {
+  static discover = (observer: *) => {
     let unsubscribed = false;
     function unsubscribe() {
       unsubscribed = true;
@@ -68,7 +68,7 @@ export default class TransportNodeHid extends Transport<string> {
     this.list().then(paths => {
       for (const path of paths) {
         if (!unsubscribed) {
-          cb(path);
+          observer.onNext(path);
         }
       }
     });
