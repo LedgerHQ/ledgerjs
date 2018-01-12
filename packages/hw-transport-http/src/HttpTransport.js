@@ -4,10 +4,21 @@ import Transport from "@ledgerhq/hw-transport";
 /**
  * HTTP transport implementation
  */
+// NOTE in the future we might want to do WebSocket, because we could have the disconnect lifecycle hooked.
 export default class HttpTransport extends Transport<string> {
   // this transport is not discoverable
   static list = (): * => Promise.resolve([]);
   static discover = () => ({ unsubscribe: () => {} });
+
+  static async open(url: string, timeout?: number) {
+    const response = await fetch(url, { timeout });
+    if (response.status !== 200) {
+      throw new Error(
+        "failed to access HttpTransport(" + url + "): status " + response.status
+      );
+    }
+    return new HttpTransport(url);
+  }
 
   url: string;
 
