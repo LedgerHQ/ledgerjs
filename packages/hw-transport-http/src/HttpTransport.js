@@ -28,6 +28,10 @@ export default class HttpTransport extends Transport<string> {
   async exchange(apduHex: string, statusList: Array<number>): Promise<string> {
     const response = await fetch(this.url, {
       method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json"
+      },
       body: JSON.stringify({ apduHex, statusList })
     });
     if (response.status !== 200) {
