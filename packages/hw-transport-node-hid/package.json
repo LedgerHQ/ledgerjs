@@ -1,8 +1,7 @@
 {
   "name": "@ledgerhq/hw-transport-node-hid",
-  "version": "1.0.8",
-  "description":
-    "Ledger Hardware Wallet Node implementation of the communication layer, using node-hid",
+  "version": "1.1.0",
+  "description": "Ledger Hardware Wallet Node implementation of the communication layer, using node-hid",
   "keywords": [
     "Ledger",
     "LedgerWallet",
@@ -26,7 +25,7 @@
   "main": "lib/TransportNodeHid.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^1.0.8",
+    "@ledgerhq/hw-transport": "^1.1.0",
     "node-hid": "^0.7.2"
   },
   "devDependencies": {
@@ -36,9 +35,7 @@
   "scripts": {
     "flow": "flow",
     "clean": "rm -rf lib/",
-    "build":
-      "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src && flow-copy-source -v src lib",
-    "watch":
-      "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src & flow-copy-source -w -v src lib"
+    "build": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src && flow-copy-source -v src lib",
+    "watch": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src & flow-copy-source -w -v src lib"
   }
 }

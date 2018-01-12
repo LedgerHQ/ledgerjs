@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-transport-http",
-  "version": "1.0.5",
+  "version": "1.1.0",
   "description": "Ledger Hardware Wallet communication layer over http",
   "keywords": [
     "Ledger",
@@ -25,7 +25,7 @@
   "main": "lib/HttpTransport.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^1.0.5"
+    "@ledgerhq/hw-transport": "^1.1.0"
   },
   "devDependencies": {
     "flow-bin": "^0.63.1",
@@ -34,9 +34,7 @@
   "scripts": {
     "flow": "flow",
     "clean": "rm -rf lib/",
-    "build":
-      "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src && flow-copy-source -v src lib",
-    "watch":
-      "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src & flow-copy-source -w -v src lib"
+    "build": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src && flow-copy-source -v src lib",
+    "watch": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src & flow-copy-source -w -v src lib"
   }
 }
