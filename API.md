@@ -367,7 +367,7 @@ Type: function (observer: Observer&lt;Descriptor>): Subscription
 
 **Parameters**
 
--   `observer`  is an object with a onNext, onError and onDone function (compatible with observer pattern)
+-   `observer`  is an object with a next, error and complete function (compatible with observer pattern)
 
 **Examples**
 
