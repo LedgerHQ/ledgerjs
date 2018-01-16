@@ -1,5 +1,7 @@
 //@flow
 import Transport from "@ledgerhq/hw-transport";
+import withStaticURL from "./withStaticURL";
+export { withStaticURL };
 
 /**
  * HTTP transport implementation
