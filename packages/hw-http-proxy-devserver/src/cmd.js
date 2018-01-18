@@ -1,4 +1,3 @@
-import "babel-polyfill";
 import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
 import express from "express";
 import cors from "cors";
