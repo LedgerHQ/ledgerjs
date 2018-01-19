@@ -1,9 +1,14 @@
 {
   "name": "@ledgerhq/react-native-hw-transport-ble",
-  "version": "1.2.0-beta.df091f88",
-  "description":
-    "Ledger Hardware Wallet bluetooth BLE implementation of the transport layer",
-  "keywords": ["Ledger", "LedgerWallet", "NanoS", "Blue", "Hardware Wallet"],
+  "version": "2.0.0",
+  "description": "Ledger Hardware Wallet bluetooth BLE implementation of the transport layer",
+  "keywords": [
+    "Ledger",
+    "LedgerWallet",
+    "NanoS",
+    "Blue",
+    "Hardware Wallet"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/LedgerHQ/ledger-node-js-api"
@@ -21,7 +26,7 @@
     "react-native-ble-plx": "^0.8.0"
   },
   "dependencies": {
-    "@ledgerhq/hw-transport": "^1.1.0",
+    "@ledgerhq/hw-transport": "^2.0.0",
     "invariant": "^2.2.0"
   },
   "devDependencies": {
@@ -31,9 +36,7 @@
   "scripts": {
     "flow": "flow",
     "clean": "rm -rf lib/",
-    "build":
-      "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src && flow-copy-source -v src lib",
-    "watch":
-      "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src & flow-copy-source -w -v src lib"
+    "build": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src && flow-copy-source -v src lib",
+    "watch": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src & flow-copy-source -w -v src lib"
   }
 }
