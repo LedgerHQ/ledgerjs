@@ -29,7 +29,7 @@
   "main": "lib/index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^1.2.0-beta.df091f88"
+    "@ledgerhq/hw-transport": "^1.1.0"
   },
   "devDependencies": {
     "flow-bin": "^0.63.1",
