@@ -33,8 +33,11 @@ TransportNodeHid.create(5000, process.env.DEBUG || false).then(
       }
       pending = false;
       const result = { data, error };
-      if (data) console.log("APDU:", req.body.apduHex, "=>", data);
-      else console.log("APDU failed:", req.body.apduHex, "=>", error);
+      if (data) {
+        console.log("APDU:", req.body.apduHex, "=>", data.toString("hex"));
+      } else {
+        console.log("APDU failed:", req.body.apduHex, "=>", error);
+      }
       res.json(result);
     });
 
