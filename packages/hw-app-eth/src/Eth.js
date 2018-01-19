@@ -54,21 +54,21 @@ export default class Eth {
     chainCode?: string
   }> {
     let paths = splitPath(path);
-    let buffer = new Buffer(5 + 1 + paths.length * 4);
-    buffer[0] = 0xe0;
-    buffer[1] = 0x02;
-    buffer[2] = boolDisplay ? 0x01 : 0x00;
-    buffer[3] = boolChaincode ? 0x01 : 0x00;
-    buffer[4] = 1 + paths.length * 4;
-    buffer[5] = paths.length;
+    let buffer = new Buffer(1 + paths.length * 4);
+    buffer[0] = paths.length;
     paths.forEach((element, index) => {
-      buffer.writeUInt32BE(element, 6 + 4 * index);
+      buffer.writeUInt32BE(element, 1 + 4 * index);
     });
     return this.transport
-      .exchange(buffer.toString("hex"), [0x9000])
-      .then(responseHex => {
+      .send(
+        0xe0,
+        0x02,
+        boolDisplay ? 0x01 : 0x00,
+        boolChaincode ? 0x01 : 0x00,
+        buffer
+      )
+      .then(response => {
         let result = {};
-        let response = new Buffer(responseHex, "hex");
         let publicKeyLength = response[0];
         let addressLength = response[1 + publicKeyLength];
         result.publicKey = response
@@ -110,7 +110,7 @@ export default class Eth {
     let paths = splitPath(path);
     let offset = 0;
     let rawTx = new Buffer(rawTxHex, "hex");
-    let apdus = [];
+    let toSend = [];
     let response = [];
     while (offset !== rawTx.length) {
       let maxChunkSize = offset === 0 ? 150 - 1 - paths.length * 4 : 150;
@@ -119,29 +119,26 @@ export default class Eth {
           ? rawTx.length - offset
           : maxChunkSize;
       let buffer = new Buffer(
-        offset === 0 ? 5 + 1 + paths.length * 4 + chunkSize : 5 + chunkSize
+        offset === 0 ? 1 + paths.length * 4 + chunkSize : chunkSize
       );
-      buffer[0] = 0xe0;
-      buffer[1] = 0x04;
-      buffer[2] = offset === 0 ? 0x00 : 0x80;
-      buffer[3] = 0x00;
-      buffer[4] = offset === 0 ? 1 + paths.length * 4 + chunkSize : chunkSize;
       if (offset === 0) {
-        buffer[5] = paths.length;
+        buffer[0] = paths.length;
         paths.forEach((element, index) => {
-          buffer.writeUInt32BE(element, 6 + 4 * index);
+          buffer.writeUInt32BE(element, 1 + 4 * index);
         });
-        rawTx.copy(buffer, 6 + 4 * paths.length, offset, offset + chunkSize);
+        rawTx.copy(buffer, 1 + 4 * paths.length, offset, offset + chunkSize);
       } else {
-        rawTx.copy(buffer, 5, offset, offset + chunkSize);
+        rawTx.copy(buffer, 0, offset, offset + chunkSize);
       }
-      apdus.push(buffer.toString("hex"));
+      toSend.push(buffer);
       offset += chunkSize;
     }
-    return foreach(apdus, apdu =>
-      this.transport.exchange(apdu, [0x9000]).then(apduResponse => {
-        response = apduResponse;
-      })
+    return foreach(toSend, (data, i) =>
+      this.transport
+        .send(0xe0, 0x04, i === 0 ? 0x00 : 0x80, 0x00, data)
+        .then(apduResponse => {
+          response = apduResponse;
+        })
     ).then(() => {
       response = new Buffer(response, "hex");
       const v = response.slice(0, 1).toString("hex");
@@ -157,22 +154,12 @@ export default class Eth {
     arbitraryDataEnabled: number,
     version: string
   }> {
-    let buffer = new Buffer(5);
-    buffer[0] = 0xe0;
-    buffer[1] = 0x06;
-    buffer[2] = 0x00;
-    buffer[3] = 0x00;
-    buffer[4] = 0x00;
-    return this.transport
-      .exchange(buffer.toString("hex"), [0x9000])
-      .then(responseHex => {
-        let result = {};
-        let response = Buffer.from(responseHex, "hex");
-        result.arbitraryDataEnabled = response[0] & 0x01;
-        result.version =
-          "" + response[1] + "." + response[2] + "." + response[3];
-        return result;
-      });
+    return this.transport.send(0xe0, 0x06, 0x00, 0x00).then(response => {
+      let result = {};
+      result.arbitraryDataEnabled = response[0] & 0x01;
+      result.version = "" + response[1] + "." + response[2] + "." + response[3];
+      return result;
+    });
   }
 
   /**

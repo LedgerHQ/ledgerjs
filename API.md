@@ -270,7 +270,8 @@ it can be for instance an ID, an file path, a URL,...
 ### exchange
 
 low level api to communicate with the device
-TODO: in the future we'll refactor this to be Buffer=>Buffer instead
+This method is for implementations to implement but should not be directly called.
+Instead, the recommanded way is to use send() method
 
 Type: function (apduHex: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), statusList: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>
 
@@ -340,6 +341,7 @@ wrapper on top of exchange to simplify work of the implementation.
 -   `p1`  
 -   `p2`  
 -   `data`  
+-   `statusList`  is a list of accepted status code (shorts). [0x9000] by default
 
 Returns **any** a Promise of response buffer
 

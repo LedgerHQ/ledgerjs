@@ -1,22 +1,9 @@
-/********************************************************************************
- *   Ledger Node JS API
- *   (c) 2016-2017 Ledger
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- ********************************************************************************/
 //@flow
 
-// FIXME drop:
+// TODO future refactoring
+// - drop utils.js & refactoring with async/await style
+// - try to avoid every place we do hex<>Buffer conversion. also accept Buffer as func parameters (could accept both a string or a Buffer in the API)
+// - there are redundant code across apps (see Eth vs Btc). we might want to factorize it somewhere. also each app apdu call should be abstracted it out as an api
 import { foreach, doIf, asyncWhile, splitPath, eachSeries } from "./utils";
 import type Transport from "@ledgerhq/hw-transport";
 
@@ -70,20 +57,14 @@ export default class Btc {
     chainCode: string
   }> {
     const paths = splitPath(path);
-    const buffer = Buffer.alloc(5 + 1 + paths.length * 4);
-    buffer[0] = 0xe0;
-    buffer[1] = 0x40;
-    buffer[2] = 0x00;
-    buffer[3] = 0x00;
-    buffer[4] = 1 + paths.length * 4;
-    buffer[5] = paths.length;
+    const buffer = Buffer.alloc(1 + paths.length * 4);
+    buffer[0] = paths.length;
     paths.forEach((element, index) => {
-      buffer.writeUInt32BE(element, 6 + 4 * index);
+      buffer.writeUInt32BE(element, 1 + 4 * index);
     });
     return this.transport
-      .exchange(buffer.toString("hex"), [0x9000])
-      .then(responseHex => {
-        const response = Buffer.from(responseHex, "hex");
+      .send(0xe0, 0x40, 0x00, 0x00, buffer)
+      .then(response => {
         const publicKeyLength = response[0];
         const addressLength = response[1 + publicKeyLength];
         const publicKey = response
@@ -122,16 +103,11 @@ export default class Btc {
     } else {
       data = transactionData;
     }
-    let buffer = Buffer.alloc(5);
-    buffer[0] = 0xe0;
-    buffer[1] = 0x42;
-    buffer[2] = firstRound ? 0x00 : 0x80;
-    buffer[3] = 0x00;
-    buffer[4] = data.length;
-    buffer = Buffer.concat([buffer, data], 5 + data.length);
     return this.transport
-      .exchange(buffer.toString("hex"), [0x9000])
-      .then(trustedInput => trustedInput.substring(0, trustedInput.length - 4));
+      .send(0xe0, 0x42, firstRound ? 0x00 : 0x80, 0x00, data)
+      .then(trustedInput =>
+        trustedInput.slice(0, trustedInput.length - 2).toString("hex")
+      );
   }
 
   getTrustedInput(
@@ -232,17 +208,13 @@ export default class Btc {
     firstRound: boolean,
     transactionData: Buffer
   ) {
-    let buffer = Buffer.alloc(5);
-    buffer[0] = 0xe0;
-    buffer[1] = 0x44;
-    buffer[2] = firstRound ? 0x00 : 0x80;
-    buffer[3] = newTransaction ? 0x00 : 0x80;
-    buffer[4] = transactionData.length;
-    buffer = Buffer.concat(
-      [buffer, transactionData],
-      5 + transactionData.length
+    return this.transport.send(
+      0xe0,
+      0x44,
+      firstRound ? 0x00 : 0x80,
+      newTransaction ? 0x00 : 0x80,
+      transactionData
     );
-    return this.transport.exchange(buffer.toString("hex"), [0x9000]);
   }
 
   startUntrustedHashTransactionInput(
@@ -322,17 +294,12 @@ export default class Btc {
 
   provideOutputFullChangePath(path: string): Promise<string> {
     let paths = splitPath(path);
-    let buffer = Buffer.alloc(5 + 1 + paths.length * 4);
-    buffer[0] = 0xe0;
-    buffer[1] = 0x4a;
-    buffer[2] = 0xff;
-    buffer[3] = 0x00;
-    buffer[4] = 1 + paths.length * 4;
-    buffer[5] = paths.length;
+    let buffer = Buffer.alloc(1 + paths.length * 4);
+    buffer[0] = paths.length;
     paths.forEach((element, index) => {
-      buffer.writeUInt32BE(element, 6 + 4 * index);
+      buffer.writeUInt32BE(element, 1 + 4 * index);
     });
-    return this.transport.exchange(buffer.toString("hex"), [0x9000]);
+    return this.transport.send(0xe0, 0x4a, 0xff, 0x00, buffer);
   }
 
   hashOutputFull(outputScript: Buffer): Promise<*> {
@@ -345,21 +312,10 @@ export default class Btc {
             ? outputScript.length - offset
             : MAX_SCRIPT_BLOCK;
         let p1 = offset + blockSize === outputScript.length ? 0x80 : 0x00;
-        let prefix = Buffer.alloc(5);
-        prefix[0] = 0xe0;
-        prefix[1] = 0x4a;
-        prefix[2] = p1;
-        prefix[3] = 0x00;
-        prefix[4] = blockSize;
-        let data = Buffer.concat([
-          prefix,
-          outputScript.slice(offset, offset + blockSize)
-        ]);
-        return this.transport
-          .exchange(data.toString("hex"), [0x9000])
-          .then(() => {
-            offset += blockSize;
-          });
+        let data = outputScript.slice(offset, offset + blockSize);
+        return this.transport.send(0xe0, 0x4a, p1, 0x00, data).then(() => {
+          offset += blockSize;
+        });
       }
     );
   }
@@ -372,13 +328,8 @@ export default class Btc {
     sigHashType?: number = SIGHASH_ALL
   ): Promise<Buffer> {
     const paths = splitPath(path);
-    const buffer = Buffer.alloc(5 + 1 + paths.length * 4 + 1 + 4 + 1);
+    const buffer = Buffer.alloc(1 + paths.length * 4 + 1 + 4 + 1); // TODO shouldn't have to calc that, just use buffer concat all the way down
     let offset = 0;
-    buffer[offset++] = 0xe0;
-    buffer[offset++] = 0x48;
-    buffer[offset++] = 0x00;
-    buffer[offset++] = 0x00;
-    buffer[offset++] = 1 + paths.length * 4 + 1 + 4 + 1;
     buffer[offset++] = paths.length;
     paths.forEach(element => {
       buffer.writeUInt32BE(element, offset);
@@ -388,13 +339,10 @@ export default class Btc {
     buffer.writeUInt32LE(lockTime, offset);
     offset += 4;
     buffer[offset++] = sigHashType;
-    return this.transport
-      .exchange(buffer.toString("hex"), [0x9000])
-      .then(signature => {
-        const result = Buffer.from(signature, "hex");
-        result[0] = 0x30;
-        return result.slice(0, result.length - 2);
-      });
+    return this.transport.send(0xe0, 0x48, 0x00, 0x00, buffer).then(result => {
+      result[0] = 0x30;
+      return result.slice(0, result.length - 2);
+    });
   }
 
   /**
@@ -413,7 +361,7 @@ export default class Btc {
     const paths = splitPath(path);
     const message = new Buffer(messageHex, "hex");
     let offset = 0;
-    const apdus = [];
+    const toSend = [];
     while (offset !== message.length) {
       let maxChunkSize =
         offset === 0
@@ -424,61 +372,47 @@ export default class Btc {
           ? message.length - offset
           : maxChunkSize;
       const buffer = new Buffer(
-        offset === 0 ? 5 + 1 + paths.length * 4 + 2 + chunkSize : 5 + chunkSize
+        offset === 0 ? 1 + paths.length * 4 + 2 + chunkSize : chunkSize
       );
-      buffer[0] = 0xe0;
-      buffer[1] = 0x4e;
-      buffer[2] = 0x00;
-      buffer[3] = offset === 0 ? 0x01 : 0x80;
-      buffer[4] =
-        offset === 0 ? 1 + paths.length * 4 + 2 + chunkSize : chunkSize;
       if (offset === 0) {
-        buffer[5] = paths.length;
+        buffer[0] = paths.length;
         paths.forEach((element, index) => {
-          buffer.writeUInt32BE(element, 6 + 4 * index);
+          buffer.writeUInt32BE(element, 1 + 4 * index);
         });
-        buffer.writeUInt16BE(message.length, 6 + 4 * paths.length);
+        buffer.writeUInt16BE(message.length, 1 + 4 * paths.length);
         message.copy(
           buffer,
-          6 + 4 * paths.length + 2,
+          1 + 4 * paths.length + 2,
           offset,
           offset + chunkSize
         );
       } else {
-        message.copy(buffer, 5, offset, offset + chunkSize);
+        message.copy(buffer, 0, offset, offset + chunkSize);
       }
-      apdus.push(buffer.toString("hex"));
+      toSend.push(buffer);
       offset += chunkSize;
     }
-    return foreach(apdus, apdu => this.transport.exchange(apdu, [0x9000])).then(
-      () => {
-        const buffer = Buffer.alloc(6);
-        buffer[0] = 0xe0;
-        buffer[1] = 0x4e;
-        buffer[2] = 0x80;
-        buffer[3] = 0x00;
-        buffer[4] = 0x01;
-        buffer[5] = 0x00;
-        return this.transport
-          .exchange(buffer.toString("hex"), [0x9000])
-          .then(apduResponse => {
-            const response = Buffer.from(apduResponse, "hex");
-            const v = response[0] - 0x30;
-            let r = response.slice(4, 4 + response[3]);
-            if (r[0] === 0) {
-              r = r.slice(1);
-            }
-            r = r.toString("hex");
-            let offset = 4 + response[3] + 2;
-            let s = response.slice(offset, offset + response[offset - 1]);
-            if (s[0] === 0) {
-              s = s.slice(1);
-            }
-            s = s.toString("hex");
-            return { v, r, s };
-          });
-      }
-    );
+    return foreach(toSend, (data, i) =>
+      this.transport.send(0xe0, 0x4e, 0x00, i === 0 ? 0x01 : 0x80, data)
+    ).then(() => {
+      return this.transport
+        .send(0xe0, 0x4e, 0x80, 0x00, Buffer.from([0x00]))
+        .then(response => {
+          const v = response[0] - 0x30;
+          let r = response.slice(4, 4 + response[3]);
+          if (r[0] === 0) {
+            r = r.slice(1);
+          }
+          r = r.toString("hex");
+          let offset = 4 + response[3] + 2;
+          let s = response.slice(offset, offset + response[offset - 1]);
+          if (s[0] === 0) {
+            s = s.slice(1);
+          }
+          s = s.toString("hex");
+          return { v, r, s };
+        });
+    });
   }
 
   /**

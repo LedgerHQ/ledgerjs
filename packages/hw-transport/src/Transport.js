@@ -56,7 +56,8 @@ TransportFoo.open(descriptor).then(transport => ...)
 
   /**
    * low level api to communicate with the device
-   * TODO: in the future we'll refactor this to be Buffer=>Buffer instead
+   * This method is for implementations to implement but should not be directly called.
+   * Instead, the recommanded way is to use send() method
    * @param apduHex hex string of the data to send
    * @param statusList an array of accepted status code to be considered successful
    * @return a Promise of hex string response data
@@ -112,6 +113,7 @@ TransportFoo.open(descriptor).then(transport => ...)
    * @param p1
    * @param p2
    * @param data
+   * @param statusList is a list of accepted status code (shorts). [0x9000] by default
    * @return a Promise of response buffer
    */
   send = async (
@@ -119,24 +121,23 @@ TransportFoo.open(descriptor).then(transport => ...)
     ins: number,
     p1: number,
     p2: number,
-    data: Buffer = Buffer.alloc(0)
+    data: Buffer = Buffer.alloc(0),
+    statusList: Array<number> = [0x9000]
   ): Promise<Buffer> => {
     invariant(
       data.length < 256,
       "data.length exceed 256 bytes limit. Got: %s",
       data.length
     );
-    return Buffer.from(
-      await this.exchange(
-        Buffer.concat([
-          Buffer.from([cla, ins, p1, p2]),
-          Buffer.from([data.length]),
-          data
-        ]).toString("hex"),
-        [0x9000]
-      ),
-      "hex"
+    const response = await this.exchange(
+      Buffer.concat([
+        Buffer.from([cla, ins, p1, p2]),
+        Buffer.from([data.length]),
+        data
+      ]).toString("hex"),
+      statusList
     );
+    return Buffer.from(response, "hex");
   };
 
   /**
