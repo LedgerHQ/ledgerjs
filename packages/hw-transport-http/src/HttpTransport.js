@@ -40,14 +40,14 @@ export default class HttpTransport extends Transport<string> {
     this.url = url;
   }
 
-  async exchange(apduHex: string, statusList: Array<number>): Promise<string> {
+  async exchange(apdu: Buffer): Promise<Buffer> {
     const response = await fetch(this.url, {
       method: "POST",
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ apduHex, statusList })
+      body: apdu.toString("hex")
     });
     if (response.status !== 200) {
       throw "failed to communicate to server. code=" + response.status;

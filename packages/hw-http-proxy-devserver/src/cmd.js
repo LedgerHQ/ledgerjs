@@ -17,7 +17,7 @@ TransportNodeHid.create(5000, process.env.DEBUG || false).then(
 
     let pending = false;
     app.post("/", bodyParser.json(), async (req, res) => {
-      if (!req.body) return res.sendStatus(400);
+      if (typeof req.body !== "string") return res.sendStatus(400);
       let data = null,
         error = null;
       if (pending) {
@@ -27,21 +27,14 @@ TransportNodeHid.create(5000, process.env.DEBUG || false).then(
       }
       pending = true;
       try {
-        data = await transport.exchange(req.body.apduHex, req.body.statusList);
+        data = await transport.exchange(Buffer.from(req.body, "hex"));
       } catch (e) {
         error = e.toString();
       }
       pending = false;
       const result = { data, error };
       if (data) console.log("APDU:", req.body.apduHex, "=>", data);
-      else
-        console.log(
-          "APDU failed:",
-          req.body.apduHex,
-          req.body.statusList,
-          "=>",
-          error
-        );
+      else console.log("APDU failed:", req.body, "=>", error);
       res.json(result);
     });
 

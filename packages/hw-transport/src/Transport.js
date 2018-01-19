@@ -58,11 +58,10 @@ TransportFoo.open(descriptor).then(transport => ...)
    * low level api to communicate with the device
    * This method is for implementations to implement but should not be directly called.
    * Instead, the recommanded way is to use send() method
-   * @param apduHex hex string of the data to send
-   * @param statusList an array of accepted status code to be considered successful
-   * @return a Promise of hex string response data
+   * @param apdu the data to send
+   * @return a Promise of response data
    */
-  +exchange: (apduHex: string, statusList: Array<number>) => Promise<string>;
+  +exchange: (apdu: Buffer) => Promise<Buffer>;
 
   /**
    * set the "scramble key" for the next exchanges with the device.
@@ -134,10 +133,15 @@ TransportFoo.open(descriptor).then(transport => ...)
         Buffer.from([cla, ins, p1, p2]),
         Buffer.from([data.length]),
         data
-      ]).toString("hex"),
-      statusList
+      ])
     );
-    return Buffer.from(response, "hex");
+    const sw = response.readUInt16BE(response.length - 2);
+    invariant(
+      statusList.some(s => s === sw),
+      "Invalid status %s",
+      sw.toString(16)
+    );
+    return response;
   };
 
   /**
@@ -153,9 +157,7 @@ TransportFoo.open(descriptor).then(transport => ...)
         ".create is deprecated. Please use .list()/.discover() and .open() instead"
     );
     const descriptors = await this.list();
-    if (descriptors.length === 0) {
-      throw "No device found";
-    }
+    invariant(descriptors.length !== 0, "No device found");
     const transport = await this.open(descriptors[0], timeout);
     transport.setDebugMode(debug);
     return transport;

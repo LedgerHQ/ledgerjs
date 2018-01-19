@@ -38,26 +38,6 @@ const webSafe64 = (base64: string) =>
 const normal64 = (base64: string) =>
   base64.replace(/-/g, "+").replace(/_/g, "/") +
   "==".substring(0, (3 * base64.length) % 4);
-
-function u2fPromise(response, statusList) {
-  const { signatureData } = response;
-  return new Promise((resolve, reject) => {
-    if (typeof signatureData === "string") {
-      const data = Buffer.from(normal64(signatureData), "base64");
-      if (typeof statusList !== "undefined") {
-        const sw = data.readUInt16BE(data.length - 2);
-        const statusFound = statusList.some(s => s === sw);
-        if (!statusFound) {
-          reject("Invalid status " + sw.toString(16));
-        }
-      }
-      resolve(data.toString("hex", 5));
-    } else {
-      reject(response);
-    }
-  });
-}
-
 /**
  * U2F web Transport implementation
  * @example
@@ -98,8 +78,7 @@ export default class TransportU2F extends Transport<null> {
     return Promise.resolve(new TransportU2F(timeout));
   }
 
-  exchange(apduHex: string, statusList: Array<number>): Promise<string> {
-    const apdu = Buffer.from(apduHex, "hex");
+  exchange(apdu: Buffer): Promise<Buffer> {
     const keyHandle = wrapApdu(apdu, this.scrambleKey);
     const challenge = Buffer.from(
       "0000000000000000000000000000000000000000000000000000000000000000",
@@ -111,9 +90,15 @@ export default class TransportU2F extends Transport<null> {
       challenge: webSafe64(challenge.toString("base64")),
       appId: location.origin
     };
-    return sign(signRequest, this.timeoutSeconds).then(result =>
-      u2fPromise(result, statusList)
-    );
+    return sign(signRequest, this.timeoutSeconds).then(response => {
+      const { signatureData } = response;
+      if (typeof signatureData === "string") {
+        const data = Buffer.from(normal64(signatureData), "base64");
+        return data.slice(5);
+      } else {
+        throw response;
+      }
+    });
   }
 
   setScrambleKey(scrambleKey: string) {

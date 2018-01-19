@@ -273,14 +273,13 @@ low level api to communicate with the device
 This method is for implementations to implement but should not be directly called.
 Instead, the recommanded way is to use send() method
 
-Type: function (apduHex: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), statusList: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>
+Type: function (apdu: [Buffer](https://nodejs.org/api/buffer.html)): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Buffer](https://nodejs.org/api/buffer.html)>
 
 **Parameters**
 
--   `apduHex`  hex string of the data to send
--   `statusList`  an array of accepted status code to be considered successful
+-   `apdu`  the data to send
 
-Returns **any** a Promise of hex string response data
+Returns **any** a Promise of response data
 
 ### setScrambleKey
 

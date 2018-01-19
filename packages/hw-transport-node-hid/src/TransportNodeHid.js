@@ -93,7 +93,7 @@ export default class TransportNodeHid extends Transport<string> {
     });
   }
 
-  exchange(apduHex: string, statusList: Array<number>): Promise<string> {
+  exchange(apdu: Buffer): Promise<Buffer> {
     function ledgerWrap(channel, command, packetSize) {
       let sequenceIdx = 0;
       let offset = 0;
@@ -197,8 +197,6 @@ export default class TransportNodeHid extends Transport<string> {
       }
       return response;
     }
-
-    const apdu = Buffer.from(apduHex, "hex");
 
     const deferred = defer();
     let exchangeTimeout;
@@ -325,33 +323,21 @@ export default class TransportNodeHid extends Transport<string> {
 
         performExchange()
           .then(result => {
-            let status,
-              response,
+            let response,
               resultBin = result;
             if (!this.ledgerTransport) {
               if (resultBin.length === 2 || resultBin[0] !== 0x61) {
-                status = (resultBin[0] << 8) | resultBin[1];
-                response = resultBin.toString("hex");
+                response = resultBin;
               } else {
                 let size = resultBin[1];
                 // fake T0
                 if (size === 0) {
                   size = 256;
                 }
-
-                response = resultBin.toString("hex", 2);
-                status = (resultBin[2 + size] << 8) | resultBin[2 + size + 1];
+                response = resultBin.slice(2);
               }
             } else {
-              response = resultBin.toString("hex");
-              status =
-                (resultBin[resultBin.length - 2] << 8) |
-                resultBin[resultBin.length - 1];
-            }
-            // Check the status
-            const statusFound = statusList.some(s => s === status);
-            if (!statusFound) {
-              deferred.reject("Invalid status " + status.toString(16));
+              response = resultBin;
             }
             // build the response
             if (this.timeout !== 0) {
