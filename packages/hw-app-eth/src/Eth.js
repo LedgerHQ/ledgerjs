@@ -111,7 +111,7 @@ export default class Eth {
     let offset = 0;
     let rawTx = new Buffer(rawTxHex, "hex");
     let toSend = [];
-    let response = [];
+    let response;
     while (offset !== rawTx.length) {
       let maxChunkSize = offset === 0 ? 150 - 1 - paths.length * 4 : 150;
       let chunkSize =
@@ -140,7 +140,6 @@ export default class Eth {
           response = apduResponse;
         })
     ).then(() => {
-      response = new Buffer(response, "hex");
       const v = response.slice(0, 1).toString("hex");
       const r = response.slice(1, 1 + 32).toString("hex");
       const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
@@ -185,8 +184,8 @@ eth.signPersonalMessage("44'/60'/0'/0'/0", Buffer.from("test").toString("hex")).
     let paths = splitPath(path);
     let offset = 0;
     let message = new Buffer(messageHex, "hex");
-    let apdus = [];
-    let response = [];
+    let toSend = [];
+    let response;
     while (offset !== message.length) {
       let maxChunkSize = offset === 0 ? 150 - 1 - paths.length * 4 - 4 : 150;
       let chunkSize =
@@ -194,38 +193,33 @@ eth.signPersonalMessage("44'/60'/0'/0'/0", Buffer.from("test").toString("hex")).
           ? message.length - offset
           : maxChunkSize;
       let buffer = new Buffer(
-        offset === 0 ? 5 + 1 + paths.length * 4 + 4 + chunkSize : 5 + chunkSize
+        offset === 0 ? 1 + paths.length * 4 + 4 + chunkSize : chunkSize
       );
-      buffer[0] = 0xe0;
-      buffer[1] = 0x08;
-      buffer[2] = offset === 0 ? 0x00 : 0x80;
-      buffer[3] = 0x00;
-      buffer[4] =
-        offset === 0 ? 1 + paths.length * 4 + 4 + chunkSize : chunkSize;
       if (offset === 0) {
-        buffer[5] = paths.length;
+        buffer[0] = paths.length;
         paths.forEach((element, index) => {
-          buffer.writeUInt32BE(element, 6 + 4 * index);
+          buffer.writeUInt32BE(element, 1 + 4 * index);
         });
-        buffer.writeUInt32BE(message.length, 6 + 4 * paths.length);
+        buffer.writeUInt32BE(message.length, 1 + 4 * paths.length);
         message.copy(
           buffer,
-          6 + 4 * paths.length + 4,
+          1 + 4 * paths.length + 4,
           offset,
           offset + chunkSize
         );
       } else {
-        message.copy(buffer, 5, offset, offset + chunkSize);
+        message.copy(buffer, 0, offset, offset + chunkSize);
       }
-      apdus.push(buffer.toString("hex"));
+      toSend.push(buffer);
       offset += chunkSize;
     }
-    return foreach(apdus, apdu =>
-      this.transport.exchange(apdu, [0x9000]).then(apduResponse => {
-        response = apduResponse;
-      })
+    return foreach(toSend, (data, i) =>
+      this.transport
+        .send(0xe0, 0x08, i === 0 ? 0x00 : 0x80, 0x00, data)
+        .then(apduResponse => {
+          response = apduResponse;
+        })
     ).then(() => {
-      response = new Buffer(response, "hex");
       const v = response[0];
       const r = response.slice(1, 1 + 32).toString("hex");
       const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
