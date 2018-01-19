@@ -47,7 +47,7 @@ export default class HttpTransport extends Transport<string> {
         Accept: "application/json",
         "Content-Type": "application/json"
       },
-      body: apdu.toString("hex")
+      body: JSON.stringify({ apduHex: apdu.toString("hex") })
     });
     if (response.status !== 200) {
       throw "failed to communicate to server. code=" + response.status;
