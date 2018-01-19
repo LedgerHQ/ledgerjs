@@ -51,10 +51,11 @@ export default class TransportU2F extends Transport<null> {
   static list = (): * =>
     isSupported().then(supported => (supported ? [null] : []));
 
-  static discover = (observer: *) => {
+  static listen = (observer: *) => {
     let unsubscribed = false;
     isSupported().then(supported => {
-      if (!unsubscribed && supported) observer.next(null);
+      if (!unsubscribed && supported)
+        observer.next({ type: "add", descriptor: null });
     });
     return {
       unsubscribe: () => {

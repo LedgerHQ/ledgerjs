@@ -24,7 +24,7 @@
     -   [setDebugMode](#setdebugmode)
     -   [send](#send)
     -   [list](#list)
-    -   [discover](#discover)
+    -   [listen](#listen)
     -   [open](#open)
     -   [create](#create)
 -   [HttpTransport](#httptransport)
@@ -346,7 +346,7 @@ Returns **any** a Promise of response buffer
 
 ### list
 
-List once all available descriptors. For a better granularity, checkout `discover()`.
+List once all available descriptors. For a better granularity, checkout `listen()`.
 
 Type: function (): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;Descriptor>>
 
@@ -358,13 +358,14 @@ TransportFoo.list().then(descriptors => ...)
 
 Returns **any** a promise of descriptors
 
-### discover
+### listen
 
-Listen all descriptors that can be opened. This will call cb() with all available descriptors
-and then the new ones that gets discovered in the future until unsubscribe is called.
-events can come over times, for instance if you plug a USB device after listen() or a bluetooth device become discoverable
+Listen all device events for a given Transport. The method takes an Obverver of DescriptorEvent and returns a Subscription (according to Observable paradigm <https://github.com/tc39/proposal-observable> )
+a DescriptorEvent is a `{ descriptor, type }` object. type can be `"add"` or `"remove"` and descriptor is a value you can pass to `open(descriptor)`.
+each listen() call will first emit all potential device already connected and then will emit events can come over times,
+for instance if you plug a USB device after listen() or a bluetooth device become discoverable.
 
-Type: function (observer: Observer&lt;Descriptor>): Subscription
+Type: function (observer: Observer&lt;DescriptorEvent&lt;Descriptor>>): Subscription
 
 **Parameters**
 
@@ -373,14 +374,20 @@ Type: function (observer: Observer&lt;Descriptor>): Subscription
 **Examples**
 
 ```javascript
-const sub = TransportFoo.discover(async descriptor => {
+const sub = TransportFoo.listen({
+next: e => {
+if (e.type==="add") {
 sub.unsubscribe();
-const transport = await TransportFoo.open(descriptor);
+const transport = await TransportFoo.open(e.descriptor);
 ...
+}
+},
+error: error => {},
+complete: () => {}
 })
 ```
 
-Returns **any** a Subscription object on which you can `.unsubscribe()` to stop discovering descriptors.
+Returns **any** a Subscription object on which you can `.unsubscribe()` to stop listening descriptors.
 
 ### open
 
@@ -404,7 +411,7 @@ Returns **any** a Promise of Transport instance
 ### create
 
 create() allows to open the first descriptor available or throw if there is none.
-**DEPRECATED**: use `list()` or `discover()` and `open()` instead.
+**DEPRECATED**: use `list()` or `listen()` and `open()` instead.
 
 **Parameters**
 

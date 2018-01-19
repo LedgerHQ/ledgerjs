@@ -1,71 +1,64 @@
 // @flow
 
 import EventEmitter from "events";
-import { devices } from "node-hid";
+import getDevices from "./getDevices";
 
-const myEE = new EventEmitter();
-myEE.setMaxListeners(0);
+export default (
+  delay: number = 100
+): {
+  events: EventEmitter,
+  stop: () => void
+} => {
+  const events = new EventEmitter();
+  events.setMaxListeners(0);
+  let timeoutDetection;
+  let listDevices = getDevices();
 
-let timeoutDetection = null;
-let isListenDevices = false;
+  const flatDevice = device => device.path;
 
-export default {
-  start: (delay: number = 100) => {
-    if (isListenDevices) {
-      return;
-    }
+  const getFlatDevices = () => [
+    ...new Set(getDevices().map(device => flatDevice(device)))
+  ];
+  const getDeviceByPath = ids =>
+    listDevices.find(device => flatDevice(device) === ids);
 
-    isListenDevices = true;
+  let lastDevices = getFlatDevices();
 
-    let listDevices = devices();
+  const checkDevices = () => {
+    timeoutDetection = setTimeout(() => {
+      const currentDevices = getFlatDevices();
 
-    const flatDevice = device => device.path;
+      const addDevice = currentDevices.find(
+        device => !lastDevices.includes(device)
+      );
+      const removeDevice = lastDevices.find(
+        device => !currentDevices.includes(device)
+      );
 
-    const getFlatDevices = () => [
-      ...new Set(devices().map(device => flatDevice(device)))
-    ];
-    const getDeviceByPath = ids =>
-      listDevices.find(device => flatDevice(device) === ids);
+      if (addDevice) {
+        listDevices = getDevices();
+        events.emit("add", getDeviceByPath(addDevice));
+      }
 
-    let lastDevices = getFlatDevices();
-
-    const checkDevices = () => {
-      timeoutDetection = setTimeout(() => {
-        const currentDevices = getFlatDevices();
-
-        const addDevice = currentDevices.find(
-          device => !lastDevices.includes(device)
+      if (removeDevice) {
+        events.emit("remove", getDeviceByPath(removeDevice));
+        listDevices = listDevices.filter(
+          device => flatDevice(device) !== removeDevice
         );
-        const removeDevice = lastDevices.find(
-          device => !currentDevices.includes(device)
-        );
+      }
 
-        if (addDevice) {
-          listDevices = devices();
-          myEE.emit("add", getDeviceByPath(addDevice));
-        }
+      lastDevices = currentDevices;
 
-        if (removeDevice) {
-          myEE.emit("remove", getDeviceByPath(removeDevice));
-          listDevices = listDevices.filter(
-            device => flatDevice(device) !== removeDevice
-          );
-        }
+      checkDevices();
+    }, delay);
+  };
 
-        lastDevices = currentDevices;
+  checkDevices();
 
-        checkDevices();
-      }, delay);
-    };
-
-    checkDevices();
-  },
-  stop: () => {
-    isListenDevices = false;
-
-    if (timeoutDetection !== null) {
+  return {
+    stop: () => {
       clearTimeout(timeoutDetection);
-    }
-  },
-  events: myEE
+    },
+    events
+  };
 };

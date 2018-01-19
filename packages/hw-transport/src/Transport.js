@@ -4,8 +4,12 @@ import invariant from "invariant";
 import EventEmitter from "events";
 
 export type Subscription = { unsubscribe: () => void };
-export type Observer<T> = {
-  next: (descriptor: T) => void,
+export type DescriptorEvent<Descriptor> = {
+  type: "add" | "remove",
+  descriptor: Descriptor
+};
+export type Observer<Descriptor> = {
+  next: (event: DescriptorEvent<Descriptor>) => void,
   error: (e: ?Error) => void,
   complete: () => void
 };
@@ -19,7 +23,7 @@ export default class Transport<Descriptor> {
   debug: boolean = false;
 
   /**
-   * List once all available descriptors. For a better granularity, checkout `discover()`.
+   * List once all available descriptors. For a better granularity, checkout `listen()`.
    * @return a promise of descriptors
    * @example
    * TransportFoo.list().then(descriptors => ...)
@@ -27,19 +31,28 @@ export default class Transport<Descriptor> {
   static +list: () => Promise<Array<Descriptor>>;
 
   /**
-   * Listen all descriptors that can be opened. This will call cb() with all available descriptors
-   * and then the new ones that gets discovered in the future until unsubscribe is called.
-   * events can come over times, for instance if you plug a USB device after listen() or a bluetooth device become discoverable
+   * Listen all device events for a given Transport. The method takes an Obverver of DescriptorEvent and returns a Subscription (according to Observable paradigm https://github.com/tc39/proposal-observable )
+   * a DescriptorEvent is a `{ descriptor, type }` object. type can be `"add"` or `"remove"` and descriptor is a value you can pass to `open(descriptor)`.
+   * each listen() call will first emit all potential device already connected and then will emit events can come over times,
+   * for instance if you plug a USB device after listen() or a bluetooth device become discoverable.
    * @param observer is an object with a next, error and complete function (compatible with observer pattern)
-   * @return a Subscription object on which you can `.unsubscribe()` to stop discovering descriptors.
+   * @return a Subscription object on which you can `.unsubscribe()` to stop listening descriptors.
    * @example
-const sub = TransportFoo.discover(async descriptor => {
-  sub.unsubscribe();
-  const transport = await TransportFoo.open(descriptor);
-  ...
+const sub = TransportFoo.listen({
+  next: e => {
+    if (e.type==="add") {
+      sub.unsubscribe();
+      const transport = await TransportFoo.open(e.descriptor);
+      ...
+    }
+  },
+  error: error => {},
+  complete: () => {}
 })
    */
-  static +discover: (observer: Observer<Descriptor>) => Subscription;
+  static +listen: (
+    observer: Observer<DescriptorEvent<Descriptor>>
+  ) => Subscription;
 
   /**
    * attempt to create a Transport instance with potentially a descriptor.
@@ -146,7 +159,7 @@ TransportFoo.open(descriptor).then(transport => ...)
 
   /**
    * create() allows to open the first descriptor available or throw if there is none.
-   * **DEPRECATED**: use `list()` or `discover()` and `open()` instead.
+   * **DEPRECATED**: use `list()` or `listen()` and `open()` instead.
    */
   static async create(
     timeout?: number,
@@ -154,7 +167,7 @@ TransportFoo.open(descriptor).then(transport => ...)
   ): Promise<Transport<Descriptor>> {
     console.warn(
       this.name +
-        ".create is deprecated. Please use .list()/.discover() and .open() instead"
+        ".create is deprecated. Please use .list()/.listen() and .open() instead"
     );
     const descriptors = await this.list();
     invariant(descriptors.length !== 0, "No device found");

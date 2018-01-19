@@ -2,8 +2,8 @@
 
 import HID from "node-hid";
 import Transport from "@ledgerhq/hw-transport";
-
 import getDevices from "./getDevices";
+import listenDevices from "./listenDevices";
 
 // FIXME drop
 type Defer<T> = {
@@ -49,30 +49,34 @@ export default class TransportNodeHid extends Transport<string> {
     this.debug = debug;
   }
 
-  static list = () =>
-    Promise.resolve(
-      getDevices()
-        .filter(
-          device =>
-            (device.vendorId === 0x2581 && device.productId === 0x3b7c) ||
-            device.vendorId === 0x2c97
-        )
-        .map(d => d.path)
-    );
+  static list = () => Promise.resolve(getDevices().map(d => d.path));
 
-  static discover = (observer: *) => {
+  static listen = (observer: *) => {
     let unsubscribed = false;
-    function unsubscribe() {
-      unsubscribed = true;
-    }
-    this.list().then(paths => {
+    TransportNodeHid.list().then(paths => {
       for (const path of paths) {
         if (!unsubscribed) {
-          observer.next(path);
+          observer.next({ type: "add", descriptor: path });
         }
       }
     });
-    // TODO needs to also discover new plugged connection...
+
+    const { events, stop } = listenDevices();
+
+    const onAdd = descriptor => {
+      observer.next({ type: "add", descriptor });
+    };
+    const onRemove = descriptor => {
+      observer.next({ type: "remove", descriptor });
+    };
+    events.on("add", onAdd);
+    events.on("remove", onRemove);
+    function unsubscribe() {
+      unsubscribed = true;
+      events.removeListener("add", onAdd);
+      events.removeListener("remove", onRemove);
+      stop();
+    }
     return { unsubscribe };
   };
 

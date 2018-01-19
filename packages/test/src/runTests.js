@@ -33,13 +33,48 @@ var tests = [
   { name: "testEth4", run: testEth4 }
 ];
 
-export default (Transport, timeout = 5000) =>
-  tests.reduce(async (p, step) => {
+export default (Transport, timeout = 5000) => {
+  async function getDescriptorViaList() {
+    const descriptors = await Transport.list();
+    if (descriptors.length === 0) throw "No device found";
+    return descriptors[0];
+  }
+  function getDescriptorViaListen() {
+    return new Promise((success, failure) => {
+      let t;
+      const subscription = Transport.listen({
+        next: e => {
+          if (e.type === "add") {
+            success(e.descriptor);
+            clearTimeout(t);
+          }
+        },
+        error: error => {
+          failure(error);
+          clearTimeout(t);
+        },
+        complete: () => {
+          failure("terminated too early");
+          clearTimeout(t);
+        }
+      });
+      t = setTimeout(() => {
+        subscription.unsubscribe();
+        failure("timeout");
+      }, timeout);
+    });
+  }
+
+  return tests.reduce(async (p, step, i) => {
     await p;
+    const getDescriptor =
+      i % 2 === 0 ? getDescriptorViaList : getDescriptorViaListen;
     if (step.name) {
       console.info("Running test " + step.name);
     }
-    const transport = await Transport.create(timeout, true);
+    const descriptor = await getDescriptor();
+    const transport = await Transport.open(descriptor, timeout);
+    transport.setDebugMode(true);
     try {
       const result = await step.run(transport);
       if (result) {
@@ -52,3 +87,4 @@ export default (Transport, timeout = 5000) =>
       transport.close();
     }
   }, Promise.resolve());
+};

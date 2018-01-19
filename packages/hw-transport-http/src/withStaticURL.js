@@ -1,9 +1,9 @@
 import HttpTransport from "./HttpTransport";
 export default (url: ?string) => {
-  if (!url) return HttpTransport; // by default, HttpTransport don't yield anything in list/discover
+  if (!url) return HttpTransport; // by default, HttpTransport don't yield anything in list/listen
   class StaticHttpTransport extends HttpTransport {
     static list = (): * => HttpTransport.open(url).then(() => [url], () => []);
-    static discover = (observer: *) => {
+    static listen = (observer: *) => {
       let unsubscribed = false;
 
       function attemptToConnect() {
@@ -11,7 +11,7 @@ export default (url: ?string) => {
         HttpTransport.open(url, 5000).then(
           () => {
             if (unsubscribed) return;
-            observer.next(url);
+            observer.next({ descriptor: url, type: "add" });
             observer.complete();
           },
           () => {

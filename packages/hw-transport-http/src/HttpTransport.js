@@ -10,7 +10,7 @@ export { withStaticURL };
 export default class HttpTransport extends Transport<string> {
   // this transport is not discoverable
   static list = (): * => Promise.resolve([]);
-  static discover = (_observer: *) => ({
+  static listen = (_observer: *) => ({
     unsubscribe: () => {}
   });
 
