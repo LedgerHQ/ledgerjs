@@ -28,11 +28,7 @@ export default class Xrp {
    * @return an object with a publicKey, address and (optionally) chainCode
    * @example
    * const result = await xrp.getAddress("44'/144'/0'/0/0");
-   *
-   * {
-   *   "publicKey": "0324E5F600B52BB3D9246D49C4AB1722BA7F32B7A3E4F9F2B8A1A28B9118CC36C4",
-   *   "address": "rPwReL1dVYnVzFKShJhBxNPSbfX7rjJQEd"
-   * }
+   * const { publicKey, address } = result;
    */
   async getAddress(
     path: string,
@@ -91,8 +87,6 @@ export default class Xrp {
    * @return a signature as hex string
    * @example
    * const signature = await xrp.signTransaction("44'/144'/0'/0/0", "12000022800000002400000002614000000001315D3468400000000000000C73210324E5F600B52BB3D9246D49C4AB1722BA7F32B7A3E4F9F2B8A1A28B9118CC36C48114F31B152151B6F42C1D61FE4139D34B424C8647D183142ECFC1831F6E979C6DA907E88B1CAD602DB59E2F");
-   *
-   * 30440220671dc22bed7006b2f170068ee0d9ddc5614b5fffdf438a69a956d9241c1d656b02207721ebf2d69c9c3938d6183bf087d10d786b9e94156ec46e4ddda9c8f7b95528
    */
   async signTransaction(
     path: string,
@@ -154,7 +148,7 @@ export default class Xrp {
       );
     }
 
-    // the last 2 bytes are status code from the last send operation
+    // the last 2 bytes are status code from the hardware
     return response.slice(0, response.length - 2).toString("hex");
   }
 
