@@ -7,6 +7,7 @@
   "dependencies": {
     "@ledgerhq/hw-app-btc": "^2.0.0",
     "@ledgerhq/hw-app-eth": "^2.0.0",
+    "@ledgerhq/hw-app-xrp": "^2.0.0",
     "@ledgerhq/hw-transport-node-hid": "^2.0.0",
     "budo": "^10.0.4"
   },
