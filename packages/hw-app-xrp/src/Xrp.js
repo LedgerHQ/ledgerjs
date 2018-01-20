@@ -53,7 +53,7 @@ export default class Xrp {
     const p2 = curveMask | (chainCode ? 0x01 : 0x00);
     const data = Buffer.alloc(1 + bipPath.length * 4);
 
-    data.writeInt8(bipPath.length);
+    data.writeInt8(bipPath.length, 0);
     bipPath.forEach((segment, index) => {
       data.writeUInt32BE(segment, 1 + index * 4);
     });
@@ -125,7 +125,7 @@ export default class Xrp {
       };
 
       if (offset === 0) {
-        apdu.data.writeInt8(bipPath.length);
+        apdu.data.writeInt8(bipPath.length, 0);
         bipPath.forEach((segment, index) => {
           apdu.data.writeUInt32BE(segment, 1 + index * 4);
         });
