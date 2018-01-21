@@ -4,6 +4,6 @@
 
 Library for Ledger Hardware Wallets.
 
-[Github](https://github.com/LedgerHQ/ledger-node-js-api/),
-[API Doc](https://github.com/LedgerHQ/ledger-node-js-api/blob/master/API.md),
+[Github](https://github.com/LedgerHQ/ledgerjs/),
+[API Doc](https://github.com/LedgerHQ/ledgerjs/blob/master/API.md),
 [Ledger Devs Slack](https://ledger-dev.slack.com/)
