@@ -6,6 +6,9 @@ import testEth from "./testEth";
 import testEth2 from "./testEth2";
 import testEth3 from "./testEth3";
 import testEth4 from "./testEth4";
+import testXrp from "./testXrp";
+import testXrp2 from "./testXrp2";
+import testXrp3 from "./testXrp3";
 
 var tests = [
   { name: "testBtc", run: testBtc },
@@ -30,7 +33,25 @@ var tests = [
   { name: "testEth", run: testEth },
   { name: "testEth2", run: testEth2 },
   { name: "testEth3", run: testEth3 },
-  { name: "testEth4", run: testEth4 }
+  { name: "testEth4", run: testEth4 },
+  {
+    run: () =>
+      new Promise(resolve => {
+        var s = 15;
+        console.info("You have " + s + " seconds to switch to xrp app ...");
+        var interval = setInterval(() => {
+          if (--s) {
+            console.log(s + " ...");
+          } else {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 1000);
+      })
+  },
+  { name: "testXrp", run: testXrp },
+  { name: "testXrp2", run: testXrp2 },
+  { name: "testXrp3", run: testXrp3 }
 ];
 
 export default (Transport, timeout = 5000) => {

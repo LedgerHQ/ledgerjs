@@ -15,6 +15,10 @@
     -   [signTransaction](#signtransaction-1)
     -   [getAppConfiguration](#getappconfiguration)
     -   [signPersonalMessage](#signpersonalmessage)
+-   [Xrp](#xrp)
+    -   [getAddress](#getaddress-1)
+    -   [signTransaction](#signtransaction-2)
+    -   [getAppConfiguration](#getappconfiguration-1)
 -   [Transport](#transport)
     -   [exchange](#exchange)
     -   [setScrambleKey](#setscramblekey)
@@ -32,6 +36,9 @@
     -   [create](#create-1)
 -   [TransportU2F](#transportu2f)
     -   [open](#open-1)
+-   [BluetoothTransport](#bluetoothtransport)
+    -   [listen](#listen-1)
+    -   [open](#open-2)
 
 ## Btc
 
@@ -260,6 +267,75 @@ console.log("Signature 0x" + result['r'] + result['s'] + v);
 ```
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{v: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), s: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), r: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** 
+
+## Xrp
+
+Ripple API
+
+**Parameters**
+
+-   `transport` **[Transport](#transport)&lt;any>** 
+
+**Examples**
+
+```javascript
+import Xrp from "@ledgerhq/hw-app-xrp";
+const xrp = new Xrp(transport);
+```
+
+### getAddress
+
+get Ripple address for a given BIP 32 path.
+
+**Parameters**
+
+-   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
+-   `display` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** optionally enable or not the display
+-   `chainCode` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** optionally enable or not the chainCode request
+-   `ed25519` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** optionally enable or not the ed25519 curve (secp256k1 is default)
+
+**Examples**
+
+```javascript
+const result = await xrp.getAddress("44'/144'/0'/0/0");
+const { publicKey, address } = result;
+```
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{publicKey: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), address: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), chainCode: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?}>** an object with a publicKey, address and (optionally) chainCode
+
+### signTransaction
+
+sign a Ripple transaction with a given BIP 32 path
+
+**Parameters**
+
+-   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
+-   `rawTxHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a raw transaction hex string
+-   `ed25519` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** optionally enable or not the ed25519 curve (secp256k1 is default)
+
+**Examples**
+
+```javascript
+const signature = await xrp.signTransaction("44'/144'/0'/0/0", "12000022800000002400000002614000000001315D3468400000000000000C73210324E5F600B52BB3D9246D49C4AB1722BA7F32B7A3E4F9F2B8A1A28B9118CC36C48114F31B152151B6F42C1D61FE4139D34B424C8647D183142ECFC1831F6E979C6DA907E88B1CAD602DB59E2F");
+```
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** a signature as hex string
+
+### getAppConfiguration
+
+get the version of the Ripple app installed on the hardware device
+
+**Examples**
+
+```javascript
+const result = await xrp.getAppConfiguration();
+
+{
+  "version": "1.0.3"
+}
+```
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{version: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** an object with a version
 
 ## Transport
 
@@ -490,3 +566,33 @@ static function to create a new Transport from a connected Ledger device discove
 -   `timeout` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[TransportU2F](#transportu2f)>** 
+
+## BluetoothTransport
+
+**Extends Transport**
+
+react-native bluetooth BLE implementation
+
+**Parameters**
+
+-   `device` **Device** 
+-   `writeCharacteristic` **Characteristic** 
+-   `notifyCharacteristic` **Characteristic** 
+
+**Examples**
+
+```javascript
+import BluetoothTransport from "@ledgerhq/react-native-hw-transport-ble";
+```
+
+### listen
+
+**Parameters**
+
+-   `observer` **any** 
+
+### open
+
+**Parameters**
+
+-   `device` **Device** 
