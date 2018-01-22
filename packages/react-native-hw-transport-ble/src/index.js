@@ -218,6 +218,6 @@ export default class BluetoothTransport extends Transport<Device> {
   setScrambleKey() {}
 
   close(): Promise<void> {
-    return Promise.resolve();
+    return this.device.cancelConnection();
   }
 }
