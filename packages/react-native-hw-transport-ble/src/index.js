@@ -134,10 +134,10 @@ export default class BluetoothTransport extends Transport<Device> {
             unsubscribe();
             return;
           }
-          if (device.name !== "Blue") return;
-          //if (device.rssi < -50) return; // HACK to filter very close device
-          console.log(device);
-          observer.next({ type: "add", descriptor: device });
+          // FIXME this is not the final filtering. we should eventually use the serviceUUIDs
+          if (device.name === "Blue" || device.id === "3A:11:99:A9:08:C4") {
+            observer.next({ type: "add", descriptor: device });
+          }
         });
         if (sub) sub.remove();
       } else if (state === "Unsupported") {
