@@ -54,7 +54,7 @@ export default class HttpTransport extends Transport<string> {
     }
     const body = await response.json();
     if (body.error) throw body.error;
-    return body.data;
+    return Buffer.from(body.data, "hex");
   }
 
   setScrambleKey() {}
