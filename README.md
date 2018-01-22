@@ -28,7 +28,7 @@ applications. There are implementations for Node and Browser.
 
 ```js
 import Transport from "@ledgerhq/hw-transport-node-hid";
-// import Transport from "@ledgerhq/hw-comm-u2f"; // for browser
+// import Transport from "@ledgerhq/hw-transport-u2f"; // for browser
 import AppBtc from "@ledgerhq/hw-app-btc";
 const getBtcAddress = async () => {
   const devices = await Transport.list();
