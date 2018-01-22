@@ -12,23 +12,6 @@ const DEFAULT_LOCKTIME = 0;
 const DEFAULT_SEQUENCE = 0xffffffff;
 const SIGHASH_ALL = 1;
 
-type TransactionInput = {
-  prevout: Buffer,
-  script: Buffer,
-  sequence: Buffer
-};
-type TransactionOutput = {
-  amount: Buffer,
-  script: Buffer
-};
-
-type Transaction = {
-  version: Buffer,
-  inputs: TransactionInput[],
-  outputs?: TransactionOutput[],
-  locktime?: Buffer
-};
-
 /**
  * Bitcoin API.
  *
@@ -418,6 +401,7 @@ export default class Btc {
   /**
    * To sign a transaction involving standard (P2PKH) inputs, call createPaymentTransactionNew with the following parameters
    * @param inputs is an array of [ transaction, output_index, optional redeem script, optional sequence ] where
+   *
    * * transaction is the previously computed transaction object for this UTXO
    * * output_index is the output in the transaction used as input for this UTXO (counting from 0)
    * * redeem script is the optional redeem script to use when consuming a Segregated Witness input
@@ -782,6 +766,8 @@ const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
     return outputBuffer;
   }
 
+  /**
+   */
   serializeTransaction(transaction: Transaction) {
     let inputBuffer = Buffer.alloc(0);
     transaction.inputs.forEach(input => {
@@ -810,6 +796,8 @@ const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
     ]);
   }
 
+  /**
+   */
   displayTransactionDebug(transaction: Transaction) {
     console.log("version " + transaction.version.toString("hex"));
     transaction.inputs.forEach((input, i) => {
@@ -830,3 +818,27 @@ const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
     }
   }
 }
+
+/**
+ */
+type TransactionInput = {
+  prevout: Buffer,
+  script: Buffer,
+  sequence: Buffer
+};
+
+/**
+ */
+type TransactionOutput = {
+  amount: Buffer,
+  script: Buffer
+};
+
+/**
+ */
+type Transaction = {
+  version: Buffer,
+  inputs: TransactionInput[],
+  outputs?: TransactionOutput[],
+  locktime?: Buffer
+};
