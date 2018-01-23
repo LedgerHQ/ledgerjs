@@ -1,3 +1,5 @@
+// @flow
+
 import HttpTransport from "./HttpTransport";
 export default (url: ?string) => {
   if (!url) return HttpTransport; // by default, HttpTransport don't yield anything in list/listen

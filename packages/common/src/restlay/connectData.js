@@ -203,7 +203,8 @@ export default function connectData<
     executeQueryF = executeQueryOrMutation(this.context.restlayProvider);
 
     execute<Out: *>(
-      queryOrMutation: | Query<any, Out>
+      queryOrMutation:
+        | Query<any, Out>
         | Mutation<any, Out>
         | ConnectionQuery<any, any>
     ): Promise<Out> {

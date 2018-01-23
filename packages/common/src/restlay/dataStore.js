@@ -114,7 +114,8 @@ const sliceConnection = <T>(
 export const executeQueryOrMutation =
   // network is dynamically provided so the library can be mocked (e.g. for tests)
   (ctx: RestlayProvider) => <Out>(
-    queryOrMutation: | Query<any, Out>
+    queryOrMutation:
+      | Query<any, Out>
       | Mutation<any, Out>
       | ConnectionQuery<any, any>
   ) => (dispatch: DispatchF, getState: GetState) => {
@@ -260,12 +261,12 @@ const reducers = {
             result:
               queryOrMutation instanceof ConnectionQuery && !resetConnection
                 ? accumulateConnectionEdges(
-                  // FIXME this is always appending, there is no way to reset this..
-                  // actually will need to differenciate the initial FETCH from PAGINATE
-                  // also there will be some obvious DEV checks to do, like there is not supposed to be dups in cursors ...
-                  store.results[cacheKey] && store.results[cacheKey].result,
-                  result.result
-                )
+                    // FIXME this is always appending, there is no way to reset this..
+                    // actually will need to differenciate the initial FETCH from PAGINATE
+                    // also there will be some obvious DEV checks to do, like there is not supposed to be dups in cursors ...
+                    store.results[cacheKey] && store.results[cacheKey].result,
+                    result.result
+                  )
                 : result.result,
             time: Date.now()
           }

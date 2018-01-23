@@ -16,11 +16,11 @@
   "plugins": ["flowtype", "react"],
   "rules": {
     "no-console": 0,
-    "indent": ["error", 2],
     "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "linebreak-style": ["error", "unix"],
     "quotes": ["error", "double"],
-    "semi": ["error", "always"]
+    "semi": ["error", "always"],
+    "flowtype/space-after-type-colon": [ 2, "always", { "allowLineBreak": true } ]
   },
   "settings": {
     "flowtype": {
