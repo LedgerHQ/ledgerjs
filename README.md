@@ -51,7 +51,7 @@ getBtcAddress().then(a => console.log(a));
 
 ## Documentation
 
-* **[API doc](https://ledgerjs.netlify.com/)**
+* **[API doc](http://ledgerhq.github.io/ledgerjs/)**
 
 ## Contributing
 
