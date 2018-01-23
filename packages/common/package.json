@@ -1,8 +1,14 @@
 {
   "name": "@ledgerhq/common",
-  "version": "2.0.4",
+  "version": "2.0.5",
   "description": "Ledger Hardware Wallet Common",
-  "keywords": ["Ledger", "LedgerWallet", "NanoS", "Blue", "Hardware Wallet"],
+  "keywords": [
+    "Ledger",
+    "LedgerWallet",
+    "NanoS",
+    "Blue",
+    "Hardware Wallet"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/LedgerHQ/ledgerjs"
@@ -35,13 +41,10 @@
     "react-test-renderer": "^16.2.0"
   },
   "scripts": {
-    "test":
-      "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && jest || echo 'TODO FIX ON CI'",
+    "test": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && jest || echo 'TODO FIX ON CI'",
     "flow": "flow",
     "clean": "rm -rf lib/",
-    "build":
-      "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src && flow-copy-source -v src lib",
-    "watch":
-      "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src & flow-copy-source -w -v src lib"
+    "build": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src && flow-copy-source -v src lib",
+    "watch": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src & flow-copy-source -w -v src lib"
   }
 }
