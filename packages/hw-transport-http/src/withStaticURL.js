@@ -1,7 +1,8 @@
 // @flow
 
 import HttpTransport from "./HttpTransport";
-export default (url: ?string) => {
+export default (urlArg: ?string) => {
+  const url = urlArg;
   if (!url) return HttpTransport; // by default, HttpTransport don't yield anything in list/listen
   class StaticHttpTransport extends HttpTransport {
     static list = (): * => HttpTransport.open(url).then(() => [url], () => []);
@@ -13,7 +14,7 @@ export default (url: ?string) => {
         HttpTransport.open(url, 5000).then(
           () => {
             if (unsubscribed) return;
-            observer.next({ descriptor: url, type: "add" });
+            observer.next({ type: "add", descriptor: url });
             observer.complete();
           },
           () => {

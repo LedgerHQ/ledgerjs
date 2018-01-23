@@ -34,6 +34,7 @@ function fetchWithRetries(
       requestsAttempted++;
       requestStartTime = Date.now();
       let isRequestAlive = true;
+      // $FlowFixMe
       const request = fetchF(uri, init);
       const requestTimeout = setTimeout(() => {
         isRequestAlive = false;

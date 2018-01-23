@@ -3,7 +3,10 @@ import type { Store } from "./dataStore";
 
 // A mutation maps to another verb on the API and means a modification of the data.
 // it will allow us to define mutation response etc..
-export default class Mutation<Input, Response> {
+export default class Mutation<
+  Input,
+  Response // eslint-disable-line no-unused-vars
+> {
   props: Input;
 
   // define the URI to hit for the API. can also pass a template function

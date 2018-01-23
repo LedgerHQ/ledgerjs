@@ -5,7 +5,9 @@ if (process.env.NODE_ENV !== "development") {
 } else {
   const mockAPI = require("../data/mock-api").default;
   fetchF = (uri: string, options: Object): Promise<*> =>
-    mockAPI(uri, options) || fetch(uri, options);
+    mockAPI(uri, options) ||
+    // $FlowFixMe
+    fetch(uri, options);
 }
 
 export default fetchF;
