@@ -33,6 +33,10 @@
     -   [listen](#listen)
     -   [open](#open)
     -   [create](#create)
+-   [fetchWithRetries](#fetchwithretries)
+-   [sendTimedRequest](#sendtimedrequest)
+-   [retryRequest](#retryrequest)
+-   [shouldRetry](#shouldretry)
 -   [TransactionInput](#transactioninput)
 -   [TransactionOutput](#transactionoutput)
 -   [Transaction](#transaction)
@@ -512,6 +516,42 @@ create() allows to open the first descriptor available or throw if there is none
 -   `debug` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)**  (optional, default `false`)
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Transport](#transport)&lt;Descriptor>>** 
+
+## fetchWithRetries
+
+Makes a POST request to the server with the given data as the payload.
+Automatic retries are done based on the values in `retryDelays`.
+
+**Parameters**
+
+-   `uri` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `initWithRetries` **InitWithRetries?** 
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;any>** 
+
+## sendTimedRequest
+
+Sends a request to the server that will timeout after `fetchTimeout`.
+If the request fails or times out a new request might be scheduled.
+
+Returns **void** 
+
+## retryRequest
+
+Schedules another run of sendTimedRequest based on how much time has
+passed between the time the last request was sent and now.
+
+Returns **void** 
+
+## shouldRetry
+
+Checks if another attempt should be done to send a request to the server.
+
+**Parameters**
+
+-   `attempt` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+
+Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** 
 
 ## TransactionInput
 
