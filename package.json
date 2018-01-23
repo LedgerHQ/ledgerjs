@@ -17,7 +17,7 @@
     "prettier-diff": "prettier --list-different 'packages/*/src/**/*.js'",
     "lint": "eslint packages/**/src",
     "flow": "lerna run flow",
-    "build": "lerna run build && yarn run documentation",
+    "build": "yarn run documentation && lerna run build",
     "watch": "lerna run --parallel watch",
     "clean":
       "rm -rf node_modules packages/*/node_modules/ packages/*/flow-typed/ packages/*/lib flow-typed",
