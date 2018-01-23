@@ -7,12 +7,12 @@
     "preinstall":
       "node -e \"if (process.env.npm_execpath.indexOf('yarn') === -1) { console.log('\u001b[31mPlease use yarn\u001b[0m'); process.exit(1); }\"",
     "postinstall":
-      "flow-mono create-symlinks packages/hw-transport/.flowconfig && flow-mono install-types --overwrite --ignoreDeps=peer",
+      "flow-mono create-symlinks packages/hw-transport/.flowconfig && flow-mono install-types --overwrite --ignoreDeps=peer || echo 'failed to setup flow-typed'",
     "test": "lerna run test",
     "test-node": "cd packages/test && yarn run test-node",
     "test-browser": "cd packages/test && yarn run test-browser",
     "documentation":
-      "documentation build packages/*/src/** -f md -o API.md --config documentation.yml",
+      "documentation build packages/hw-*/src/** packages/react-native-*/src/** --config documentation.yml -g -f html -o packages/documentation-website/public/docs",
     "prettier": "prettier --write 'packages/*/src/**/*.js'",
     "prettier-diff": "prettier --list-different 'packages/*/src/**/*.js'",
     "lint": "eslint packages/**/src",
