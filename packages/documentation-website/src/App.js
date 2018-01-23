@@ -6,7 +6,7 @@ class App extends Component {
     // HACK FOR NOW
     return (
       <iframe
-        src="/docs"
+        src="./docs"
         frameBorder="0"
         title="docs"
         style={{
