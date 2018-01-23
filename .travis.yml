@@ -12,3 +12,11 @@ addons:
     packages:
       - libusb-1.0-0-dev
       - libudev-dev
+deploy:
+  provider: pages
+  skip-cleanup: true
+  github-token: $GITHUB_TOKEN
+  local-dir: packages/documentation-website/build/
+  keep-history: true
+  on:
+    branch: master
