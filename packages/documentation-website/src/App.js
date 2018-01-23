@@ -7,7 +7,7 @@ class App extends Component {
     return (
       <iframe
         src="/docs"
-        frameborder="0"
+        frameBorder="0"
         title="docs"
         style={{
           position: "fixed",
