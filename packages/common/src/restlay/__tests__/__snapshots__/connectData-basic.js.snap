@@ -6,12 +6,12 @@ exports[`a simple query works 2`] = `
 <div>
   <div>
     max
-    :
+    : 
     14
   </div>
   <div>
     doge
-    :
+    : 
     5
   </div>
 </div>
@@ -22,7 +22,7 @@ exports[`query with props works 1`] = `null`;
 exports[`query with props works 2`] = `
 <div>
   max
-  :
+  : 
   14
 </div>
 `;
@@ -30,7 +30,7 @@ exports[`query with props works 2`] = `
 exports[`query with props works 3`] = `
 <div>
   doge
-  :
+  : 
   5
 </div>
 `;
