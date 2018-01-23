@@ -12,7 +12,7 @@
     "test-node": "cd packages/test && yarn run test-node",
     "test-browser": "cd packages/test && yarn run test-browser",
     "documentation":
-      "documentation build packages/*/src/** -f md -o API.md --config documentation.yml",
+      "documentation build packages/hw-*/src/** --config documentation.yml -g -f html -o packages/documentation-website/public/docs",
     "prettier": "prettier --write 'packages/*/src/**/*.js'",
     "prettier-diff": "prettier --list-different 'packages/*/src/**/*.js'",
     "lint": "eslint packages/**/src",
