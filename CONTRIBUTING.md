@@ -2,7 +2,7 @@
 
 :+1::tada: First off, thanks for taking the time to contribute! :tada::+1:
 
-This repository hosts the `ledgerco` library for node.js and browser.
+This repository hosts the `@ledgerhq/*` JavaScript libraries.
 
 ## JavaScript styleguide
 
