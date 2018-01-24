@@ -1,6 +1,5 @@
 //@flow
-import Transport from "@ledgerhq/hw-transport";
-import invariant from "invariant";
+import Transport, { TransportError } from "@ledgerhq/hw-transport";
 import { BleManager } from "react-native-ble-plx";
 
 const ServiceUuid = "d973f2e0-b19e-11e2-9e96-0800200c9a66";
@@ -43,29 +42,37 @@ function receive(characteristic, debug) {
         const tag = value.readUInt8(0);
         const index = value.readUInt16BE(1);
         let data = value.slice(3);
-        invariant(
-          tag === TagId,
-          "BLE: tag should be 05. Got %s",
-          tag.toString(16)
-        );
-        invariant(
-          notifiedIndex === index,
-          "BLE: discontinued chunk. Received %s but expected %s",
-          index,
-          notifiedIndex
-        );
+
+        if (tag !== TagId) {
+          throw new TransportError(
+            "Invalid tag " + tag.toString(16),
+            "InvalidTag"
+          );
+        }
+        if (notifiedIndex !== index) {
+          throw new TransportError(
+            "BLE: Invalid sequence number. discontinued chunk. Received " +
+              index +
+              " but expected " +
+              notifiedIndex,
+            "InvalidSequence"
+          );
+        }
         if (index === 0) {
           notifiedDataLength = data.readUInt16BE(0);
           data = data.slice(2);
         }
         notifiedIndex++;
         notifiedData = Buffer.concat([notifiedData, data]);
-        invariant(
-          notifiedData.length <= notifiedDataLength,
-          "BLE: received too much data. Excepted %s, received %s",
-          notifiedDataLength,
-          notifiedData.length
-        );
+        if (notifiedData.length > notifiedDataLength) {
+          throw new TransportError(
+            "BLE: received too much data. discontinued chunk. Received " +
+              notifiedData.length +
+              " but expected " +
+              notifiedDataLength,
+            "BLETooMuchData"
+          );
+        }
         if (notifiedData.length === notifiedDataLength) {
           resolve(notifiedData);
         }
@@ -74,7 +81,7 @@ function receive(characteristic, debug) {
       }
     });
   });
-  invariant(subscription, "subscription defined");
+  if (!subscription) throw new Error("subscription defined"); // to satisfy flow
   return { promise, subscription };
 }
 
@@ -142,7 +149,12 @@ export default class BluetoothTransport extends Transport<Device> {
         if (sub) sub.remove();
       } else if (state === "Unsupported") {
         unsubscribe();
-        observer.error(new Error("Bluetooth BLE is not supported"));
+        observer.error(
+          new TransportError(
+            "Bluetooth BLE is not supported",
+            "BLENotSupported"
+          )
+        );
       }
     };
     const sub = bleManager.onStateChange(onBleStateChange, true);
@@ -161,7 +173,9 @@ export default class BluetoothTransport extends Transport<Device> {
     }
     */
     const characteristics = await device.characteristicsForService(ServiceUuid);
-    invariant(characteristics, "service found");
+    if (!characteristics) {
+      throw new TransportError("service not found", "BLEServiceNotFound");
+    }
     let writeC, notifyC;
     for (const c of characteristics) {
       if (c.uuid === WriteCharacteristicUuid) {
@@ -170,10 +184,30 @@ export default class BluetoothTransport extends Transport<Device> {
         notifyC = c;
       }
     }
-    invariant(writeC, "write characteristic found");
-    invariant(notifyC, "notify characteristic found");
-    invariant(notifyC.isNotifiable, "isNotifiable expected");
-    invariant(writeC.isWritableWithResponse, "isWritableWithResponse expected");
+    if (!writeC) {
+      throw new TransportError(
+        "write characteristic not found",
+        "BLEChracteristicNotFound"
+      );
+    }
+    if (!notifyC) {
+      throw new TransportError(
+        "notify characteristic not found",
+        "BLEChracteristicNotFound"
+      );
+    }
+    if (!writeC.isWritableWithResponse) {
+      throw new TransportError(
+        "write characteristic not writableWithResponse",
+        "BLEChracteristicInvalid"
+      );
+    }
+    if (!notifyC.isNotifiable) {
+      throw new TransportError(
+        "notify characteristic not notifiable",
+        "BLEChracteristicInvalid"
+      );
+    }
     return new BluetoothTransport(device, writeC, notifyC);
   }
 
@@ -199,7 +233,12 @@ export default class BluetoothTransport extends Transport<Device> {
 
   busy = false;
   async exchange(apdu: Buffer): Promise<Buffer> {
-    invariant(!this.busy, "exchange() race condition");
+    if (this.busy) {
+      throw new TransportError(
+        "exchange() race condition",
+        "ExchangeRaceCondition"
+      );
+    }
     this.busy = true;
     let receiving;
     try {

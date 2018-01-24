@@ -1,7 +1,12 @@
 //@flow
 
 import HID from "node-hid";
-import Transport from "@ledgerhq/hw-transport";
+import Transport, { TransportError } from "@ledgerhq/hw-transport";
+import type {
+  Observer,
+  DescriptorEvent,
+  Subscription
+} from "@ledgerhq/hw-transport";
 import getDevices from "./getDevices";
 import listenDevices from "./listenDevices";
 
@@ -17,7 +22,7 @@ function defer<T>(): Defer<T> {
     resolve = success;
     reject = failure;
   });
-  if (!resolve || !reject) throw "defer() error"; // this never happens and is just to make flow happy
+  if (!resolve || !reject) throw new Error("defer() error"); // this never happens and is just to make flow happy
   return { promise, resolve, reject };
 }
 
@@ -49,14 +54,20 @@ export default class TransportNodeHid extends Transport<string> {
     this.debug = debug;
   }
 
-  static list = () => Promise.resolve(getDevices().map(d => d.path));
+  static list = (): Promise<string[]> =>
+    Promise.resolve(getDevices().map(d => d.path));
 
-  static listen = (observer: *) => {
+  /**
+   */
+  static listen = (
+    observer: Observer<DescriptorEvent<string>>
+  ): Subscription => {
     let unsubscribed = false;
     const devices = getDevices();
     for (const device of devices) {
       if (!unsubscribed) {
-        observer.next({ type: "add", descriptor: device.path, device });
+        const descriptor: string = device.path;
+        observer.next({ type: "add", descriptor, device });
       }
     }
 
@@ -79,21 +90,10 @@ export default class TransportNodeHid extends Transport<string> {
     return { unsubscribe };
   };
 
+  /**
+   */
   static async open(path: string) {
     return Promise.resolve(new TransportNodeHid(new HID.HID(path)));
-  }
-
-  /**
-   * static function to create a new Transport from the first connected Ledger device found in USB
-
-   */
-  static create(timeout?: number, debug?: boolean): Promise<TransportNodeHid> {
-    return TransportNodeHid.list().then(result => {
-      if (result.length === 0) {
-        throw "No device found";
-      }
-      return new TransportNodeHid(new HID.HID(result[0]), true, timeout, debug);
-    });
   }
 
   exchange(apdu: Buffer): Promise<Buffer> {
@@ -142,19 +142,19 @@ export default class TransportNodeHid extends Transport<string> {
         return;
       }
       if (data[offset++] !== channel >> 8) {
-        throw "Invalid channel;";
+        throw new TransportError("Invalid channel", "InvalidChannel");
       }
       if (data[offset++] !== (channel & 0xff)) {
-        throw "Invalid channel";
+        throw new TransportError("Invalid channel", "InvalidChannel");
       }
       if (data[offset++] !== 0x05) {
-        throw "Invalid tag";
+        throw new TransportError("Invalid tag", "InvalidTag");
       }
       if (data[offset++] !== 0x00) {
-        throw "Invalid sequence";
+        throw new TransportError("Invalid sequence", "InvalidSequence");
       }
       if (data[offset++] !== 0x00) {
-        throw "Invalid sequence";
+        throw new TransportError("Invalid sequence", "InvalidSequence");
       }
       responseLength = (data[offset++] & 0xff) << 8;
       responseLength |= data[offset++] & 0xff;
@@ -171,19 +171,19 @@ export default class TransportNodeHid extends Transport<string> {
           return;
         }
         if (data[offset++] !== channel >> 8) {
-          throw "Invalid channel;";
+          throw new TransportError("Invalid channel", "InvalidChannel");
         }
         if (data[offset++] !== (channel & 0xff)) {
-          throw "Invalid channel";
+          throw new TransportError("Invalid channel", "InvalidChannel");
         }
         if (data[offset++] !== 0x05) {
-          throw "Invalid tag";
+          throw new TransportError("Invalid tag", "InvalidTag");
         }
         if (data[offset++] !== sequenceIdx >> 8) {
-          throw "Invalid sequence";
+          throw new TransportError("Invalid sequence", "InvalidSequence");
         }
         if (data[offset++] !== (sequenceIdx & 0xff)) {
-          throw "Invalid sequence";
+          throw new TransportError("Invalid sequence", "InvalidSequence");
         }
         blockSize =
           responseLength - response.length > packetSize - 5
@@ -213,7 +213,7 @@ export default class TransportNodeHid extends Transport<string> {
     if (this.timeout !== 0) {
       exchangeTimeout = setTimeout(() => {
         // Node.js supports timeouts
-        deferred.reject("timeout");
+        deferred.reject(new TransportError("timeout", "timeout"));
       }, this.timeout);
     }
 
