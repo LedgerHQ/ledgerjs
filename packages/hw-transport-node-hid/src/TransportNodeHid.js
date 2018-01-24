@@ -53,21 +53,20 @@ export default class TransportNodeHid extends Transport<string> {
 
   static listen = (observer: *) => {
     let unsubscribed = false;
-    TransportNodeHid.list().then(paths => {
-      for (const path of paths) {
-        if (!unsubscribed) {
-          observer.next({ type: "add", descriptor: path });
-        }
+    const devices = getDevices();
+    for (const device of devices) {
+      if (!unsubscribed) {
+        observer.next({ type: "add", descriptor: device.path, device });
       }
-    });
+    }
 
     const { events, stop } = listenDevices();
 
-    const onAdd = descriptor => {
-      observer.next({ type: "add", descriptor });
+    const onAdd = device => {
+      observer.next({ type: "add", descriptor: device.path, device });
     };
-    const onRemove = descriptor => {
-      observer.next({ type: "remove", descriptor });
+    const onRemove = device => {
+      observer.next({ type: "remove", descriptor: device.path, device });
     };
     events.on("add", onAdd);
     events.on("remove", onRemove);
