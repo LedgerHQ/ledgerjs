@@ -1,18 +1,82 @@
 //@flow
 
-import invariant from "invariant";
 import EventEmitter from "events";
 
+/**
+ */
 export type Subscription = { unsubscribe: () => void };
+/**
+ */
 export type DescriptorEvent<Descriptor> = {
   type: "add" | "remove",
   descriptor: Descriptor
 };
-export type Observer<Descriptor> = {
-  next: (event: DescriptorEvent<Descriptor>) => void,
+/**
+ */
+export type Observer<Ev> = {
+  next: (event: Ev) => void,
   error: (e: ?Error) => void,
   complete: () => void
 };
+
+/**
+ * all possible status codes.
+ * @see https://ledgerhq.github.io/btchip-doc/bitcoin-technical.html#_status_words
+ * @example
+ * import { StatusCodes } from "@ledgerhq/hw-transport";
+ */
+export const StatusCodes = {
+  /**
+   * Incorrect length
+   */
+  IncorrectLength: 0x6700,
+  /**
+   * Security status not satisfied (Bitcoin dongle is locked or invalid access rights)
+   */
+  SecurityNotSatisfied: 0x6982,
+  /**
+   * Invalid data
+   */
+  InvalidData: 0x6a80,
+  /**
+   * File not found
+   */
+  FileNotFound: 0x6a82,
+  /**
+   * Incorrect parameter P1 or P2
+   */
+  IncorrectParameter: 0x6b00,
+  /**
+   * Success
+   */
+  Success: 0x9000
+};
+
+/**
+ * TransportError is used for any generic transport errors.
+ * e.g. Error thrown when data received by exchanges are incorrect or if exchanged failed to communicate with the device for various reason.
+ */
+export function TransportError(message: string, id: string) {
+  this.name = "TransportError";
+  this.message = message;
+  this.stack = new Error().stack;
+  this.id = id;
+}
+//$FlowFixMe
+TransportError.prototype = new Error();
+
+/**
+ * Error thrown when a device returned a non success status.
+ * the error.statusCode is one of the `StatusCodes` exported by this library.
+ */
+export function TransportStatusError(statusCode: number) {
+  this.name = "TransportStatusError";
+  this.message = "Invalid status " + statusCode.toString(16);
+  this.stack = new Error().stack;
+  this.statusCode = statusCode;
+}
+//$FlowFixMe
+TransportStatusError.prototype = new Error();
 
 /**
  * Transport defines the generic interface to share between node/u2f impl
@@ -134,13 +198,14 @@ TransportFoo.open(descriptor).then(transport => ...)
     p1: number,
     p2: number,
     data: Buffer = Buffer.alloc(0),
-    statusList: Array<number> = [0x9000]
+    statusList: Array<number> = [StatusCodes.Success]
   ): Promise<Buffer> => {
-    invariant(
-      data.length < 256,
-      "data.length exceed 256 bytes limit. Got: %s",
-      data.length
-    );
+    if (data.length >= 256) {
+      throw new TransportError(
+        "data.length exceed 256 bytes limit. Got: " + data.length,
+        "DataLengthTooBig"
+      );
+    }
     const response = await this.exchange(
       Buffer.concat([
         Buffer.from([cla, ins, p1, p2]),
@@ -149,11 +214,9 @@ TransportFoo.open(descriptor).then(transport => ...)
       ])
     );
     const sw = response.readUInt16BE(response.length - 2);
-    invariant(
-      statusList.some(s => s === sw),
-      "Invalid status %s",
-      sw.toString(16)
-    );
+    if (!statusList.some(s => s === sw)) {
+      throw new TransportStatusError(sw);
+    }
     return response;
   };
 
@@ -170,7 +233,9 @@ TransportFoo.open(descriptor).then(transport => ...)
         ".create is deprecated. Please use .list()/.listen() and .open() instead"
     );
     const descriptors = await this.list();
-    invariant(descriptors.length !== 0, "No device found");
+    if (descriptors.length === 0) {
+      throw new TransportError("No device found", "NoDeviceFound");
+    }
     const transport = await this.open(descriptors[0], timeout);
     transport.setDebugMode(debug);
     return transport;

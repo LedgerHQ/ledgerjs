@@ -1,5 +1,5 @@
 //@flow
-import Transport from "@ledgerhq/hw-transport";
+import Transport, { TransportError } from "@ledgerhq/hw-transport";
 import withStaticURL from "./withStaticURL";
 export { withStaticURL };
 
@@ -17,8 +17,12 @@ export default class HttpTransport extends Transport<string> {
   static async open(url: string, timeout?: number) {
     const response = await fetch(url, { timeout });
     if (response.status !== 200) {
-      throw new Error(
-        "failed to access HttpTransport(" + url + "): status " + response.status
+      throw new TransportError(
+        "failed to access HttpTransport(" +
+          url +
+          "): status " +
+          response.status,
+        "HttpTransportNotAccessible"
       );
     }
     return new HttpTransport(url);
@@ -50,7 +54,10 @@ export default class HttpTransport extends Transport<string> {
       body: JSON.stringify({ apduHex: apdu.toString("hex") })
     });
     if (response.status !== 200) {
-      throw "failed to communicate to server. code=" + response.status;
+      throw new TransportError(
+        "failed to communicate to server. code=" + response.status,
+        "HttpTransportStatus" + response.status
+      );
     }
     const body = await response.json();
     if (body.error) throw body.error;
