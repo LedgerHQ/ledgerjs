@@ -91,11 +91,18 @@ export default class TransportU2F extends Transport<null> {
       challenge: webSafe64(challenge.toString("base64")),
       appId: location.origin
     };
+    if (this.debug) {
+      console.log("=> " + apdu.toString("hex"));
+    }
     return sign(signRequest, this.timeoutSeconds).then(response => {
       const { signatureData } = response;
       if (typeof signatureData === "string") {
         const data = Buffer.from(normal64(signatureData), "base64");
-        return data.slice(5);
+        const result = data.slice(5);
+        if (this.debug) {
+          console.log("<= " + result.toString("hex"));
+        }
+        return result;
       } else {
         throw response;
       }
