@@ -181,6 +181,23 @@ export default class Btc {
       .then(processOutputs);
   }
 
+  async getTrustedInputBIP143(indexLookup: number, transaction: Transaction) {
+    let sha = createHash("sha256");
+    sha.update(this.serializeTransaction(transaction, true));
+    let hash = sha.digest();
+    sha = createHash("sha256");
+    sha.update(hash);
+    hash = sha.digest();
+    let data = Buffer.from([
+      indexLookup & 0xff,
+      (indexLookup >> 8) & 0xff,
+      (indexLookup >> 16) & 0xff,
+      (indexLookup >> 24) & 0xff
+    ]);
+    hash = Buffer.concat([hash, data, transaction.outputs[indexLookup].amount]);
+    return await hash.toString("hex");
+  }
+
   getVarint(data: Buffer, offset: number): [number, number] {
     if (data[offset] < 0xfd) {
       return [data[offset], 1];
@@ -836,7 +853,7 @@ const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
 
   /**
    */
-  serializeTransaction(transaction: Transaction) {
+  serializeTransaction(transaction: Transaction, skipWitness: boolean) {
     let inputBuffer = Buffer.alloc(0);
     let useWitness =
       typeof transaction["witness"] != "undefined" && !skipWitness;
