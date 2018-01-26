@@ -29,24 +29,35 @@ export default class Btc {
 
   /**
    * @param path a BIP 32 path
+   * @param segwit use segwit
    * @example
    * btc.getWalletPublicKey("44'/0'/0'/0").then(o => o.bitcoinAddress)
    */
   getWalletPublicKey(
-    path: string
+    path: string,
+    verify: boolean = false,
+    segwit: boolean = false
   ): Promise<{
     publicKey: string,
     bitcoinAddress: string,
     chainCode: string
   }> {
     const paths = splitPath(path);
+    var p1 = 0x00;
+    var p2 = 0x00;
+    if (verify === true) {
+        p1 = 0x01;
+    }
+    if (segwit == true) {
+        p2 = 0x01;
+    }
     const buffer = Buffer.alloc(1 + paths.length * 4);
     buffer[0] = paths.length;
     paths.forEach((element, index) => {
       buffer.writeUInt32BE(element, 1 + 4 * index);
     });
     return this.transport
-      .send(0xe0, 0x40, 0x00, 0x00, buffer)
+      .send(0xe0, 0x40, p1, p2, buffer)
       .then(response => {
         const publicKeyLength = response[0];
         const addressLength = response[1 + publicKeyLength];
