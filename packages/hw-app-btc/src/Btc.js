@@ -716,13 +716,18 @@ btc.signP2SHTransaction(
    * @example
 const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc4af009f4d4dc57ae597ed0420b71010000008a47304402201f36a12c240dbf9e566bc04321050b1984cd6eaf6caee8f02bb0bfec08e3354b022012ee2aeadcbbfd1e92959f57c15c1c6debb757b798451b104665aa3010569b49014104090b15bde569386734abf2a2b99f9ca6a50656627e77de663ca7325702769986cf26cc9dd7fdea0af432c8e2becc867c932e1b9dd742f2a108997c2252e2bdebffffffff0281b72e00000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88aca0860100000000001976a9144533f5fb9b4817f713c48f0bfe96b9f50c476c9b88ac00000000");
    */
-  splitTransaction(transactionHex: string): Transaction {
+  splitTransaction(transactionHex: string, isSegwitSupported: boolean): Transaction {
     const inputs = [];
     const outputs = [];
+    var witness = false;
     let offset = 0;
     const transaction = Buffer.from(transactionHex, "hex");
     const version = transaction.slice(offset, offset + 4);
     offset += 4;
+    if (isSegwitSupported && ((transaction[offset] == 0) && (transaction[offset + 1] != 0))) {
+        offset += 2;
+        witness = true;
+    }
     let varint = this.getVarint(transaction, offset);
     const numberInputs = varint[0];
     offset += varint[1];
@@ -749,8 +754,15 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
       offset += varint[0];
       outputs.push({ amount, script });
     }
-    let locktime = transaction.slice(offset, offset + 4);
-    return { version, inputs, outputs, locktime };
+    var witnessScript, locktime;
+    if (witness) {
+        witnessScript = transaction.slice(offset, - 4);
+        locktime = transaction.slice(transaction.length - 4);
+    }
+    else {
+        locktime = transaction.slice(offset, offset+ 4);
+    }
+    return { version, inputs, outputs, locktime, witness: witnessScript };
   }
 
   /**
