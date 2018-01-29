@@ -221,7 +221,8 @@ export default class Btc {
   startUntrustedHashTransactionInputRaw(
     newTransaction: boolean,
     firstRound: boolean,
-    transactionData: Buffer
+    transactionData: Buffer,
+    segwit?: boolean
   ) {
     return this.transport.send(
       0xe0,
@@ -235,7 +236,8 @@ export default class Btc {
   startUntrustedHashTransactionInput(
     newTransaction: boolean,
     transaction: Transaction,
-    inputs: Array<{ trustedInput: boolean, value: Buffer }>
+    inputs: Array<{ trustedInput: boolean, value: Buffer }>,
+    segwit: boolean
   ) {
     let data = Buffer.concat([
       transaction.version,
@@ -244,19 +246,20 @@ export default class Btc {
     return this.startUntrustedHashTransactionInputRaw(
       newTransaction,
       true,
-      data
+      data,
+      segwit
     ).then(() => {
       let i = 0;
       return eachSeries(transaction.inputs, input => {
-        // TODO : segwit
         let prefix;
         if (inputs[i].trustedInput) {
-          prefix = Buffer.alloc(2);
-          prefix[0] = 0x01;
-          prefix[1] = inputs[i].value.length;
+          if (segwit) {
+            prefix = Buffer.from([0x02]);
+          } else {
+            prefix = Buffer.from([0x01, inputs[i].value.length]);
+          }
         } else {
-          prefix = Buffer.alloc(1);
-          prefix[0] = 0x00;
+          prefix = Buffer.from([0x00]);
         }
         data = Buffer.concat([
           prefix,
