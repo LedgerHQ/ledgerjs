@@ -28,7 +28,7 @@ export default class Btc {
     transport.setScrambleKey("BTC");
   }
 
-  hashPublicKey = buffer => {
+  hashPublicKey(buffer: Buffer) {
     return createHash("rmd160")
       .update(
         createHash("sha256")
@@ -36,7 +36,7 @@ export default class Btc {
           .digest()
       )
       .digest();
-  };
+  }
 
   /**
    * @param path a BIP 32 path
@@ -46,8 +46,8 @@ export default class Btc {
    */
   getWalletPublicKey(
     path: string,
-    verify: boolean = false,
-    segwit: boolean = false
+    verify?: boolean = false,
+    segwit?: boolean = false
   ): Promise<{
     publicKey: string,
     bitcoinAddress: string,
@@ -182,19 +182,28 @@ export default class Btc {
   }
 
   async getTrustedInputBIP143(indexLookup: number, transaction: Transaction) {
+    if (!transaction) {
+      throw new Error("getTrustedInputBIP143: missing tx");
+    }
     let sha = createHash("sha256");
     sha.update(this.serializeTransaction(transaction, true));
     let hash = sha.digest();
     sha = createHash("sha256");
     sha.update(hash);
     hash = sha.digest();
-    let data = Buffer.from([
-      indexLookup & 0xff,
-      (indexLookup >> 8) & 0xff,
-      (indexLookup >> 16) & 0xff,
-      (indexLookup >> 24) & 0xff
-    ]);
-    hash = Buffer.concat([hash, data, transaction.outputs[indexLookup].amount]);
+    const look1 = indexLookup & 0xff;
+    const look2 = (indexLookup >> 8) & 0xff;
+    const look3 = (indexLookup >> 16) & 0xff;
+    const look4 = (indexLookup >> 24) & 0xff;
+    let data = Buffer.from([look1, look2, look3, look4]);
+    const { outputs, locktime } = transaction;
+    if (!outputs || !locktime) {
+      throw new Error("getTrustedInputBIP143: locktime & outputs is expected");
+    }
+    if (!outputs[indexLookup]) {
+      throw new Error("getTrustedInputBIP143: wrong index");
+    }
+    hash = Buffer.concat([hash, data, outputs[indexLookup].amount]);
     return await hash.toString("hex");
   }
 
@@ -222,7 +231,7 @@ export default class Btc {
     newTransaction: boolean,
     firstRound: boolean,
     transactionData: Buffer,
-    segwit?: boolean
+    segwit?: boolean = false
   ) {
     return this.transport.send(
       0xe0,
@@ -237,7 +246,7 @@ export default class Btc {
     newTransaction: boolean,
     transaction: Transaction,
     inputs: Array<{ trustedInput: boolean, value: Buffer }>,
-    segwit: boolean
+    segwit?: boolean = false
   ) {
     let data = Buffer.concat([
       transaction.version,
@@ -269,7 +278,8 @@ export default class Btc {
         return this.startUntrustedHashTransactionInputRaw(
           newTransaction,
           false,
-          data
+          data,
+          segwit
         ).then(() => {
           let scriptBlocks = [];
           let offset = 0;
@@ -300,7 +310,8 @@ export default class Btc {
             return this.startUntrustedHashTransactionInputRaw(
               newTransaction,
               false,
-              scriptBlock
+              scriptBlock,
+              segwit
             );
           }).then(() => {
             i++;
@@ -457,13 +468,13 @@ btc.createPaymentTransactionNew(
  ).then(res => ...);
    */
   createPaymentTransactionNew(
-    segwit: boolean,
     inputs: Array<[Transaction, number, ?string, ?number]>,
     associatedKeysets: string[],
     changePath?: string,
     outputScriptHex: string,
     lockTime?: number = DEFAULT_LOCKTIME,
-    sigHashType?: number = SIGHASH_ALL
+    sigHashType?: number = SIGHASH_ALL,
+    segwit?: boolean = false
   ) {
     // Inputs are provided as arrays of [transaction, output_index, optional redeem script, optional sequence]
     // associatedKeysets are provided as arrays of [path]
@@ -475,18 +486,19 @@ btc.createPaymentTransactionNew(
     const regularOutputs: Array<TransactionOutput> = [];
     const signatures = [];
     const publicKeys = [];
+    let firstRun = true;
     const resuming = false;
     const targetTransaction: Transaction = {
       inputs: [],
       version: defaultVersion
     };
     const getTrustedInputCall = segwit
-      ? this.getTrustedInputBIP143
-      : this.getTrustedInput;
+      ? this.getTrustedInputBIP143.bind(this)
+      : this.getTrustedInput.bind(this);
     const outputScript = Buffer.from(outputScriptHex, "hex");
 
     return foreach(inputs, input => {
-      doIf(!resuming, () =>
+      return doIf(!resuming, () =>
         getTrustedInputCall(input[1], input[0]).then(trustedInput => {
           trustedInputs.push({
             trustedInput: true,
@@ -535,16 +547,18 @@ btc.createPaymentTransactionNew(
         )
       )
       .then(() =>
-        // Do the first run with all inputs
-        this.startUntrustedHashTransactionInput(
-          true,
-          targetTransaction,
-          trustedInputs,
-          segwit
-        ).then(() =>
-          doIf(!resuming && typeof changePath != "undefined", function() {
-            return this.provideOutputFullChangePath(changePath);
-          }).then(() => this.hashOutputFull(outputScript))
+        doIf(segwit, () =>
+          // Do the first run with all inputs
+          this.startUntrustedHashTransactionInput(
+            true,
+            targetTransaction,
+            trustedInputs,
+            segwit
+          ).then(() =>
+            doIf(!resuming && typeof changePath != "undefined", function() {
+              return this.provideOutputFullChangePath(changePath);
+            }).then(() => this.hashOutputFull(outputScript))
+          )
         )
       )
       .then(() =>
@@ -561,17 +575,27 @@ btc.createPaymentTransactionNew(
                     Buffer.from("88ac", "hex")
                   ]);
           return this.startUntrustedHashTransactionInput(
-            false,
+            !segwit ? firstRun : false,
             targetTransaction,
             trustedInputs,
             segwit
           )
-            .then(() => {
-              this.signTransaction(associatedKeysets[i], lockTime, sigHashType);
-            })
+            .then(() =>
+              doIf(!segwit, () =>
+                doIf(!resuming && typeof changePath != "undefined", function() {
+                  return this.provideOutputFullChangePath(changePath);
+                }).then(() => this.hashOutputFull(outputScript))
+              )
+            )
+            .then(() =>
+              this.signTransaction(associatedKeysets[i], lockTime, sigHashType)
+            )
             .then(signature => {
               signatures.push(signature);
               targetTransaction.inputs[i].script = nullScript;
+              if (firstRun) {
+                firstRun = false;
+              }
             });
         })
       )
@@ -581,7 +605,7 @@ btc.createPaymentTransactionNew(
           if (segwit) {
             targetTransaction.inputs[i].script = Buffer.concat([
               Buffer.from("160014", "hex"),
-              hash160(publicKeys[i])
+              this.hashPublicKey(publicKeys[i])
             ]);
           } else {
             const signatureSize = Buffer.alloc(1);
@@ -607,7 +631,7 @@ btc.createPaymentTransactionNew(
         lockTimeBuffer.writeUInt32LE(lockTime, 0);
 
         var result = Buffer.concat([
-          this.serializeTransaction(targetTransaction),
+          this.serializeTransaction(targetTransaction, false),
           outputScript
         ]);
 
@@ -719,7 +743,8 @@ btc.signP2SHTransaction(
           return this.startUntrustedHashTransactionInput(
             firstRun,
             targetTransaction,
-            trustedInputs
+            trustedInputs,
+            false
           )
             .then(() => this.hashOutputFull(outputScript))
             .then(() =>
@@ -877,7 +902,7 @@ const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
     ) {
       outputBuffer = Buffer.concat([
         outputBuffer,
-        useWitness ? transaction.witness : Buffer.alloc(0),
+        (useWitness && transaction.witness) || Buffer.alloc(0),
         transaction.locktime
       ]);
     }
@@ -935,5 +960,6 @@ type Transaction = {
   version: Buffer,
   inputs: TransactionInput[],
   outputs?: TransactionOutput[],
-  locktime?: Buffer
+  locktime?: Buffer,
+  witness?: Buffer
 };
