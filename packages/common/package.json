@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/common",
-  "version": "2.0.5",
+  "version": "2.1.2",
   "description": "Ledger Hardware Wallet Common",
   "keywords": [
     "Ledger",
