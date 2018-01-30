@@ -21,8 +21,8 @@ export type DescriptorEvent<Descriptor> = {
  */
 export type Observer<Ev> = {
   next: (event: Ev) => void,
-  error?: (e: ?Error) => void,
-  complete?: () => void
+  error: (e: ?Error) => void,
+  complete: () => void
 };
 
 /**
