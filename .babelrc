@@ -4,13 +4,15 @@
       "env",
       {
         "targets": {
-          "browsers": ["last 2 Chrome versions"],
-          "node": "8"
-        }
+          "browsers": ["last 2 versions"],
+          "node": 8
+        },
+        "forceAllTransforms": true
       }
     ],
     "flow",
     "react",
     "stage-0"
-  ]
+  ],
+  "plugins": ["transform-runtime"]
 }
