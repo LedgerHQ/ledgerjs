@@ -15,7 +15,7 @@ export type Device = Object;
 export type DescriptorEvent<Descriptor> = {
   type: "add" | "remove",
   descriptor: Descriptor,
-  device: Device
+  device?: Device
 };
 /**
  */
