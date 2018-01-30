@@ -9,11 +9,11 @@
     "@ledgerhq/hw-app-eth": "^2.1.2",
     "@ledgerhq/hw-app-xrp": "^2.1.2",
     "@ledgerhq/hw-transport-node-hid": "^2.1.2",
-    "budo": "^10.0.4"
+    "budo": "^11.0.1"
   },
   "devDependencies": {
-    "flow-bin": "^0.63.1",
-    "flow-typed": "^2.2.3"
+    "flow-bin": "^0.64.0",
+    "flow-typed": "^2.3.0"
   },
   "scripts": {
     "test-browser": "budo --ssl lib/index-browser.js",
