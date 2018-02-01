@@ -242,7 +242,10 @@ TransportFoo.create().then(transport => ...)
     }
     return new Promise((resolve, reject) => {
       let found = false;
-      const timeoutId = setTimeout(() => {}, timeout);
+      const timeoutId = setTimeout(() => {
+        sub.unsubscribe();
+        reject(new TransportError("Transport timeout", "timeout"));
+      }, timeout);
       const sub = this.listen({
         next: e => {
           found = true;
@@ -250,8 +253,12 @@ TransportFoo.create().then(transport => ...)
           clearTimeout(timeoutId);
           this.open(e.descriptor, timeout).then(resolve, reject);
         },
-        error: reject,
+        error: e => {
+          clearTimeout(timeoutId);
+          reject(e);
+        },
         complete: () => {
+          clearTimeout(timeoutId);
           if (!found) {
             reject(new TransportError("No device found", "NoDeviceFound"));
           }
