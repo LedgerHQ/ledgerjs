@@ -63,14 +63,15 @@ export default class TransportNodeHid extends Transport<string> {
     observer: Observer<DescriptorEvent<string>>
   ): Subscription => {
     let unsubscribed = false;
-    const devices = getDevices();
-    for (const device of devices) {
-      if (!unsubscribed) {
-        const descriptor: string = device.path;
-        observer.next({ type: "add", descriptor, device });
+    Promise.resolve(getDevices()).then(devices => {
+      // this needs to run asynchronously so the subscription is defined during this phase
+      for (const device of devices) {
+        if (!unsubscribed) {
+          const descriptor: string = device.path;
+          observer.next({ type: "add", descriptor, device });
+        }
       }
-    }
-
+    });
     const { events, stop } = listenDevices();
 
     const onAdd = device => {
