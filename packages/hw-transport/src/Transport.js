@@ -5,11 +5,17 @@ import EventEmitter from "events";
 /**
  */
 export type Subscription = { unsubscribe: () => void };
+
+/**
+ */
+export type Device = Object;
+
 /**
  */
 export type DescriptorEvent<Descriptor> = {
   type: "add" | "remove",
-  descriptor: Descriptor
+  descriptor: Descriptor,
+  device?: Device
 };
 /**
  */

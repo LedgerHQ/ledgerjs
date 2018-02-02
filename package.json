@@ -2,48 +2,47 @@
   "private": true,
   "name": "ledger-libs",
   "version": "0.0.0",
-  "workspaces": ["packages/*"],
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "preinstall":
-      "node -e \"if (process.env.npm_execpath.indexOf('yarn') === -1) { console.log('\u001b[31mPlease use yarn\u001b[0m'); process.exit(1); }\"",
-    "postinstall":
-      "flow-mono create-symlinks packages/hw-transport/.flowconfig && flow-mono install-types --overwrite --ignoreDeps=peer || echo 'failed to setup flow-typed'",
-    "test": "lerna run test",
+    "preinstall": "node -e \"if (process.env.npm_execpath.indexOf('yarn') === -1) { console.log('\u001b[31mPlease use yarn\u001b[0m'); process.exit(1); }\"",
+    "postinstall": "flow-mono create-symlinks packages/hw-transport/.flowconfig && flow-mono install-types --overwrite --ignoreDeps=peer || echo 'failed to setup flow-typed'",
+    "test": "npm run build && npm run lint && npm run flow && npm run prettier-diff && lerna run test",
     "test-node": "cd packages/test && yarn run test-node",
     "test-browser": "cd packages/test && yarn run test-browser",
-    "documentation":
-      "documentation build packages/hw-*/src/** packages/react-native-*/src/** --project-name '@ledgerhq/*' --project-version `node -e \"console.log(require('./lerna.json').version)\"` --project-homepage https://github.com/LedgerHQ/ledgerjs --config documentation.yml -g -f html -o packages/documentation-website/public/docs",
+    "documentation": "documentation build packages/hw-*/src/** packages/react-native-*/src/** --project-name '@ledgerhq/*' --project-version `node -e \"console.log(require('./lerna.json').version)\"` --project-homepage https://github.com/LedgerHQ/ledgerjs --config documentation.yml -g -f html -o packages/documentation-website/public/docs",
     "prettier": "prettier --write 'packages/*/src/**/*.js'",
     "prettier-diff": "prettier --list-different 'packages/*/src/**/*.js'",
     "lint": "eslint packages/**/src",
     "flow": "lerna run flow",
-    "build": "yarn run documentation && lerna run build",
+    "build": "BABEL_ENV=production && yarn run documentation && lerna run build",
     "watch": "lerna run --parallel watch",
-    "clean":
-      "rm -rf node_modules packages/*/node_modules/ packages/*/flow-typed/ packages/*/lib flow-typed",
+    "clean": "rm -rf node_modules packages/*/node_modules/ packages/*/flow-typed/ packages/*/lib flow-typed",
     "rebuild": "lerna run clean && lerna run build",
-    "publish":
-      "yarn && lerna run clean && lerna run build && lerna publish --registry=https://registry.npmjs.org/"
+    "publish": "yarn && lerna run clean && lerna run build && lerna publish --registry=https://registry.npmjs.org/"
   },
   "dependencies": {
     "babel-cli": "^6.26.0",
     "babel-eslint": "^8.0.2",
+    "babel-plugin-transform-runtime": "^6.23.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-flow": "^6.23.0",
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-0": "^6.24.1",
+    "babel-runtime": "^6.26.0",
     "browserify": "^15.1.0",
     "documentation": "^5.3.5",
     "eslint": "^4.11.0",
     "eslint-config-prettier": "^2.7.0",
-    "eslint-plugin-flowtype": "^2.41.0",
-    "eslint-plugin-react": "^7.5.1",
-    "flow-bin": "^0.63.1",
-    "flow-copy-source": "^1.2.1",
+    "eslint-plugin-flowtype": "^2.42.0",
+    "eslint-plugin-react": "^7.6.1",
+    "flow-bin": "^0.64.0",
+    "flow-copy-source": "^1.2.2",
     "flow-mono-cli": "^1.3.0",
-    "flow-typed": "^2.2.3",
-    "lerna": "2.6.0",
+    "flow-typed": "^2.3.0",
+    "lerna": "2.8.0",
     "prettier": "^1.10.2",
-    "uglify-js": "^3.3.7"
+    "uglify-js": "^3.3.9"
   }
 }

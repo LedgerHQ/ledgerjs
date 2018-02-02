@@ -85,6 +85,14 @@ yarn run lint
 
 ### Run Tests
 
+First of all, this ensure the libraries are correctly building, and passing lint and flow:
+
+```
+yarn test
+```
+
+**then to test on a real device...**
+
 Plug a device like the Nano S and open Bitcoin app.
 
 Then run the test and accept the commands on the devices for the tests to
@@ -109,6 +117,11 @@ deploy a new release
 ```
  yarn run publish
 ```
+
+then, go to [/releases](https://github.com/LedgerHQ/ledgerjs/releases) and create a release with change logs.
+
+
+**alternatively:**
 
 deploy a canary release (beta, etc)
 
