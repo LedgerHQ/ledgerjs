@@ -12,7 +12,11 @@ const MAX_SCRIPT_BLOCK = 50;
 const DEFAULT_LOCKTIME = 0;
 const DEFAULT_SEQUENCE = 0xffffffff;
 const SIGHASH_ALL = 1;
-
+const OP_PUSHDATA1 = 0x76;
+const OP_HASH160 = 0xa9;
+const HASH_SIZE = 0x14;
+const OP_EQUALVERIFY = 0x88;
+const OP_CHECKSIG = 0xac;
 /**
  * Bitcoin API.
  *
@@ -191,11 +195,8 @@ export default class Btc {
     sha = createHash("sha256");
     sha.update(hash);
     hash = sha.digest();
-    const look1 = indexLookup & 0xff;
-    const look2 = (indexLookup >> 8) & 0xff;
-    const look3 = (indexLookup >> 16) & 0xff;
-    const look4 = (indexLookup >> 24) & 0xff;
-    let data = Buffer.from([look1, look2, look3, look4]);
+    const data = Buffer.alloc(4);
+    data.writeUInt32LE(indexLookup, 0);
     const { outputs, locktime } = transaction;
     if (!outputs || !locktime) {
       throw new Error("getTrustedInputBIP143: locktime & outputs is expected");
@@ -570,12 +571,12 @@ btc.createPaymentTransactionNew(
               : !segwit
                 ? regularOutputs[i].script
                 : Buffer.concat([
-                    Buffer.from("76a914", "hex"),
+                    Buffer.from([OP_PUSHDATA1, OP_HASH160, HASH_SIZE]),
                     this.hashPublicKey(publicKeys[i]),
-                    Buffer.from("88ac", "hex")
+                    Buffer.from([OP_EQUALVERIFY, OP_CHECKSIG])
                   ]);
           return this.startUntrustedHashTransactionInput(
-            !segwit ? firstRun : false,
+            !segwit && firstRun,
             targetTransaction,
             trustedInputs,
             segwit
@@ -636,7 +637,7 @@ btc.createPaymentTransactionNew(
         ]);
 
         if (segwit) {
-          var witness = Buffer.from("", "hex");
+          var witness = Buffer.alloc(0);
           for (var i = 0; i < inputs.length; i++) {
             var tmpScriptData = Buffer.concat([
               Buffer.from("02", "hex"),
@@ -814,7 +815,7 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
     offset += 4;
     if (
       isSegwitSupported &&
-      (transaction[offset] == 0 && transaction[offset + 1] != 0)
+      (transaction[offset] === 0 && transaction[offset + 1] !== 0)
     ) {
       offset += 2;
       witness = true;
