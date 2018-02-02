@@ -55,17 +55,18 @@ var tests = [
 ];
 
 export default (Transport, timeout = 5000) => {
-  async function getDescriptorViaList() {
+  async function getTransportViaList() {
     const descriptors = await Transport.list();
     if (descriptors.length === 0) throw "No device found";
-    return descriptors[0];
+    return await Transport.open(descriptors[0], timeout);
   }
-  function getDescriptorViaListen() {
-    return new Promise((success, failure) => {
+  async function getTransportViaListen() {
+    const descriptor = await new Promise((success, failure) => {
       let t;
       const subscription = Transport.listen({
         next: e => {
           if (e.type === "add") {
+            subscription.unsubscribe();
             success(e.descriptor);
             clearTimeout(t);
           }
@@ -84,18 +85,26 @@ export default (Transport, timeout = 5000) => {
         failure("timeout");
       }, timeout);
     });
+    return await Transport.open(descriptor, timeout);
+  }
+  async function getTransportViaCreate() {
+    return await Transport.create(timeout);
   }
 
   return tests.reduce(async (p, step, i) => {
     await p;
-    const getDescriptor =
-      i % 2 === 0 ? getDescriptorViaList : getDescriptorViaListen;
+    // this will alternate between one of the 3 ways to create a transport
+    const getTransport = [
+      getTransportViaCreate,
+      getTransportViaList,
+      getTransportViaListen
+    ][i % 3];
+    let transport = await getTransport();
+    transport.setDebugMode(true);
+
     if (step.name) {
       console.info("Running test " + step.name);
     }
-    const descriptor = await getDescriptor();
-    const transport = await Transport.open(descriptor, timeout);
-    transport.setDebugMode(true);
     try {
       const result = await step.run(transport);
       if (result) {

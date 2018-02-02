@@ -227,23 +227,43 @@ TransportFoo.open(descriptor).then(transport => ...)
   };
 
   /**
-   * create() allows to open the first descriptor available or throw if there is none.
-   * **DEPRECATED**: use `list()` or `listen()` and `open()` instead.
+   * create() allows to open the first descriptor available or
+   * throw if there is none or if timeout is reached.
+   * This is a light helper, alternative to using listen() and open() (that you may need for any more advanced usecase)
+   * @example
+TransportFoo.create().then(transport => ...)
    */
-  static async create(
-    timeout?: number,
-    debug?: boolean = false
-  ): Promise<Transport<Descriptor>> {
-    console.warn(
-      this.name +
-        ".create is deprecated. Please use .list()/.listen() and .open() instead"
-    );
-    const descriptors = await this.list();
-    if (descriptors.length === 0) {
-      throw new TransportError("No device found", "NoDeviceFound");
+  static create(timeout?: number = 5000): Promise<Transport<Descriptor>> {
+    if (arguments.length > 1) {
+      console.warn(
+        this.name +
+          ".create: second parameter 'debugMode' has been dropped. instead, please use transport.setDebugMode(debug)"
+      );
     }
-    const transport = await this.open(descriptors[0], timeout);
-    transport.setDebugMode(debug);
-    return transport;
+    return new Promise((resolve, reject) => {
+      let found = false;
+      const timeoutId = setTimeout(() => {
+        sub.unsubscribe();
+        reject(new TransportError("Transport timeout", "timeout"));
+      }, timeout);
+      const sub = this.listen({
+        next: e => {
+          found = true;
+          sub.unsubscribe();
+          clearTimeout(timeoutId);
+          this.open(e.descriptor, timeout).then(resolve, reject);
+        },
+        error: e => {
+          clearTimeout(timeoutId);
+          reject(e);
+        },
+        complete: () => {
+          clearTimeout(timeoutId);
+          if (!found) {
+            reject(new TransportError("No device found", "NoDeviceFound"));
+          }
+        }
+      });
+    });
   }
 }
