@@ -264,7 +264,6 @@ TransportFoo.create().then(transport => ...)
           }
         }
       });
-      console.log("SUB", sub);
     });
   }
 }
