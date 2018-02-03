@@ -46,8 +46,9 @@ const normal64 = (base64: string) =>
  * TransportU2F.create().then(transport => ...)
  */
 export default class TransportU2F extends Transport<null> {
-  // this transport is not discoverable but we are going to guess if it is here with isSupported()
+  static isSupported = isSupported;
 
+  // this transport is not discoverable but we are going to guess if it is here with isSupported()
   static list = (): * =>
     isSupported().then(supported => (supported ? [null] : []));
 

@@ -93,6 +93,11 @@ export default class Transport<Descriptor> {
   debug: boolean = false;
 
   /**
+   * Statically check if a transport is supported on the user's platform/browser.
+   */
+  static +isSupported: () => Promise<boolean>;
+
+  /**
    * List once all available descriptors. For a better granularity, checkout `listen()`.
    * @return a promise of descriptors
    * @example

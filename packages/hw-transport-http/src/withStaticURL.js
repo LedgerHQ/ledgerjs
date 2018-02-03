@@ -10,6 +10,8 @@ export default (urlArg: ?string): Class<HttpTransport> => {
   const url = urlArg;
   if (!url) return HttpTransport; // by default, HttpTransport don't yield anything in list/listen
   class StaticHttpTransport extends HttpTransport {
+    static isSupported = HttpTransport.isSupported;
+
     static list = (): Promise<string[]> =>
       HttpTransport.open(url).then(() => [url], () => []);
 

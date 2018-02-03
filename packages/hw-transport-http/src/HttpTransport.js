@@ -8,6 +8,9 @@ export { withStaticURL };
  */
 // NOTE in the future we might want to do WebSocket, because we could have the disconnect lifecycle hooked.
 export default class HttpTransport extends Transport<string> {
+  static isSupported = (): Promise<boolean> =>
+    Promise.resolve(typeof fetch === "function");
+
   // this transport is not discoverable
   static list = (): * => Promise.resolve([]);
   static listen = (_observer: *) => ({
