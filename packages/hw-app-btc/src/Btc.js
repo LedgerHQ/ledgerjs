@@ -804,21 +804,27 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
    */
   splitTransaction(
     transactionHex: string,
-    isSegwitSupported: boolean
+    isSegwitSupported: ?boolean = false,
+    hasTimestamp?: boolean = false
   ): Transaction {
     const inputs = [];
     const outputs = [];
     var witness = false;
     let offset = 0;
+    let timestamp = Buffer.alloc(0);
     const transaction = Buffer.from(transactionHex, "hex");
     const version = transaction.slice(offset, offset + 4);
     offset += 4;
     if (
+      !hasTimestamp &&
       isSegwitSupported &&
       (transaction[offset] === 0 && transaction[offset + 1] !== 0)
     ) {
       offset += 2;
       witness = true;
+    }
+    if (hasTimestamp) {
+      timestamp = transaction.slice(offset, 4 + offset);
     }
     let varint = this.getVarint(transaction, offset);
     const numberInputs = varint[0];
@@ -853,7 +859,14 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
     } else {
       locktime = transaction.slice(offset, offset + 4);
     }
-    return { version, inputs, outputs, locktime, witness: witnessScript };
+    return {
+      version,
+      inputs,
+      outputs,
+      locktime,
+      witness: witnessScript,
+      timestamp
+    };
   }
 
   /**
