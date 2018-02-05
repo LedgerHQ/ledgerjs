@@ -54,6 +54,9 @@ export default class TransportNodeHid extends Transport<string> {
     this.debug = debug;
   }
 
+  static isSupported = (): Promise<boolean> =>
+    Promise.resolve(typeof HID.HID === "function");
+
   static list = (): Promise<string[]> =>
     Promise.resolve(getDevices().map(d => d.path));
 

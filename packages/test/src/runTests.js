@@ -54,7 +54,11 @@ var tests = [
   { name: "testXrp3", run: testXrp3 }
 ];
 
-export default (Transport, timeout = 5000) => {
+export default async (Transport, timeout = 5000) => {
+  const supported = await Transport.isSupported();
+  if (!supported) {
+    throw new Error("Transport.isSupported() is false");
+  }
   async function getTransportViaList() {
     const descriptors = await Transport.list();
     if (descriptors.length === 0) throw "No device found";

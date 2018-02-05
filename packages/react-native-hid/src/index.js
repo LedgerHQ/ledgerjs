@@ -8,6 +8,9 @@ type DeviceObj = {
 };
 
 export default class HIDTransport extends Transport<DeviceObj> {
+  static isSupported = (): Promise<boolean> =>
+    Promise.resolve(!!NativeModules.HID);
+
   static async list(): * {
     if (!NativeModules.HID) return Promise.resolve([]);
     const list = await NativeModules.HID.getDeviceList();

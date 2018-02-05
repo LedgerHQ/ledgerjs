@@ -116,6 +116,9 @@ async function send(characteristic, apdu, termination, debug) {
  * import BluetoothTransport from "@ledgerhq/react-native-hw-transport-ble";
  */
 export default class BluetoothTransport extends Transport<Device> {
+  static isSupported = (): Promise<boolean> =>
+    Promise.resolve(typeof BleManager === "function");
+
   static list = (): * => Promise.resolve([]);
 
   /**
