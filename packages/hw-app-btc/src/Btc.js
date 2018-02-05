@@ -6,12 +6,17 @@
 // - there are redundant code across apps (see Eth vs Btc). we might want to factorize it somewhere. also each app apdu call should be abstracted it out as an api
 import { foreach, doIf, asyncWhile, splitPath, eachSeries } from "./utils";
 import type Transport from "@ledgerhq/hw-transport";
+import createHash from "create-hash";
 
 const MAX_SCRIPT_BLOCK = 50;
 const DEFAULT_LOCKTIME = 0;
 const DEFAULT_SEQUENCE = 0xffffffff;
 const SIGHASH_ALL = 1;
-
+const OP_PUSHDATA1 = 0x76;
+const OP_HASH160 = 0xa9;
+const HASH_SIZE = 0x14;
+const OP_EQUALVERIFY = 0x88;
+const OP_CHECKSIG = 0xac;
 /**
  * Bitcoin API.
  *
@@ -27,46 +32,60 @@ export default class Btc {
     transport.setScrambleKey("BTC");
   }
 
+  hashPublicKey(buffer: Buffer) {
+    return createHash("rmd160")
+      .update(
+        createHash("sha256")
+          .update(buffer)
+          .digest()
+      )
+      .digest();
+  }
+
   /**
    * @param path a BIP 32 path
+   * @param segwit use segwit
    * @example
    * btc.getWalletPublicKey("44'/0'/0'/0").then(o => o.bitcoinAddress)
    */
   getWalletPublicKey(
-    path: string
+    path: string,
+    verify?: boolean = false,
+    segwit?: boolean = false
   ): Promise<{
     publicKey: string,
     bitcoinAddress: string,
     chainCode: string
   }> {
     const paths = splitPath(path);
+    var p1 = 0x00;
+    var p2 = 0x00;
+    if (verify === true) {
+      p1 = 0x01;
+    }
+    if (segwit == true) {
+      p2 = 0x01;
+    }
     const buffer = Buffer.alloc(1 + paths.length * 4);
     buffer[0] = paths.length;
     paths.forEach((element, index) => {
       buffer.writeUInt32BE(element, 1 + 4 * index);
     });
-    return this.transport
-      .send(0xe0, 0x40, 0x00, 0x00, buffer)
-      .then(response => {
-        const publicKeyLength = response[0];
-        const addressLength = response[1 + publicKeyLength];
-        const publicKey = response
-          .slice(1, 1 + publicKeyLength)
-          .toString("hex");
-        const bitcoinAddress = response
-          .slice(
-            1 + publicKeyLength + 1,
-            1 + publicKeyLength + 1 + addressLength
-          )
-          .toString("ascii");
-        const chainCode = response
-          .slice(
-            1 + publicKeyLength + 1 + addressLength,
-            1 + publicKeyLength + 1 + addressLength + 32
-          )
-          .toString("hex");
-        return { publicKey, bitcoinAddress, chainCode };
-      });
+    return this.transport.send(0xe0, 0x40, p1, p2, buffer).then(response => {
+      const publicKeyLength = response[0];
+      const addressLength = response[1 + publicKeyLength];
+      const publicKey = response.slice(1, 1 + publicKeyLength).toString("hex");
+      const bitcoinAddress = response
+        .slice(1 + publicKeyLength + 1, 1 + publicKeyLength + 1 + addressLength)
+        .toString("ascii");
+      const chainCode = response
+        .slice(
+          1 + publicKeyLength + 1 + addressLength,
+          1 + publicKeyLength + 1 + addressLength + 32
+        )
+        .toString("hex");
+      return { publicKey, bitcoinAddress, chainCode };
+    });
   }
 
   getTrustedInputRaw(
@@ -166,6 +185,29 @@ export default class Btc {
       .then(processOutputs);
   }
 
+  async getTrustedInputBIP143(indexLookup: number, transaction: Transaction) {
+    if (!transaction) {
+      throw new Error("getTrustedInputBIP143: missing tx");
+    }
+    let sha = createHash("sha256");
+    sha.update(this.serializeTransaction(transaction, true));
+    let hash = sha.digest();
+    sha = createHash("sha256");
+    sha.update(hash);
+    hash = sha.digest();
+    const data = Buffer.alloc(4);
+    data.writeUInt32LE(indexLookup, 0);
+    const { outputs, locktime } = transaction;
+    if (!outputs || !locktime) {
+      throw new Error("getTrustedInputBIP143: locktime & outputs is expected");
+    }
+    if (!outputs[indexLookup]) {
+      throw new Error("getTrustedInputBIP143: wrong index");
+    }
+    hash = Buffer.concat([hash, data, outputs[indexLookup].amount]);
+    return await hash.toString("hex");
+  }
+
   getVarint(data: Buffer, offset: number): [number, number] {
     if (data[offset] < 0xfd) {
       return [data[offset], 1];
@@ -189,13 +231,14 @@ export default class Btc {
   startUntrustedHashTransactionInputRaw(
     newTransaction: boolean,
     firstRound: boolean,
-    transactionData: Buffer
+    transactionData: Buffer,
+    segwit?: boolean = false
   ) {
     return this.transport.send(
       0xe0,
       0x44,
       firstRound ? 0x00 : 0x80,
-      newTransaction ? 0x00 : 0x80,
+      newTransaction ? (segwit ? 0x02 : 0x00) : 0x80,
       transactionData
     );
   }
@@ -203,7 +246,8 @@ export default class Btc {
   startUntrustedHashTransactionInput(
     newTransaction: boolean,
     transaction: Transaction,
-    inputs: Array<{ trustedInput: boolean, value: Buffer }>
+    inputs: Array<{ trustedInput: boolean, value: Buffer }>,
+    segwit?: boolean = false
   ) {
     let data = Buffer.concat([
       transaction.version,
@@ -212,19 +256,20 @@ export default class Btc {
     return this.startUntrustedHashTransactionInputRaw(
       newTransaction,
       true,
-      data
+      data,
+      segwit
     ).then(() => {
       let i = 0;
       return eachSeries(transaction.inputs, input => {
-        // TODO : segwit
         let prefix;
         if (inputs[i].trustedInput) {
-          prefix = Buffer.alloc(2);
-          prefix[0] = 0x01;
-          prefix[1] = inputs[i].value.length;
+          if (segwit) {
+            prefix = Buffer.from([0x02]);
+          } else {
+            prefix = Buffer.from([0x01, inputs[i].value.length]);
+          }
         } else {
-          prefix = Buffer.alloc(1);
-          prefix[0] = 0x00;
+          prefix = Buffer.from([0x00]);
         }
         data = Buffer.concat([
           prefix,
@@ -234,7 +279,8 @@ export default class Btc {
         return this.startUntrustedHashTransactionInputRaw(
           newTransaction,
           false,
-          data
+          data,
+          segwit
         ).then(() => {
           let scriptBlocks = [];
           let offset = 0;
@@ -265,7 +311,8 @@ export default class Btc {
             return this.startUntrustedHashTransactionInputRaw(
               newTransaction,
               false,
-              scriptBlock
+              scriptBlock,
+              segwit
             );
           }).then(() => {
             i++;
@@ -406,6 +453,7 @@ export default class Btc {
    * * output_index is the output in the transaction used as input for this UTXO (counting from 0)
    * * redeem script is the optional redeem script to use when consuming a Segregated Witness input
    * * sequence is the sequence number to use for this input (when using RBF), or non present
+   * @param segwit is a boolean indicating wether to use segwit or not
    * @param associatedKeysets is an array of BIP 32 paths pointing to the path to the private key used for each UTXO
    * @param changePath is an optional BIP 32 path pointing to the path to the public key used to compute the change address
    * @param outputScript is the hexadecimal serialized outputs of the transaction to sign
@@ -426,7 +474,8 @@ btc.createPaymentTransactionNew(
     changePath?: string,
     outputScriptHex: string,
     lockTime?: number = DEFAULT_LOCKTIME,
-    sigHashType?: number = SIGHASH_ALL
+    sigHashType?: number = SIGHASH_ALL,
+    segwit?: boolean = false
   ) {
     // Inputs are provided as arrays of [transaction, output_index, optional redeem script, optional sequence]
     // associatedKeysets are provided as arrays of [path]
@@ -444,43 +493,46 @@ btc.createPaymentTransactionNew(
       inputs: [],
       version: defaultVersion
     };
-
+    const getTrustedInputCall = segwit
+      ? this.getTrustedInputBIP143.bind(this)
+      : this.getTrustedInput.bind(this);
     const outputScript = Buffer.from(outputScriptHex, "hex");
 
-    return foreach(inputs, input =>
-      doIf(!resuming, () =>
-        this.getTrustedInput(input[1], input[0]).then(trustedInput => {
+    return foreach(inputs, input => {
+      return doIf(!resuming, () =>
+        getTrustedInputCall(input[1], input[0]).then(trustedInput => {
           trustedInputs.push({
             trustedInput: true,
             value: Buffer.from(trustedInput, "hex")
           });
         })
-      ).then(() => {
-        const { outputs } = input[0];
-        const index = input[1];
-        if (outputs && index <= outputs.length - 1) {
-          regularOutputs.push(outputs[index]);
-        }
-      })
-    )
-      .then(() => {
-        for (let i = 0; i < inputs.length; i++) {
-          let sequence = Buffer.alloc(4);
-          sequence.writeUInt32LE(
-            inputs[i].length >= 4 && typeof inputs[i][3] === "number"
-              ? inputs[i][3]
-              : DEFAULT_SEQUENCE,
-            0
-          );
-          targetTransaction.inputs.push({
-            script: nullScript,
-            prevout: nullPrevout,
-            sequence
-          });
-        }
-      })
-      .then(() => {
-        return doIf(!resuming, () =>
+      )
+        .then(() => {
+          const { outputs } = input[0];
+          const index = input[1];
+          if (outputs && index <= outputs.length - 1) {
+            regularOutputs.push(outputs[index]);
+          }
+        })
+        .then(() => {
+          for (let i = 0; i < inputs.length; i++) {
+            let sequence = Buffer.alloc(4);
+            sequence.writeUInt32LE(
+              inputs[i].length >= 4 && typeof inputs[i][3] === "number"
+                ? inputs[i][3]
+                : DEFAULT_SEQUENCE,
+              0
+            );
+            targetTransaction.inputs.push({
+              script: nullScript,
+              prevout: nullPrevout,
+              sequence
+            });
+          }
+        });
+    })
+      .then(() =>
+        doIf(!resuming, () =>
           // Collect public keys
           foreach(inputs, (input, i) =>
             this.getWalletPublicKey(associatedKeysets[i])
@@ -493,69 +545,113 @@ btc.createPaymentTransactionNew(
               );
             }
           })
-        );
-      })
+        )
+      )
       .then(() =>
+        doIf(segwit, () =>
+          // Do the first run with all inputs
+          this.startUntrustedHashTransactionInput(
+            true,
+            targetTransaction,
+            trustedInputs,
+            segwit
+          ).then(() =>
+            doIf(!resuming && typeof changePath != "undefined", function() {
+              return this.provideOutputFullChangePath(changePath);
+            }).then(() => this.hashOutputFull(outputScript))
+          )
+        )
+      )
+      .then(() =>
+        // Do the second run with the individual transaction
         foreach(inputs, (input, i) => {
           targetTransaction.inputs[i].script =
             inputs[i].length >= 3 && typeof inputs[i][2] === "string"
               ? Buffer.from(inputs[i][2], "hex")
-              : regularOutputs[i].script;
+              : !segwit
+                ? regularOutputs[i].script
+                : Buffer.concat([
+                    Buffer.from([OP_PUSHDATA1, OP_HASH160, HASH_SIZE]),
+                    this.hashPublicKey(publicKeys[i]),
+                    Buffer.from([OP_EQUALVERIFY, OP_CHECKSIG])
+                  ]);
           return this.startUntrustedHashTransactionInput(
-            firstRun,
+            !segwit && firstRun,
             targetTransaction,
-            trustedInputs
-          ).then(() =>
-            Promise.resolve()
-              .then(() => {
-                if (!resuming && typeof changePath !== "undefined") {
+            trustedInputs,
+            segwit
+          )
+            .then(() =>
+              doIf(!segwit, () =>
+                doIf(!resuming && typeof changePath != "undefined", function() {
                   return this.provideOutputFullChangePath(changePath);
-                }
-              })
-              .then(() => this.hashOutputFull(outputScript))
-              .then(() =>
-                this.signTransaction(
-                  associatedKeysets[i],
-                  lockTime,
-                  sigHashType
-                ).then(signature => {
-                  signatures.push(signature);
-                  targetTransaction.inputs[i].script = nullScript;
-                  if (firstRun) {
-                    firstRun = false;
-                  }
-                })
+                }).then(() => this.hashOutputFull(outputScript))
               )
-          );
+            )
+            .then(() =>
+              this.signTransaction(associatedKeysets[i], lockTime, sigHashType)
+            )
+            .then(signature => {
+              signatures.push(signature);
+              targetTransaction.inputs[i].script = nullScript;
+              if (firstRun) {
+                firstRun = false;
+              }
+            });
         })
       )
       .then(() => {
         // Populate the final input scripts
         for (let i = 0; i < inputs.length; i++) {
-          const signatureSize = Buffer.alloc(1);
-          const keySize = Buffer.alloc(1);
-          signatureSize[0] = signatures[i].length;
-          keySize[0] = publicKeys[i].length;
-          targetTransaction.inputs[i].script = Buffer.concat([
-            signatureSize,
-            signatures[i],
-            keySize,
-            publicKeys[i]
-          ]);
+          if (segwit) {
+            targetTransaction.inputs[i].script = Buffer.concat([
+              Buffer.from("160014", "hex"),
+              this.hashPublicKey(publicKeys[i])
+            ]);
+          } else {
+            const signatureSize = Buffer.alloc(1);
+            const keySize = Buffer.alloc(1);
+            signatureSize[0] = signatures[i].length;
+            keySize[0] = publicKeys[i].length;
+            targetTransaction.inputs[i].script = Buffer.concat([
+              signatureSize,
+              signatures[i],
+              keySize,
+              publicKeys[i]
+            ]);
+          }
+          let offset = segwit ? 0 : 4;
           targetTransaction.inputs[i].prevout = trustedInputs[i].value.slice(
-            4,
-            4 + 0x24
+            offset,
+            offset + 0x24
           );
         }
+        targetTransaction.witness = Buffer.alloc(0);
 
         const lockTimeBuffer = Buffer.alloc(4);
         lockTimeBuffer.writeUInt32LE(lockTime, 0);
 
-        const result = Buffer.concat([
-          this.serializeTransaction(targetTransaction),
-          outputScript,
-          lockTimeBuffer
+        var result = Buffer.concat([
+          this.serializeTransaction(targetTransaction, false),
+          outputScript
         ]);
+
+        if (segwit) {
+          var witness = Buffer.alloc(0);
+          for (var i = 0; i < inputs.length; i++) {
+            var tmpScriptData = Buffer.concat([
+              Buffer.from("02", "hex"),
+              Buffer.from([signatures[i].length]),
+              signatures[i],
+              Buffer.from([publicKeys[i].length]),
+              publicKeys[i]
+            ]);
+            witness = Buffer.concat([witness, tmpScriptData]);
+          }
+          result = Buffer.concat([result, witness]);
+        }
+
+        result = Buffer.concat([result, lockTimeBuffer]);
 
         return result.toString("hex");
       });
@@ -648,7 +744,8 @@ btc.signP2SHTransaction(
           return this.startUntrustedHashTransactionInput(
             firstRun,
             targetTransaction,
-            trustedInputs
+            trustedInputs,
+            false
           )
             .then(() => this.hashOutputFull(outputScript))
             .then(() =>
@@ -705,13 +802,24 @@ btc.signP2SHTransaction(
    * @example
 const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc4af009f4d4dc57ae597ed0420b71010000008a47304402201f36a12c240dbf9e566bc04321050b1984cd6eaf6caee8f02bb0bfec08e3354b022012ee2aeadcbbfd1e92959f57c15c1c6debb757b798451b104665aa3010569b49014104090b15bde569386734abf2a2b99f9ca6a50656627e77de663ca7325702769986cf26cc9dd7fdea0af432c8e2becc867c932e1b9dd742f2a108997c2252e2bdebffffffff0281b72e00000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88aca0860100000000001976a9144533f5fb9b4817f713c48f0bfe96b9f50c476c9b88ac00000000");
    */
-  splitTransaction(transactionHex: string): Transaction {
+  splitTransaction(
+    transactionHex: string,
+    isSegwitSupported: boolean
+  ): Transaction {
     const inputs = [];
     const outputs = [];
+    var witness = false;
     let offset = 0;
     const transaction = Buffer.from(transactionHex, "hex");
     const version = transaction.slice(offset, offset + 4);
     offset += 4;
+    if (
+      isSegwitSupported &&
+      (transaction[offset] === 0 && transaction[offset + 1] !== 0)
+    ) {
+      offset += 2;
+      witness = true;
+    }
     let varint = this.getVarint(transaction, offset);
     const numberInputs = varint[0];
     offset += varint[1];
@@ -738,8 +846,14 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
       offset += varint[0];
       outputs.push({ amount, script });
     }
-    let locktime = transaction.slice(offset, offset + 4);
-    return { version, inputs, outputs, locktime };
+    var witnessScript, locktime;
+    if (witness) {
+      witnessScript = transaction.slice(offset, -4);
+      locktime = transaction.slice(transaction.length - 4);
+    } else {
+      locktime = transaction.slice(offset, offset + 4);
+    }
+    return { version, inputs, outputs, locktime, witness: witnessScript };
   }
 
   /**
@@ -768,8 +882,10 @@ const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
 
   /**
    */
-  serializeTransaction(transaction: Transaction) {
+  serializeTransaction(transaction: Transaction, skipWitness: boolean) {
     let inputBuffer = Buffer.alloc(0);
+    let useWitness =
+      typeof transaction["witness"] != "undefined" && !skipWitness;
     transaction.inputs.forEach(input => {
       inputBuffer = Buffer.concat([
         inputBuffer,
@@ -785,11 +901,16 @@ const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
       typeof transaction.outputs !== "undefined" &&
       typeof transaction.locktime !== "undefined"
     ) {
-      outputBuffer = Buffer.concat([outputBuffer, transaction.locktime]);
+      outputBuffer = Buffer.concat([
+        outputBuffer,
+        (useWitness && transaction.witness) || Buffer.alloc(0),
+        transaction.locktime
+      ]);
     }
 
     return Buffer.concat([
       transaction.version,
+      useWitness ? Buffer.from("0001", "hex") : Buffer.alloc(0),
       this.createVarint(transaction.inputs.length),
       inputBuffer,
       outputBuffer
@@ -840,5 +961,6 @@ type Transaction = {
   version: Buffer,
   inputs: TransactionInput[],
   outputs?: TransactionOutput[],
-  locktime?: Buffer
+  locktime?: Buffer,
+  witness?: Buffer
 };
