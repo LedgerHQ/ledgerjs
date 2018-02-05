@@ -178,6 +178,7 @@ export default class Btc {
 
     const data = Buffer.concat([
       transaction.version,
+      transaction.timestamp || Buffer.alloc(0),
       this.createVarint(inputs.length)
     ]);
     return this.getTrustedInputRaw(data, indexLookup)
