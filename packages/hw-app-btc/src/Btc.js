@@ -994,5 +994,6 @@ type Transaction = {
   inputs: TransactionInput[],
   outputs?: TransactionOutput[],
   locktime?: Buffer,
-  witness?: Buffer
+  witness?: Buffer,
+  timestamp?: Buffer
 };
