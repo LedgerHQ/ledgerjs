@@ -251,6 +251,7 @@ export default class Btc {
   ) {
     let data = Buffer.concat([
       transaction.version,
+      transaction.timestamp || Buffer.alloc(0),
       this.createVarint(transaction.inputs.length)
     ]);
     return this.startUntrustedHashTransactionInputRaw(
