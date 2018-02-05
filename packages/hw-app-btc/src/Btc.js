@@ -907,7 +907,11 @@ const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
 
   /**
    */
-  serializeTransaction(transaction: Transaction, skipWitness: boolean) {
+  serializeTransaction(
+    transaction: Transaction,
+    skipWitness: boolean,
+    timestamp?: Buffer
+  ) {
     let inputBuffer = Buffer.alloc(0);
     let useWitness =
       typeof transaction["witness"] != "undefined" && !skipWitness;
@@ -935,6 +939,7 @@ const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
 
     return Buffer.concat([
       transaction.version,
+      timestamp ? timestamp : Buffer.alloc(0),
       useWitness ? Buffer.from("0001", "hex") : Buffer.alloc(0),
       this.createVarint(transaction.inputs.length),
       inputBuffer,
