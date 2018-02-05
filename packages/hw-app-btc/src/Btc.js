@@ -453,12 +453,13 @@ export default class Btc {
    * * output_index is the output in the transaction used as input for this UTXO (counting from 0)
    * * redeem script is the optional redeem script to use when consuming a Segregated Witness input
    * * sequence is the sequence number to use for this input (when using RBF), or non present
-   * @param segwit is a boolean indicating wether to use segwit or not
    * @param associatedKeysets is an array of BIP 32 paths pointing to the path to the private key used for each UTXO
    * @param changePath is an optional BIP 32 path pointing to the path to the public key used to compute the change address
    * @param outputScript is the hexadecimal serialized outputs of the transaction to sign
    * @param lockTime is the optional lockTime of the transaction to sign, or default (0)
    * @param sigHashType is the hash type of the transaction to sign, or default (all)
+   * @param segwit is a boolean indicating wether to use segwit or not
+   * @param initialTimestamp is the timestamp in ms when the function is called, not the one that the tx will include
    * @return the signed transaction ready to be broadcast
    * @example
 btc.createPaymentTransactionNew(
@@ -475,8 +476,11 @@ btc.createPaymentTransactionNew(
     outputScriptHex: string,
     lockTime?: number = DEFAULT_LOCKTIME,
     sigHashType?: number = SIGHASH_ALL,
-    segwit?: boolean = false
+    segwit?: boolean = false,
+    initialTimestamp?: number
   ) {
+    const hasTimestamp = initialTimestamp !== undefined;
+    let startTime = Date.now();
     // Inputs are provided as arrays of [transaction, output_index, optional redeem script, optional sequence]
     // associatedKeysets are provided as arrays of [path]
     const nullScript = Buffer.alloc(0);
@@ -497,6 +501,14 @@ btc.createPaymentTransactionNew(
       ? this.getTrustedInputBIP143.bind(this)
       : this.getTrustedInput.bind(this);
     const outputScript = Buffer.from(outputScriptHex, "hex");
+    let timestamp = Buffer.alloc(0);
+    if (hasTimestamp) {
+      timestamp = Buffer.alloc(4);
+      timestamp.writeUInt32LE(
+        Math.floor((initialTimestamp + (Date.now() - startTime)) / 1000),
+        0
+      );
+    }
 
     return foreach(inputs, input => {
       return doIf(!resuming, () =>
@@ -632,7 +644,7 @@ btc.createPaymentTransactionNew(
         lockTimeBuffer.writeUInt32LE(lockTime, 0);
 
         var result = Buffer.concat([
-          this.serializeTransaction(targetTransaction, false),
+          this.serializeTransaction(targetTransaction, false, timestamp),
           outputScript
         ]);
 
