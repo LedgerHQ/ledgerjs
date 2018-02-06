@@ -1,8 +1,5 @@
 //@flow
-import type { Unit } from "./types";
-console.warn(
-  "DEPRECATED: @ledgerhq/common/lib/data/fiat-units : use @ledgerhq/currencies instead"
-);
+import type { Unit } from "../types";
 // inspired by https://github.com/smirzaei/currency-formatter/blob/master/currencies.json
 const units: { [key: string]: Unit } = {
   AED: { name: "Emirati Dirham", code: "AED", symbol: "د.إ.‏", magnitude: 2 },
@@ -215,4 +212,16 @@ for (let u in units) {
   units[u].showAllDigits = true;
 }
 
-export default units;
+export type Fiat = $Keys<typeof units>;
+
+export function hasFiatUnit(fiat: string): boolean {
+  return fiat in units;
+}
+
+export function getFiatUnit(fiat: string): Unit {
+  const unit = units[fiat];
+  if (!unit) {
+    throw new Error(`unit "${fiat}" not found`);
+  }
+  return unit;
+}
