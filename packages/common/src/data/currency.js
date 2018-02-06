@@ -2,6 +2,10 @@
 import fiatUnits from "./fiat-units";
 import type { Currency, Unit, Rate } from "./types";
 
+console.warn(
+  "DEPRECATED: @ledgerhq/common/lib/data/currency : use @ledgerhq/currencies instead"
+);
+
 // This define utility to deal with currencies, units, countervalues
 
 type UnitValue = { value: number, unit: Unit };

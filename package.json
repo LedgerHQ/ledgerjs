@@ -8,7 +8,7 @@
   "scripts": {
     "preinstall": "node -e \"if (process.env.npm_execpath.indexOf('yarn') === -1) { console.log('\u001b[31mPlease use yarn\u001b[0m'); process.exit(1); }\"",
     "postinstall": "flow-mono create-symlinks packages/hw-transport/.flowconfig && flow-mono install-types --overwrite --ignoreDeps=peer || echo 'failed to setup flow-typed'",
-    "test": "npm run build && npm run lint && npm run flow && npm run prettier-diff && lerna run test",
+    "test": "yarn run build && lerna run test && yarn run lint && yarn run flow && yarn run prettier-diff",
     "test-node": "cd packages/test && yarn run test-node",
     "test-browser": "cd packages/test && yarn run test-browser",
     "documentation": "documentation build packages/hw-*/src/** packages/react-native-*/src/** --project-name '@ledgerhq/*' --project-version `node -e \"console.log(require('./lerna.json').version)\"` --project-homepage https://github.com/LedgerHQ/ledgerjs --config documentation.yml -g -f html -o packages/documentation-website/public/docs",
