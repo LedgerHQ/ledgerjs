@@ -1,6 +1,6 @@
 # Ledger DApp Ethereum starter kit
 
-Welcome to the DApp starter kit that helps you writing web app backed by Ethereum start contract and interacting with the Ledger device.
+Welcome to Ledger DApp starter kit, web app backed by Ethereum smart contract. Out of the box support of Ledger devices and MetaMask.
 
 This is a normal `create-react-app` project bootstrapped with a `truffle` project under `src/dapp`.
 
