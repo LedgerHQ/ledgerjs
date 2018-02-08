@@ -65,19 +65,13 @@ export default class TransportU2F extends Transport<null> {
     };
   };
 
-  timeoutSeconds: number;
   scrambleKey: Buffer;
-
-  constructor(timeoutSeconds?: number = 20) {
-    super();
-    this.timeoutSeconds = timeoutSeconds;
-  }
 
   /**
    * static function to create a new Transport from a connected Ledger device discoverable via U2F (browser support)
    */
-  static open(_: *, timeout?: number): Promise<TransportU2F> {
-    return Promise.resolve(new TransportU2F(timeout));
+  static open(): Promise<TransportU2F> {
+    return Promise.resolve(new TransportU2F());
   }
 
   exchange(apdu: Buffer): Promise<Buffer> {
@@ -95,7 +89,7 @@ export default class TransportU2F extends Transport<null> {
     if (this.debug) {
       console.log("=> " + apdu.toString("hex"));
     }
-    return sign(signRequest, this.timeoutSeconds).then(response => {
+    return sign(signRequest, this.exchangeTimeout / 1000).then(response => {
       const { signatureData } = response;
       if (typeof signatureData === "string") {
         const data = Buffer.from(normal64(signatureData), "base64");
