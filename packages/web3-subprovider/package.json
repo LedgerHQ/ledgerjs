@@ -1,0 +1,48 @@
+{
+  "name": "@ledgerhq/web3-subprovider",
+  "version": "2.3.0",
+  "description": "Ledger Hardware Wallet Ethereum Web3 subprovider",
+  "keywords": [
+    "Ledger",
+    "LedgerWallet",
+    "Ethereum",
+    "eth",
+    "NanoS",
+    "Blue",
+    "Hardware Wallet",
+    "web3",
+    "subprovider",
+    "provider"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LedgerHQ/ledgerjs"
+  },
+  "bugs": {
+    "url": "https://github.com/LedgerHQ/ledgerjs/issues"
+  },
+  "homepage": "https://github.com/LedgerHQ/ledgerjs",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "lib/index.js",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@ledgerhq/hw-app-eth": "^2.1.3",
+    "@ledgerhq/hw-transport": "^2.1.3",
+    "@ledgerhq/hw-transport-u2f": "^2.1.3",
+    "ethereumjs-tx": "^1.3.3",
+    "strip-hex-prefix": "^1.0.0",
+    "web3-provider-engine": "^13.6.0"
+  },
+  "devDependencies": {
+    "flow-bin": "^0.64.0",
+    "flow-typed": "^2.3.0"
+  },
+  "scripts": {
+    "flow": "flow",
+    "clean": "rm -rf lib/",
+    "build": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src && flow-copy-source -v src lib",
+    "watch": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src & flow-copy-source -w -v src lib"
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "create-dapp",
+  "version": "0.3.0",
+  "description": "Create React Ethereum apps, ready to use with Ledger and MetaMask",
+  "keywords": [
+    "dapp",
+    "ethereum",
+    "web3",
+    "truffle",
+    "ledger",
+    "react",
+    "ganache"
+  ],
+  "homepage": "https://github.com/ledgerhq/ledgerjs",
+  "bugs": "https://github.com/ledgerhq/ledgerjs/issues",
+  "license": "Apache-2.0",
+  "bin": "scripts/create-dapp"
+}

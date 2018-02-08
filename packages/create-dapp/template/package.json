@@ -1,0 +1,19 @@
+{
+  "name": "dapp",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-scripts": "1.1.0",
+    "truffle-contract": "^3.0.3",
+    "@ledgerhq/web3-subprovider": "^2.0.0",
+    "web3": "^1.0.0-beta.29"
+  },
+  "scripts": {
+    "start": "HTTPS=true react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test --env=jsdom",
+    "eject": "react-scripts eject"
+  }
+}

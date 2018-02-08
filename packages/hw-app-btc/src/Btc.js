@@ -178,6 +178,7 @@ export default class Btc {
 
     const data = Buffer.concat([
       transaction.version,
+      transaction.timestamp || Buffer.alloc(0),
       this.createVarint(inputs.length)
     ]);
     return this.getTrustedInputRaw(data, indexLookup)
@@ -251,6 +252,7 @@ export default class Btc {
   ) {
     let data = Buffer.concat([
       transaction.version,
+      transaction.timestamp || Buffer.alloc(0),
       this.createVarint(transaction.inputs.length)
     ]);
     return this.startUntrustedHashTransactionInputRaw(
@@ -453,12 +455,13 @@ export default class Btc {
    * * output_index is the output in the transaction used as input for this UTXO (counting from 0)
    * * redeem script is the optional redeem script to use when consuming a Segregated Witness input
    * * sequence is the sequence number to use for this input (when using RBF), or non present
-   * @param segwit is a boolean indicating wether to use segwit or not
    * @param associatedKeysets is an array of BIP 32 paths pointing to the path to the private key used for each UTXO
    * @param changePath is an optional BIP 32 path pointing to the path to the public key used to compute the change address
    * @param outputScript is the hexadecimal serialized outputs of the transaction to sign
    * @param lockTime is the optional lockTime of the transaction to sign, or default (0)
    * @param sigHashType is the hash type of the transaction to sign, or default (all)
+   * @param segwit is a boolean indicating wether to use segwit or not
+   * @param initialTimestamp is the timestamp in ms when the function is called, not the one that the tx will include
    * @return the signed transaction ready to be broadcast
    * @example
 btc.createPaymentTransactionNew(
@@ -475,8 +478,11 @@ btc.createPaymentTransactionNew(
     outputScriptHex: string,
     lockTime?: number = DEFAULT_LOCKTIME,
     sigHashType?: number = SIGHASH_ALL,
-    segwit?: boolean = false
+    segwit?: boolean = false,
+    initialTimestamp?: number
   ) {
+    const hasTimestamp = initialTimestamp !== undefined;
+    let startTime = Date.now();
     // Inputs are provided as arrays of [transaction, output_index, optional redeem script, optional sequence]
     // associatedKeysets are provided as arrays of [path]
     const nullScript = Buffer.alloc(0);
@@ -497,6 +503,14 @@ btc.createPaymentTransactionNew(
       ? this.getTrustedInputBIP143.bind(this)
       : this.getTrustedInput.bind(this);
     const outputScript = Buffer.from(outputScriptHex, "hex");
+    let timestamp = Buffer.alloc(0);
+    if (hasTimestamp) {
+      timestamp = Buffer.alloc(4);
+      timestamp.writeUInt32LE(
+        Math.floor((initialTimestamp + (Date.now() - startTime)) / 1000),
+        0
+      );
+    }
 
     return foreach(inputs, input => {
       return doIf(!resuming, () =>
@@ -632,7 +646,7 @@ btc.createPaymentTransactionNew(
         lockTimeBuffer.writeUInt32LE(lockTime, 0);
 
         var result = Buffer.concat([
-          this.serializeTransaction(targetTransaction, false),
+          this.serializeTransaction(targetTransaction, false, timestamp),
           outputScript
         ]);
 
@@ -804,21 +818,27 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
    */
   splitTransaction(
     transactionHex: string,
-    isSegwitSupported: boolean
+    isSegwitSupported: ?boolean = false,
+    hasTimestamp?: boolean = false
   ): Transaction {
     const inputs = [];
     const outputs = [];
     var witness = false;
     let offset = 0;
+    let timestamp = Buffer.alloc(0);
     const transaction = Buffer.from(transactionHex, "hex");
     const version = transaction.slice(offset, offset + 4);
     offset += 4;
     if (
+      !hasTimestamp &&
       isSegwitSupported &&
       (transaction[offset] === 0 && transaction[offset + 1] !== 0)
     ) {
       offset += 2;
       witness = true;
+    }
+    if (hasTimestamp) {
+      timestamp = transaction.slice(offset, 4 + offset);
     }
     let varint = this.getVarint(transaction, offset);
     const numberInputs = varint[0];
@@ -853,7 +873,14 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
     } else {
       locktime = transaction.slice(offset, offset + 4);
     }
-    return { version, inputs, outputs, locktime, witness: witnessScript };
+    return {
+      version,
+      inputs,
+      outputs,
+      locktime,
+      witness: witnessScript,
+      timestamp
+    };
   }
 
   /**
@@ -882,7 +909,11 @@ const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
 
   /**
    */
-  serializeTransaction(transaction: Transaction, skipWitness: boolean) {
+  serializeTransaction(
+    transaction: Transaction,
+    skipWitness: boolean,
+    timestamp?: Buffer
+  ) {
     let inputBuffer = Buffer.alloc(0);
     let useWitness =
       typeof transaction["witness"] != "undefined" && !skipWitness;
@@ -910,6 +941,7 @@ const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
 
     return Buffer.concat([
       transaction.version,
+      timestamp ? timestamp : Buffer.alloc(0),
       useWitness ? Buffer.from("0001", "hex") : Buffer.alloc(0),
       this.createVarint(transaction.inputs.length),
       inputBuffer,
@@ -962,5 +994,6 @@ type Transaction = {
   inputs: TransactionInput[],
   outputs?: TransactionOutput[],
   locktime?: Buffer,
-  witness?: Buffer
+  witness?: Buffer,
+  timestamp?: Buffer
 };
