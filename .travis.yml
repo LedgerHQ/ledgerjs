@@ -16,3 +16,5 @@ deploy:
   keep-history: true
   on:
     branch: master
+ notifications:
+    slack: ledger:P3qNX0wGSjiWtgq5KxF2kHDS
