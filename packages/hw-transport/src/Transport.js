@@ -91,6 +91,7 @@ TransportStatusError.prototype = new Error();
  */
 export default class Transport<Descriptor> {
   debug: boolean = false;
+  exchangeTimeout: number = 30000;
 
   /**
    * Statically check if a transport is supported on the user's platform/browser.
@@ -194,6 +195,13 @@ TransportFoo.open(descriptor).then(transport => ...)
   }
 
   /**
+   * Set a timeout (in milliseconds) for the exchange call. Only some transport might implement it. (e.g. U2F)
+   */
+  setExchangeTimeout(exchangeTimeout: number) {
+    this.exchangeTimeout = exchangeTimeout;
+  }
+
+  /**
    * wrapper on top of exchange to simplify work of the implementation.
    * @param cla
    * @param ins
@@ -238,7 +246,7 @@ TransportFoo.open(descriptor).then(transport => ...)
    * @example
 TransportFoo.create().then(transport => ...)
    */
-  static create(timeout?: number = 5000): Promise<Transport<Descriptor>> {
+  static create(openTimeout?: number = 5000): Promise<Transport<Descriptor>> {
     if (arguments.length > 1) {
       console.warn(
         this.name +
@@ -247,23 +255,23 @@ TransportFoo.create().then(transport => ...)
     }
     return new Promise((resolve, reject) => {
       let found = false;
-      const timeoutId = setTimeout(() => {
+      const openTimeoutId = setTimeout(() => {
         sub.unsubscribe();
-        reject(new TransportError("Transport timeout", "timeout"));
-      }, timeout);
+        reject(new TransportError("Transport openTimeout", "OpenTimeout"));
+      }, openTimeout);
       const sub = this.listen({
         next: e => {
           found = true;
           sub.unsubscribe();
-          clearTimeout(timeoutId);
-          this.open(e.descriptor, timeout).then(resolve, reject);
+          clearTimeout(openTimeoutId);
+          this.open(e.descriptor, openTimeout).then(resolve, reject);
         },
         error: e => {
-          clearTimeout(timeoutId);
+          clearTimeout(openTimeoutId);
           reject(e);
         },
         complete: () => {
-          clearTimeout(timeoutId);
+          clearTimeout(openTimeoutId);
           if (!found) {
             reject(new TransportError("No device found", "NoDeviceFound"));
           }
