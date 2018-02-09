@@ -839,6 +839,7 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
     }
     if (hasTimestamp) {
       timestamp = transaction.slice(offset, 4 + offset);
+      offset += 4;
     }
     let varint = this.getVarint(transaction, offset);
     const numberInputs = varint[0];
