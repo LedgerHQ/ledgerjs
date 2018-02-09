@@ -620,6 +620,7 @@ btc.createPaymentTransactionNew(
         // Populate the final input scripts
         for (let i = 0; i < inputs.length; i++) {
           if (segwit) {
+            targetTransaction.witness = Buffer.alloc(0);
             targetTransaction.inputs[i].script = Buffer.concat([
               Buffer.from("160014", "hex"),
               this.hashPublicKey(publicKeys[i])
@@ -642,7 +643,6 @@ btc.createPaymentTransactionNew(
             offset + 0x24
           );
         }
-        targetTransaction.witness = Buffer.alloc(0);
 
         const lockTimeBuffer = Buffer.alloc(4);
         lockTimeBuffer.writeUInt32LE(lockTime, 0);
