@@ -16,4 +16,7 @@ npm v create-dapp dist.tarball | xargs curl -s | tar -xz
 cd - 1> /dev/null
 cd $APP_NAME
 cp -R $TMP_FOLDER/package/template/. .
+npm i
 echo "Project $APP_NAME has been successfully bootstrapped."
+echo ""
+echo "You can now cd into '$APP_NAME' and read the README instructions."
