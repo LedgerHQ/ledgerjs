@@ -97,6 +97,8 @@ export default async function createLedgerSubprovider(
 
   const pathComponents = obtainPathComponentsFromDerivationPath(path);
 
+  const addressToPathMap = {};
+
   async function getAccounts() {
     const addresses = {};
     for (let i = accountsOffset; i < accountsOffset + accountsLength; i++) {
@@ -104,11 +106,14 @@ export default async function createLedgerSubprovider(
         pathComponents.basePath + (pathComponents.index + i).toString();
       const address = await eth.getAddress(path, askConfirm, false);
       addresses[path] = address.address;
+      addressToPathMap[address.address] = path;
     }
     return addresses;
   }
 
   async function signPersonalMessage(msgData) {
+    const path = addressToPathMap[msgData.from];
+    if (!path) throw new Error("address unknown '" + msgData.from + "'");
     const result = await eth.signPersonalMessage(
       path,
       stripHexPrefix(msgData.data)
@@ -122,6 +127,8 @@ export default async function createLedgerSubprovider(
   }
 
   async function signTransaction(txData) {
+    const path = addressToPathMap[txData.from];
+    if (!path) throw new Error("address unknown '" + txData.from + "'");
     const tx = new EthereumTx(txData);
 
     // Set the EIP155 bits
