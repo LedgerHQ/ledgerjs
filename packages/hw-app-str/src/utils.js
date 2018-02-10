@@ -81,7 +81,7 @@ export function verifyEd25519Signature (
 
 export function hash(data) {
   let hasher = new sha256();
-  hasher.update(data, 'utf8');
+  hasher.update(data, "utf8");
   return hasher.digest();
 }
 
@@ -92,8 +92,8 @@ export function checkStellarBip32Path(
       + " The Stellar app is authorized only for paths starting with 44'/148'."
       + " Example: 44'/148'/0'");
   }
-  path.split('/').forEach(function (element) {
-    if (!element.toString().endsWith('\'')) {
+  path.split("/").forEach(function (element) {
+    if (!element.toString().endsWith("'")) {
       throw new Error("Detected a non-hardened path element in requested BIP32 path." +
         " Non-hardended paths are not supported at this time. Please use an all-hardened path." +
         " Example: 44'/148'/0'");

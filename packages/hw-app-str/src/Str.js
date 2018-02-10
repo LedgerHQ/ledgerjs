@@ -81,7 +81,7 @@ export default class Str {
   pathElts.forEach((element, index) => {
     buffer.writeUInt32BE(element, 1 + 4 * index);
   });
-  let verifyMsg = Buffer.from('via lumina', 'ascii');
+  let verifyMsg = Buffer.from("via lumina", "ascii");
   buffer = Buffer.concat([buffer, verifyMsg]);
   return this.transport
     .send(CLA, INS_GET_PK, boolValidate ? 0x01 : 0x00, boolDisplay ? 0x01 : 0x00, buffer)
@@ -94,12 +94,12 @@ export default class Str {
       if (boolValidate) {
         let signature = response.slice(offset, offset + 64);
         if (!verifyEd25519Signature(verifyMsg, signature, rawPublicKey)) {
-          throw new Error('Bad signature. Keypair is invalid. Please report this.');
+          throw new Error("Bad signature. Keypair is invalid. Please report this.");
         }
       }
       return {
         publicKey: publicKey
-      }
+      };
     });
   }
 
@@ -169,7 +169,7 @@ export default class Str {
         // pre-v2 app version: fall back on hash signing
         return this.signHash(path, hash(transaction));
       } else {
-        throw new Error('Transaction approval request was rejected');
+        throw new Error("Transaction approval request was rejected");
       }
     });
   }
@@ -204,7 +204,7 @@ export default class Str {
             signature: signature
           };
         } else {
-          throw new Error('Transaction approval request was rejected');
+          throw new Error("Transaction approval request was rejected");
         }
       });
   }
