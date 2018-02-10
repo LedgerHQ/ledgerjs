@@ -31,7 +31,14 @@ const signStrTransaction = async () => {
   const transport = await Transport.create();
   const str = new Str(transport);
   const result = await str.signTransaction("44'/148'/0'", transaction.signatureBase());
-  return result.signature;
+  
+  // add signature to transaction
+  const keyPair = StellarSdk.Keypair.fromPublicKey(publicKey);
+  const hint = keyPair.signatureHint();
+  const decorated = new StellarSdk.xdr.DecoratedSignature({hint: hint, signature: signature});
+  transaction.signatures.push(decorated);
+  
+  return transaction;
 }
 signStrTransaction().then(s => console.log(s.toString('hex')));
 ```

@@ -15,63 +15,63 @@ import testStr2 from "./testStr2";
 import testStr3 from "./testStr3";
 
 var tests = [
-  { name: "testBtc", run: testBtc },
-  { name: "testBtc2", run: testBtc2 },
-  { name: "testBtc3", run: testBtc3 },
-  { name: "testBtc4", run: testBtc4 },
-  { name: "testBtc5", run: testBtc5 },
-  {
-    run: () =>
-      new Promise(resolve => {
-        var s = 15;
-        console.info("You have " + s + " seconds to switch to eth app ...");
-        var interval = setInterval(() => {
-          if (--s) {
-            console.log(s + " ...");
-          } else {
-            clearInterval(interval);
-            resolve();
-          }
-        }, 1000);
-      })
-  },
-  { name: "testEth", run: testEth },
-  { name: "testEth2", run: testEth2 },
-  { name: "testEth3", run: testEth3 },
-  { name: "testEth4", run: testEth4 },
-  {
-    run: () =>
-      new Promise(resolve => {
-        var s = 15;
-        console.info("You have " + s + " seconds to switch to xrp app ...");
-        var interval = setInterval(() => {
-          if (--s) {
-            console.log(s + " ...");
-          } else {
-            clearInterval(interval);
-            resolve();
-          }
-        }, 1000);
-      })
-  },
-  { name: "testXrp", run: testXrp },
-  { name: "testXrp2", run: testXrp2 },
-  { name: "testXrp3", run: testXrp3 },
-  {
-    run: () =>
-      new Promise(resolve => {
-        var s = 15;
-        console.info("You have " + s + " seconds to switch to Stellar app ...");
-        var interval = setInterval(() => {
-          if (--s) {
-            console.log(s + " ...");
-          } else {
-            clearInterval(interval);
-            resolve();
-          }
-        }, 1000);
-      })
-  },
+  // { name: "testBtc", run: testBtc },
+  // { name: "testBtc2", run: testBtc2 },
+  // { name: "testBtc3", run: testBtc3 },
+  // { name: "testBtc4", run: testBtc4 },
+  // { name: "testBtc5", run: testBtc5 },
+  // {
+  //   run: () =>
+  //     new Promise(resolve => {
+  //       var s = 15;
+  //       console.info("You have " + s + " seconds to switch to eth app ...");
+  //       var interval = setInterval(() => {
+  //         if (--s) {
+  //           console.log(s + " ...");
+  //         } else {
+  //           clearInterval(interval);
+  //           resolve();
+  //         }
+  //       }, 1000);
+  //     })
+  // },
+  // { name: "testEth", run: testEth },
+  // { name: "testEth2", run: testEth2 },
+  // { name: "testEth3", run: testEth3 },
+  // { name: "testEth4", run: testEth4 },
+  // {
+  //   run: () =>
+  //     new Promise(resolve => {
+  //       var s = 15;
+  //       console.info("You have " + s + " seconds to switch to xrp app ...");
+  //       var interval = setInterval(() => {
+  //         if (--s) {
+  //           console.log(s + " ...");
+  //         } else {
+  //           clearInterval(interval);
+  //           resolve();
+  //         }
+  //       }, 1000);
+  //     })
+  // },
+  // { name: "testXrp", run: testXrp },
+  // { name: "testXrp2", run: testXrp2 },
+  // { name: "testXrp3", run: testXrp3 },
+  // {
+  //   run: () =>
+  //     new Promise(resolve => {
+  //       var s = 15;
+  //       console.info("You have " + s + " seconds to switch to Stellar app ...");
+  //       var interval = setInterval(() => {
+  //         if (--s) {
+  //           console.log(s + " ...");
+  //         } else {
+  //           clearInterval(interval);
+  //           resolve();
+  //         }
+  //       }, 1000);
+  //     })
+  // },
   { name: "testStr", run: testStr },
   { name: "testStr2", run: testStr2 },
   { name: "testStr3", run: testStr3 }
