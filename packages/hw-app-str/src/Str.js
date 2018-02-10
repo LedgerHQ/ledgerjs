@@ -17,7 +17,7 @@
 //@flow
 
 import type Transport from "@ledgerhq/hw-transport";
-import { splitPath, foreach, encodeEd25519PublicKey, verifyEd25519Signature, checkStellarBip32Path } from "./utils";
+import { splitPath, foreach, encodeEd25519PublicKey, verifyEd25519Signature, checkStellarBip32Path, hash } from "./utils";
 
 const CLA = 0xe0;
 const INS_GET_PK = 0x02;
@@ -62,13 +62,13 @@ export default class Str {
   }
 
   /**
-   * get Ethereum address for a given BIP 32 path.
+   * get Stellar public key for a given BIP 32 path.
    * @param path a path in BIP 32 format
+   * @option boolValidate optionally enable key pair validation
    * @option boolDisplay optionally enable or not the display
-   * @option boolChaincode optionally enable or not the chaincode request
-   * @return an object with a publicKey, address and (optionally) chainCode
+   * @return an object with the publicKey
    * @example
-   * eth.getAddress("44'/60'/0'/0'/0").then(o => o.address)
+   * str.getPublicKey("44'/148'/0'").then(o => o.publicKey)
    */
   getPublicKey(
     path: string,
@@ -84,30 +84,33 @@ export default class Str {
   let verifyMsg = Buffer.from('via lumina', 'ascii');
   buffer = Buffer.concat([buffer, verifyMsg]);
   return this.transport
-    .send(
-      CLA,
-      INS_GET_PK,
-      boolValidate ? 0x01 : 0x00,
-      boolDisplay ? 0x01 : 0x00,
-      buffer
-    )
+    .send(CLA, INS_GET_PK, boolValidate ? 0x01 : 0x00, boolDisplay ? 0x01 : 0x00, buffer)
     .then(response => {
-      let result = {};
-      response = Buffer.from(response, 'hex');
+      // response = Buffer.from(response, 'hex');
       let offset = 0;
       let rawPublicKey = response.slice(offset, offset + 32);
       offset += 32;
-      result.publicKey = encodeEd25519PublicKey(rawPublicKey);
+      let publicKey = encodeEd25519PublicKey(rawPublicKey);
       if (boolValidate) {
         let signature = response.slice(offset, offset + 64);
         if (!verifyEd25519Signature(verifyMsg, signature, rawPublicKey)) {
           throw new Error('Bad signature. Keypair is invalid. Please report this.');
         }
       }
-      return result;
+      return {
+        publicKey: publicKey
+      }
     });
   }
 
+  /**
+   * sign a Stellar transaction.
+   * @param path a path in BIP 32 format
+   * @param transaction signature base of the transaction to sign
+   * @return an object with the signature and the status
+   * @example
+   * str.signTransaction("44'/148'/0'", signatureBase).then(o => o.signature)
+   */
   signTransaction(
     path: string,
     transaction: Buffer
@@ -145,7 +148,13 @@ export default class Str {
   }
   return foreach(apdus, (data, i) =>
       this.transport
-        .send(CLA, INS_SIGN_TX, i === 0 ? P1_FIRST_APDU : P1_MORE_APDU, i === apdus.length-1 ? P2_LAST_APDU : P2_MORE_APDU, data)
+        .send(
+          CLA,
+          INS_SIGN_TX,
+          i === 0 ? P1_FIRST_APDU : P1_MORE_APDU,
+          i === apdus.length-1 ? P2_LAST_APDU : P2_MORE_APDU,
+          data,
+          [SW_OK, SW_CANCEL, SW_UNKNOWN_OP])
         .then(apduResponse => {
           response = apduResponse;
       })
@@ -154,46 +163,50 @@ export default class Str {
       if (status === SW_OK) {
         let signature = Buffer.from(response.slice(0, response.length - 2));
         return {
-          status: status,
           signature: signature
         };
-      }
-      else {
-        return {
-          status: status
-        };
+      } else if (status === SW_UNKNOWN_OP) {
+        // pre-v2 app version: fall back on hash signing
+        return this.signHash(path, hash(transaction));
+      } else {
+        throw new Error('Transaction approval request was rejected');
       }
     });
   }
 
-  // deprecated
-  signTransactionHash(
+  /**
+   * @deprecated
+   * sign a Stellar transaction hash.
+   * @param path a path in BIP 32 format
+   * @param hash hash of the transaction to sign
+   * @return an object with the signature
+   * @example
+   * str.signHash("44'/148'/0'", hash).then(o => o.signature)
+   */
+  signHash(
     path: string,
     hash: Buffer
   ): Promise<{ signature: Buffer }> {
-
     let pathElts = splitPath(path);
     let buffer = Buffer.alloc(1 + pathElts.length * 4);
-    buffer[0] = splitPath.length;
-    splitPath.forEach(function (element, index) {
-      buffer.writeUInt32BE(element, 6 + 4 * index);
+    buffer[0] = pathElts.length;
+    pathElts.forEach(function (element, index) {
+      buffer.writeUInt32BE(element, 1 + 4 * index);
     });
     buffer = Buffer.concat([buffer, hash]);
     return this.transport
-      .send(CLA, INS_SIGN_TX_HASH, 0x00, 0x00, buffer)
+      .send(CLA, INS_SIGN_TX_HASH, 0x00, 0x00, buffer, [SW_OK, SW_CANCEL])
       .then(response => {
         let status = Buffer.from(response.slice(response.length - 2)).readUInt16BE(0);
         if (status === SW_OK) {
           let signature = Buffer.from(response.slice(0, response.length - 2));
           return {
-            status: status,
             signature: signature
           };
         } else {
-          return {
-            status: status
-          };
+          throw new Error('Transaction approval request was rejected');
         }
       });
-    }
+  }
+
 }

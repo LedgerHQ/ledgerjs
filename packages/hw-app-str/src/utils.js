@@ -19,6 +19,7 @@
 import crc16xmodem from "crc/lib/crc16_xmodem";
 import base32 from "base32.js";
 import nacl from "tweetnacl";
+import {sha256} from "sha.js";
 
 // TODO use bip32-path library
 export function splitPath(path: string): number[] {
@@ -76,6 +77,12 @@ export function verifyEd25519Signature (
   signature = new Uint8Array(signature.toJSON().data);
   publicKey = new Uint8Array(publicKey.toJSON().data);
   return nacl.sign.detached.verify(data, signature, publicKey);
+}
+
+export function hash(data) {
+  let hasher = new sha256();
+  hasher.update(data, 'utf8');
+  return hasher.digest();
 }
 
 export function checkStellarBip32Path(

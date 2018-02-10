@@ -28,7 +28,8 @@
     "@ledgerhq/hw-transport": "^3.0.0",
     "base32.js": "^0.1.0",
     "crc": "^3.5.0",
-    "tweetnacl": "^1.0.0"
+    "tweetnacl": "^1.0.0",
+    "sha.js": "^2.3.6"
   },
   "devDependencies": {
     "flow-bin": "^0.64.0",
