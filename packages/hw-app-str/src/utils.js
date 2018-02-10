@@ -73,13 +73,14 @@ export function verifyEd25519Signature (
   signature: Buffer,
   publicKey: Buffer
 ): boolean {
-  data      = new Uint8Array(data.toJSON().data);
-  signature = new Uint8Array(signature.toJSON().data);
-  publicKey = new Uint8Array(publicKey.toJSON().data);
-  return nacl.sign.detached.verify(data, signature, publicKey);
+  return nacl.sign.detached.verify(
+    new Uint8Array(data.toJSON().data),
+    new Uint8Array(signature.toJSON().data),
+    new Uint8Array(publicKey.toJSON().data)
+  );
 }
 
-export function hash(data) {
+export function hash(data: Buffer) {
   let hasher = new sha256();
   hasher.update(data, "utf8");
   return hasher.digest();
