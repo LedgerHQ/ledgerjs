@@ -1,1 +1,12 @@
-/Users/unico/Code/lenondupe/ledgerjs/packages/hw-transport/.flowconfig
+[ignore]
+
+[include]
+
+[libs]
+flow-typed
+
+[lints]
+
+[options]
+
+[strict]
