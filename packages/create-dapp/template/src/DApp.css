@@ -5,3 +5,8 @@
   margin: 20px 0;
   color: #f66;
 }
+.DApp input,
+.DApp button {
+  font-size: inherit;
+  margin: 0 1em;
+}

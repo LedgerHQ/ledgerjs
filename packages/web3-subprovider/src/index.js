@@ -62,6 +62,8 @@ engine.addProvider(new RpcSubprovider({ rpcUrl }));
 engine.start();
 const web3 = new Web3(engine);
  */
+// TODO in next major, we'll make createLedgerSubprovider take a transport instance as first argument
+// as we don't want to depends on U2F and move the transport creation logic on user land
 export default async function createLedgerSubprovider(
   options?: SubproviderOptions
 ): Promise<HookedWalletSubprovider> {
