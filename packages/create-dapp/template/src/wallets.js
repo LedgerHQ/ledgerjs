@@ -1,5 +1,6 @@
 // @flow
 import Web3 from "web3";
+import TransportU2F from "@ledgerhq/hw-transport-u2f";
 import createLedgerSubprovider from "@ledgerhq/web3-subprovider";
 import ProviderEngine from "web3-provider-engine";
 import FetchSubprovider from "web3-provider-engine/subproviders/fetch";
@@ -23,7 +24,8 @@ export default [
     // create a web3 with the ledger device
     getWeb3: async () => {
       const engine = new ProviderEngine();
-      const ledger = await createLedgerSubprovider({
+      const getTransport = () => TransportU2F.create();
+      const ledger = await createLedgerSubprovider(getTransport, {
         networkId,
         accountsLength: 5
       });
