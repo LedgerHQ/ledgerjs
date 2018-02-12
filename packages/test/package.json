@@ -1,11 +1,11 @@
 {
   "private": true,
   "name": "@ledgerhq/test",
-  "version": "3.0.2",
+  "version": "3.0.8",
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-app-btc": "^3.0.2",
+    "@ledgerhq/hw-app-btc": "^3.0.8",
     "@ledgerhq/hw-app-eth": "^3.0.0",
     "@ledgerhq/hw-app-xrp": "^3.0.0",
     "@ledgerhq/hw-transport-node-hid": "^3.0.0",
