@@ -246,37 +246,44 @@ TransportFoo.open(descriptor).then(transport => ...)
    * @example
 TransportFoo.create().then(transport => ...)
    */
-  static create(openTimeout?: number = 5000): Promise<Transport<Descriptor>> {
-    if (arguments.length > 1) {
-      console.warn(
-        this.name +
-          ".create: second parameter 'debugMode' has been dropped. instead, please use transport.setDebugMode(debug)"
-      );
-    }
+  static create(
+    openTimeout?: number = 3000,
+    listenTimeout?: number = 10000
+  ): Promise<Transport<Descriptor>> {
     return new Promise((resolve, reject) => {
       let found = false;
-      const openTimeoutId = setTimeout(() => {
+      const listenTimeoutId = setTimeout(() => {
         sub.unsubscribe();
-        reject(new TransportError("Transport openTimeout", "OpenTimeout"));
-      }, openTimeout);
+        reject(
+          new TransportError(this.ErrorMessage_ListenTimeout, "ListenTimeout")
+        );
+      }, listenTimeout);
       const sub = this.listen({
         next: e => {
           found = true;
           sub.unsubscribe();
-          clearTimeout(openTimeoutId);
+          clearTimeout(listenTimeoutId);
           this.open(e.descriptor, openTimeout).then(resolve, reject);
         },
         error: e => {
-          clearTimeout(openTimeoutId);
+          clearTimeout(listenTimeoutId);
           reject(e);
         },
         complete: () => {
-          clearTimeout(openTimeoutId);
+          clearTimeout(listenTimeoutId);
           if (!found) {
-            reject(new TransportError("No device found", "NoDeviceFound"));
+            reject(
+              new TransportError(
+                this.ErrorMessage_NoDeviceFound,
+                "NoDeviceFound"
+              )
+            );
           }
         }
       });
     });
   }
+
+  static ErrorMessage_ListenTimeout = "No Ledger device found (timeout)";
+  static ErrorMessage_NoDeviceFound = "No Ledger device found";
 }
