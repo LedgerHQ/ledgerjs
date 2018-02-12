@@ -84,10 +84,22 @@ export default class DApp extends Component<
     if (!simpleStorage) return;
     this.setState({ error: null, pending: true });
     try {
+      // estimate the gas limit cost we will need for the contract call
+      const estimatedGas = await simpleStorage.set.estimateGas(
+        localInputValue,
+        {
+          from: account
+        }
+      );
+      // and add 50% to make sure it does not go out of gas
+      const gasCost = 1.5 * estimatedGas;
+      // the gas price is configurable by the user. converting it in wei
+      const gasPrice = gasPriceGWEI * 1000000000;
       // call the set function on the contract with our new value
       const res = await simpleStorage.set(localInputValue, {
         from: account,
-        gasPrice: gasPriceGWEI * 1000000000
+        gasPrice,
+        gasCost
       });
       // NB at this stage we don't have the transaction confirmed yet,
       // but we move on by optimistically setting the new value
