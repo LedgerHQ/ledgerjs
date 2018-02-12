@@ -14,9 +14,7 @@ export default class DApp extends Component<
   {
     web3: Web3,
     account: string,
-    onLogout: () => void,
-    error: ?Error,
-    pending: boolean
+    onLogout: () => void
   },
   *
 > {

@@ -461,7 +461,7 @@ export default class Btc {
    * @param lockTime is the optional lockTime of the transaction to sign, or default (0)
    * @param sigHashType is the hash type of the transaction to sign, or default (all)
    * @param segwit is a boolean indicating wether to use segwit or not
-   * @param initialTimestamp is the timestamp in ms when the function is called, not the one that the tx will include
+   * @param initialTimestamp is the timestamp when the function is called, not the one that the tx will include
    * @return the signed transaction ready to be broadcast
    * @example
 btc.createPaymentTransactionNew(
@@ -497,20 +497,13 @@ btc.createPaymentTransactionNew(
     const resuming = false;
     const targetTransaction: Transaction = {
       inputs: [],
-      version: defaultVersion
+      version: defaultVersion,
+      timestamp: Buffer.alloc(0)
     };
     const getTrustedInputCall = segwit
       ? this.getTrustedInputBIP143.bind(this)
       : this.getTrustedInput.bind(this);
     const outputScript = Buffer.from(outputScriptHex, "hex");
-    let timestamp = Buffer.alloc(0);
-    if (hasTimestamp) {
-      timestamp = Buffer.alloc(4);
-      timestamp.writeUInt32LE(
-        Math.floor((initialTimestamp + (Date.now() - startTime)) / 1000),
-        0
-      );
-    }
 
     return foreach(inputs, input => {
       return doIf(!resuming, () =>
@@ -561,6 +554,15 @@ btc.createPaymentTransactionNew(
           })
         )
       )
+      .then(() => {
+        if (hasTimestamp) {
+          targetTransaction.timestamp = Buffer.alloc(4);
+          targetTransaction.timestamp.writeUInt32LE(
+            Math.floor(initialTimestamp + (Date.now() - startTime) / 1000),
+            0
+          );
+        }
+      })
       .then(() =>
         doIf(segwit, () =>
           // Do the first run with all inputs
@@ -618,6 +620,7 @@ btc.createPaymentTransactionNew(
         // Populate the final input scripts
         for (let i = 0; i < inputs.length; i++) {
           if (segwit) {
+            targetTransaction.witness = Buffer.alloc(0);
             targetTransaction.inputs[i].script = Buffer.concat([
               Buffer.from("160014", "hex"),
               this.hashPublicKey(publicKeys[i])
@@ -640,13 +643,16 @@ btc.createPaymentTransactionNew(
             offset + 0x24
           );
         }
-        targetTransaction.witness = Buffer.alloc(0);
 
         const lockTimeBuffer = Buffer.alloc(4);
         lockTimeBuffer.writeUInt32LE(lockTime, 0);
 
         var result = Buffer.concat([
-          this.serializeTransaction(targetTransaction, false, timestamp),
+          this.serializeTransaction(
+            targetTransaction,
+            false,
+            targetTransaction.timestamp
+          ),
           outputScript
         ]);
 
