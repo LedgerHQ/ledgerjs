@@ -2,10 +2,16 @@
 import React, { Component } from "react";
 import type Web3 from "web3";
 import DApp from "./DApp";
+import DAppReadOnly from "./DAppReadOnly";
 import Onboarding from "./Onboarding";
 import availableWallets from "./wallets";
 import "./App.css";
 
+/**
+ * In our sample architecture, authentification is required to access the dapp.
+ * However, DAppReadOnly example shows we can also read the contract without auth.
+ * You might want to change and adapt this architecture to your own need.
+ */
 export default class App extends Component<
   {},
   { web3: ?Web3, account: ?string }
@@ -28,7 +34,10 @@ export default class App extends Component<
     return (
       <div className="App">
         <header>
-          <h1>React DApp Sample</h1>
+          <h1>React DApp sample</h1>
+          <h2>
+            <DAppReadOnly />
+          </h2>
         </header>
         <div className="App-body">
           {account && web3 ? (
