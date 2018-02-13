@@ -19,11 +19,13 @@ export default class DApp extends Component<
   *
 > {
   state = {
-    storageValue: 0,
-    localInputValue: 0,
+    storageValue: 1,
+    localInputValue: 1,
+    gasPriceGWEI: 1,
     simpleStorage: null,
     error: null,
-    pending: false
+    pending: false,
+    tx: null
   };
 
   valueChangedEvent: *;
@@ -37,7 +39,8 @@ export default class DApp extends Component<
 
     // retrieve the value of the contract
     const result = await simpleStorage.get();
-    const storageValue = result.c[0];
+    // in truffle-contract, uint values are BigNumber instance so need to convert in our example:
+    const storageValue = result.toNumber();
     this.setState({
       simpleStorage,
       storageValue,
@@ -50,7 +53,10 @@ export default class DApp extends Component<
       if (error) {
         this.setState({ error });
       } else {
-        this.setState({ error: null, storageValue: result.args.value.c[0] });
+        this.setState({
+          error: null,
+          storageValue: result.args.value.toNumber()
+        });
       }
     });
   }
@@ -68,20 +74,40 @@ export default class DApp extends Component<
     this.setState({ localInputValue: parseInt(e.target.value, 10) });
   };
 
+  onChangeGasInput = (e: *) => {
+    this.setState({ gasPriceGWEI: parseInt(e.target.value, 10) });
+  };
+
   onSetButton = async () => {
-    const { simpleStorage, localInputValue } = this.state;
+    const { simpleStorage, localInputValue, gasPriceGWEI } = this.state;
     const { account } = this.props;
     if (!simpleStorage) return;
     this.setState({ error: null, pending: true });
     try {
+      // estimate the gas limit cost we will need for the contract call
+      const estimatedGas = await simpleStorage.set.estimateGas(
+        localInputValue,
+        {
+          from: account
+        }
+      );
+      // and add 50% to make sure it does not go out of gas
+      const gasCost = 1.5 * estimatedGas;
+      // the gas price is configurable by the user. converting it in wei
+      const gasPrice = gasPriceGWEI * 1000000000;
       // call the set function on the contract with our new value
-      await simpleStorage.set(localInputValue, { from: account });
+      const res = await simpleStorage.set(localInputValue, {
+        from: account,
+        gasPrice,
+        gasCost
+      });
       // NB at this stage we don't have the transaction confirmed yet,
       // but we move on by optimistically setting the new value
       this.setState({
         error: null,
         storageValue: localInputValue,
-        pending: false
+        pending: false,
+        tx: res.tx
       });
     } catch (error) {
       this.setState({ error, pending: false });
@@ -94,8 +120,10 @@ export default class DApp extends Component<
       simpleStorage,
       storageValue,
       localInputValue,
+      gasPriceGWEI,
       error,
-      pending
+      pending,
+      tx
     } = this.state;
 
     if (!simpleStorage) {
@@ -113,21 +141,39 @@ export default class DApp extends Component<
           <button onClick={onLogout}>Logout</button>
         </p>
         <p>
-          The stored value is: <strong>{storageValue}</strong>
+          <label>
+            <span>Set new Value</span>
+            <input
+              type="number"
+              min={1}
+              step={1}
+              value={localInputValue}
+              onChange={this.onChangeInput}
+            />
+            {pending ? (
+              "..."
+            ) : (
+              <button
+                onClick={this.onSetButton}
+                disabled={localInputValue === storageValue}
+              >
+                SET
+              </button>
+            )}
+          </label>
         </p>
-        <label>
-          <input
-            type="number"
-            value={localInputValue}
-            onChange={this.onChangeInput}
-          />
-          <button
-            onClick={this.onSetButton}
-            disabled={pending || localInputValue === storageValue}
-          >
-            SET
-          </button>
-        </label>
+        <p>
+          <label>
+            <span>Gas Price (GWEI)</span>
+            <input
+              type="number"
+              min={1}
+              value={gasPriceGWEI}
+              onChange={this.onChangeGasInput}
+            />
+          </label>
+        </p>
+        <p>{tx ? "Transaction: " + tx : null}</p>
         {error ? (
           <div className="error">
             {String((error && error.message) || error)}

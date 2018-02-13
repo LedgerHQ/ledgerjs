@@ -6,13 +6,20 @@ import runTests from "./runTests";
 const btn = document.createElement("button");
 btn.textContent = "run tests";
 document.body.appendChild(btn);
-btn.onclick = () =>
+const errorEl = document.createElement("code");
+errorEl.style.color = "#a33";
+const pre = document.createElement("pre");
+pre.appendChild(errorEl);
+document.body.appendChild(pre);
+btn.onclick = () => {
+  errorEl.textContent = "";
   runTests(Transport).then(
     () => {
       console.log("ALL PASS");
     },
     e => {
       console.error(e);
-      process.exit(1);
+      errorEl.textContent = e.message;
     }
   );
+};
