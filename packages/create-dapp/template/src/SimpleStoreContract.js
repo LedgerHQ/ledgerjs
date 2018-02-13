@@ -3,13 +3,17 @@ import createContract from "truffle-contract";
 // our example includes a simple contract that allows to set and restore a value.
 import SimpleStorageJSON from "./dapp/build/contracts/SimpleStorage.json";
 
+const contractAddress = process.env.REACT_APP_CONTRACT_ADDRESS;
+
 export default class SimpleStorageContract {
   static async createWithWeb3(web3) {
     // initialize the contract and retrieve the deployed version
-    const contract = createContract(SimpleStorageJSON);
-    contract.setProvider(web3.currentProvider);
-    const contractResolved = await contract.deployed();
-    return new SimpleStorageContract(contractResolved);
+    const SimpleStorage = createContract(SimpleStorageJSON);
+    SimpleStorage.setProvider(web3.currentProvider);
+    const contract = contractAddress
+      ? await SimpleStorage.at(contractAddress)
+      : await SimpleStorage.deployed();
+    return new SimpleStorageContract(contract);
   }
 
   constructor(contract) {
