@@ -8,6 +8,7 @@
     "@ledgerhq/hw-app-btc": "^3.0.2",
     "@ledgerhq/hw-app-eth": "^3.0.0",
     "@ledgerhq/hw-app-xrp": "^3.0.0",
+    "@ledgerhq/hw-app-str": "^3.0.0",
     "@ledgerhq/hw-transport-node-hid": "^3.0.0",
     "budo": "^11.0.1"
   },
