@@ -36,7 +36,12 @@ export default class Onboarding extends Component<
     const selectedWalletIndex = parseInt(e.target.value, 10);
     const wallet = this.props.wallets[selectedWalletIndex];
     try {
-      this.setState({ selectedWalletIndex, pending: true, accounts: null });
+      this.setState({
+        selectedWalletIndex,
+        pending: true,
+        accounts: null,
+        error: null
+      });
       const web3 = await wallet.getWeb3();
       const accounts = await new Promise((resolve, reject) => {
         web3.eth.getAccounts((error, accounts) => {
@@ -45,7 +50,12 @@ export default class Onboarding extends Component<
         });
       });
       if (accounts.length === 0) throw new Error("no accounts found");
-      this.setState({ web3, accounts, pending: false });
+      this.setState({
+        web3,
+        accounts,
+        pending: false,
+        error: null
+      });
     } catch (error) {
       this.setState({ error, pending: false });
     }

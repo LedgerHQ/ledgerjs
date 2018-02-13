@@ -38,6 +38,8 @@ Run a development Ethereum network:
 ganache-cli --networkId 1337
 ```
 
+> Alternatively you can run on Ethereum testnet.
+
 Run the truffle tool, to generate and compile the contracts. **NB: the truffle project lives under src/dapp**
 
 ```
@@ -46,8 +48,12 @@ truffle compile
 truffle deploy --network development
 ```
 
+> Adapt the deploy based on your need. Read truffle documentation for more information.
+
 Run the web app:
 
 ```
 npm start
 ```
+
+> Read create-react-app documentation for more information.
