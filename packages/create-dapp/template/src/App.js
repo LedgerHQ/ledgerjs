@@ -1,6 +1,4 @@
-// @flow
 import React, { Component } from "react";
-import type Web3 from "web3";
 import DApp from "./DApp";
 import DAppReadOnly from "./DAppReadOnly";
 import Onboarding from "./Onboarding";
@@ -12,10 +10,7 @@ import "./App.css";
  * However, DAppReadOnly example shows we can also read the contract without auth.
  * You might want to change and adapt this architecture to your own need.
  */
-export default class App extends Component<
-  {},
-  { web3: ?Web3, account: ?string }
-> {
+export default class App extends Component {
   state = {
     web3: null,
     account: null
@@ -25,7 +20,7 @@ export default class App extends Component<
     this.setState({ web3: null, account: null });
   };
 
-  onOnboardingDone = (web3: Web3, account: string) => {
+  onOnboardingDone = (web3, account) => {
     this.setState({ web3, account });
   };
 

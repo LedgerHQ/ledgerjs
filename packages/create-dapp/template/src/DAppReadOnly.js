@@ -1,7 +1,5 @@
-// @flow
 import { Component } from "react";
-import contract from "truffle-contract";
-import SimpleStorageContract from "./dapp/build/contracts/SimpleStorage.json";
+import SimpleStorageContract from "./SimpleStoreContract";
 import { getReadOnlyWeb3 } from "./wallets";
 
 /**
@@ -9,36 +7,27 @@ import { getReadOnlyWeb3 } from "./wallets";
  * without being logged in via metamask or ledger device.
  * NB: we can't sign transaction but we can still read the contract.
  */
-export default class DappReadOnly extends Component<*, *> {
+export default class DappReadOnly extends Component {
   state = {
     value: null
   };
 
-  valueChangedEvent: *;
-
   async componentDidMount() {
     const web3 = await getReadOnlyWeb3();
-    const simpleStorageContract = contract(SimpleStorageContract);
-    simpleStorageContract.setProvider(web3.currentProvider);
-    const simpleStorage = await simpleStorageContract.deployed();
+    const simpleStorage = await SimpleStorageContract.createWithWeb3(web3);
     const value = await simpleStorage.get();
     this.setState({ value });
-    this.valueChangedEvent = simpleStorage.ValueChanged();
-    this.valueChangedEvent.watch((error, r) => {
-      if (!error) {
-        this.setState({
-          value: r.args.value
-        });
-      }
+    this.valueChangedSubscription = simpleStorage.listenValueChanged(value => {
+      this.setState({ value });
     });
   }
 
   componentWillUnmount() {
-    this.valueChangedEvent.stopWatching();
+    this.valueChangedSubscription();
   }
 
   render() {
     const { value } = this.state;
-    return "value: " + (value ? value.toString() : "...");
+    return "value: " + (value !== null ? value : "...");
   }
 }
