@@ -17,7 +17,14 @@
 //@flow
 
 import type Transport from "@ledgerhq/hw-transport";
-import { splitPath, foreach, encodeEd25519PublicKey, verifyEd25519Signature, checkStellarBip32Path, hash } from "./utils";
+import {
+  splitPath,
+  foreach,
+  encodeEd25519PublicKey,
+  verifyEd25519Signature,
+  checkStellarBip32Path,
+  hash
+} from "./utils";
 
 const CLA = 0xe0;
 const INS_GET_PK = 0x02;
@@ -75,32 +82,40 @@ export default class Str {
     boolValidate?: boolean,
     boolDisplay?: boolean
   ): Promise<{ publicKey: string }> {
-  let pathElts = splitPath(path);
-  let buffer = new Buffer(1 + pathElts.length * 4);
-  buffer[0] = pathElts.length;
-  pathElts.forEach((element, index) => {
-    buffer.writeUInt32BE(element, 1 + 4 * index);
-  });
-  let verifyMsg = Buffer.from("via lumina", "ascii");
-  buffer = Buffer.concat([buffer, verifyMsg]);
-  return this.transport
-    .send(CLA, INS_GET_PK, boolValidate ? 0x01 : 0x00, boolDisplay ? 0x01 : 0x00, buffer)
-    .then(response => {
-      // response = Buffer.from(response, 'hex');
-      let offset = 0;
-      let rawPublicKey = response.slice(offset, offset + 32);
-      offset += 32;
-      let publicKey = encodeEd25519PublicKey(rawPublicKey);
-      if (boolValidate) {
-        let signature = response.slice(offset, offset + 64);
-        if (!verifyEd25519Signature(verifyMsg, signature, rawPublicKey)) {
-          throw new Error("Bad signature. Keypair is invalid. Please report this.");
-        }
-      }
-      return {
-        publicKey: publicKey
-      };
+    let pathElts = splitPath(path);
+    let buffer = new Buffer(1 + pathElts.length * 4);
+    buffer[0] = pathElts.length;
+    pathElts.forEach((element, index) => {
+      buffer.writeUInt32BE(element, 1 + 4 * index);
     });
+    let verifyMsg = Buffer.from("via lumina", "ascii");
+    buffer = Buffer.concat([buffer, verifyMsg]);
+    return this.transport
+      .send(
+        CLA,
+        INS_GET_PK,
+        boolValidate ? 0x01 : 0x00,
+        boolDisplay ? 0x01 : 0x00,
+        buffer
+      )
+      .then(response => {
+        // response = Buffer.from(response, 'hex');
+        let offset = 0;
+        let rawPublicKey = response.slice(offset, offset + 32);
+        offset += 32;
+        let publicKey = encodeEd25519PublicKey(rawPublicKey);
+        if (boolValidate) {
+          let signature = response.slice(offset, offset + 64);
+          if (!verifyEd25519Signature(verifyMsg, signature, rawPublicKey)) {
+            throw new Error(
+              "Bad signature. Keypair is invalid. Please report this."
+            );
+          }
+        }
+        return {
+          publicKey: publicKey
+        };
+      });
   }
 
   /**
@@ -115,51 +130,55 @@ export default class Str {
     path: string,
     transaction: Buffer
   ): Promise<{ signature: Buffer }> {
+    checkStellarBip32Path(path);
 
-  checkStellarBip32Path(path);
+    let apdus = [];
+    let response;
 
-  let apdus = [];
-  let response;
-
-  let pathElts = splitPath(path);
-  let bufferSize = 1 + pathElts.length * 4;
-  let buffer = Buffer.alloc(bufferSize);
-  buffer[0] = pathElts.length;
-  pathElts.forEach(function (element, index) {
-    buffer.writeUInt32BE(element, 1 + 4 * index);
-  });
-  let chunkSize = APDU_MAX_SIZE - bufferSize;
-  if (transaction.length <= chunkSize) { // it fits in a single apdu
-    apdus.push(Buffer.concat([buffer, transaction]));
-  } else { // we need to send multiple apdus to transmit the entire transaction
-    let chunk = Buffer.alloc(chunkSize);
-    let offset = 0;
-    transaction.copy(chunk, 0, offset, chunkSize);
-    apdus.push(Buffer.concat([buffer, chunk]));
-    offset += chunkSize;
-    while (offset < transaction.length) {
-      let remaining = transaction.length - offset;
-      chunkSize = remaining < APDU_MAX_SIZE ? remaining : APDU_MAX_SIZE;
-      chunk = Buffer.alloc(chunkSize);
-      transaction.copy(chunk, 0, offset, offset + chunkSize);
+    let pathElts = splitPath(path);
+    let bufferSize = 1 + pathElts.length * 4;
+    let buffer = Buffer.alloc(bufferSize);
+    buffer[0] = pathElts.length;
+    pathElts.forEach(function(element, index) {
+      buffer.writeUInt32BE(element, 1 + 4 * index);
+    });
+    let chunkSize = APDU_MAX_SIZE - bufferSize;
+    if (transaction.length <= chunkSize) {
+      // it fits in a single apdu
+      apdus.push(Buffer.concat([buffer, transaction]));
+    } else {
+      // we need to send multiple apdus to transmit the entire transaction
+      let chunk = Buffer.alloc(chunkSize);
+      let offset = 0;
+      transaction.copy(chunk, 0, offset, chunkSize);
+      apdus.push(Buffer.concat([buffer, chunk]));
       offset += chunkSize;
-      apdus.push(chunk);
+      while (offset < transaction.length) {
+        let remaining = transaction.length - offset;
+        chunkSize = remaining < APDU_MAX_SIZE ? remaining : APDU_MAX_SIZE;
+        chunk = Buffer.alloc(chunkSize);
+        transaction.copy(chunk, 0, offset, offset + chunkSize);
+        offset += chunkSize;
+        apdus.push(chunk);
+      }
     }
-  }
-  return foreach(apdus, (data, i) =>
+    return foreach(apdus, (data, i) =>
       this.transport
         .send(
           CLA,
           INS_SIGN_TX,
           i === 0 ? P1_FIRST_APDU : P1_MORE_APDU,
-          i === apdus.length-1 ? P2_LAST_APDU : P2_MORE_APDU,
+          i === apdus.length - 1 ? P2_LAST_APDU : P2_MORE_APDU,
           data,
-          [SW_OK, SW_CANCEL, SW_UNKNOWN_OP])
+          [SW_OK, SW_CANCEL, SW_UNKNOWN_OP]
+        )
         .then(apduResponse => {
           response = apduResponse;
-      })
+        })
     ).then(() => {
-      let status = Buffer.from(response.slice(response.length - 2)).readUInt16BE(0);
+      let status = Buffer.from(
+        response.slice(response.length - 2)
+      ).readUInt16BE(0);
       if (status === SW_OK) {
         let signature = Buffer.from(response.slice(0, response.length - 2));
         return {
@@ -183,21 +202,20 @@ export default class Str {
    * @example
    * str.signHash("44'/148'/0'", hash).then(o => o.signature)
    */
-  signHash(
-    path: string,
-    hash: Buffer
-  ): Promise<{ signature: Buffer }> {
+  signHash(path: string, hash: Buffer): Promise<{ signature: Buffer }> {
     let pathElts = splitPath(path);
     let buffer = Buffer.alloc(1 + pathElts.length * 4);
     buffer[0] = pathElts.length;
-    pathElts.forEach(function (element, index) {
+    pathElts.forEach(function(element, index) {
       buffer.writeUInt32BE(element, 1 + 4 * index);
     });
     buffer = Buffer.concat([buffer, hash]);
     return this.transport
       .send(CLA, INS_SIGN_TX_HASH, 0x00, 0x00, buffer, [SW_OK, SW_CANCEL])
       .then(response => {
-        let status = Buffer.from(response.slice(response.length - 2)).readUInt16BE(0);
+        let status = Buffer.from(
+          response.slice(response.length - 2)
+        ).readUInt16BE(0);
         if (status === SW_OK) {
           let signature = Buffer.from(response.slice(0, response.length - 2));
           return {
@@ -208,5 +226,4 @@ export default class Str {
         }
       });
   }
-
 }

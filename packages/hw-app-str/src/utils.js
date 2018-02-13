@@ -19,7 +19,7 @@
 import crc16xmodem from "crc/lib/crc16_xmodem";
 import base32 from "base32.js";
 import nacl from "tweetnacl";
-import {sha256} from "sha.js";
+import { sha256 } from "sha.js";
 
 // TODO use bip32-path library
 export function splitPath(path: string): number[] {
@@ -55,20 +55,18 @@ export function foreach<T, A>(
   return Promise.resolve().then(() => iterate(0, arr, []));
 }
 
-export function encodeEd25519PublicKey (
-  rawPublicKey: Buffer
-): string {
+export function encodeEd25519PublicKey(rawPublicKey: Buffer): string {
   let versionByte = 6 << 3; // 'G'
-  let data          = Buffer.from(rawPublicKey);
+  let data = Buffer.from(rawPublicKey);
   let versionBuffer = Buffer.from([versionByte]);
-  let payload       = Buffer.concat([versionBuffer, data]);
-  let checksum      = Buffer.alloc(2);
+  let payload = Buffer.concat([versionBuffer, data]);
+  let checksum = Buffer.alloc(2);
   checksum.writeUInt16LE(crc16xmodem(payload), 0);
-  let unencoded     = Buffer.concat([payload, checksum]);
+  let unencoded = Buffer.concat([payload, checksum]);
   return base32.encode(unencoded);
 }
 
-export function verifyEd25519Signature (
+export function verifyEd25519Signature(
   data: Buffer,
   signature: Buffer,
   publicKey: Buffer
@@ -86,18 +84,23 @@ export function hash(data: Buffer) {
   return hasher.digest();
 }
 
-export function checkStellarBip32Path(
-  path: string): void {
+export function checkStellarBip32Path(path: string): void {
   if (!path.startsWith("44'/148'")) {
-    throw new Error("Not a Stellar BIP32 path. Path: " + path + "."
-      + " The Stellar app is authorized only for paths starting with 44'/148'."
-      + " Example: 44'/148'/0'");
+    throw new Error(
+      "Not a Stellar BIP32 path. Path: " +
+        path +
+        "." +
+        " The Stellar app is authorized only for paths starting with 44'/148'." +
+        " Example: 44'/148'/0'"
+    );
   }
-  path.split("/").forEach(function (element) {
+  path.split("/").forEach(function(element) {
     if (!element.toString().endsWith("'")) {
-      throw new Error("Detected a non-hardened path element in requested BIP32 path." +
-        " Non-hardended paths are not supported at this time. Please use an all-hardened path." +
-        " Example: 44'/148'/0'");
+      throw new Error(
+        "Detected a non-hardened path element in requested BIP32 path." +
+          " Non-hardended paths are not supported at this time. Please use an all-hardened path." +
+          " Example: 44'/148'/0'"
+      );
     }
   });
 }
