@@ -1,28 +1,16 @@
-// @flow
 import React, { Component } from "react";
-import type Web3 from "web3";
+import PropTypes from "prop-types";
 import "./Onboarding.css";
-
-type Wallet = { name: string, getWeb3: () => Promise<Web3> };
 
 /**
  * define Onboarding, a component that will handle
  * the wallet selection and account address selection logic
  */
-export default class Onboarding extends Component<
-  {
-    wallets: Array<Wallet>,
-    onDone: (web3: Web3, account: string) => void
-  },
-  {
-    pending: boolean,
-    web3: ?Web3,
-    error: ?Error,
-    accounts: ?Array<string>,
-    selectedAccountIndex: number,
-    selectedWalletIndex: number
-  }
-> {
+export default class Onboarding extends Component {
+  static propTypes = {
+    wallets: PropTypes.array.isRequired,
+    onDone: PropTypes.func.isRequired
+  };
   state = {
     pending: false,
     web3: null,
@@ -32,7 +20,7 @@ export default class Onboarding extends Component<
     selectedAccountIndex: 0
   };
 
-  onWalletChange = async (e: *) => {
+  onWalletChange = async e => {
     const selectedWalletIndex = parseInt(e.target.value, 10);
     const wallet = this.props.wallets[selectedWalletIndex];
     try {
@@ -61,7 +49,7 @@ export default class Onboarding extends Component<
     }
   };
 
-  onAccountChange = (e: *) => {
+  onAccountChange = e => {
     this.setState({ selectedAccountIndex: parseInt(e.target.value, 10) });
   };
 

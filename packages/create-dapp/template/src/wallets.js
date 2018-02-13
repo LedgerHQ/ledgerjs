@@ -1,14 +1,12 @@
-// @flow
 import Web3 from "web3";
 import TransportU2F from "@ledgerhq/hw-transport-u2f";
 import createLedgerSubprovider from "@ledgerhq/web3-subprovider";
 import ProviderEngine from "web3-provider-engine";
 import FetchSubprovider from "web3-provider-engine/subproviders/fetch";
 
-// we are branching the configuration based on development mode.
-const DEV = process.env.NODE_ENV === "development";
-const rpcUrl = DEV ? "http://127.0.0.1:8545" : "https://mainnet.infura.io";
-const networkId = DEV ? 1337 : 1;
+// configuration can be overrided by env variables
+const rpcUrl = process.env.REACT_APP_NETWORK_URL || "http://127.0.0.1:8545";
+const networkId = parseInt(process.env.REACT_APP_NETWORK_ID || "1337", 10);
 
 export const getReadOnlyWeb3 = async () => {
   const engine = new ProviderEngine();
