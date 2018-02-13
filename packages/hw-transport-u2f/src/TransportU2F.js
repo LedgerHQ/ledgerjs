@@ -1,23 +1,14 @@
-/********************************************************************************
- *   Ledger Node JS API
- *   (c) 2016-2017 Ledger
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- ********************************************************************************/
 //@flow
 
 import { sign, isSupported } from "u2f-api";
-import Transport from "@ledgerhq/hw-transport";
+import Transport, { TransportError } from "@ledgerhq/hw-transport";
+
+function wrapU2FTransportError(originalError, message, id) {
+  const err = new TransportError(message, id);
+  // $FlowFixMe
+  err.originalError = originalError;
+  return err;
+}
 
 function wrapApdu(apdu: Buffer, key: Buffer) {
   const result = Buffer.alloc(apdu.length);
@@ -38,6 +29,53 @@ const webSafe64 = (base64: string) =>
 const normal64 = (base64: string) =>
   base64.replace(/-/g, "+").replace(/_/g, "/") +
   "==".substring(0, (3 * base64.length) % 4);
+
+function attemptExchange(
+  apdu: Buffer,
+  timeoutMillis: number,
+  debug: boolean,
+  scrambleKey: Buffer
+): Promise<Buffer> {
+  const keyHandle = wrapApdu(apdu, scrambleKey);
+  const challenge = Buffer.from(
+    "0000000000000000000000000000000000000000000000000000000000000000",
+    "hex"
+  );
+  const signRequest = {
+    version: "U2F_V2",
+    keyHandle: webSafe64(keyHandle.toString("base64")),
+    challenge: webSafe64(challenge.toString("base64")),
+    appId: location.origin
+  };
+  if (debug) {
+    console.log("=> " + apdu.toString("hex"));
+  }
+  return sign(signRequest, timeoutMillis / 1000).then(response => {
+    const { signatureData } = response;
+    if (typeof signatureData === "string") {
+      const data = Buffer.from(normal64(signatureData), "base64");
+      const result = data.slice(5);
+      if (debug) {
+        console.log("<= " + result.toString("hex"));
+      }
+      return result;
+    } else {
+      throw response;
+    }
+  });
+}
+
+let transportInstances = [];
+
+function emitDisconnect() {
+  transportInstances.forEach(t => t.emit("disconnect"));
+  transportInstances = [];
+}
+
+function isTimeoutU2FError(u2fError) {
+  return u2fError.metaData.code === 5;
+}
+
 /**
  * U2F web Transport implementation
  * @example
@@ -55,8 +93,20 @@ export default class TransportU2F extends Transport<null> {
   static listen = (observer: *) => {
     let unsubscribed = false;
     isSupported().then(supported => {
-      if (!unsubscribed && supported)
+      if (unsubscribed) return;
+      if (supported) {
         observer.next({ type: "add", descriptor: null });
+        observer.complete();
+      } else {
+        observer.error(
+          new TransportError(
+            "U2F browser support is needed for Ledger. " +
+              "Please use Chrome, Opera or Firefox with a U2F extension. " +
+              "Also make sure you're on an HTTPS connection",
+            "U2FNotSupported"
+          )
+        );
+      }
     });
     return {
       unsubscribe: () => {
@@ -70,38 +120,69 @@ export default class TransportU2F extends Transport<null> {
   /**
    * static function to create a new Transport from a connected Ledger device discoverable via U2F (browser support)
    */
-  static open(): Promise<TransportU2F> {
-    return Promise.resolve(new TransportU2F());
+  static async open(_: *, openTimeout?: number = 5000): Promise<TransportU2F> {
+    try {
+      // This is not a valid exchange at all, but this allows to have a way to know if there is a device.
+      // in case it reaches the timeout, we will throw timeout error, in other case, we will return the U2FTransport.
+      await attemptExchange(
+        Buffer.alloc(0),
+        openTimeout,
+        false,
+        Buffer.alloc(1)
+      );
+    } catch (e) {
+      const isU2FError = typeof e.metaData === "object";
+      if (isU2FError) {
+        if (isTimeoutU2FError(e)) {
+          emitDisconnect();
+          throw wrapU2FTransportError(
+            e,
+            "Ledger device unreachable.\n" +
+              "Make sure the device is plugged, unlocked and with the correct application opened." +
+              (location && location.protocol !== "https:"
+                ? "\nYou are not running on HTTPS. U2F is likely to not work in unsecure protocol."
+                : ""),
+            "Timeout"
+          );
+        } else {
+          // we don't throw if it's another u2f error
+        }
+      } else {
+        throw e;
+      }
+    }
+    return new TransportU2F();
   }
 
-  exchange(apdu: Buffer): Promise<Buffer> {
-    const keyHandle = wrapApdu(apdu, this.scrambleKey);
-    const challenge = Buffer.from(
-      "0000000000000000000000000000000000000000000000000000000000000000",
-      "hex"
-    );
-    const signRequest = {
-      version: "U2F_V2",
-      keyHandle: webSafe64(keyHandle.toString("base64")),
-      challenge: webSafe64(challenge.toString("base64")),
-      appId: location.origin
-    };
-    if (this.debug) {
-      console.log("=> " + apdu.toString("hex"));
-    }
-    return sign(signRequest, this.exchangeTimeout / 1000).then(response => {
-      const { signatureData } = response;
-      if (typeof signatureData === "string") {
-        const data = Buffer.from(normal64(signatureData), "base64");
-        const result = data.slice(5);
-        if (this.debug) {
-          console.log("<= " + result.toString("hex"));
+  constructor() {
+    super();
+    transportInstances.push(this);
+  }
+
+  async exchange(apdu: Buffer): Promise<Buffer> {
+    try {
+      return await attemptExchange(
+        apdu,
+        this.exchangeTimeout,
+        this.debug,
+        this.scrambleKey
+      );
+    } catch (e) {
+      const isU2FError = typeof e.metaData === "object";
+      if (isU2FError) {
+        if (isTimeoutU2FError(e)) {
+          emitDisconnect();
         }
-        return result;
+        // the wrapping make error more usable and "printable" to the end user.
+        throw wrapU2FTransportError(
+          e,
+          "Failed to sign with Ledger device: U2F " + e.metaData.type,
+          "U2F_" + e.metaData.code
+        );
       } else {
-        throw response;
+        throw e;
       }
-    });
+    }
   }
 
   setScrambleKey(scrambleKey: string) {
@@ -109,6 +190,11 @@ export default class TransportU2F extends Transport<null> {
   }
 
   close(): Promise<void> {
+    const i = transportInstances.indexOf(this);
+    if (i === -1) {
+      throw new Error("invalid transport instance");
+    }
+    transportInstances.splice(i, 1);
     return Promise.resolve();
   }
 }
