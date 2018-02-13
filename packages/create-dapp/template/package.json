@@ -7,7 +7,8 @@
     "react-dom": "^16.2.0",
     "react-scripts": "1.1.0",
     "truffle-contract": "^3.0.3",
-    "@ledgerhq/web3-subprovider": "^3.0.0",
+    "@ledgerhq/web3-subprovider": "^4.0.0",
+    "@ledgerhq/hw-transport-u2f": "^4.0.0",
     "web3": "^1.0.0-beta.29"
   },
   "scripts": {
