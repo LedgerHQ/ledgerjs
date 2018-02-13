@@ -65,10 +65,11 @@ function attemptExchange(
   });
 }
 
-const transportInstances = [];
+let transportInstances = [];
 
 function emitDisconnect() {
   transportInstances.forEach(t => t.emit("disconnect"));
+  transportInstances = [];
 }
 
 function isTimeoutU2FError(u2fError) {
