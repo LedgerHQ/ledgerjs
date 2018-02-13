@@ -1,4 +1,3 @@
-// @flow
 import Web3 from "web3";
 import TransportU2F from "@ledgerhq/hw-transport-u2f";
 import createLedgerSubprovider from "@ledgerhq/web3-subprovider";

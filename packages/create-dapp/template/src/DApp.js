@@ -1,23 +1,17 @@
-// @flow
 import React, { Component } from "react";
-import contract from "truffle-contract";
-import type Web3 from "web3";
+import PropTypes from "prop-types";
+import SimpleStorageContract from "./SimpleStoreContract";
 import "./DApp.css";
-
-// our example includes a simple contract that allows to set and restore a value.
-import SimpleStorageContract from "./dapp/build/contracts/SimpleStorage.json";
 
 /**
  * define our actual DApp that works with a web3 instance on a given account.
  */
-export default class DApp extends Component<
-  {
-    web3: Web3,
-    account: string,
-    onLogout: () => void
-  },
-  *
-> {
+export default class DApp extends Component {
+  static propTypes = {
+    web3: PropTypes.object.isRequired,
+    account: PropTypes.string.isRequired,
+    onLogout: PropTypes.func.isRequired
+  };
   state = {
     storageValue: 1,
     localInputValue: 1,
@@ -28,19 +22,12 @@ export default class DApp extends Component<
     tx: null
   };
 
-  valueChangedEvent: *;
-
   async componentDidMount() {
     // initialize the contract and retrieve the deployed version
     const { web3 } = this.props;
-    const simpleStorageContract = contract(SimpleStorageContract);
-    simpleStorageContract.setProvider(web3.currentProvider);
-    const simpleStorage = await simpleStorageContract.deployed();
+    const simpleStorage = await SimpleStorageContract.createWithWeb3(web3);
 
-    // retrieve the value of the contract
-    const result = await simpleStorage.get();
-    // in truffle-contract, uint values are BigNumber instance so need to convert in our example:
-    const storageValue = result.toNumber();
+    const storageValue = await simpleStorage.get();
     this.setState({
       simpleStorage,
       storageValue,
@@ -48,33 +35,27 @@ export default class DApp extends Component<
     });
 
     // and plug to the ValueChanged event
-    this.valueChangedEvent = simpleStorage.ValueChanged();
-    this.valueChangedEvent.watch((error, result) => {
-      if (error) {
-        this.setState({ error });
-      } else {
-        this.setState({
-          error: null,
-          storageValue: result.args.value.toNumber()
-        });
+    this.valueChangedSubscription = simpleStorage.listenValueChanged(
+      storageValue => {
+        this.setState({ storageValue });
       }
-    });
+    );
   }
 
   componentWillUnmount() {
     try {
-      this.valueChangedEvent.stopWatching();
+      this.valueChangedSubscription();
     } catch (e) {
       // NB MetaMask currently have an error thrown
       console.error(e);
     }
   }
 
-  onChangeInput = (e: *) => {
+  onChangeInput = e => {
     this.setState({ localInputValue: parseInt(e.target.value, 10) });
   };
 
-  onChangeGasInput = (e: *) => {
+  onChangeGasInput = e => {
     this.setState({ gasPriceGWEI: parseInt(e.target.value, 10) });
   };
 
@@ -84,23 +65,11 @@ export default class DApp extends Component<
     if (!simpleStorage) return;
     this.setState({ error: null, pending: true });
     try {
-      // estimate the gas limit cost we will need for the contract call
-      const estimatedGas = await simpleStorage.set.estimateGas(
+      const res = await simpleStorage.set(
         localInputValue,
-        {
-          from: account
-        }
+        account,
+        gasPriceGWEI
       );
-      // and add 50% to make sure it does not go out of gas
-      const gasCost = 1.5 * estimatedGas;
-      // the gas price is configurable by the user. converting it in wei
-      const gasPrice = gasPriceGWEI * 1000000000;
-      // call the set function on the contract with our new value
-      const res = await simpleStorage.set(localInputValue, {
-        from: account,
-        gasPrice,
-        gasCost
-      });
       // NB at this stage we don't have the transaction confirmed yet,
       // but we move on by optimistically setting the new value
       this.setState({
