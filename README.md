@@ -32,6 +32,7 @@ applications. There are implementations for Node and Browser.
 | **Development Tools**                                                                |
 | [`@ledgerhq/hw-http-proxy-devserver`](/packages/hw-http-proxy-devserver)             | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-http-proxy-devserver.svg)](https://www.npmjs.com/package/@ledgerhq/hw-http-proxy-devserver)             | HTTP server proxy to use with `hw-transport-node-hid` **for development**                           |
 | [`@ledgerhq/hw-hid-cli`](/packages/hw-hid-cli)                                       | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-hid-cli.svg)](https://www.npmjs.com/package/@ledgerhq/hw-hid-cli)                                       | CLI utility to send APDU to the device via node-hid                                                 |
+| [`@ledgerhq/hw-transport-mocker`](/packages/hw-transport-mocker)                     | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-mocker.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-mocker)                     | Tool used for test to record and replay APDU calls.                                                 |
 
 ## Examples
 

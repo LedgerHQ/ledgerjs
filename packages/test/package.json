@@ -9,6 +9,7 @@
     "@ledgerhq/hw-app-eth": "^4.0.0",
     "@ledgerhq/hw-app-xrp": "^4.0.0",
     "@ledgerhq/hw-app-str": "^4.0.0",
+    "@ledgerhq/hw-transport-mocker": "^4.0.0",
     "@ledgerhq/hw-transport-node-hid": "^4.0.0",
     "budo": "^11.0.1"
   },
@@ -19,6 +20,8 @@
   "scripts": {
     "test-browser": "budo --ssl lib/index-browser.js",
     "test-node": "node lib/index-node.js",
+    "test-snapshot": "node lib/index-snapshot.js",
+    "test": "yarn run test-snapshot",
     "flow": "flow",
     "clean": "rm -rf lib/",
     "build": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src",
