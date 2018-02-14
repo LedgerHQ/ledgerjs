@@ -10,6 +10,9 @@ import testEth4 from "./testEth4";
 import testXrp from "./testXrp";
 import testXrp2 from "./testXrp2";
 import testXrp3 from "./testXrp3";
+import testStr from "./testStr";
+import testStr2 from "./testStr2";
+import testStr3 from "./testStr3";
 
 var tests = [
   { name: "testBtc", run: testBtc },
@@ -53,7 +56,25 @@ var tests = [
   },
   { name: "testXrp", run: testXrp },
   { name: "testXrp2", run: testXrp2 },
-  { name: "testXrp3", run: testXrp3 }
+  { name: "testXrp3", run: testXrp3 },
+  {
+    run: () =>
+      new Promise(resolve => {
+        var s = 15;
+        console.info("You have " + s + " seconds to switch to Stellar app ...");
+        var interval = setInterval(() => {
+          if (--s) {
+            console.log(s + " ...");
+          } else {
+            clearInterval(interval);
+            resolve();
+          }
+        }, 1000);
+      })
+  },
+  { name: "testStr", run: testStr },
+  { name: "testStr2", run: testStr2 },
+  { name: "testStr3", run: testStr3 }
 ];
 
 export default async (Transport, timeout = 5000) => {
