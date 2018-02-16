@@ -1,14 +1,14 @@
 {
   "private": true,
   "name": "@ledgerhq/test",
-  "version": "4.0.0",
+  "version": "4.1.0",
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/hw-app-btc": "^4.0.0",
     "@ledgerhq/hw-app-eth": "^4.0.0",
+    "@ledgerhq/hw-app-str": "^4.1.0",
     "@ledgerhq/hw-app-xrp": "^4.0.0",
-    "@ledgerhq/hw-app-str": "^4.0.0",
     "@ledgerhq/hw-transport-node-hid": "^4.0.0",
     "budo": "^11.0.1"
   },
