@@ -15,11 +15,11 @@ import {
 test("can get currency by coin type", () => {
   expect(getCurrencyByCoinType(0)).toMatchObject({
     coinType: 0,
-    name: "bitcoin"
+    name: "Bitcoin"
   });
   expect(getCurrencyByCoinType(2)).toMatchObject({
     coinType: 2,
-    name: "litecoin"
+    name: "Litecoin"
   });
   expect(hasCurrencyByCoinType(0)).toBe(true);
   expect(hasCurrencyByCoinType(-1)).toBe(false);

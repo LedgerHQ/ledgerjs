@@ -31,20 +31,23 @@ const bitcoinUnits = [
 const cryptocurrenciesArray: Currency[] = [
   {
     coinType: 0,
-    name: "bitcoin",
+    name: "Bitcoin",
     scheme: "bitcoin",
+    color: "#ffae35",
     units: bitcoinUnits
   },
   {
     coinType: 1,
-    name: "testnet",
+    name: "Bitcoin Testnet",
     scheme: "bitcoin",
+    color: "#ffae35",
     units: bitcoinUnits
   },
   {
     coinType: 2,
-    name: "litecoin",
+    name: "Litecoin",
     scheme: "litecoin",
+    color: "#cccccc",
     units: [
       {
         name: "litecoin",
@@ -56,8 +59,9 @@ const cryptocurrenciesArray: Currency[] = [
   },
   {
     coinType: 3,
-    name: "dogecoin",
+    name: "Dogecoin",
     scheme: "dogecoin",
+    color: "#65d196",
     units: [
       {
         name: "dogecoin",
@@ -69,8 +73,9 @@ const cryptocurrenciesArray: Currency[] = [
   },
   {
     coinType: 5,
-    name: "dash",
+    name: "Dash",
     scheme: "dash",
+    color: "#0e76aa",
     units: [
       {
         name: "dash",
@@ -81,44 +86,22 @@ const cryptocurrenciesArray: Currency[] = [
   },
   {
     coinType: 6,
-    name: "peercoin",
+    name: "Peercoin",
     scheme: "peercoin",
+    color: "#3cb054",
     units: [
       {
-        name: "Peercoin",
+        name: "peercoin",
         code: "PPC",
         magnitude: 8
       }
     ]
   },
   {
-    coinType: 47,
-    name: "posw",
-    scheme: "poswallet",
-    units: [
-      {
-        name: "posw",
-        code: "POSW",
-        magnitude: 8
-      }
-    ]
-  },
-  {
-    coinType: 79,
-    name: "clubcoin",
-    scheme: "clubcoin",
-    units: [
-      {
-        name: "club",
-        code: "CLUB",
-        magnitude: 8
-      }
-    ]
-  },
-  {
     coinType: 105,
-    name: "stratis",
+    name: "Stratis",
     scheme: "stratis",
+    color: "#1382c6",
     units: [
       {
         name: "stratis",
@@ -129,11 +112,12 @@ const cryptocurrenciesArray: Currency[] = [
   },
   {
     coinType: 133,
-    name: "zcash",
+    name: "Zcash",
     scheme: "zcash",
+    color: "#3790ca",
     units: [
       {
-        name: "Zcash",
+        name: "zcash",
         code: "ZEC",
         magnitude: 8
       }
@@ -141,8 +125,9 @@ const cryptocurrenciesArray: Currency[] = [
   },
   {
     coinType: 141,
-    name: "komodo",
+    name: "Komodo",
     scheme: "komodo",
+    color: "#326464",
     units: [
       {
         name: "komodo",
