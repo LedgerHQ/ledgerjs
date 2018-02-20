@@ -7,6 +7,7 @@ import { getFiatUnit, hasFiatUnit } from "./data/fiat";
 import {
   listCurrencies,
   getCurrencyByCoinType,
+  getDefaultUnitByCoinType,
   hasCurrencyByCoinType
 } from "./data/cryptocurrencies";
 
@@ -24,6 +25,7 @@ export {
   formatCurrencyUnit,
   formatCurrencyUnitFragment,
   getCurrencyByCoinType,
+  getDefaultUnitByCoinType,
   hasCurrencyByCoinType,
   countervalueForRate,
   encodeURIScheme,
