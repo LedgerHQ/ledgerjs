@@ -1,6 +1,6 @@
 import "babel-polyfill";
 
-import Transport from "@ledgerhq/hw-transport-u2f";
+import TransportU2F from "@ledgerhq/hw-transport-u2f";
 import runTests from "./runTests";
 
 const btn = document.createElement("button");
@@ -13,7 +13,7 @@ pre.appendChild(errorEl);
 document.body.appendChild(pre);
 btn.onclick = () => {
   errorEl.textContent = "";
-  runTests(Transport).then(
+  runTests(() => TransportU2F).then(
     () => {
       console.log("ALL PASS");
     },

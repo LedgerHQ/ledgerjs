@@ -1,7 +1,7 @@
 {
-  "name": "@ledgerhq/hw-transport",
+  "name": "@ledgerhq/hw-transport-mocker",
   "version": "4.2.0",
-  "description": "Ledger Hardware Wallet common interface of the communication layer",
+  "description": "Ledger Hardware Wallet mocker utilities used for tests",
   "keywords": [
     "Ledger",
     "LedgerWallet",
@@ -20,10 +20,10 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "lib/Transport.js",
+  "main": "lib/index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "events": "^1.1.1"
+    "@ledgerhq/hw-transport": "^4.2.0"
   },
   "devDependencies": {
     "flow-bin": "^0.66.0",

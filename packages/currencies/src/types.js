@@ -28,6 +28,8 @@ export type Currency = {
   name: string,
   // the scheme name to use when formatting an URI (without the ':')
   scheme: string,
+  // used for UI
+  color: string,
   // all units of a currency (e.g. Bitcoin have bitcoin, mBTC, bit, satoshi)
   // IMPORTANT: by convention, [0] is the default and have "highest" magnitude
   units: Unit[]
