@@ -20,10 +20,10 @@ export default [
   {
     name: "Ledger device",
     // create a web3 with the ledger device
-    getWeb3: async () => {
+    getWeb3: () => {
       const engine = new ProviderEngine();
       const getTransport = () => TransportU2F.create();
-      const ledger = await createLedgerSubprovider(getTransport, {
+      const ledger = createLedgerSubprovider(getTransport, {
         networkId,
         accountsLength: 5
       });

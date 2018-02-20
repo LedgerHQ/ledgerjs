@@ -69,7 +69,7 @@ engine.addProvider(new RpcSubprovider({ rpcUrl }));
 engine.start();
 const web3 = new Web3(engine);
  */
-export default async function createLedgerSubprovider(
+export default function createLedgerSubprovider(
   getTransport: () => Transport<*>,
   options?: SubproviderOptions
 ): HookedWalletSubprovider {
@@ -191,5 +191,6 @@ export default async function createLedgerSubprovider(
         .catch(err => callback(err, null));
     }
   });
+
   return subprovider;
 }
