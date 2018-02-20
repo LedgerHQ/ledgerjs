@@ -121,7 +121,16 @@ yarn run test-browser
 
 ### Deploy
 
-deploy a new release
+Checklist before deploying a new release:
+
+* you have the right in the LedgerHQ org on NPM
+* you have run `npm login` once (check `npm whoami`)
+* Go to **master** branch
+  * your master point on LedgerHQ repository (check with `git config remote.$(git config branch.master.remote).url` and fix it with `git branch --set-upstream master origin/master`)
+  * you are in sync (`git pull`) and there is no changes in `git status`
+* Run `yarn` once, there is still no changes in `git status`
+
+**deploy a new release**
 
 ```
  yarn run publish
@@ -136,3 +145,5 @@ deploy a canary release (beta, etc)
 ```
  yarn run publish -- -c beta
 ```
+
+> NB: if there is a new package, AFAIK you need to manually `npm publish` it once on NPM.
