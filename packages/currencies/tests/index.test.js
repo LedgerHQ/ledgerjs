@@ -4,6 +4,7 @@ import {
   listCurrencies,
   hasCurrencyByCoinType,
   getCurrencyByCoinType,
+  getDefaultUnitByCoinType,
   getFiatUnit,
   hasFiatUnit,
   countervalueForRate,
@@ -143,5 +144,14 @@ test("decodeURIScheme", () => {
     currency: getCurrencyByCoinType(0),
     address: "1gre1noAY9HiK2qxoW8FzSdjdFBcoZ5fV",
     amount: 1234567000000
+  });
+});
+
+test("getDefaultUnitByCoinType", () => {
+  expect(getDefaultUnitByCoinType(0)).toMatchObject({
+    code: "BTC",
+    magnitude: 8,
+    name: "bitcoin",
+    symbol: "Ƀ"
   });
 });

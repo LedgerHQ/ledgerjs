@@ -1,5 +1,5 @@
 //@flow
-import type { Currency } from "../types";
+import type { Currency, Unit } from "../types";
 
 const bitcoinUnits = [
   {
@@ -161,4 +161,19 @@ export function getCurrencyByCoinType(coinType: number): Currency {
     throw new Error(`currency with coin type "${coinType}" not found`);
   }
   return currency;
+}
+
+export function getDefaultUnitByCoinType(coinType: number): Unit {
+  const currency = getCurrencyByCoinType(coinType);
+
+  // get unit with max magnitude
+  const unit = currency.units.reduce(
+    (acc, cur) => (!acc || acc.magnitude < cur.magnitude ? cur : acc),
+    null
+  );
+
+  if (!unit) {
+    throw new Error(`default unit for coin type "${coinType}" not found`);
+  }
+  return unit;
 }
