@@ -1,12 +1,10 @@
 {
-  "name": "@ledgerhq/hw-app-xrp",
+  "name": "@ledgerhq/hw-transport-mocker",
   "version": "4.0.0",
-  "description": "Ledger Hardware Wallet Ripple Application API",
+  "description": "Ledger Hardware Wallet mocker utilities used for tests",
   "keywords": [
     "Ledger",
     "LedgerWallet",
-    "Ripple",
-    "xrp",
     "NanoS",
     "Blue",
     "Hardware Wallet"
@@ -22,11 +20,10 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "lib/Xrp.js",
+  "main": "lib/index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^4.0.0",
-    "bip32-path": "0.4.2"
+    "@ledgerhq/hw-transport": "^4.0.0"
   },
   "devDependencies": {
     "flow-bin": "^0.66.0",

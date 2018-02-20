@@ -36,7 +36,7 @@
     "web3-provider-engine": "^13.6.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.64.0",
+    "flow-bin": "^0.66.0",
     "flow-typed": "^2.3.0"
   },
   "scripts": {
