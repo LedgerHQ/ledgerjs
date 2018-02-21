@@ -32,7 +32,11 @@ export default class Eth {
 
   constructor(transport: Transport<*>) {
     this.transport = transport;
-    transport.setScrambleKey("w0w");
+    transport.decorateAppAPIMethods(
+      this,
+      ["getAddress", "signTransaction", "signPersonalMessage"],
+      "w0w"
+    );
   }
 
   /**
