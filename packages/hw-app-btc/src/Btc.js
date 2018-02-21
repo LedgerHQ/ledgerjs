@@ -513,31 +513,30 @@ btc.createPaymentTransactionNew(
             value: Buffer.from(trustedInput, "hex")
           });
         })
-      )
-        .then(() => {
-          const { outputs } = input[0];
-          const index = input[1];
-          if (outputs && index <= outputs.length - 1) {
-            regularOutputs.push(outputs[index]);
-          }
-        })
-        .then(() => {
-          for (let i = 0; i < inputs.length; i++) {
-            let sequence = Buffer.alloc(4);
-            sequence.writeUInt32LE(
-              inputs[i].length >= 4 && typeof inputs[i][3] === "number"
-                ? inputs[i][3]
-                : DEFAULT_SEQUENCE,
-              0
-            );
-            targetTransaction.inputs.push({
-              script: nullScript,
-              prevout: nullPrevout,
-              sequence
-            });
-          }
-        });
+      ).then(() => {
+        const { outputs } = input[0];
+        const index = input[1];
+        if (outputs && index <= outputs.length - 1) {
+          regularOutputs.push(outputs[index]);
+        }
+      });
     })
+      .then(() => {
+        for (let i = 0; i < inputs.length; i++) {
+          let sequence = Buffer.alloc(4);
+          sequence.writeUInt32LE(
+            inputs[i].length >= 4 && typeof inputs[i][3] === "number"
+              ? inputs[i][3]
+              : DEFAULT_SEQUENCE,
+            0
+          );
+          targetTransaction.inputs.push({
+            script: nullScript,
+            prevout: nullPrevout,
+            sequence
+          });
+        }
+      })
       .then(() =>
         doIf(!resuming, () =>
           // Collect public keys
