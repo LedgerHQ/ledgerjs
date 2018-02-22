@@ -27,36 +27,61 @@ export type Observer<Ev> = {
 
 /**
  * all possible status codes.
- * @see https://ledgerhq.github.io/btchip-doc/bitcoin-technical.html#_status_words
+ * @see https://github.com/LedgerHQ/blue-app-btc/blob/d8a03d10f77ca5ef8b22a5d062678eef788b824a/include/btchip_apdu_constants.h#L85-L115
  * @example
  * import { StatusCodes } from "@ledgerhq/hw-transport";
  */
 export const StatusCodes = {
-  /**
-   * Incorrect length
-   */
-  IncorrectLength: 0x6700,
-  /**
-   * Security status not satisfied (Bitcoin dongle is locked or invalid access rights)
-   */
-  SecurityNotSatisfied: 0x6982,
-  /**
-   * Invalid data
-   */
-  InvalidData: 0x6a80,
-  /**
-   * File not found
-   */
-  FileNotFound: 0x6a82,
-  /**
-   * Incorrect parameter P1 or P2
-   */
-  IncorrectParameter: 0x6b00,
-  /**
-   * Success
-   */
-  Success: 0x9000
+  PIN_REMAINING_ATTEMPTS: 0x63c0,
+  INCORRECT_LENGTH: 0x6700,
+  COMMAND_INCOMPATIBLE_FILE_STRUCTURE: 0x6981,
+  SECURITY_STATUS_NOT_SATISFIED: 0x6982,
+  CONDITIONS_OF_USE_NOT_SATISFIED: 0x6985,
+  INCORRECT_DATA: 0x6a80,
+  NOT_ENOUGH_MEMORY_SPACE: 0x6a84,
+  REFERENCED_DATA_NOT_FOUND: 0x6a88,
+  FILE_ALREADY_EXISTS: 0x6a89,
+  INCORRECT_P1_P2: 0x6b00,
+  INS_NOT_SUPPORTED: 0x6d00,
+  CLA_NOT_SUPPORTED: 0x6e00,
+  TECHNICAL_PROBLEM: 0x6f00,
+  OK: 0x9000,
+  MEMORY_PROBLEM: 0x9240,
+  NO_EF_SELECTED: 0x9400,
+  INVALID_OFFSET: 0x9402,
+  FILE_NOT_FOUND: 0x9404,
+  INCONSISTENT_FILE: 0x9408,
+  ALGORITHM_NOT_SUPPORTED: 0x9484,
+  INVALID_KCV: 0x9485,
+  CODE_NOT_INITIALIZED: 0x9802,
+  ACCESS_CONDITION_NOT_FULFILLED: 0x9804,
+  CONTRADICTION_SECRET_CODE_STATUS: 0x9808,
+  CONTRADICTION_INVALIDATION: 0x9810,
+  CODE_BLOCKED: 0x9840,
+  MAX_VALUE_REACHED: 0x9850,
+  GP_AUTH_FAILED: 0x6300,
+  LICENSING: 0x6f42,
+  HALTED: 0x6faa
 };
+
+export function getAltStatusMessage(code: number): ?string {
+  switch (code) {
+    // improve text of most common errors
+    case 0x6700:
+      return "Incorrect length";
+    case 0x6982:
+      return "Security not satisfied (dongle locked or have invalid access rights)";
+    case 0x6985:
+      return "Condition of use not satisfied (denied by the user?)";
+    case 0x6a80:
+      return "Invalid data received";
+    case 0x6b00:
+      return "Invalid parameter received";
+  }
+  if (0x6f00 <= code && code <= 0x6fff) {
+    return "Internal error, please report";
+  }
+}
 
 /**
  * TransportError is used for any generic transport errors.
@@ -77,9 +102,15 @@ TransportError.prototype = new Error();
  */
 export function TransportStatusError(statusCode: number) {
   this.name = "TransportStatusError";
-  this.message = "Invalid status " + statusCode.toString(16);
+  const statusText =
+    Object.keys(StatusCodes).find(k => StatusCodes[k] === statusCode) ||
+    "UNKNOWN_ERROR";
+  const smsg = getAltStatusMessage(statusCode) || statusText;
+  const statusCodeStr = statusCode.toString(16);
+  this.message = `Ledger device: ${smsg} (0x${statusCodeStr})`;
   this.stack = new Error().stack;
   this.statusCode = statusCode;
+  this.statusText = statusText;
 }
 //$FlowFixMe
 TransportStatusError.prototype = new Error();
@@ -217,7 +248,7 @@ TransportFoo.open(descriptor).then(transport => ...)
     p1: number,
     p2: number,
     data: Buffer = Buffer.alloc(0),
-    statusList: Array<number> = [StatusCodes.Success]
+    statusList: Array<number> = [StatusCodes.OK]
   ): Promise<Buffer> => {
     if (data.length >= 256) {
       throw new TransportError(
