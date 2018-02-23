@@ -33,15 +33,141 @@ const cryptocurrenciesArray: Currency[] = [
     coinType: 0,
     name: "Bitcoin",
     scheme: "bitcoin",
+    apiName: "btc",
     color: "#ffae35",
+    xpub: 0x0488b21e,
+    isSegwitSupported: true,
+    handleFeePerByte: true,
+    bitcoinjs: {
+      bech32: "bc",
+      bip32: {
+        private: 76066276,
+        public: 76067358
+      },
+      messagePrefix: "Bitcoin Signed Message:",
+      pubKeyHash: 0,
+      scriptHash: 5,
+      wif: 128
+    },
     units: bitcoinUnits
   },
   {
     coinType: 1,
     name: "Bitcoin Testnet",
     scheme: "bitcoin",
+    apiName: "btc_testnet",
     color: "#ffae35",
+    xpub: 0x043587cf,
+    isSegwitSupported: true,
+    handleFeePerByte: true,
+    bitcoinjs: {
+      bech32: "bc",
+      bip32: {
+        private: 70615956,
+        public: 70617039
+      },
+      messagePrefix: "Bitcoin Signed Message:",
+      pubKeyHash: 111,
+      scriptHash: 196,
+      wif: 239
+    },
     units: bitcoinUnits
+  },
+  {
+    coinType: 145,
+    name: "Bitcoin Cash",
+    scheme: "bitcoin",
+    apiName: "abc",
+    color: "#85bb65",
+    xpub: 0x0488b21e,
+    sigHashType: 0x41,
+    isSegwitSupported: true,
+    handleFeePerByte: true,
+    bitcoinjs: {
+      bech32: "bc",
+      bip32: {
+        private: 76066276,
+        public: 76067358
+      },
+      messagePrefix: "Bitcoin Signed Message:",
+      pubKeyHash: 0,
+      scriptHash: 5,
+      wif: 128
+    },
+    units: [
+      {
+        name: "bitcoin cash",
+        code: "BCH",
+        symbol: "Ƀ",
+        magnitude: 8
+      },
+      {
+        name: "mBCH",
+        code: "mBCH",
+        symbol: "Ƀ",
+        magnitude: 5
+      },
+      {
+        name: "bit",
+        code: "bit",
+        symbol: "Ƀ",
+        magnitude: 2
+      },
+      {
+        name: "satoshi",
+        code: "satoshi",
+        symbol: "Ƀ",
+        magnitude: 0
+      }
+    ]
+  },
+  {
+    coinType: 156,
+    name: "Bitcoin Gold",
+    scheme: "bitcoin",
+    apiName: "btg",
+    color: "#132c47",
+    xpub: 76067358,
+    sigHashType: 0x41,
+    isSegwitSupported: true,
+    handleFeePerByte: true,
+    areTransactionTimestamped: false,
+    bitcoinjs: {
+      messagePrefix: "Bitcoin gold Signed Message:",
+      bip32: {
+        public: 76067358,
+        private: 76066276
+      },
+      pubKeyHash: 38,
+      scriptHash: 23,
+      wif: 128
+    },
+    units: [
+      {
+        name: "bitcoin gold",
+        code: "BTG",
+        symbol: "Ƀ",
+        magnitude: 8
+      },
+      {
+        name: "mBTG",
+        code: "mBTG",
+        symbol: "Ƀ",
+        magnitude: 5
+      },
+      {
+        name: "bit",
+        code: "bit",
+        symbol: "Ƀ",
+        magnitude: 2
+      },
+      {
+        name: "satoshi",
+        code: "satoshi",
+        symbol: "Ƀ",
+        magnitude: 0
+      }
+    ]
   },
   {
     coinType: 2,
@@ -75,7 +201,22 @@ const cryptocurrenciesArray: Currency[] = [
     coinType: 5,
     name: "Dash",
     scheme: "dash",
+    apiName: "dash",
     color: "#0e76aa",
+    xpub: 50221816,
+    isSegwitSupported: false,
+    handleFeePerByte: false,
+    areTransactionTimestamped: false,
+    bitcoinjs: {
+      messagePrefix: "DarkCoin Signed Message:",
+      bip32: {
+        public: 50221816,
+        private: 87393172
+      },
+      pubKeyHash: 76,
+      scriptHash: 16,
+      wif: 128
+    },
     units: [
       {
         name: "dash",
@@ -88,12 +229,27 @@ const cryptocurrenciesArray: Currency[] = [
     coinType: 6,
     name: "Peercoin",
     scheme: "peercoin",
+    apiName: "ppc",
     color: "#3cb054",
+    xpub: 3874023909,
+    isSegwitSupported: false,
+    handleFeePerByte: false,
+    areTransactionTimestamped: true,
+    bitcoinjs: {
+      messagePrefix: "PPCoin Signed Message:",
+      bip32: {
+        public: 3874023909,
+        private: 87393172
+      },
+      pubKeyHash: 55,
+      scriptHash: 117,
+      wif: 128
+    },
     units: [
       {
         name: "peercoin",
         code: "PPC",
-        magnitude: 8
+        magnitude: 6
       }
     ]
   },
@@ -101,7 +257,22 @@ const cryptocurrenciesArray: Currency[] = [
     coinType: 105,
     name: "Stratis",
     scheme: "stratis",
+    apiName: "strat",
     color: "#1382c6",
+    xpub: 76071454,
+    isSegwitSupported: false,
+    handleFeePerByte: false,
+    areTransactionTimestamped: true,
+    bitcoinjs: {
+      messagePrefix: "Stratis Signed Message:",
+      bip32: {
+        public: 76071454,
+        private: 87393172
+      },
+      pubKeyHash: 63,
+      scriptHash: 125,
+      wif: 128
+    },
     units: [
       {
         name: "stratis",
@@ -114,7 +285,22 @@ const cryptocurrenciesArray: Currency[] = [
     coinType: 133,
     name: "Zcash",
     scheme: "zcash",
+    apiName: "zec",
     color: "#3790ca",
+    xpub: 76067358,
+    isSegwitSupported: false,
+    handleFeePerByte: false,
+    areTransactionTimestamped: false,
+    bitcoinjs: {
+      messagePrefix: "Zcash Signed Message:",
+      bip32: {
+        public: 76067358,
+        private: 87393172
+      },
+      pubKeyHash: new Uint8Array([0x1c, 0xb8]) /*7352*/,
+      scriptHash: new Uint8Array([0x1c, 0xbd]) /*7357*/,
+      wif: 128
+    },
     units: [
       {
         name: "zcash",
@@ -127,7 +313,22 @@ const cryptocurrenciesArray: Currency[] = [
     coinType: 141,
     name: "Komodo",
     scheme: "komodo",
+    apiName: "kmd",
     color: "#326464",
+    xpub: 4193182861,
+    isSegwitSupported: false,
+    handleFeePerByte: false,
+    areTransactionTimestamped: false,
+    bitcoinjs: {
+      messagePrefix: "Komodo Signed Message:",
+      bip32: {
+        public: 4193182861,
+        private: 87393172
+      },
+      pubKeyHash: 60,
+      scriptHash: 85,
+      wif: 128
+    },
     units: [
       {
         name: "komodo",
