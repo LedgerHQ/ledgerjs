@@ -6,7 +6,7 @@ export type Rate = {
   fiat: Fiat
 };
 
-export type Unit = {
+export type Unit = {|
   // display name of a given unit (exemple: satoshi)
   name: string,
   // string to use when formatting the unit. like 'BTC' or 'USD'
@@ -17,11 +17,23 @@ export type Unit = {
   symbol?: string,
   // should it always print all digits even if they are 0 (usually: true for fiats, false for cryptos)
   showAllDigits?: boolean
-};
+|};
 
-export type UnitValue = { value: number, unit: Unit };
+export type UnitValue = {| value: number, unit: Unit |};
 
-export type Currency = {
+export type BitcoinJS = {|
+  bech32?: string,
+  bip32: {
+    private: number,
+    public: number
+  },
+  messagePrefix: string,
+  pubKeyHash: number | Uint8Array,
+  scriptHash: number | Uint8Array,
+  wif: number
+|};
+
+export type Currency = {|
   // coinType is an identifier specified by https://github.com/satoshilabs/slips/blob/master/slip-0044.md
   coinType: number,
   // display name of a currency
@@ -32,8 +44,21 @@ export type Currency = {
   color: string,
   // all units of a currency (e.g. Bitcoin have bitcoin, mBTC, bit, satoshi)
   // IMPORTANT: by convention, [0] is the default and have "highest" magnitude
-  units: Unit[]
-  // NB more field will come as we need them. basically see https://github.com/LedgerHQ/ledger-wallet-chrome/blob/487a8c86726f92dd49eb284fe12c49f4d3410d69/app/src/bitcoin/networks.coffee
-};
+  units: Unit[],
+  // TODO: document apiName
+  apiName?: string,
+  // TODO: document xpub
+  xpub?: number,
+  // TODO: document isSegwitSupported
+  isSegwitSupported?: boolean,
+  // TODO: document handleFeePerByte
+  handleFeePerByte?: boolean,
+  // TODO: document areTransactionTimestamped
+  areTransactionTimestamped?: boolean,
+  // TODO: document sigHashType
+  sigHashType?: number,
+  // TODO: document bitcoinjs
+  bitcoinjs?: BitcoinJS
+|};
 
 export type CurrencyEntity = Currency;
