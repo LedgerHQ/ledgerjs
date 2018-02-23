@@ -113,6 +113,18 @@ test("formatter works with fiats", () => {
   expect(formatCurrencyUnit(getFiatUnit("EUR"), 12300)).toBe("123.00");
 });
 
+test("formatter can change locale", () => {
+  expect(
+    formatCurrencyUnit(getFiatUnit("USD"), -1234567, { showCode: true })
+  ).toBe("- USD 12,345.67");
+  expect(
+    formatCurrencyUnit(getFiatUnit("EUR"), -1234567, {
+      showCode: true,
+      locale: "fr-FR"
+    })
+  ).toBe("-12 345.67 EUR");
+});
+
 test("encodeURIScheme", () => {
   expect(
     encodeURIScheme({

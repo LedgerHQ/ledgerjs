@@ -24,7 +24,7 @@
   "dependencies": {
     "fbjs": "^0.8.16",
     "invariant": "^2.2.2",
-    "lodash": "^4.17.4",
+    "lodash": "^4.17.5",
     "normalizr-gre": "^3.2.4",
     "prop-types": "^15.5.10",
     "query-string": "^5.0.0",
