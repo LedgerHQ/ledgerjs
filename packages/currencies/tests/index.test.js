@@ -115,7 +115,8 @@ test("formatter works with fiats", () => {
 });
 
 test("formatShort", () => {
-  expect(formatShort(getFiatUnit("EUR"), 123456789)).toBe("1.2k");
+  expect(formatShort(getFiatUnit("EUR"), 123456789)).toBe("1.2m");
+  expect(formatShort(getFiatUnit("EUR"), 123456)).toBe("1.2k");
 });
 
 test("encodeURIScheme", () => {
