@@ -15,7 +15,11 @@ export default class Xrp {
 
   constructor(transport: Transport<*>) {
     this.transport = transport;
-    transport.setScrambleKey("w0w");
+    transport.decorateAppAPIMethods(
+      this,
+      ["getAddress", "signTransaction", "getAppConfiguration"],
+      "w0w"
+    );
   }
 
   /**

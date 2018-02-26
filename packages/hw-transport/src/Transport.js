@@ -315,6 +315,52 @@ TransportFoo.create().then(transport => ...)
     });
   }
 
+  decorateAppAPIMethods(
+    self: Object,
+    methods: Array<string>,
+    scrambleKey: string
+  ) {
+    for (let methodName of methods) {
+      self[methodName] = this.decorateAppAPIMethod(
+        methodName,
+        self[methodName],
+        self,
+        scrambleKey
+      );
+    }
+  }
+
+  _appAPIlock = null;
+  decorateAppAPIMethod<R, A: any[]>(
+    methodName: string,
+    f: (...args: A) => Promise<R>,
+    ctx: *,
+    scrambleKey: string
+  ): (...args: A) => Promise<R> {
+    return async (...args) => {
+      const { _appAPIlock } = this;
+      if (_appAPIlock) {
+        const e = new TransportError(
+          "Ledger Device is busy (lock " + _appAPIlock + ")",
+          "TransportLocked"
+        );
+        //$FlowFixMe
+        Object.assign(e, {
+          currentLock: _appAPIlock,
+          methodName
+        });
+        return Promise.reject(e);
+      }
+      try {
+        this._appAPIlock = methodName;
+        this.setScrambleKey(scrambleKey);
+        return await f.apply(ctx, args);
+      } finally {
+        this._appAPIlock = null;
+      }
+    };
+  }
+
   static ErrorMessage_ListenTimeout = "No Ledger device found (timeout)";
   static ErrorMessage_NoDeviceFound = "No Ledger device found";
 }

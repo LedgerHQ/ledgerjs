@@ -54,7 +54,11 @@ export default class Str {
 
   constructor(transport: Transport<*>) {
     this.transport = transport;
-    transport.setScrambleKey("l0v");
+    transport.decorateAppAPIMethods(
+      this,
+      ["getAppConfiguration", "getPublicKey", "signTransaction", "signHash"],
+      "l0v"
+    );
   }
 
   getAppConfiguration(): Promise<{
@@ -186,7 +190,7 @@ export default class Str {
         };
       } else if (status === SW_UNKNOWN_OP) {
         // pre-v2 app version: fall back on hash signing
-        return this.signHash(path, hash(transaction));
+        return this.signHash_private(path, hash(transaction));
       } else {
         throw new Error("Transaction approval request was rejected");
       }
@@ -203,6 +207,10 @@ export default class Str {
    * str.signHash("44'/148'/0'", hash).then(o => o.signature)
    */
   signHash(path: string, hash: Buffer): Promise<{ signature: Buffer }> {
+    return this.signHash_private(path, hash);
+  }
+
+  signHash_private(path: string, hash: Buffer): Promise<{ signature: Buffer }> {
     let pathElts = splitPath(path);
     let buffer = Buffer.alloc(1 + pathElts.length * 4);
     buffer[0] = pathElts.length;
