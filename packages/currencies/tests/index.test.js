@@ -9,6 +9,7 @@ import {
   hasFiatUnit,
   countervalueForRate,
   formatCurrencyUnit,
+  formatShort,
   decodeURIScheme,
   encodeURIScheme
 } from "..";
@@ -111,6 +112,10 @@ test("formatter works with fiats", () => {
   ).toBe("EUR 123.45");
   // by default, fiats always show the digits
   expect(formatCurrencyUnit(getFiatUnit("EUR"), 12300)).toBe("123.00");
+});
+
+test("formatShort", () => {
+  expect(formatShort(getFiatUnit("EUR"), 123456789)).toBe("1.2k");
 });
 
 test("encodeURIScheme", () => {
