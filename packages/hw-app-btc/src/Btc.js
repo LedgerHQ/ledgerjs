@@ -29,7 +29,16 @@ export default class Btc {
 
   constructor(transport: Transport<*>) {
     this.transport = transport;
-    transport.setScrambleKey("BTC");
+    transport.decorateAppAPIMethods(
+      this,
+      [
+        "getWalletPublicKey",
+        "signP2SHTransaction",
+        "signMessageNew",
+        "createPaymentTransactionNew"
+      ],
+      "BTC"
+    );
   }
 
   hashPublicKey(buffer: Buffer) {
@@ -42,16 +51,10 @@ export default class Btc {
       .digest();
   }
 
-  /**
-   * @param path a BIP 32 path
-   * @param segwit use segwit
-   * @example
-   * btc.getWalletPublicKey("44'/0'/0'/0").then(o => o.bitcoinAddress)
-   */
-  getWalletPublicKey(
+  getWalletPublicKey_private(
     path: string,
-    verify?: boolean = false,
-    segwit?: boolean = false
+    verify: boolean,
+    segwit: boolean
   ): Promise<{
     publicKey: string,
     bitcoinAddress: string,
@@ -86,6 +89,24 @@ export default class Btc {
         .toString("hex");
       return { publicKey, bitcoinAddress, chainCode };
     });
+  }
+
+  /**
+   * @param path a BIP 32 path
+   * @param segwit use segwit
+   * @example
+   * btc.getWalletPublicKey("44'/0'/0'/0").then(o => o.bitcoinAddress)
+   */
+  getWalletPublicKey(
+    path: string,
+    verify?: boolean = false,
+    segwit?: boolean = false
+  ): Promise<{
+    publicKey: string,
+    bitcoinAddress: string,
+    chainCode: string
+  }> {
+    return this.getWalletPublicKey_private(path, verify, segwit);
   }
 
   getTrustedInputRaw(
@@ -352,8 +373,6 @@ export default class Btc {
     );
   }
 
-  /**
-   */
   signTransaction(
     path: string,
     lockTime?: number = DEFAULT_LOCKTIME,
@@ -508,9 +527,17 @@ btc.createPaymentTransactionNew(
     return foreach(inputs, input => {
       return doIf(!resuming, () =>
         getTrustedInputCall(input[1], input[0]).then(trustedInput => {
+          let sequence = Buffer.alloc(4);
+          sequence.writeUInt32LE(
+            input.length >= 4 && typeof input[3] === "number"
+              ? input[3]
+              : DEFAULT_SEQUENCE,
+            0
+          );
           trustedInputs.push({
             trustedInput: true,
-            value: Buffer.from(trustedInput, "hex")
+            value: Buffer.from(trustedInput, "hex"),
+            sequence
           });
         })
       ).then(() => {
@@ -541,7 +568,7 @@ btc.createPaymentTransactionNew(
         doIf(!resuming, () =>
           // Collect public keys
           foreach(inputs, (input, i) =>
-            this.getWalletPublicKey(associatedKeysets[i])
+            this.getWalletPublicKey_private(associatedKeysets[i], false, false)
           ).then(result => {
             for (let index = 0; index < result.length; index++) {
               publicKeys.push(
@@ -580,7 +607,7 @@ btc.createPaymentTransactionNew(
       .then(() =>
         // Do the second run with the individual transaction
         foreach(inputs, (input, i) => {
-          targetTransaction.inputs[i].script =
+          let script =
             inputs[i].length >= 3 && typeof inputs[i][2] === "string"
               ? Buffer.from(inputs[i][2], "hex")
               : !segwit
@@ -590,10 +617,17 @@ btc.createPaymentTransactionNew(
                     this.hashPublicKey(publicKeys[i]),
                     Buffer.from([OP_EQUALVERIFY, OP_CHECKSIG])
                   ]);
+          let pseudoTX = Object.assign({}, targetTransaction);
+          let pseudoTrustedInputs = segwit ? [trustedInputs[i]] : trustedInputs;
+          if (segwit) {
+            pseudoTX.inputs = [{ ...pseudoTX.inputs[i], script }];
+          } else {
+            pseudoTX.inputs[i].script = script;
+          }
           return this.startUntrustedHashTransactionInput(
             !segwit && firstRun,
-            targetTransaction,
-            trustedInputs,
+            pseudoTX,
+            pseudoTrustedInputs,
             segwit
           )
             .then(() =>

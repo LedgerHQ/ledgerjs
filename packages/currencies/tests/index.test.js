@@ -9,6 +9,7 @@ import {
   hasFiatUnit,
   countervalueForRate,
   formatCurrencyUnit,
+  formatShort,
   decodeURIScheme,
   encodeURIScheme
 } from "..";
@@ -126,6 +127,11 @@ test("formatter can change locale", () => {
     })
   ).toBe("-12 345.67 EUR");
   */
+});
+
+test("formatShort", () => {
+  expect(formatShort(getFiatUnit("EUR"), 123456789)).toBe("1.2m");
+  expect(formatShort(getFiatUnit("EUR"), 123456)).toBe("1.2k");
 });
 
 test("encodeURIScheme", () => {

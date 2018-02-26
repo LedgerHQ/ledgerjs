@@ -16,6 +16,8 @@ import {
   formatCurrencyUnitFragment
 } from "./formatCurrencyUnit";
 
+import { formatShort } from "./formatShort";
+
 import countervalueForRate from "./countervalueForRate";
 
 export {
@@ -24,6 +26,7 @@ export {
   hasFiatUnit,
   formatCurrencyUnit,
   formatCurrencyUnitFragment,
+  formatShort,
   getCurrencyByCoinType,
   getDefaultUnitByCoinType,
   hasCurrencyByCoinType,
