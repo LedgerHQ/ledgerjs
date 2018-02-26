@@ -114,6 +114,21 @@ test("formatter works with fiats", () => {
   expect(formatCurrencyUnit(getFiatUnit("EUR"), 12300)).toBe("123.00");
 });
 
+test("formatter can change locale", () => {
+  expect(
+    formatCurrencyUnit(getFiatUnit("USD"), -1234567, { showCode: true })
+  ).toBe("- USD 12,345.67");
+  // FIXME we can't test this unless we configure node.js properly to have the locales. we'll come back to this later...
+  /*
+  expect(
+    formatCurrencyUnit(getFiatUnit("EUR"), -1234567, {
+      showCode: true,
+      locale: "fr-FR"
+    })
+  ).toBe("-12 345.67 EUR");
+  */
+});
+
 test("formatShort", () => {
   expect(formatShort(getFiatUnit("EUR"), 123456789)).toBe("1.2m");
   expect(formatShort(getFiatUnit("EUR"), 123456)).toBe("1.2k");
