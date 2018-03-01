@@ -41,6 +41,7 @@ const P2_MORE_APDU = 0x80;
 const SW_OK = 0x9000;
 const SW_CANCEL = 0x6985;
 const SW_UNKNOWN_OP = 0x6c24;
+const SW_MULTI_OP = 0x6c25;
 
 /**
  * Stellar API
@@ -174,7 +175,7 @@ export default class Str {
           i === 0 ? P1_FIRST_APDU : P1_MORE_APDU,
           i === apdus.length - 1 ? P2_LAST_APDU : P2_MORE_APDU,
           data,
-          [SW_OK, SW_CANCEL, SW_UNKNOWN_OP]
+          [SW_OK, SW_CANCEL, SW_UNKNOWN_OP, SW_MULTI_OP]
         )
         .then(apduResponse => {
           response = apduResponse;
@@ -191,6 +192,8 @@ export default class Str {
       } else if (status === SW_UNKNOWN_OP) {
         // pre-v2 app version: fall back on hash signing
         return this.signHash_private(path, hash(transaction));
+      } else if (status === SW_MULTI_OP) {
+        throw new Error("Multi-operation transactions are not supported");
       } else {
         throw new Error("Transaction approval request was rejected");
       }
