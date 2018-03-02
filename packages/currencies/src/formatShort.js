@@ -9,5 +9,5 @@ import numeral from "numeral";
 export function formatShort(unit: Unit, value: number): string {
   const { magnitude } = unit;
   const floatValue = value / 10 ** magnitude;
-  return numeral(floatValue).format("0.0a");
+  return numeral(floatValue).format("0[.]0a");
 }
