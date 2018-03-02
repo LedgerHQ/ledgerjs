@@ -476,7 +476,7 @@ export default class Btc {
    * * sequence is the sequence number to use for this input (when using RBF), or non present
    * @param associatedKeysets is an array of BIP 32 paths pointing to the path to the private key used for each UTXO
    * @param changePath is an optional BIP 32 path pointing to the path to the public key used to compute the change address
-   * @param outputScript is the hexadecimal serialized outputs of the transaction to sign
+   * @param outputScriptHex is the hexadecimal serialized outputs of the transaction to sign
    * @param lockTime is the optional lockTime of the transaction to sign, or default (0)
    * @param sigHashType is the hash type of the transaction to sign, or default (all)
    * @param segwit is a boolean indicating wether to use segwit or not
@@ -718,7 +718,7 @@ btc.createPaymentTransactionNew(
    * * redeem script is the mandatory redeem script associated to the current P2SH input
    * * sequence is the sequence number to use for this input (when using RBF), or non present
    * @param associatedKeysets is an array of BIP 32 paths pointing to the path to the private key used for each UTXO
-   * @param outputScript is the hexadecimal serialized outputs of the transaction to sign
+   * @param outputScriptHex is the hexadecimal serialized outputs of the transaction to sign
    * @param lockTime is the optional lockTime of the transaction to sign, or default (0)
    * @param sigHashType is the hash type of the transaction to sign, or default (all)
    * @return the signed transaction ready to be broadcast
