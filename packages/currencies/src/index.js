@@ -11,6 +11,8 @@ import {
   hasCurrencyByCoinType
 } from "./data/cryptocurrencies";
 
+import { parseCurrencyUnit } from "./parseCurrencyUnit";
+
 import {
   formatCurrencyUnit,
   formatCurrencyUnitFragment
@@ -24,6 +26,7 @@ export {
   listCurrencies,
   getFiatUnit,
   hasFiatUnit,
+  parseCurrencyUnit,
   formatCurrencyUnit,
   formatCurrencyUnitFragment,
   formatShort,

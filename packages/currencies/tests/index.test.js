@@ -9,6 +9,7 @@ import {
   hasFiatUnit,
   countervalueForRate,
   formatCurrencyUnit,
+  parseCurrencyUnit,
   formatShort,
   decodeURIScheme,
   encodeURIScheme
@@ -104,6 +105,20 @@ test("formatter will round values by default", () => {
   expect(
     formatCurrencyUnit(getCurrencyByCoinType(0).units[0], 999999999999)
   ).toBe("10,000");
+});
+
+test("formatter rounding can be disabled", () => {
+  expect(
+    formatCurrencyUnit(getCurrencyByCoinType(0).units[0], 999999999999, {
+      disableRounding: true
+    })
+  ).toBe("9,999.99999999");
+});
+
+test("parseCurrencyUnit", () => {
+  expect(
+    parseCurrencyUnit(getCurrencyByCoinType(0).units[0], "9,999.99999999")
+  ).toBe(999999999999);
 });
 
 test("formatter works with fiats", () => {
