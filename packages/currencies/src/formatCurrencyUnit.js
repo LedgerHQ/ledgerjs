@@ -8,7 +8,8 @@ const defaultFormatOptions = {
   showCode: false,
   alwaysShowSign: false,
   // override showAllDigits of the unit
-  showAllDigits: false
+  showAllDigits: false,
+  disableRounding: false
 };
 
 type FormatFragment =
@@ -51,7 +52,7 @@ export function formatCurrencyUnitFragment(
   value: number,
   options?: $Shape<typeof defaultFormatOptions>
 ): FormatFragment[] {
-  const { showCode, alwaysShowSign, showAllDigits, locale } = {
+  const { showCode, alwaysShowSign, showAllDigits, locale, disableRounding } = {
     ...defaultFormatOptions,
     ...unit,
     ...options
@@ -60,14 +61,16 @@ export function formatCurrencyUnitFragment(
   const floatValue = value / 10 ** magnitude;
   const floatValueAbs = Math.abs(floatValue);
   const minimumFractionDigits = showAllDigits ? magnitude : 0;
-  const maximumFractionDigits = Math.max(
-    minimumFractionDigits,
-    Math.max(
-      0,
-      // dynamic max number of digits based on the value itself. to only show significant part
-      Math.min(4 - Math.round(Math.log10(floatValueAbs)), magnitude)
-    )
-  );
+  const maximumFractionDigits = disableRounding
+    ? magnitude
+    : Math.max(
+        minimumFractionDigits,
+        Math.max(
+          0,
+          // dynamic max number of digits based on the value itself. to only show significant part
+          Math.min(4 - Math.round(Math.log10(floatValueAbs)), magnitude)
+        )
+      );
 
   const fragValueByKind = {
     sign:
