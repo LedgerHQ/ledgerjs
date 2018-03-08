@@ -42,6 +42,8 @@ const SW_OK = 0x9000;
 const SW_CANCEL = 0x6985;
 const SW_UNKNOWN_OP = 0x6c24;
 const SW_MULTI_OP = 0x6c25;
+const SW_SAFE_MODE = 0x6c66;
+const SW_UNSUPPORTED = 0x6d00;
 
 /**
  * Stellar API
@@ -193,7 +195,8 @@ export default class Str {
         // pre-v2 app version: fall back on hash signing
         return this.signHash_private(path, hash(transaction));
       } else if (status === SW_MULTI_OP) {
-        throw new Error("Multi-operation transactions are not supported");
+        // multi-operation transaction: attempt hash signing
+        return this.signHash_private(path, hash(transaction));
       } else {
         throw new Error("Transaction approval request was rejected");
       }
@@ -222,7 +225,12 @@ export default class Str {
     });
     buffer = Buffer.concat([buffer, hash]);
     return this.transport
-      .send(CLA, INS_SIGN_TX_HASH, 0x00, 0x00, buffer, [SW_OK, SW_CANCEL])
+      .send(CLA, INS_SIGN_TX_HASH, 0x00, 0x00, buffer, [
+        SW_OK,
+        SW_CANCEL,
+        SW_SAFE_MODE,
+        SW_UNSUPPORTED
+      ])
       .then(response => {
         let status = Buffer.from(
           response.slice(response.length - 2)
@@ -232,6 +240,13 @@ export default class Str {
           return {
             signature: signature
           };
+        }
+        if (status === SW_SAFE_MODE) {
+          throw new Error(
+            "To sign multi-operation transactions 'Unsafe mode' must be enabled in the app settings"
+          );
+        } else if (status === SW_UNSUPPORTED) {
+          throw new Error("Multi-operation transactions are not supported");
         } else {
           throw new Error("Transaction approval request was rejected");
         }
