@@ -19,11 +19,11 @@ export type DescriptorEvent<Descriptor> = {
 };
 /**
  */
-export type Observer<Ev> = {
-  next: (event: Ev) => void,
-  error: (e: ?Error) => void,
-  complete: () => void
-};
+export type Observer<Ev> = $ReadOnly<{
+  next: (event: Ev) => mixed,
+  error: (e: any) => mixed,
+  complete: () => mixed
+}>;
 
 /**
  * all possible status codes.
