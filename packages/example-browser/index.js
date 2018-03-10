@@ -25,8 +25,8 @@ class App extends Component {
     try {
       this.setState({ error: null });
       const transport = await TransportU2F.create();
-      const btc = new Eth(transport);
-      const { address } = await btc.getAddress("44'/60'/0'/0'/0");
+      const eth = new Eth(transport);
+      const { address } = await eth.getAddress("44'/60'/0'/0'/0");
       this.setState({ address });
     } catch (error) {
       this.setState({ error });
