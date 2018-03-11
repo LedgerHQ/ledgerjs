@@ -68,9 +68,11 @@ export default class Str {
     version: string
   }> {
     return this.transport.send(CLA, INS_GET_CONF, 0x00, 0x00).then(response => {
+      let multiOpsEnabled = response[0] || response[1] < 0x02;
       let version = "" + response[1] + "." + response[2] + "." + response[3];
       return {
-        version: version
+        version: version,
+        multiOpsEnabled: multiOpsEnabled
       };
     });
   }
