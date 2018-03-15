@@ -89,7 +89,7 @@ glob(`${rootDir}/svg/*.svg`, (err, icons) => {
 
   icons.forEach(i => {
     const name = camelcase(path.basename(i, ".svg"));
-    const exportString = `export { default as ${name} } from './${name}';\r\n`;
+    const exportString = `export { default as ${name} } from "./${name}";\n`;
 
     fs.appendFileSync(`${reactDir}/index.js`, exportString, "utf-8");
     fs.appendFileSync(`${reactNativeDir}/index.js`, exportString, "utf-8");
