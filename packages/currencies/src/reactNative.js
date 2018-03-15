@@ -1,5 +1,5 @@
 // @flow
-import * as icons from "./data/icons/react";
+import * as icons from "./data/icons/reactNative";
 
 const iconsByCoinType = {
   "0": icons.bitcoin,
