@@ -1,6 +1,6 @@
 {
   "name": "documentation-website",
-  "version": "2.1.2",
+  "version": "4.7.0",
   "private": true,
   "homepage": "./",
   "dependencies": {
