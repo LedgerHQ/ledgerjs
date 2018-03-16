@@ -32,11 +32,11 @@
     "@ledgerhq/hw-transport-node-hid": "^4.6.0",
     "body-parser": "^1.18.2",
     "cors": "^2.8.4",
-    "express": "^4.16.2"
+    "express": "^4.16.3"
   },
   "devDependencies": {
-    "flow-bin": "^0.66.0",
-    "flow-typed": "^2.3.0"
+    "flow-bin": "^0.68.0",
+    "flow-typed": "^2.4.0"
   },
   "scripts": {
     "flow": "flow",

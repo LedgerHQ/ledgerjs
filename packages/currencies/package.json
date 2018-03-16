@@ -23,8 +23,8 @@
   },
   "devDependencies": {
     "babel-jest": "^20.0.0",
-    "flow-bin": "^0.66.0",
-    "flow-typed": "^2.3.0",
+    "flow-bin": "^0.68.0",
+    "flow-typed": "^2.4.0",
     "glob": "^7.1.2",
     "jest": "^20.0.0",
     "path": "^0.12.7",
@@ -34,9 +34,7 @@
     "flow": "flow",
     "test": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && jest",
     "clean": "rm -rf lib/ src/data/icons/react src/data/icons/reactNative",
-    "build":
-      "node scripts/buildReactIcons.js && cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src && flow-copy-source -v src lib",
-    "watch":
-      "node scripts/buildReactIcons.js && cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src & flow-copy-source -w -v src lib"
+    "build": "node scripts/buildReactIcons.js && cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src && flow-copy-source -v src lib",
+    "watch": "node scripts/buildReactIcons.js && cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src & flow-copy-source -w -v src lib"
   }
 }

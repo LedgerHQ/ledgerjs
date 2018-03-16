@@ -10,8 +10,8 @@
     "@ledgerhq/hw-transport-node-hid": "^4.6.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.66.0",
-    "flow-typed": "^2.3.0"
+    "flow-bin": "^0.68.0",
+    "flow-typed": "^2.4.0"
   },
   "scripts": {
     "start": "node lib/index.js",
