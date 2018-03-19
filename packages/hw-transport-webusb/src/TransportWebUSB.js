@@ -36,9 +36,9 @@ function requestDevice(): Promise<USBDevice> {
   );
 }
 
-const configurationValue = 0;
-const interfaceNumber = 0;
-const endpointNumber = 2;
+const configurationValue = 1;
+const interfaceNumber = 2;
+const endpointNumber = 3;
 
 /**
  * WebUSB Transport implementation
