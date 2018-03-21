@@ -84,13 +84,11 @@ export default class Ada {
    *
    */
   async getWalletRecoveryPassphrase(): Promise<{ publicKey: string, chainCode: string }> {
-    const buffer = Buffer.alloc(OFFSET_CDATA);
-    buffer.writeUInt32BE(0, OFFSET_LC);
+    const response = await this.transport.send(CLA, INS_GET_PUBLIC_KEY, 0x01, 0x00);
 
-    const response = await this.transport.send(CLA, INS_GET_PUBLIC_KEY, 0x01, 0x00, buffer);
     const [ publicKeyLength ] = response;
     const publicKey = response.slice(1, 1 + publicKeyLength).toString("hex");
-    const chainCode = response.slice(1, 1 + publicKeyLength + 32).toString("hex");
+    const chainCode = response.slice(1 + publicKeyLength, 1 + publicKeyLength + 32).toString("hex");
 
     return { publicKey, chainCode };
   }
