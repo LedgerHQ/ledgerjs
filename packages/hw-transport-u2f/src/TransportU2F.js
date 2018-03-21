@@ -120,8 +120,8 @@ export default class TransportU2F extends Transport<null> {
   /**
    * static function to create a new Transport from a connected Ledger device discoverable via U2F (browser support)
    */
-  static async open(_: *, openTimeout?: number = 5000): Promise<TransportU2F> {
-    try {
+  static async open(_: *, _openTimeout?: number = 5000): Promise<TransportU2F> {
+    /*try {
       // This is not a valid exchange at all, but this allows to have a way to know if there is a device.
       // in case it reaches the timeout, we will throw timeout error, in other case, we will return the U2FTransport.
       await attemptExchange(
@@ -150,7 +150,7 @@ export default class TransportU2F extends Transport<null> {
       } else {
         throw e;
       }
-    }
+    }*/
     return new TransportU2F();
   }
 
