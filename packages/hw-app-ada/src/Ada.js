@@ -40,7 +40,7 @@ export default class Ada {
   constructor(transport: Transport<*>) {
     this.transport = transport;
     this.methods = [ "isConnected", "getWalletRecoveryPassphrase", "getWalletPublicKeyWithIndex", "signTransaction" ];
-    transport.decorateAppAPIMethods(this, this.methods, "ADA");
+    this.transport.decorateAppAPIMethods(this, this.methods, "ADA");
   }
 
   /**
@@ -59,12 +59,9 @@ export default class Ada {
    *
    */
   async isConnected(): Promise<{ major: string, minor: string, patch: string }> {
-    const buffer = Buffer.alloc(OFFSET_CDATA);
-    buffer.writeUInt32BE(0, OFFSET_LC);
+    const response = await this.transport.send(CLA, INS_APP_INFO, 0x00, 0x00);
 
-    const response = await this.transport.send(CLA, INS_APP_INFO, 0x00, 0x00, buffer);
     const [ major, minor, patch ] = response;
-
     return { major, minor, patch };
   }
 
