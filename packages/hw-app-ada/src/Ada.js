@@ -17,11 +17,9 @@
 // @flow
 
 import type Transport from "@ledgerhq/hw-transport";
+import { TransportStatusError } from "@ledgerhq/hw-transport";
 
 const CLA = 0x80;
-
-const OFFSET_CDATA = 8;
-const OFFSET_LC = 4;
 
 const INS_GET_PUBLIC_KEY = 0x01;
 const INS_APP_INFO = 0x04;
@@ -113,11 +111,15 @@ export default class Ada {
    *
    */
   async getWalletPublicKeyWithIndex(index: number): Promise<{ publicKey: string }> {
-    const buffer = Buffer.alloc(OFFSET_CDATA + 4);
-    buffer.writeUInt32BE(4, OFFSET_LC);
-    buffer.writeUInt32BE(index, OFFSET_CDATA);
-    
+    if (isNaN(index)) {
+      throw new TransportStatusError(0x5003);
+    }
+
+    const buffer = Buffer.alloc(4);
+    buffer.writeUInt32BE(index, 0);
+
     const response = await this.transport.send(CLA, INS_GET_PUBLIC_KEY, 0x02, 0x00, buffer);
+
     const [ publicKeyLength ] = response;
     const publicKey = response.slice(1, 1 + publicKeyLength).toString("hex");
 
