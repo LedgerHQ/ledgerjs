@@ -1,11 +1,21 @@
 // @flow
+import Int64 from "node-int64";
 import type Transport from "@ledgerhq/hw-transport";
+import { TransportStatusError } from "@ledgerhq/hw-transport";
 import Ada from "@ledgerhq/hw-app-ada";
 
 const CLA = 0x80;
 
-const INS_BASE58_ENCODE_TEST = 0x08;
 const INS_BLAKE2B_TEST = 0x07;
+const INS_BASE58_ENCODE_TEST = 0x08;
+const INS_CBOR_DECODE_TEST = 0x09;
+
+const P1_FIRST = 0x01;
+const P1_NEXT = 0x02;
+const P1_LAST = 0x03;
+
+const P2_SINGLE_TX = 0x01;
+const P2_MULTI_TX = 0x02;
 
 const MAX_APDU_SIZE = 64;
 const OFFSET_CDATA = 5;
@@ -14,7 +24,7 @@ export default class TestAda extends Ada {
 
   constructor(transport: Transport<*>) {
     super(transport);
-    this.methods = this.methods.concat([ "testBase58Encode", "testCBORDecode", "testHashTransaction" ]);
+    this.methods = [ "testBase58Encode", "testCBORDecode", "testHashTransaction" ];
     this.transport.decorateAppAPIMethods(this, this.methods, "ADA");
   }
   
@@ -43,6 +53,54 @@ export default class TestAda extends Ada {
   }
 
   /**
+   * Check CBOR decoding on the device. This is for testing purposes only and is not available in production.
+   *
+   * @param {String} txHex The hexadecimal address for encoding.
+   * @returns {Promise<Object>} The response from the device.
+   */
+  async testCBORDecode(txHex: string) : Promise<{ inputs?: number, outputs?: number }> {
+    const rawTx = Buffer.from(txHex, "hex");
+    const chunkSize = MAX_APDU_SIZE - OFFSET_CDATA;
+    let response = {};
+
+    for (let i = 0; i < rawTx.length; i += chunkSize) {
+      const chunk = rawTx.slice(i, i + chunkSize);
+      const p2 = rawTx.length < chunkSize ? P2_SINGLE_TX : P2_MULTI_TX;
+      let p1 = P1_NEXT;
+
+      if (i === 0) {
+          p1 = P1_FIRST;
+      } else if (i + chunkSize >= rawTx.length) {
+          p1 = P1_LAST;
+      }
+
+      const res = await this.transport.send(CLA, INS_CBOR_DECODE_TEST, p1, p2, chunk);
+
+      const sw = res.readUInt16BE(res.length - 2);
+      if (sw !== 0x9000) {
+        throw new TransportStatusError(sw);
+      }
+
+      if (res.length > 4) {
+          const [ inputs, outputs ] = res;
+          const txs = [];
+
+          let position = 2;
+          while (position < res.length - 2) {
+              let checksum = res.readUInt32BE(position);
+              let amount = new Int64(res.readUInt32LE(position + 9), res.readUInt32LE(position + 5)).toOctetString();
+              txs.push({ checksum, amount });
+              position += 14;
+          }
+
+          response = { inputs, outputs, txs };
+      }
+    }
+
+    return response;
+  }
+
+  /**
    * Check transaction hashing on the device. This is for testing purposes only and is not available in production.
    *
    * @param {String} txHex The hexadecimal address for hashing.
@@ -55,16 +113,21 @@ export default class TestAda extends Ada {
 
     for (let i = 0; i < rawTx.length; i += chunkSize) {
       const chunk = rawTx.slice(i, i + chunkSize);
-      const p1 = i == 0 ? 0x01 : 0x02;
-      const p2 = rawTx.length < chunkSize ? 0x01 : 0x02;
+      const p2 = rawTx.length < chunkSize ? P2_SINGLE_TX : P2_MULTI_TX;
+      let p1 = P1_NEXT;
 
-      const data = Buffer.concat([
-        Buffer.from([CLA, INS_BLAKE2B_TEST, p1, p2]),
-        Buffer.from([i == 0 ? rawTx.length : rawTx.length - i]),
-        chunk,
-      ]);
+      if (i === 0) {
+          p1 = P1_FIRST;
+      } else if (i + chunkSize >= rawTx.length) {
+          p1 = P1_LAST;
+      }
 
-      const res = await this.transport.exchange(data);
+      const res = await this.transport.send(CLA, INS_BLAKE2B_TEST, p1, p2, chunk);
+
+      const sw = res.readUInt16BE(res.length - 2);
+      if (sw !== 0x9000) {
+        throw new TransportStatusError(sw);
+      }
 
       if (res.length > 4) {
         const tx = res.slice(1, res.length - 2).toString('hex');
