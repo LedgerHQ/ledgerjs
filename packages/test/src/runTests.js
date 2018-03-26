@@ -13,7 +13,6 @@ import testXrp3 from "./testXrp3";
 import testStr from "./testStr";
 import testStr2 from "./testStr2";
 import testStr3 from "./testStr3";
-import testAda from "./testAda";
 
 function expectAppContext(appName) {
   // TODO improve this by waiting user to do an action?
