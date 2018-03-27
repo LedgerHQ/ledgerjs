@@ -119,6 +119,17 @@ test("parseCurrencyUnit", () => {
   expect(
     parseCurrencyUnit(getCurrencyByCoinType(0).units[0], "9,999.99999999")
   ).toBe(999999999999);
+  expect(parseCurrencyUnit(getCurrencyByCoinType(0).units[0], ".987654")).toBe(
+    98765400
+  );
+  expect(parseCurrencyUnit(getCurrencyByCoinType(0).units[0], "9,999")).toBe(
+    999900000000
+  );
+  expect(parseCurrencyUnit(getCurrencyByCoinType(0).units[0], "1")).toBe(
+    100000000
+  );
+  expect(parseCurrencyUnit(getCurrencyByCoinType(0).units[0], "0x1")).toBe(0);
+  expect(parseCurrencyUnit(getCurrencyByCoinType(0).units[0], "NOPE")).toBe(0);
 });
 
 test("formatter works with fiats", () => {
