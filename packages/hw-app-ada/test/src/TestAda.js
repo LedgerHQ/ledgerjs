@@ -1,7 +1,6 @@
 // @flow
 import Int64 from "node-int64";
 import type Transport from "@ledgerhq/hw-transport";
-import { TransportStatusError } from "@ledgerhq/hw-transport";
 import Ada from "@ledgerhq/hw-app-ada";
 
 const CLA = 0x80;
@@ -58,7 +57,7 @@ export default class TestAda extends Ada {
    * @param {String} txHex The hexadecimal address for encoding.
    * @returns {Promise<Object>} The response from the device.
    */
-  async testCBORDecode(txHex: string) : Promise<{ inputs?: number, outputs?: number }> {
+  async testCBORDecode(txHex: string) : Promise<{ inputs?: number, outputs?: number, txs?: Array<{ checksum: string, amount: string }> }> {
     const rawTx = Buffer.from(txHex, "hex");
     const chunkSize = MAX_APDU_SIZE - OFFSET_CDATA;
     let response = {};
@@ -75,11 +74,6 @@ export default class TestAda extends Ada {
       }
 
       const res = await this.transport.send(CLA, INS_CBOR_DECODE_TEST, p1, p2, chunk);
-
-      const sw = res.readUInt16BE(res.length - 2);
-      if (sw !== 0x9000) {
-        throw new TransportStatusError(sw);
-      }
 
       if (res.length > 4) {
           const [ inputs, outputs ] = res;
@@ -123,11 +117,6 @@ export default class TestAda extends Ada {
       }
 
       const res = await this.transport.send(CLA, INS_BLAKE2B_TEST, p1, p2, chunk);
-
-      const sw = res.readUInt16BE(res.length - 2);
-      if (sw !== 0x9000) {
-        throw new TransportStatusError(sw);
-      }
 
       if (res.length > 4) {
         const tx = res.slice(1, res.length - 2).toString('hex');

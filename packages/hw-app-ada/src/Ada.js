@@ -16,13 +16,26 @@
  ********************************************************************************/
 // @flow
 
+import Int64 from "node-int64";
 import type Transport from "@ledgerhq/hw-transport";
 import { TransportStatusError } from "@ledgerhq/hw-transport";
 
 const CLA = 0x80;
 
 const INS_GET_PUBLIC_KEY = 0x01;
+const INS_SET_TX = 0x02;
 const INS_APP_INFO = 0x04;
+
+const P1_FIRST = 0x01;
+const P1_NEXT = 0x02;
+const P1_LAST = 0x03;
+
+const P2_SINGLE_TX = 0x01;
+const P2_MULTI_TX = 0x02;
+
+const MAX_APDU_SIZE = 64;
+const OFFSET_CDATA = 5;
+const MAX_ADDR_PRINT_LENGTH = 12;
 
 /**
  * Cardano ADA API
@@ -125,4 +138,49 @@ export default class Ada {
 
     return { publicKey };
   }
-};
+
+  /**
+   * Set the transaction.
+   *
+   * @param {string} txHex The transaction to be set.
+   * @return {Promise<Object>} The response from the device.
+   * @private
+   */
+  async setTransaction(txHex: string): Promise<{ inputs?: string, outputs?: string, txs?: Array<{ address: string, amount: string }> }> {
+    const rawTx = Buffer.from(txHex, "hex");
+    const chunkSize = MAX_APDU_SIZE - OFFSET_CDATA;
+    let response = {};
+
+    for (let i = 0; i < rawTx.length; i += chunkSize) {
+      const chunk = rawTx.slice(i, i + chunkSize);
+      const p2 = rawTx.length < chunkSize ? P2_SINGLE_TX : P2_MULTI_TX;
+      let p1 = P1_NEXT;
+
+      if (i === 0) {
+          p1 = P1_FIRST;
+      } else if (i + chunkSize >= rawTx.length) {
+          p1 = P1_LAST;
+      }
+
+      const res = await this.transport.send(CLA, INS_SET_TX, p1, p2, chunk);
+
+      if (res.length > 4) {
+        const [ inputs, outputs ] = res;
+        const txs = [];
+
+        let offset = 2;
+        for (let i = 0; i < outputs; i++) {
+            let address = res.slice(offset, offset + MAX_ADDR_PRINT_LENGTH).toString();
+            offset += MAX_ADDR_PRINT_LENGTH;
+            let amount = new Int64(res.readUInt32LE(offset + 4), res.readUInt32LE(offset)).toOctetString();
+            txs.push({ address, amount });
+            offset += 8;
+        }
+
+        response = { inputs, outputs, txs };
+      }
+    }
+
+    return response;
+  }
+}
