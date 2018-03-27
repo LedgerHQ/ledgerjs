@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/currencies",
-  "version": "4.7.3",
+  "version": "4.7.4",
   "description": "Ledger Hardware Wallet currencies dataset",
   "keywords": [],
   "main": "lib/index.js",
