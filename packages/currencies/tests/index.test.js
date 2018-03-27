@@ -140,6 +140,15 @@ test("formatter works with fiats", () => {
   expect(formatCurrencyUnit(getFiatUnit("EUR"), 12300)).toBe("123.00");
 });
 
+test("formatter useGrouping", () => {
+  expect(
+    formatCurrencyUnit(getFiatUnit("EUR"), 1234500, { useGrouping: true })
+  ).toBe("12,345.00");
+  expect(
+    formatCurrencyUnit(getFiatUnit("EUR"), 1234500, { useGrouping: false })
+  ).toBe("12345.00");
+});
+
 test("formatter can change locale", () => {
   expect(
     formatCurrencyUnit(getFiatUnit("USD"), -1234567, { showCode: true })

@@ -9,7 +9,8 @@ const defaultFormatOptions = {
   alwaysShowSign: false,
   // override showAllDigits of the unit
   showAllDigits: false,
-  disableRounding: false
+  disableRounding: false,
+  useGrouping: true
 };
 
 type FormatFragment =
@@ -52,7 +53,14 @@ export function formatCurrencyUnitFragment(
   value: number,
   options?: $Shape<typeof defaultFormatOptions>
 ): FormatFragment[] {
-  const { showCode, alwaysShowSign, showAllDigits, locale, disableRounding } = {
+  const {
+    showCode,
+    alwaysShowSign,
+    showAllDigits,
+    locale,
+    disableRounding,
+    useGrouping
+  } = {
     ...defaultFormatOptions,
     ...unit,
     ...options
@@ -78,7 +86,8 @@ export function formatCurrencyUnitFragment(
     code: showCode ? code : null,
     value: floatValueAbs.toLocaleString(locale, {
       maximumFractionDigits,
-      minimumFractionDigits
+      minimumFractionDigits,
+      useGrouping
     }),
     separator: nonBreakableSpace
   };
