@@ -80,7 +80,15 @@ yarn
 Build all packages
 
 ```bash
-yarn run build
+yarn build
+```
+
+### Watch
+
+Watch all packages change. Very useful during development to build only file that changes.
+
+```bash
+yarn watch
 ```
 
 ### Lint
@@ -88,7 +96,7 @@ yarn run build
 Lint all packages
 
 ```bash
-yarn run lint
+yarn lint
 ```
 
 ### Run Tests
@@ -107,13 +115,13 @@ Then run the test and accept the commands on the devices for the tests to
 continue.
 
 ```bash
-yarn run test-node
+yarn test-node
 ```
 
 You can also test on the web:
 
 ```bash
-yarn run test-browser
+yarn test-browser
 ```
 
 > make sure to configure your device app with "Browser support" set to "YES".
