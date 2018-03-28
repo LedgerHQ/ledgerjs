@@ -7,7 +7,7 @@ const defaultFormatOptions = {
 };
 
 // returns decimal and thousands separator
-const getSeparators = memoize((locale: string): {
+export const getSeparators = memoize((locale: string): {
   decimal: ?string,
   thousands: ?string
 } => {
