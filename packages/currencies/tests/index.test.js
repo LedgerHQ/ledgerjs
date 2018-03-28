@@ -10,6 +10,7 @@ import {
   countervalueForRate,
   formatCurrencyUnit,
   parseCurrencyUnit,
+  chopCurrencyUnitDecimals,
   formatShort,
   decodeURIScheme,
   encodeURIScheme
@@ -167,6 +168,20 @@ test("formatter can change locale", () => {
 test("formatShort", () => {
   expect(formatShort(getFiatUnit("EUR"), 123456789)).toBe("1.2m");
   expect(formatShort(getFiatUnit("EUR"), 123456)).toBe("1.2k");
+});
+
+test("chopCurrencyUnitDecimals", () => {
+  expect(chopCurrencyUnitDecimals(getFiatUnit("EUR"), "1")).toBe("1");
+  expect(chopCurrencyUnitDecimals(getFiatUnit("EUR"), "1,234")).toBe("1,234");
+  expect(chopCurrencyUnitDecimals(getFiatUnit("EUR"), "1,234.56")).toBe(
+    "1,234.56"
+  );
+  expect(chopCurrencyUnitDecimals(getFiatUnit("EUR"), "1,234.5678")).toBe(
+    "1,234.56"
+  );
+  expect(chopCurrencyUnitDecimals(getFiatUnit("EUR"), "1,234.5678 EUR")).toBe(
+    "1,234.56 EUR"
+  );
 });
 
 test("encodeURIScheme", () => {

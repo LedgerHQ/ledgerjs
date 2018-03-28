@@ -13,6 +13,8 @@ import {
 
 import { parseCurrencyUnit } from "./parseCurrencyUnit";
 
+import { chopCurrencyUnitDecimals } from "./chopCurrencyUnitDecimals";
+
 import {
   formatCurrencyUnit,
   formatCurrencyUnitFragment
@@ -27,6 +29,7 @@ export {
   getFiatUnit,
   hasFiatUnit,
   parseCurrencyUnit,
+  chopCurrencyUnitDecimals,
   formatCurrencyUnit,
   formatCurrencyUnitFragment,
   formatShort,
