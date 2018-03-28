@@ -24,6 +24,7 @@ const CLA = 0x80;
 
 const INS_GET_PUBLIC_KEY = 0x01;
 const INS_SET_TX = 0x02;
+const INS_SIGN_TX = 0x03;
 const INS_APP_INFO = 0x04;
 
 const P1_FIRST = 0x01;
@@ -36,6 +37,10 @@ const P2_MULTI_TX = 0x02;
 const MAX_APDU_SIZE = 64;
 const OFFSET_CDATA = 5;
 const MAX_ADDR_PRINT_LENGTH = 12;
+const INDEX_MAX = 0xFFFFFFFF;
+
+const INDEX_NAN = 0x5003;
+const INDEX_MAX_EXCEEDED = 0x5302;
 
 /**
  * Cardano ADA API
@@ -125,18 +130,47 @@ export default class Ada {
    */
   async getWalletPublicKeyWithIndex(index: number): Promise<{ publicKey: string }> {
     if (isNaN(index)) {
-      throw new TransportStatusError(0x5003);
+      throw new TransportStatusError(INDEX_NAN);
     }
 
-    const buffer = Buffer.alloc(4);
-    buffer.writeUInt32BE(index, 0);
+    const data = Buffer.alloc(4);
+    data.writeUInt32BE(index, 0);
 
-    const response = await this.transport.send(CLA, INS_GET_PUBLIC_KEY, 0x02, 0x00, buffer);
+    const response = await this.transport.send(CLA, INS_GET_PUBLIC_KEY, 0x02, 0x00, data);
 
     const [ publicKeyLength ] = response;
     const publicKey = response.slice(1, 1 + publicKeyLength).toString("hex");
 
     return { publicKey };
+  }
+
+  /**
+   * @description Signs a hex encoded transaction with the given indexes.
+   * The transaction is hased using Blake2b on the Ledger device.
+   * Then, signed by the private key derived from each of the passed in indexes at
+   * path 44'/1815'/0'/[index].
+   *
+   * @param {string} txHex The transaction to be signed.
+   * @param {number[]} indexes The indexes of the keys to be used for signing.
+   * @return {Array.Promise<{success:boolean, digest:string }>} An array of result objects containing a digest for each of the passed in indexes.
+   *
+   * @throws 5001 - Tx > 1024 bytes
+   * @throws 5301 - Index < 0x80000000
+   * @throws 5302 - Index > 0xFFFFFFFF
+   * @throws 5003 - Index not a number
+   *
+   * @example
+   * const transaction = '839F8200D8185826825820E981442C2BE40475BB42193CA35907861D90715854DE6FCBA767B98F1789B51219439AFF9F8282D818584A83581CE7FE8E468D2249F18CD7BF9AEC0D4374B7D3E18609EDE8589F82F7F0A20058208200581C240596B9B63FC010C06FBE92CF6F820587406534795958C411E662DC014443C0688E001A6768CC861B0037699E3EA6D064FFA0';
+   * ada.signTransaction(transaction, [0xF005BA11])
+   *  .then((response) => {
+   *    console.log('Signed successfully: %s', response.digest);
+   *  })
+   *  .catch(error => console.log(error));
+   *
+   */
+  async signTransaction(txHex: string, indexes: Array<number>): Promise<Array<{ digest: string }>> {
+    const response = await this.setTransaction(txHex);
+    return this.signTransactionWithIndexes(indexes);
   }
 
   /**
@@ -179,6 +213,38 @@ export default class Ada {
 
         response = { inputs, outputs, txs };
       }
+    }
+
+    return response;
+  }
+
+  /**
+   * Sign the set transaction with the given indexes.
+   * Note that setTransaction must be called prior to this being called.
+   *
+   * @param {number[]} indexes The indexes of the keys to be used for signing.
+   * @returns {Array.Promise<Object>} An array of result objects containing a digest for each of the passed in indexes.
+   * @private
+   */
+  async signTransactionWithIndexes(indexes: Array<number>): Promise<Array<{ digest: string }>> {
+    let response = [];
+
+    for (let i = 0; i < indexes.length; i++) {
+      if (isNaN(indexes[i])) {
+        throw new TransportStatusError(INDEX_NAN);
+      }
+
+      if (indexes[i] > INDEX_MAX) {
+        throw new TransportStatusError(INDEX_MAX_EXCEEDED);
+      }
+
+      const data = Buffer.alloc(4);
+      data.writeUInt32BE(indexes[i], 0);
+
+      const res = await this.transport.send(CLA, INS_SIGN_TX, 0x00, 0x00, data);
+      const digest = res.slice(0, res.length - 2).toString("hex");
+
+      response.push({ digest });
     }
 
     return response;
