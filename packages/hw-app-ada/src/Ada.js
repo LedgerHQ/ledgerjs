@@ -169,7 +169,7 @@ export default class Ada {
    *
    */
   async signTransaction(txHex: string, indexes: Array<number>): Promise<Array<{ digest: string }>> {
-    const response = await this.setTransaction(txHex);
+    await this.setTransaction(txHex);
     return this.signTransactionWithIndexes(indexes);
   }
 

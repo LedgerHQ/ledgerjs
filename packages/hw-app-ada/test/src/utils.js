@@ -57,6 +57,10 @@ export function promptUser(message) {
  * @param {Joi.object} schema The Joi schema to validate against.
  */
 export function validate(response, schema) {
+  if (response === null || response === undefined) {
+    throw new Error("Validation Error: Response was empty");
+  }
+
   const { error, value } = Joi.validate(response, schema);
   expect(error).to.be.null;
 }
