@@ -1,6 +1,7 @@
 //@flow
 
 import {
+  listFiats,
   listCurrencies,
   hasCurrencyByCoinType,
   getCurrencyByCoinType,
@@ -34,6 +35,41 @@ test("all cryptocurrencies have at least one unit", () => {
   for (let c of listCurrencies()) {
     expect(c.units.length).toBeGreaterThan(0);
   }
+});
+
+test("fiats list is always the same", () => {
+  expect(listFiats()).toEqual(listFiats());
+});
+
+test("fiats list elements are correct", () => {
+  const tickers = {};
+  for (const fiat of listFiats()) {
+    expect(tickers[fiat.ticker]).toBeFalsy();
+    expect(fiat.code).toBeTruthy();
+    expect(typeof fiat.code).toBe("string");
+    expect(fiat.ticker).toBeTruthy();
+    expect(typeof fiat.ticker).toBe("string");
+    expect(fiat.name).toBeTruthy();
+    expect(typeof fiat.name).toBe("string");
+    expect(fiat.symbol).toBeTruthy();
+    expect(typeof fiat.symbol).toBe("string");
+    expect(fiat.magnitude).toBeGreaterThan(-1);
+    expect(typeof fiat.magnitude).toBe("number");
+    tickers[fiat.ticker] = fiat;
+  }
+});
+
+test("fiats list is sorted by ticker", () => {
+  expect(
+    listFiats()
+      .map(fiat => fiat.ticker)
+      .join(",")
+  ).toEqual(
+    listFiats()
+      .map(fiat => fiat.ticker)
+      .sort((a, b) => (a > b ? 1 : -1))
+      .join(",")
+  );
 });
 
 test("can get fiat by coin type", () => {
