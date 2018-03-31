@@ -116,6 +116,61 @@ test("formatter rounding can be disabled", () => {
   ).toBe("9,999.99999999");
 });
 
+test("sub magnitude", () => {
+  expect(
+    formatCurrencyUnit(getFiatUnit("USD"), 0.04, {
+      subMagnitude: 2
+    })
+  ).toBe("0.0004");
+
+  // digits will be round after subMagnitude
+  expect(
+    formatCurrencyUnit(getFiatUnit("USD"), 0.03987654, {
+      subMagnitude: 2,
+      showCode: true
+    })
+  ).toBe("USD 0.0004");
+
+  expect(
+    formatCurrencyUnit(getFiatUnit("USD"), 0.03987654, {
+      subMagnitude: 2,
+      disableRounding: true
+    })
+  ).toBe("0.0004");
+
+  expect(
+    formatCurrencyUnit(getFiatUnit("USD"), 0.03987654, {
+      subMagnitude: 5,
+      disableRounding: true
+    })
+  ).toBe("0.0003988");
+
+  // even tho the USD unit showAllDigits, it does not force the sub magnitude digits to show
+  expect(
+    formatCurrencyUnit(getFiatUnit("USD"), 0.03, {
+      subMagnitude: 5,
+      disableRounding: true
+    })
+  ).toBe("0.0003");
+
+  expect(
+    formatCurrencyUnit(getCurrencyByCoinType(0).units[0], 9.123456, {
+      subMagnitude: 2
+    })
+  ).toBe("0.0000000912");
+  expect(
+    formatCurrencyUnit(getCurrencyByCoinType(0).units[0], 999999999999.123456, {
+      disableRounding: true,
+      subMagnitude: 2
+    })
+  ).toBe("9,999.9999999912");
+  expect(
+    formatCurrencyUnit(getCurrencyByCoinType(0).units[0], 999999999999.123456, {
+      subMagnitude: 2
+    })
+  ).toBe("10,000");
+});
+
 test("parseCurrencyUnit", () => {
   expect(
     parseCurrencyUnit(getCurrencyByCoinType(0).units[0], "9,999.99999999")
