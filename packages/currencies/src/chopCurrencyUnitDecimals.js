@@ -1,24 +1,16 @@
 //@flow
 import type { Unit } from "./types";
-import { getSeparators } from "./parseCurrencyUnit";
-
-const defaultFormatOptions = {
-  locale: "en-EN"
-};
 
 // remove the extra decimals that can't be represented in unit
 // this function will preserve the string characters
-// for instance EUR 1,230.00234 will be transformed to EUR 1,230.00
+// for instance EUR 1230.00234 will be transformed to EUR 1230.00
+// NB this function parse a subset of formats because it it locale independant.
+// make sure you have at least following options set on the formatter:
+// - useGrouping: true
 export const chopCurrencyUnitDecimals = (
   unit: Unit,
-  valueString: string,
-  options?: $Shape<typeof defaultFormatOptions>
+  valueString: string
 ): string => {
-  const { locale } = {
-    ...defaultFormatOptions,
-    ...options
-  };
-  const sep = getSeparators(locale);
   let str = "",
     decimals = -1;
   for (let i = 0; i < valueString.length; i++) {
@@ -28,7 +20,7 @@ export const chopCurrencyUnitDecimals = (
       if (decimals > unit.magnitude) {
         continue;
       }
-    } else if (c === sep.decimal) {
+    } else if (c === "," || c === ".") {
       decimals = 0;
     }
     str += c;

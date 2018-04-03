@@ -1,6 +1,6 @@
 //@flow
 import type { Unit } from "./types";
-import memoize from "lodash/memoize";
+import { getFragPositions } from "./localeUtility";
 
 const nonBreakableSpace = " ";
 const defaultFormatOptions = {
@@ -29,35 +29,6 @@ type FormatFragment =
   | { kind: "sign", value: string }
   | { kind: "code", value: string }
   | { kind: "separator", value: string };
-
-const getFragPositions = memoize((locale: string): Array<*> => {
-  const res = (-1).toLocaleString(locale, {
-    currency: "USD",
-    style: "currency"
-  });
-  const frags = [];
-  let mandatoryFrags = 0;
-  for (let i = 0; i < res.length; i++) {
-    const c = res[i];
-    if (c === "$") {
-      // force code to be surround by separators. we'll dedup later
-      frags.push("separator");
-      frags.push("code");
-      frags.push("separator");
-      mandatoryFrags++;
-    } else if (c === "-") {
-      frags.push("sign");
-      mandatoryFrags++;
-    } else if (c === "1") {
-      frags.push("value");
-      mandatoryFrags++;
-    } else if (/\s/.test(c)) {
-      frags.push("separator");
-    }
-    if (mandatoryFrags === 3) return frags;
-  }
-  return frags;
-});
 
 export function formatCurrencyUnitFragment(
   unit: Unit,

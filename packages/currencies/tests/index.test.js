@@ -173,12 +173,12 @@ test("sub magnitude", () => {
 
 test("parseCurrencyUnit", () => {
   expect(
-    parseCurrencyUnit(getCurrencyByCoinType(0).units[0], "9,999.99999999")
+    parseCurrencyUnit(getCurrencyByCoinType(0).units[0], "9999.99999999")
   ).toBe(999999999999);
   expect(parseCurrencyUnit(getCurrencyByCoinType(0).units[0], ".987654")).toBe(
     98765400
   );
-  expect(parseCurrencyUnit(getCurrencyByCoinType(0).units[0], "9,999")).toBe(
+  expect(parseCurrencyUnit(getCurrencyByCoinType(0).units[0], "9999")).toBe(
     999900000000
   );
   expect(parseCurrencyUnit(getCurrencyByCoinType(0).units[0], "1")).toBe(
@@ -227,15 +227,15 @@ test("formatShort", () => {
 
 test("chopCurrencyUnitDecimals", () => {
   expect(chopCurrencyUnitDecimals(getFiatUnit("EUR"), "1")).toBe("1");
-  expect(chopCurrencyUnitDecimals(getFiatUnit("EUR"), "1,234")).toBe("1,234");
-  expect(chopCurrencyUnitDecimals(getFiatUnit("EUR"), "1,234.56")).toBe(
-    "1,234.56"
+  expect(chopCurrencyUnitDecimals(getFiatUnit("EUR"), "1234")).toBe("1234");
+  expect(chopCurrencyUnitDecimals(getFiatUnit("EUR"), "1234.56")).toBe(
+    "1234.56"
   );
-  expect(chopCurrencyUnitDecimals(getFiatUnit("EUR"), "1,234.5678")).toBe(
-    "1,234.56"
+  expect(chopCurrencyUnitDecimals(getFiatUnit("EUR"), "1234.5678")).toBe(
+    "1234.56"
   );
-  expect(chopCurrencyUnitDecimals(getFiatUnit("EUR"), "1,234.5678 EUR")).toBe(
-    "1,234.56 EUR"
+  expect(chopCurrencyUnitDecimals(getFiatUnit("EUR"), "1234.5678 EUR")).toBe(
+    "1234.56 EUR"
   );
 });
 
