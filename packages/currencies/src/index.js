@@ -42,4 +42,4 @@ export {
   decodeURIScheme
 };
 
-export type { Currency, Unit, Rate, UnitValue } from "./types";
+export type { Currency, Unit, FiatUnit, Rate, UnitValue } from "./types";
