@@ -37,7 +37,7 @@ describe("getWalletRecoveryPassphrase", async () => {
     promptUser("Please accept public key request");
     
     const response = await ada.getWalletRecoveryPassphrase();
-    validate(res, schema);
+    validate(response, schema);
         
     promptUser("Please accept public key request");
 
