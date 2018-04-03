@@ -32,6 +32,7 @@ const cryptocurrenciesArray: Currency[] = [
   {
     coinType: 0,
     name: "Bitcoin",
+    ticker: "BTC",
     scheme: "bitcoin",
     apiName: "btc",
     color: "#ffae35",
@@ -54,6 +55,7 @@ const cryptocurrenciesArray: Currency[] = [
   {
     coinType: 1,
     name: "Bitcoin Testnet",
+    ticker: "BTC",
     scheme: "bitcoin",
     apiName: "btc_testnet",
     color: "#ffae35",
@@ -76,6 +78,7 @@ const cryptocurrenciesArray: Currency[] = [
   {
     coinType: 145,
     name: "Bitcoin Cash",
+    ticker: "BCH",
     scheme: "bitcoin",
     apiName: "abc",
     color: "#85bb65",
@@ -124,6 +127,7 @@ const cryptocurrenciesArray: Currency[] = [
   {
     coinType: 156,
     name: "Bitcoin Gold",
+    ticker: "BTG",
     scheme: "bitcoin",
     apiName: "btg",
     color: "#132c47",
@@ -172,6 +176,7 @@ const cryptocurrenciesArray: Currency[] = [
   {
     coinType: 2,
     name: "Litecoin",
+    ticker: "LTC",
     scheme: "litecoin",
     color: "#cccccc",
     units: [
@@ -186,6 +191,7 @@ const cryptocurrenciesArray: Currency[] = [
   {
     coinType: 3,
     name: "Dogecoin",
+    ticker: "DOGE",
     scheme: "dogecoin",
     color: "#65d196",
     units: [
@@ -200,6 +206,7 @@ const cryptocurrenciesArray: Currency[] = [
   {
     coinType: 5,
     name: "Dash",
+    ticker: "DASH",
     scheme: "dash",
     apiName: "dash",
     color: "#0e76aa",
@@ -228,6 +235,7 @@ const cryptocurrenciesArray: Currency[] = [
   {
     coinType: 6,
     name: "Peercoin",
+    ticker: "PPC",
     scheme: "peercoin",
     apiName: "ppc",
     color: "#3cb054",
@@ -256,6 +264,7 @@ const cryptocurrenciesArray: Currency[] = [
   {
     coinType: 105,
     name: "Stratis",
+    ticker: "STRAT",
     scheme: "stratis",
     apiName: "strat",
     color: "#1382c6",
@@ -284,6 +293,7 @@ const cryptocurrenciesArray: Currency[] = [
   {
     coinType: 133,
     name: "Zcash",
+    ticker: "ZEC",
     scheme: "zcash",
     apiName: "zec",
     color: "#3790ca",
@@ -312,6 +322,7 @@ const cryptocurrenciesArray: Currency[] = [
   {
     coinType: 141,
     name: "Komodo",
+    ticker: "KMD",
     scheme: "komodo",
     apiName: "kmd",
     color: "#326464",

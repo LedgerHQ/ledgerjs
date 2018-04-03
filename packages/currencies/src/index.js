@@ -2,7 +2,7 @@
 
 import { encodeURIScheme, decodeURIScheme } from "./CurrencyURIScheme";
 
-import { getFiatUnit, hasFiatUnit } from "./data/fiat";
+import { listFiats, getFiatUnit, hasFiatUnit } from "./data/fiat";
 
 import {
   listCurrencies,
@@ -25,6 +25,7 @@ import { formatShort } from "./formatShort";
 import countervalueForRate from "./countervalueForRate";
 
 export {
+  listFiats,
   listCurrencies,
   getFiatUnit,
   hasFiatUnit,
