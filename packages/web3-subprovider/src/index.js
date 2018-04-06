@@ -102,7 +102,7 @@ export default function createLedgerSubprovider(
           pathComponents.basePath + (pathComponents.index + i).toString();
         const address = await eth.getAddress(path, askConfirm, false);
         addresses[path] = address.address;
-        addressToPathMap[address.address] = path;
+        addressToPathMap[address.address.toLowerCase()] = path;
       }
       return addresses;
     } finally {
@@ -111,7 +111,7 @@ export default function createLedgerSubprovider(
   }
 
   async function signPersonalMessage(msgData) {
-    const path = addressToPathMap[msgData.from];
+    const path = addressToPathMap[msgData.from.toLowerCase()];
     if (!path) throw new Error("address unknown '" + msgData.from + "'");
     const transport = await getTransport();
     try {
@@ -132,7 +132,7 @@ export default function createLedgerSubprovider(
   }
 
   async function signTransaction(txData) {
-    const path = addressToPathMap[txData.from];
+    const path = addressToPathMap[txData.from.toLowerCase()];
     if (!path) throw new Error("address unknown '" + txData.from + "'");
     const transport = await getTransport();
     try {

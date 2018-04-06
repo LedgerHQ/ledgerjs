@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/currencies",
-  "version": "4.5.0",
+  "version": "4.10.1",
   "description": "Ledger Hardware Wallet currencies dataset",
   "keywords": [],
   "main": "lib/index.js",
@@ -23,15 +23,18 @@
   },
   "devDependencies": {
     "babel-jest": "^20.0.0",
-    "flow-bin": "^0.66.0",
-    "flow-typed": "^2.3.0",
-    "jest": "^20.0.0"
+    "flow-bin": "^0.68.0",
+    "flow-typed": "^2.4.0",
+    "glob": "^7.1.2",
+    "jest": "^20.0.0",
+    "path": "^0.12.7",
+    "svgr": "^1.9.0"
   },
   "scripts": {
     "flow": "flow",
     "test": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && jest",
-    "clean": "rm -rf lib/",
-    "build": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src && flow-copy-source -v src lib",
-    "watch": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src & flow-copy-source -w -v src lib"
+    "clean": "rm -rf lib/ src/data/icons/react src/data/icons/reactNative",
+    "build": "node scripts/buildReactIcons.js && cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src && flow-copy-source -v src lib",
+    "watch": "node scripts/buildReactIcons.js && cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src & flow-copy-source -w -v src lib"
   }
 }

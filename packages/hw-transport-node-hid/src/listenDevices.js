@@ -11,16 +11,18 @@ export default (
 } => {
   const events = new EventEmitter();
   events.setMaxListeners(0);
+
   let timeoutDetection;
   let listDevices = getDevices();
 
-  const flatDevice = device => device.path;
+  const flatDevice = d => d.path;
 
   const getFlatDevices = () => [
-    ...new Set(getDevices().map(device => flatDevice(device)))
+    ...new Set(getDevices().map(d => flatDevice(d)))
   ];
-  const getDeviceByPath = ids =>
-    listDevices.find(device => flatDevice(device) === ids);
+
+  const getDeviceByPaths = paths =>
+    listDevices.find(d => paths.includes(flatDevice(d)));
 
   let lastDevices = getFlatDevices();
 
@@ -28,22 +30,20 @@ export default (
     timeoutDetection = setTimeout(() => {
       const currentDevices = getFlatDevices();
 
-      const addDevice = currentDevices.find(
-        device => !lastDevices.includes(device)
-      );
-      const removeDevice = lastDevices.find(
-        device => !currentDevices.includes(device)
+      const newDevices = currentDevices.filter(d => !lastDevices.includes(d));
+      const removeDevices = lastDevices.filter(
+        d => !currentDevices.includes(d)
       );
 
-      if (addDevice) {
+      if (newDevices.length > 0) {
         listDevices = getDevices();
-        events.emit("add", getDeviceByPath(addDevice));
+        events.emit("add", getDeviceByPaths(newDevices));
       }
 
-      if (removeDevice) {
-        events.emit("remove", getDeviceByPath(removeDevice));
+      if (removeDevices.length > 0) {
+        events.emit("remove", getDeviceByPaths(removeDevices));
         listDevices = listDevices.filter(
-          device => flatDevice(device) !== removeDevice
+          d => !removeDevices.includes(flatDevice(d))
         );
       }
 

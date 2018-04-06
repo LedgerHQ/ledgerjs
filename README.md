@@ -29,7 +29,6 @@ applications. There are implementations for Node and Browser.
 | [`@ledgerhq/hw-transport`](/packages/hw-transport)                                   | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport)                                   | The generic interface of the communication layer                                                    |
 | **internal utility libraries**                                                       |
 | [`@ledgerhq/currencies`](/packages/currencies)                                       | [![npm](https://img.shields.io/npm/v/@ledgerhq/currencies.svg)](https://www.npmjs.com/package/@ledgerhq/currencies)                                       | deal with crypto currencies                                                                         |
-| [`@ledgerhq/common`](/packages/common)                                               | [![npm](https://img.shields.io/npm/v/@ledgerhq/common.svg)](https://www.npmjs.com/package/@ledgerhq/common)                                               | internal library which share code across Ledger projects                                            |
 | **Development Tools**                                                                |
 | [`@ledgerhq/hw-http-proxy-devserver`](/packages/hw-http-proxy-devserver)             | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-http-proxy-devserver.svg)](https://www.npmjs.com/package/@ledgerhq/hw-http-proxy-devserver)             | HTTP server proxy to use with `hw-transport-node-hid` **NB: DEV & testing purpose only. DO NOT use in PROD**                           |
 | [`@ledgerhq/hw-hid-cli`](/packages/hw-hid-cli)                                       | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-hid-cli.svg)](https://www.npmjs.com/package/@ledgerhq/hw-hid-cli)                                       | CLI utility to send APDU to the device via node-hid                                                 |
@@ -82,7 +81,15 @@ yarn
 Build all packages
 
 ```bash
-yarn run build
+yarn build
+```
+
+### Watch
+
+Watch all packages change. Very useful during development to build only file that changes.
+
+```bash
+yarn watch
 ```
 
 ### Lint
@@ -90,7 +97,7 @@ yarn run build
 Lint all packages
 
 ```bash
-yarn run lint
+yarn lint
 ```
 
 ### Run Tests
@@ -109,13 +116,13 @@ Then run the test and accept the commands on the devices for the tests to
 continue.
 
 ```bash
-yarn run test-node
+yarn test-node
 ```
 
 You can also test on the web:
 
 ```bash
-yarn run test-browser
+yarn test-browser
 ```
 
 > make sure to configure your device app with "Browser support" set to "YES".

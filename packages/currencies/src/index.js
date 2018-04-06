@@ -2,7 +2,7 @@
 
 import { encodeURIScheme, decodeURIScheme } from "./CurrencyURIScheme";
 
-import { getFiatUnit, hasFiatUnit } from "./data/fiat";
+import { listFiats, getFiatUnit, hasFiatUnit } from "./data/fiat";
 
 import {
   listCurrencies,
@@ -12,6 +12,8 @@ import {
 } from "./data/cryptocurrencies";
 
 import { parseCurrencyUnit } from "./parseCurrencyUnit";
+
+import { chopCurrencyUnitDecimals } from "./chopCurrencyUnitDecimals";
 
 import {
   formatCurrencyUnit,
@@ -23,10 +25,12 @@ import { formatShort } from "./formatShort";
 import countervalueForRate from "./countervalueForRate";
 
 export {
+  listFiats,
   listCurrencies,
   getFiatUnit,
   hasFiatUnit,
   parseCurrencyUnit,
+  chopCurrencyUnitDecimals,
   formatCurrencyUnit,
   formatCurrencyUnitFragment,
   formatShort,
@@ -38,4 +42,4 @@ export {
   decodeURIScheme
 };
 
-export type { Currency, Unit, Rate, UnitValue } from "./types";
+export type { Currency, Unit, FiatUnit, Rate, UnitValue } from "./types";
