@@ -9,6 +9,7 @@
     "@ledgerhq/hw-app-eth": "^4.7.3",
     "@ledgerhq/hw-app-str": "^4.7.3",
     "@ledgerhq/hw-app-xrp": "^4.7.3",
+    "@ledgerhq/hw-app-ada": "^0.1.0",
     "@ledgerhq/hw-transport-mocker": "^4.7.3",
     "@ledgerhq/hw-transport-node-hid": "^4.7.3",
     "budo": "^11.0.1"
