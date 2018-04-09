@@ -63,15 +63,11 @@ export default class Ada {
    * Checks if the device is connected and if so, returns an object
    * containing the app version.
    *
-   * @returns {Promise<{success:boolean, major:number, minor:number, patch:number}>} Result object containing the application version number.
+   * @returns {Promise<{major:number, minor:number, patch:number}>} Result object containing the application version number.
    *
    * @example
-   * ada.isConnected()
-   *  .then((response) => {
-   *    const { major, minor, patch } = response;
-   *    console.log('App version %d.%d.%d: ', major, minor, patch);
-   *  })
-   *  .catch(error => console.log(error));
+   * const { major, minor, patch } = await ada.isConnected();
+   * console.log(`App version ${major}.${minor}.${patch}`);
    *
    */
   async isConnected(): Promise<{ major: string, minor: string, patch: string }> {
@@ -88,15 +84,12 @@ export default class Ada {
    * 32 Byte Public Key
    * 32 Byte Chain Code
    *
-   * @return {Promise<{success:boolean, publicKey:string, chainCode:string }>} The result object containing the root wallet public key and chaincode.
+   * @return {Promise<{ publicKey:string, chainCode:string }>} The result object containing the root wallet public key and chaincode.
    *
    * @example
-   * ada.getWalletRecoveryPassphrase()
-   *  .then((response) => {
-   *    console.log(response.publicKey);
-   *    console.log(response.chainCode);
-   *  })
-   *  .catch(error => console.log(error));
+   * const { publicKey, chainCode } = await ada.getWalletRecoveryPassphrase();
+   * console.log(publicKey);
+   * console.log(chainCode);
    *
    */
   async getWalletRecoveryPassphrase(): Promise<{ publicKey: string, chainCode: string }> {
@@ -114,18 +107,15 @@ export default class Ada {
    * The BIP 32 index is from the path at `44'/1815'/0'/[index]`.
    *
    * @param {number} index The index to retrieve.
-   * @return {Promise<{ success:boolean, publicKey:string }>} The public key for the given index.
+   * @return {Promise<{ publicKey:string }>} The public key for the given index.
    *
    * @throws 5201 - Non-hardened index passed in, Index < 0x80000000
    * @throws 5202 - Invalid header
    * @throws 5003 - Index not a number
    *
    * @example
-   * ada.getWalletPublicKeyWithIndex(0xC001CODE)
-   *  .then((response) => {
-   *    console.log(response.publicKey);
-   *  })
-   *  .catch(error => console.log(error));
+   * const { publicKey } = await ada.getWalletPublicKeyWithIndex(0xC001CODE);
+   * console.log(publicKey);
    *
    */
   async getWalletPublicKeyWithIndex(index: number): Promise<{ publicKey: string }> {
@@ -152,7 +142,7 @@ export default class Ada {
    *
    * @param {string} txHex The transaction to be signed.
    * @param {number[]} indexes The indexes of the keys to be used for signing.
-   * @return {Array.Promise<{success:boolean, digest:string }>} An array of result objects containing a digest for each of the passed in indexes.
+   * @return {Array.Promise<{ digest:string }>} An array of result objects containing a digest for each of the passed in indexes.
    *
    * @throws 5001 - Tx > 1024 bytes
    * @throws 5301 - Index < 0x80000000
@@ -161,11 +151,8 @@ export default class Ada {
    *
    * @example
    * const transaction = '839F8200D8185826825820E981442C2BE40475BB42193CA35907861D90715854DE6FCBA767B98F1789B51219439AFF9F8282D818584A83581CE7FE8E468D2249F18CD7BF9AEC0D4374B7D3E18609EDE8589F82F7F0A20058208200581C240596B9B63FC010C06FBE92CF6F820587406534795958C411E662DC014443C0688E001A6768CC861B0037699E3EA6D064FFA0';
-   * ada.signTransaction(transaction, [0xF005BA11])
-   *  .then((response) => {
-   *    console.log('Signed successfully: %s', response.digest);
-   *  })
-   *  .catch(error => console.log(error));
+   * const { digest } = await ada.signTransaction(transaction, [0xF005BA11]);
+   * console.log(`Signed successfully: ${digest}`);
    *
    */
   async signTransaction(txHex: string, indexes: Array<number>): Promise<Array<{ digest: string }>> {
@@ -177,7 +164,7 @@ export default class Ada {
    * Set the transaction.
    *
    * @param {string} txHex The transaction to be set.
-   * @return {Promise<Object>} The response from the device.
+   * @return Promise<{ inputs?: string, outputs?: string, txs?: Array<{ address: string, amount: string }> }>  The response from the device.
    * @private
    */
   async setTransaction(txHex: string): Promise<{ inputs?: string, outputs?: string, txs?: Array<{ address: string, amount: string }> }> {
