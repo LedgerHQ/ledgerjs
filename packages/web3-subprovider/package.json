@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/web3-subprovider",
-  "version": "4.7.3",
+  "version": "4.11.0",
   "description": "Ledger Hardware Wallet Ethereum Web3 subprovider",
   "keywords": [
     "Ledger",
