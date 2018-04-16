@@ -32,7 +32,7 @@ For tests which require user interaction, ensure you have a standard production 
 yarn run api-test
 ```
 
-For headless tests, ensure you have a **headless** build installed on the device (see ledger app respository for details). Then run:
+For headless tests, ensure you have a **headless** build installed on the device (see ledger app repository for details). Then run:
 
 ```shell
 yarn run api-test --headless
