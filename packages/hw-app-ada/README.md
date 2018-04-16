@@ -8,9 +8,13 @@ Library for Ledger Hardware Wallets.
 [API Doc](http://ledgerhq.github.io/ledgerjs/),
 [Ledger Devs Slack](https://ledger-dev.slack.com/)
 
+### Application
+
+This library is compatible with the [Cardano ADA Ledger Application](https://github.com/HiddenField/ledger-cardano-app).
+
 ### Tests
 
-As well as the tests in `@ledgerhq/test`, automated end-to-end tests are provided here using [mocha](https://mochajs.org/).
+As well as the tests in `@ledgerhq/t@est`, automated end-to-end tests are provided here using [mocha](https://mochajs.org/).
 
 #### Core Tests
 
