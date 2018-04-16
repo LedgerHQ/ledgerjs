@@ -21,6 +21,8 @@ describe("getWalletPublicKeyWithIndex", async () => {
   it("Should successfully get public key", async () => {
     const index = 0xFFFFFFFF;
 
+    promptUser("Please accept public key request");
+    
     const response = await ada.getWalletPublicKeyWithIndex(index);
     validate(response, schema);
 
