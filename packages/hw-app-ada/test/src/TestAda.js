@@ -1,7 +1,7 @@
 // @flow
 import Int64 from "node-int64";
 import type Transport from "@ledgerhq/hw-transport";
-import Ada from "@ledgerhq/hw-app-ada";
+import Ada from "../../lib/Ada.js";
 
 const CLA = 0x80;
 

@@ -136,38 +136,13 @@ describe("testBase58Encode", async () => {
     }
   });
 
-  it("Should base58 encode with 20 iterations (stress test)", (done) => {
+  it("Should base58 encode with 20 iterations (stress test)", async () => {
     const address = "82d818584a83581ce7fe8e468d2249f18cd7bf9aec0d4374b7d3e18609ede8589f82f7f0a20058208200581c240596b9b63fc010c06fbe92cf6f820587406534795958c411e662dc014443c0688e001a6768cc86";
-
-    const check = (response) => {
+    
+    for (let i = 0; i < 20; i++) {
+      const response = await ada.testBase58Encode(address);
       expect(response.encodedAddress).to.equal("AL91N9VXRTCypFouG2KjJvJuvKmUC4p3XcpHnYETWRG5HJVpi2ixeN1nG5EWtbJCH71YjzhqHKcsmmPYGRjy8nHDe2i17BEf9hTqDDLmcFVbHxx1GW9");
       expect(response.addressLength).to.equal(115);
-
-      return ada.testBase58Encode(address);
-    };
-
-    ada.testBase58Encode(address)
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => done())
-      .catch(error => done(error));
+    }
   });
 });

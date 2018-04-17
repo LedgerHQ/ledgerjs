@@ -52,34 +52,10 @@ describe("getWalletRecoveryPassphrase", async () => {
     expect(res.chainCode).to.equal(response.chainCode);
   });
 
-  ifHeadlessIt("Should get public key and chain code 20 times (stress test)", (done) => {
-    const check = (response) => {
+  ifHeadlessIt("Should get public key and chain code 20 times (stress test)", async () => {
+    for (let i = 0; i < 20; i++) {
+      const response = await ada.getWalletRecoveryPassphrase()
       validate(response, schema);
-      return ada.getWalletRecoveryPassphrase();
-    };
-
-    ada.getWalletRecoveryPassphrase()
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => done())
-      .catch(error => done(error));
+    }
   });
 });

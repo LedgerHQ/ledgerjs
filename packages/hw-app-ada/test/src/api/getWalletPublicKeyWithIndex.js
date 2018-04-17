@@ -80,36 +80,12 @@ describe("getWalletPublicKeyWithIndex", async () => {
     }
   });
 
-  ifHeadlessIt("Should get public key 20 times (stress test)", (done) => {
+  ifHeadlessIt("Should get public key 20 times (stress test)", async () => {
     const index = 0xBABADADA;
 
-    const check = (response) => {
+    for (let i = 0; i < 20; i++) {
+      const response = await ada.getWalletPublicKeyWithIndex(index);
       validate(response, schema);
-      return ada.getWalletPublicKeyWithIndex(index);
-    };
-
-    ada.getWalletPublicKeyWithIndex(index)
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => done())
-      .catch(error => done(error));
+    }
   });
 });

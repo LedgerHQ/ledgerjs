@@ -105,36 +105,12 @@ describe("testHashTransaction", async () => {
     }
   });
 
-  it("Should hash transaction with 20 iterations (stress test)", (done) => {
+  it("Should hash transaction with 20 iterations (stress test)", async () => {
     const address = "82d818584a83581ce7fe8e468d2249f18cd7bf9aec0d4374b7d3e18609ede8589f82f7f0a20058208200581c240596b9b63fc010c06fbe92cf6f820587406534795958c411e662dc014443c0688e001a6768cc86";
 
-    const check = (response) => {
+    for (let i = 0; i < 20; i++) {
+      const response = await ada.testHashTransaction(address)
       expect(response.tx).to.equal("40eaf5b817d73e4c239caf6b11c554fcb58a77e7a7f8635e4e1d5900cc3ae947");
-      return ada.testHashTransaction(address);
-    };
-
-    ada.testHashTransaction(address)
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => check(res))
-      .then(res => done())
-      .catch(error => done(error));
+    }
   });
 });
