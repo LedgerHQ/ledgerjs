@@ -14,7 +14,7 @@ This library is compatible with the [Cardano ADA Ledger Application](https://git
 
 ### Tests
 
-As well as the tests in `@ledgerhq/t@est`, automated end-to-end tests are provided here using [mocha](https://mochajs.org/).
+As well as the tests in `@ledgerhq/test`, automated end-to-end tests are provided here using [mocha](https://mochajs.org/).
 
 #### Core Tests
 
