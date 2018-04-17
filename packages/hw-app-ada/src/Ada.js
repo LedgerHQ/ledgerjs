@@ -37,7 +37,7 @@ const P2_MULTI_TX = 0x02;
 const MAX_APDU_SIZE = 64;
 const OFFSET_CDATA = 5;
 const MAX_ADDR_PRINT_LENGTH = 12;
-const INDEX_MAX = 0xFFFFFFFF;
+const INDEX_MAX = 0xffffffff;
 
 const INDEX_NAN = 0x5003;
 const INDEX_MAX_EXCEEDED = 0x5302;
@@ -55,7 +55,12 @@ export default class Ada {
 
   constructor(transport: Transport<*>) {
     this.transport = transport;
-    this.methods = [ "isConnected", "getWalletRecoveryPassphrase", "getWalletPublicKeyWithIndex", "signTransaction" ];
+    this.methods = [
+      "isConnected",
+      "getWalletRecoveryPassphrase",
+      "getWalletPublicKeyWithIndex",
+      "signTransaction"
+    ];
     this.transport.decorateAppAPIMethods(this, this.methods, "ADA");
   }
 
@@ -70,10 +75,14 @@ export default class Ada {
    * console.log(`App version ${major}.${minor}.${patch}`);
    *
    */
-  async isConnected(): Promise<{ major: string, minor: string, patch: string }> {
+  async isConnected(): Promise<{
+    major: string,
+    minor: string,
+    patch: string
+  }> {
     const response = await this.transport.send(CLA, INS_APP_INFO, 0x00, 0x00);
 
-    const [ major, minor, patch ] = response;
+    const [major, minor, patch] = response;
     return { major, minor, patch };
   }
 
@@ -92,12 +101,22 @@ export default class Ada {
    * console.log(chainCode);
    *
    */
-  async getWalletRecoveryPassphrase(): Promise<{ publicKey: string, chainCode: string }> {
-    const response = await this.transport.send(CLA, INS_GET_PUBLIC_KEY, 0x01, 0x00);
+  async getWalletRecoveryPassphrase(): Promise<{
+    publicKey: string,
+    chainCode: string
+  }> {
+    const response = await this.transport.send(
+      CLA,
+      INS_GET_PUBLIC_KEY,
+      0x01,
+      0x00
+    );
 
-    const [ publicKeyLength ] = response;
+    const [publicKeyLength] = response;
     const publicKey = response.slice(1, 1 + publicKeyLength).toString("hex");
-    const chainCode = response.slice(1 + publicKeyLength, 1 + publicKeyLength + 32).toString("hex");
+    const chainCode = response
+      .slice(1 + publicKeyLength, 1 + publicKeyLength + 32)
+      .toString("hex");
 
     return { publicKey, chainCode };
   }
@@ -118,7 +137,9 @@ export default class Ada {
    * console.log(publicKey);
    *
    */
-  async getWalletPublicKeyWithIndex(index: number): Promise<{ publicKey: string }> {
+  async getWalletPublicKeyWithIndex(
+    index: number
+  ): Promise<{ publicKey: string }> {
     if (isNaN(index)) {
       throw new TransportStatusError(INDEX_NAN);
     }
@@ -126,9 +147,15 @@ export default class Ada {
     const data = Buffer.alloc(4);
     data.writeUInt32BE(index, 0);
 
-    const response = await this.transport.send(CLA, INS_GET_PUBLIC_KEY, 0x02, 0x00, data);
+    const response = await this.transport.send(
+      CLA,
+      INS_GET_PUBLIC_KEY,
+      0x02,
+      0x00,
+      data
+    );
 
-    const [ publicKeyLength ] = response;
+    const [publicKeyLength] = response;
     const publicKey = response.slice(1, 1 + publicKeyLength).toString("hex");
 
     return { publicKey };
@@ -155,7 +182,10 @@ export default class Ada {
    * console.log(`Signed successfully: ${digest}`);
    *
    */
-  async signTransaction(txHex: string, indexes: Array<number>): Promise<Array<{ digest: string }>> {
+  async signTransaction(
+    txHex: string,
+    indexes: Array<number>
+  ): Promise<Array<{ digest: string }>> {
     await this.setTransaction(txHex);
     return this.signTransactionWithIndexes(indexes);
   }
@@ -167,7 +197,13 @@ export default class Ada {
    * @return Promise<{ inputs?: string, outputs?: string, txs?: Array<{ address: string, amount: string }> }>  The response from the device.
    * @private
    */
-  async setTransaction(txHex: string): Promise<{ inputs?: string, outputs?: string, txs?: Array<{ address: string, amount: string }> }> {
+  async setTransaction(
+    txHex: string
+  ): Promise<{
+    inputs?: string,
+    outputs?: string,
+    txs?: Array<{ address: string, amount: string }>
+  }> {
     const rawTx = Buffer.from(txHex, "hex");
     const chunkSize = MAX_APDU_SIZE - OFFSET_CDATA;
     let response = {};
@@ -178,24 +214,29 @@ export default class Ada {
       let p1 = P1_NEXT;
 
       if (i === 0) {
-          p1 = P1_FIRST;
+        p1 = P1_FIRST;
       } else if (i + chunkSize >= rawTx.length) {
-          p1 = P1_LAST;
+        p1 = P1_LAST;
       }
 
       const res = await this.transport.send(CLA, INS_SET_TX, p1, p2, chunk);
 
       if (res.length > 4) {
-        const [ inputs, outputs ] = res;
+        const [inputs, outputs] = res;
         const txs = [];
 
         let offset = 2;
         for (let i = 0; i < outputs; i++) {
-            let address = res.slice(offset, offset + MAX_ADDR_PRINT_LENGTH).toString();
-            offset += MAX_ADDR_PRINT_LENGTH;
-            let amount = new Int64(res.readUInt32LE(offset + 4), res.readUInt32LE(offset)).toOctetString();
-            txs.push({ address, amount });
-            offset += 8;
+          let address = res
+            .slice(offset, offset + MAX_ADDR_PRINT_LENGTH)
+            .toString();
+          offset += MAX_ADDR_PRINT_LENGTH;
+          let amount = new Int64(
+            res.readUInt32LE(offset + 4),
+            res.readUInt32LE(offset)
+          ).toOctetString();
+          txs.push({ address, amount });
+          offset += 8;
         }
 
         response = { inputs, outputs, txs };
@@ -213,7 +254,9 @@ export default class Ada {
    * @returns {Array.Promise<Object>} An array of result objects containing a digest for each of the passed in indexes.
    * @private
    */
-  async signTransactionWithIndexes(indexes: Array<number>): Promise<Array<{ digest: string }>> {
+  async signTransactionWithIndexes(
+    indexes: Array<number>
+  ): Promise<Array<{ digest: string }>> {
     let response = [];
 
     for (let i = 0; i < indexes.length; i++) {
