@@ -13,6 +13,10 @@ import testXrp3 from "./testXrp3";
 import testStr from "./testStr";
 import testStr2 from "./testStr2";
 import testStr3 from "./testStr3";
+import testAda from "./testAda";
+import testAda2 from "./testAda2";
+import testAda3 from "./testAda3";
+import testAda4 from "./testAda4";
 
 function expectAppContext(appName) {
   // TODO improve this by waiting user to do an action?
@@ -41,7 +45,12 @@ var tests = [
   expectAppContext("Stellar"),
   { name: "testStr", run: testStr },
   { name: "testStr2", run: testStr2 },
-  { name: "testStr3", run: testStr3 }
+  { name: "testStr3", run: testStr3 },
+  expectAppContext("Cardano (ada)"),
+  { name: "testAda", run: testAda },
+  { name: "testAda2", run: testAda2 },
+  { name: "testAda3", run: testAda3 },
+  { name: "testAda4", run: testAda4 }
 ];
 
 const defaultWaitForAppSwitch = step =>
