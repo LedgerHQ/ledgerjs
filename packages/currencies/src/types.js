@@ -38,6 +38,8 @@ export type BitcoinJS = {|
 |};
 
 export type Currency = {|
+  // unique internal id of a crypto currency
+  id: string,
   // coinType is an identifier specified by https://github.com/satoshilabs/slips/blob/master/slip-0044.md
   coinType: number,
   // display name of a currency

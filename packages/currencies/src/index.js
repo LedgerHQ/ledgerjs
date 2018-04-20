@@ -6,6 +6,8 @@ import { listFiats, getFiatUnit, hasFiatUnit } from "./data/fiat";
 
 import {
   listCurrencies,
+  getCurrencyById,
+  hasCurrencyId,
   getCurrencyByCoinType,
   getDefaultUnitByCoinType,
   hasCurrencyByCoinType
@@ -34,6 +36,8 @@ export {
   formatCurrencyUnit,
   formatCurrencyUnitFragment,
   formatShort,
+  getCurrencyById,
+  hasCurrencyId,
   getCurrencyByCoinType,
   getDefaultUnitByCoinType,
   hasCurrencyByCoinType,
