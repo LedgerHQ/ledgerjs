@@ -3,12 +3,10 @@
 import {
   listFiats,
   listCurrencies,
-  hasCurrencyByCoinType,
-  getCurrencyByCoinType,
-  getDefaultUnitByCoinType,
+  hasCurrencyId,
+  getCurrencyById,
   getFiatUnit,
   hasFiatUnit,
-  countervalueForRate,
   formatCurrencyUnit,
   parseCurrencyUnit,
   chopCurrencyUnitDecimals,
@@ -18,17 +16,19 @@ import {
 } from "..";
 
 test("can get currency by coin type", () => {
-  expect(getCurrencyByCoinType(0)).toMatchObject({
+  expect(getCurrencyById("btc")).toMatchObject({
     coinType: 0,
     name: "Bitcoin"
   });
-  expect(getCurrencyByCoinType(2)).toMatchObject({
+  expect(getCurrencyById("ltc")).toMatchObject({
     coinType: 2,
     name: "Litecoin"
   });
-  expect(hasCurrencyByCoinType(0)).toBe(true);
-  expect(hasCurrencyByCoinType(-1)).toBe(false);
-  expect(() => getCurrencyByCoinType(-1)).toThrow();
+  expect(hasCurrencyId("btc")).toBe(true);
+  expect(hasCurrencyId("")).toBe(false);
+  expect(() => getCurrencyById("")).toThrow();
+  expect(hasCurrencyId("_")).toBe(false);
+  expect(() => getCurrencyById("_")).toThrow();
 });
 
 test("all cryptocurrencies have at least one unit", () => {
@@ -87,41 +87,28 @@ test("can get fiat by coin type", () => {
   expect(hasFiatUnit("USDT")).toBe(false);
 });
 
-test("can compute counterValue for a rate", () => {
-  expect(countervalueForRate({ value: 100, fiat: "USD" }, 200)).toMatchObject({
-    unit: { symbol: "$" },
-    value: 20000
-  });
-  expect(countervalueForRate({ value: 0.211, fiat: "EUR" }, 100)).toMatchObject(
-    {
-      unit: { symbol: "€" },
-      value: 21 // this should gets rounded
-    }
-  );
-});
-
 test("can format a currency unit", () => {
-  expect(formatCurrencyUnit(getCurrencyByCoinType(0).units[0], 100000000)).toBe(
+  expect(formatCurrencyUnit(getCurrencyById("btc").units[0], 100000000)).toBe(
     "1"
   );
   expect(
-    formatCurrencyUnit(getCurrencyByCoinType(0).units[0], 1000000, {
+    formatCurrencyUnit(getCurrencyById("btc").units[0], 1000000, {
       showCode: true
     })
   ).toBe("BTC 0.01");
   expect(
-    formatCurrencyUnit(getCurrencyByCoinType(0).units[0], 100000000, {
+    formatCurrencyUnit(getCurrencyById("btc").units[0], 100000000, {
       showCode: true
     })
   ).toBe("BTC 1");
   expect(
-    formatCurrencyUnit(getCurrencyByCoinType(0).units[0], 100000000, {
+    formatCurrencyUnit(getCurrencyById("btc").units[0], 100000000, {
       showCode: true,
       showAllDigits: true
     })
   ).toBe("BTC 1.00000000");
   expect(
-    formatCurrencyUnit(getCurrencyByCoinType(0).units[0], 100000000, {
+    formatCurrencyUnit(getCurrencyById("btc").units[0], 100000000, {
       showCode: true,
       showAllDigits: true,
       alwaysShowSign: true
@@ -130,23 +117,23 @@ test("can format a currency unit", () => {
 });
 
 test("formatter will round values by default", () => {
-  expect(
-    formatCurrencyUnit(getCurrencyByCoinType(0).units[0], 1000001, {})
-  ).toBe("0.01");
-  expect(formatCurrencyUnit(getCurrencyByCoinType(0).units[0], 1000010)).toBe(
+  expect(formatCurrencyUnit(getCurrencyById("btc").units[0], 1000001, {})).toBe(
     "0.01"
   );
-  expect(formatCurrencyUnit(getCurrencyByCoinType(0).units[0], 1000100)).toBe(
+  expect(formatCurrencyUnit(getCurrencyById("btc").units[0], 1000010)).toBe(
+    "0.01"
+  );
+  expect(formatCurrencyUnit(getCurrencyById("btc").units[0], 1000100)).toBe(
     "0.010001"
   );
   expect(
-    formatCurrencyUnit(getCurrencyByCoinType(0).units[0], 999999999999)
+    formatCurrencyUnit(getCurrencyById("btc").units[0], 999999999999)
   ).toBe("10,000");
 });
 
 test("formatter rounding can be disabled", () => {
   expect(
-    formatCurrencyUnit(getCurrencyByCoinType(0).units[0], 999999999999, {
+    formatCurrencyUnit(getCurrencyById("btc").units[0], 999999999999, {
       disableRounding: true
     })
   ).toBe("9,999.99999999");
@@ -190,18 +177,18 @@ test("sub magnitude", () => {
   ).toBe("0.0003");
 
   expect(
-    formatCurrencyUnit(getCurrencyByCoinType(0).units[0], 9.123456, {
+    formatCurrencyUnit(getCurrencyById("btc").units[0], 9.123456, {
       subMagnitude: 2
     })
   ).toBe("0.0000000912");
   expect(
-    formatCurrencyUnit(getCurrencyByCoinType(0).units[0], 999999999999.123456, {
+    formatCurrencyUnit(getCurrencyById("btc").units[0], 999999999999.123456, {
       disableRounding: true,
       subMagnitude: 2
     })
   ).toBe("9,999.9999999912");
   expect(
-    formatCurrencyUnit(getCurrencyByCoinType(0).units[0], 999999999999.123456, {
+    formatCurrencyUnit(getCurrencyById("btc").units[0], 999999999999.123456, {
       subMagnitude: 2
     })
   ).toBe("10,000");
@@ -209,19 +196,19 @@ test("sub magnitude", () => {
 
 test("parseCurrencyUnit", () => {
   expect(
-    parseCurrencyUnit(getCurrencyByCoinType(0).units[0], "9999.99999999")
+    parseCurrencyUnit(getCurrencyById("btc").units[0], "9999.99999999")
   ).toBe(999999999999);
-  expect(parseCurrencyUnit(getCurrencyByCoinType(0).units[0], ".987654")).toBe(
+  expect(parseCurrencyUnit(getCurrencyById("btc").units[0], ".987654")).toBe(
     98765400
   );
-  expect(parseCurrencyUnit(getCurrencyByCoinType(0).units[0], "9999")).toBe(
+  expect(parseCurrencyUnit(getCurrencyById("btc").units[0], "9999")).toBe(
     999900000000
   );
-  expect(parseCurrencyUnit(getCurrencyByCoinType(0).units[0], "1")).toBe(
+  expect(parseCurrencyUnit(getCurrencyById("btc").units[0], "1")).toBe(
     100000000
   );
-  expect(parseCurrencyUnit(getCurrencyByCoinType(0).units[0], "0x1")).toBe(0);
-  expect(parseCurrencyUnit(getCurrencyByCoinType(0).units[0], "NOPE")).toBe(0);
+  expect(parseCurrencyUnit(getCurrencyById("btc").units[0], "0x1")).toBe(0);
+  expect(parseCurrencyUnit(getCurrencyById("btc").units[0], "NOPE")).toBe(0);
 });
 
 test("formatter works with fiats", () => {
@@ -245,15 +232,6 @@ test("formatter can change locale", () => {
   expect(
     formatCurrencyUnit(getFiatUnit("USD"), -1234567, { showCode: true })
   ).toBe("- USD 12,345.67");
-  // FIXME we can't test this unless we configure node.js properly to have the locales. we'll come back to this later...
-  /*
-  expect(
-    formatCurrencyUnit(getFiatUnit("EUR"), -1234567, {
-      showCode: true,
-      locale: "fr-FR"
-    })
-  ).toBe("-12 345.67 EUR");
-  */
 });
 
 test("formatShort", () => {
@@ -278,14 +256,14 @@ test("chopCurrencyUnitDecimals", () => {
 test("encodeURIScheme", () => {
   expect(
     encodeURIScheme({
-      currency: getCurrencyByCoinType(0),
+      currency: getCurrencyById("btc"),
       address: "1gre1noAY9HiK2qxoW8FzSdjdFBcoZ5fV"
     })
   ).toBe("bitcoin:1gre1noAY9HiK2qxoW8FzSdjdFBcoZ5fV");
 
   expect(
     encodeURIScheme({
-      currency: getCurrencyByCoinType(0),
+      currency: getCurrencyById("btc"),
       address: "1gre1noAY9HiK2qxoW8FzSdjdFBcoZ5fV",
       amount: 1234567000000
     })
@@ -296,24 +274,15 @@ test("decodeURIScheme", () => {
   expect(
     decodeURIScheme("bitcoin:1gre1noAY9HiK2qxoW8FzSdjdFBcoZ5fV")
   ).toMatchObject({
-    currency: getCurrencyByCoinType(0),
+    currency: getCurrencyById("btc"),
     address: "1gre1noAY9HiK2qxoW8FzSdjdFBcoZ5fV"
   });
 
   expect(
     decodeURIScheme("bitcoin:1gre1noAY9HiK2qxoW8FzSdjdFBcoZ5fV?amount=12345.67")
   ).toMatchObject({
-    currency: getCurrencyByCoinType(0),
+    currency: getCurrencyById("btc"),
     address: "1gre1noAY9HiK2qxoW8FzSdjdFBcoZ5fV",
     amount: 1234567000000
-  });
-});
-
-test("getDefaultUnitByCoinType", () => {
-  expect(getDefaultUnitByCoinType(0)).toMatchObject({
-    code: "BTC",
-    magnitude: 8,
-    name: "bitcoin",
-    symbol: "Ƀ"
   });
 });

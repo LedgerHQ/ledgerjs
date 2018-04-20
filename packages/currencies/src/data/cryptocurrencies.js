@@ -30,6 +30,7 @@ const bitcoinUnits = [
 
 const cryptocurrenciesArray: Currency[] = [
   {
+    id: "btc",
     coinType: 0,
     name: "Bitcoin",
     ticker: "BTC",
@@ -53,6 +54,7 @@ const cryptocurrenciesArray: Currency[] = [
     units: bitcoinUnits
   },
   {
+    id: "btc_testnet",
     coinType: 1,
     name: "Bitcoin Testnet",
     ticker: "BTC",
@@ -76,6 +78,7 @@ const cryptocurrenciesArray: Currency[] = [
     units: bitcoinUnits
   },
   {
+    id: "abc",
     coinType: 145,
     name: "Bitcoin Cash",
     ticker: "BCH",
@@ -125,6 +128,7 @@ const cryptocurrenciesArray: Currency[] = [
     ]
   },
   {
+    id: "btg",
     coinType: 156,
     name: "Bitcoin Gold",
     ticker: "BTG",
@@ -174,6 +178,7 @@ const cryptocurrenciesArray: Currency[] = [
     ]
   },
   {
+    id: "ltc",
     coinType: 2,
     name: "Litecoin",
     ticker: "LTC",
@@ -189,6 +194,7 @@ const cryptocurrenciesArray: Currency[] = [
     ]
   },
   {
+    id: "doge",
     coinType: 3,
     name: "Dogecoin",
     ticker: "DOGE",
@@ -204,6 +210,7 @@ const cryptocurrenciesArray: Currency[] = [
     ]
   },
   {
+    id: "dash",
     coinType: 5,
     name: "Dash",
     ticker: "DASH",
@@ -233,6 +240,7 @@ const cryptocurrenciesArray: Currency[] = [
     ]
   },
   {
+    id: "ppc",
     coinType: 6,
     name: "Peercoin",
     ticker: "PPC",
@@ -262,6 +270,7 @@ const cryptocurrenciesArray: Currency[] = [
     ]
   },
   {
+    id: "strat",
     coinType: 105,
     name: "Stratis",
     ticker: "STRAT",
@@ -291,6 +300,7 @@ const cryptocurrenciesArray: Currency[] = [
     ]
   },
   {
+    id: "zec",
     coinType: 133,
     name: "Zcash",
     ticker: "ZEC",
@@ -320,6 +330,7 @@ const cryptocurrenciesArray: Currency[] = [
     ]
   },
   {
+    id: "kmd",
     coinType: 141,
     name: "Komodo",
     ticker: "KMD",
@@ -350,9 +361,11 @@ const cryptocurrenciesArray: Currency[] = [
   }
 ];
 
-const cryptocurrencies: { [_: string]: Currency } = {};
+const cryptocurrenciesByCoinType: { [_: string]: Currency } = {};
+const cryptocurrenciesById: { [_: string]: Currency } = {};
 cryptocurrenciesArray.forEach(c => {
-  cryptocurrencies[String(c.coinType)] = c;
+  cryptocurrenciesByCoinType[String(c.coinType)] = c;
+  cryptocurrenciesById[c.id] = c;
 });
 
 export function listCurrencies(): Currency[] {
@@ -363,12 +376,25 @@ export function findCurrencyByScheme(scheme: string): ?Currency {
   return cryptocurrenciesArray.find(c => c.scheme === scheme);
 }
 
+export const hasCurrencyId = (id: string): boolean =>
+  id in cryptocurrenciesById;
+
+export function getCurrencyById(id: string): Currency {
+  const currency = cryptocurrenciesById[id];
+  if (!currency) {
+    throw new Error(`currency with id "${id}" not found`);
+  }
+  return currency;
+}
+
 export function hasCurrencyByCoinType(coinType: number): boolean {
-  return String(coinType) in cryptocurrencies;
+  console.log("DEPRECATED: hasCurrencyByCoinType: use hasCurrencyId");
+  return String(coinType) in cryptocurrenciesByCoinType;
 }
 
 export function getCurrencyByCoinType(coinType: number): Currency {
-  const currency = cryptocurrencies[String(coinType)];
+  console.log("DEPRECATED: getCurrencyByCoinType: use getCurrencyById");
+  const currency = cryptocurrenciesByCoinType[String(coinType)];
   if (!currency) {
     throw new Error(`currency with coin type "${coinType}" not found`);
   }
@@ -376,6 +402,9 @@ export function getCurrencyByCoinType(coinType: number): Currency {
 }
 
 export function getDefaultUnitByCoinType(coinType: number): Unit {
+  console.log(
+    "DEPRECATED: directly use `currency.units[0]`. default is always the first unit by convention"
+  );
   const currency = getCurrencyByCoinType(coinType);
 
   // get unit with max magnitude
