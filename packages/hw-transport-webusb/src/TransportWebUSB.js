@@ -28,6 +28,25 @@ const ledgerDevices = [
   { vendorId: 0x2c97 }
 ];
 
+const DEBUG_MODE = true;
+function decorateDebugDevice(device: any) {
+  const methods = [];
+  for (let k in device) {
+    if (typeof device[k] === "function") {
+      methods.push(k);
+    }
+  }
+  methods.forEach(key => {
+    const old = device[key];
+    if (typeof old !== "function") return;
+    device[key] = (...args) => {
+      const out = old.apply(device, args);
+      console.log("device." + key + "(", ...args, ")", "=>", out);
+      return out;
+    };
+  });
+}
+
 // TODO actually we'll use https://wicg.github.io/webusb/#dom-usb-getdevices and inspire more from node-hid
 function requestDevice(): Promise<USBDevice> {
   return Promise.resolve().then(() =>
@@ -100,17 +119,21 @@ export default class TransportWebUSB extends Transport<USBDevice> {
   /**
    */
   static async open(device: USBDevice) {
-    console.log(device);
+    if (DEBUG_MODE) {
+      decorateDebugDevice(device);
+    }
     await device.open();
     if (device.configuration === null) {
       await device.selectConfiguration(configurationValue);
     }
+    await device.reset();
     await device.claimInterface(interfaceNumber);
     return new TransportWebUSB(device);
   }
 
   async close(): Promise<void> {
     await this.device.releaseInterface(interfaceNumber);
+    await this.device.reset();
     await this.device.close();
   }
 
@@ -120,7 +143,7 @@ export default class TransportWebUSB extends Transport<USBDevice> {
       let offset = 0;
 
       let tmp = Buffer.alloc(7);
-      tmp.writeUInt16BE(channel, 0);
+      tmp.writeUInt16BE(channel, 0); // TODO identify one instance of transport, use random
       tmp[2] = 0x05; // TAG_APDU
       tmp.writeUInt16BE(sequenceIdx, 3);
       sequenceIdx++;
@@ -247,10 +270,7 @@ export default class TransportWebUSB extends Transport<USBDevice> {
           if (this.debug) {
             console.log("=>" + content.toString("hex"));
           }
-          const res = await this.device.transferOut(
-            endpointNumber,
-            Buffer.concat([Buffer.from([0x00]), content])
-          );
+          const res = await this.device.transferOut(endpointNumber, content);
           return res.bytesWritten;
         };
 
