@@ -5,7 +5,7 @@ import HookedWalletSubprovider from "web3-provider-engine/dist/es5/subproviders/
 import stripHexPrefix from "strip-hex-prefix";
 import EthereumTx from "ethereumjs-tx";
 
-const allowedHdPaths = ["44'/60'", "44'/61'"];
+const allowedHdPaths = ["44'/1'", "44'/60'", "44'/61'"];
 
 function makeError(msg, id) {
   const err = new Error(msg);
@@ -16,7 +16,7 @@ function makeError(msg, id) {
 
 function obtainPathComponentsFromDerivationPath(derivationPath) {
   // check if derivation path follows 44'/60'/x'/n pattern
-  const regExp = /^(44'\/6[0|1]'\/\d+'?\/)(\d+)$/;
+  const regExp = /^(44'\/(?:1|60|61)'\/\d+'?\/)(\d+)$/;
   const matchResult = regExp.exec(derivationPath);
   if (matchResult === null) {
     throw makeError(
