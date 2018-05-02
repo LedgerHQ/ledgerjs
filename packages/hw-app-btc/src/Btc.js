@@ -598,7 +598,7 @@ btc.createPaymentTransactionNew(
             trustedInputs,
             segwit
           ).then(() =>
-            doIf(!resuming && typeof changePath != "undefined", function() {
+            doIf(!resuming && typeof changePath != "undefined", () => {
               return this.provideOutputFullChangePath(changePath);
             }).then(() => this.hashOutputFull(outputScript))
           )
@@ -632,7 +632,7 @@ btc.createPaymentTransactionNew(
           )
             .then(() =>
               doIf(!segwit, () =>
-                doIf(!resuming && typeof changePath != "undefined", function() {
+                doIf(!resuming && typeof changePath != "undefined", () => {
                   return this.provideOutputFullChangePath(changePath);
                 }).then(() => this.hashOutputFull(outputScript))
               )
