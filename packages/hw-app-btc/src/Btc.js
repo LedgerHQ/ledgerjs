@@ -387,7 +387,7 @@ export default class Btc {
       offset += 4;
     });
     buffer[offset++] = 0x00; // authorization length
-    buffer.writeUInt32LE(lockTime, offset);
+    buffer.writeUInt32BE(lockTime, offset);
     offset += 4;
     buffer[offset++] = sigHashType;
     return this.transport.send(0xe0, 0x48, 0x00, 0x00, buffer).then(result => {
