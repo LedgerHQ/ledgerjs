@@ -268,15 +268,15 @@ const cryptocurrenciesArray: Currency[] = [
     scheme: "stratis",
     apiName: "strat",
     color: "#1382c6",
-    xpub: 76071454,
+    xpub: 76067358,
     isSegwitSupported: false,
     handleFeePerByte: false,
     areTransactionTimestamped: true,
     bitcoinjs: {
       messagePrefix: "Stratis Signed Message:",
       bip32: {
-        public: 76071454,
-        private: 87393172
+        public: 76067358,
+        private: 76066276
       },
       pubKeyHash: 63,
       scriptHash: 125,
