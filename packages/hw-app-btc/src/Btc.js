@@ -599,6 +599,7 @@ btc.createPaymentTransactionNew(
             segwit
           ).then(() =>
             doIf(!resuming && typeof changePath != "undefined", () => {
+              // $FlowFixMe
               return this.provideOutputFullChangePath(changePath);
             }).then(() => this.hashOutputFull(outputScript))
           )
@@ -633,6 +634,7 @@ btc.createPaymentTransactionNew(
             .then(() =>
               doIf(!segwit, () =>
                 doIf(!resuming && typeof changePath != "undefined", () => {
+                  // $FlowFixMe
                   return this.provideOutputFullChangePath(changePath);
                 }).then(() => this.hashOutputFull(outputScript))
               )
