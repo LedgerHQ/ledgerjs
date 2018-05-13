@@ -7,6 +7,21 @@ import EthereumTx from "ethereumjs-tx";
 
 const allowedHdPaths = ["44'/1'", "44'/60'", "44'/61'"];
 
+class AddressGenerator {
+  constructor(data) {
+      this.hdk = new HDKey();
+      this.hdk.publicKey = new Buffer(data.publicKey, 'hex');
+      this.hdk.chainCode = new Buffer(data.chainCode, 'hex');
+  }
+
+  getAddressString = index => {
+      let derivedKey = this.hdk.derive(`m/${index}`);
+      let address = ethUtil.publicToAddress(derivedKey.publicKey, true);
+      let addressString = `0x${address.toString('hex')}`;
+      return addressString;
+  }
+}
+
 function makeError(msg, id) {
   const err = new Error(msg);
   // $FlowFixMe
@@ -96,13 +111,14 @@ export default function createLedgerSubprovider(
     const transport = await getTransport();
     try {
       const eth = new AppEth(transport);
+      const addressGenerator = await new AddressGenerator(await eth.getAddress(pathComponents.basePath, askConfirm, true));
+
       const addresses = {};
-      for (let i = accountsOffset; i < accountsOffset + accountsLength; i++) {
-        const path =
-          pathComponents.basePath + (pathComponents.index + i).toString();
-        const address = await eth.getAddress(path, askConfirm, false);
-        addresses[path] = address.address;
-        addressToPathMap[address.address.toLowerCase()] = path;
+      for (let i = accountsOffset; i < accountsOffset + accountsLength; i++){
+        const path = pathComponents.basePath + (pathComponents.index + i).toString();
+        const address = addressGenerator.getAddressString(i);
+        addresses[path] = address;
+        addressToPathMap[address.toLowerCase()] = path;
       }
       return addresses;
     } finally {
