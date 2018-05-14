@@ -301,10 +301,10 @@ export default class Str {
       } else if (status === SW_CANCEL) {
         throw new Error("Transaction approval request was rejected");
       } else if (status === SW_UNSUPPORTED) {
-        throw new Error("Multi-operation transactions are not supported");
+        throw new Error("Hash signing is not supported");
       } else {
         throw new Error(
-          "Hash signing not allowed. Have you enabled multi-ops support?"
+          "Hash signing not allowed. Have you enabled it in the app settings?"
         );
       }
     });
