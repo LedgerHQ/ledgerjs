@@ -91,6 +91,19 @@ const mockCurrencies: CurrencyEntity[] = [
         magnitude: 8
       }
     ]
+  },
+  {
+      name: "syscoin",
+      family: "Syscoin",
+      color: "#008dd1",
+      units: [
+          {
+              name: "Syscoin",
+              code: "SYS",
+              symbol: "SYS",
+              magnitude: 8
+          }
+      ]
   }
 ];
 
