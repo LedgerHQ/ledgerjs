@@ -8,6 +8,7 @@ export default {
   "79": "clubcoin",
   "5": "dash",
   "42": "decred",
+  "57": "syscoin",
   "20": "digibyte",
   "3": "dogecoin",
   "61": "ethereumClassic",

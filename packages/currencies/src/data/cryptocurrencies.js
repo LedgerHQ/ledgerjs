@@ -262,6 +262,35 @@ const cryptocurrenciesArray: Currency[] = [
     ]
   },
   {
+      coinType: 57,
+      name: "Syscoin",
+      ticker: "SYS",
+      scheme: "syscoin",
+      apiName: "sys",
+      color: "#008dd1",
+      xpub: 0x0488B21E,
+      isSegwitSupported: false,
+      handleFeePerByte: false,
+      areTransactionTimestamped: false,
+      bitcoinjs: {
+          messagePrefix: "Syscoin Signed Message:",
+          bip32: {
+              private: 76066276,
+              public: 76067358
+          },
+          pubKeyHash: 63,
+          scriptHash: 5,
+          wif: 128
+      },
+      units: [
+          {
+              name: "syscoin",
+              code: "SYS",
+              magnitude: 8
+          }
+      ]
+  },
+  {
     coinType: 105,
     name: "Stratis",
     ticker: "STRAT",
