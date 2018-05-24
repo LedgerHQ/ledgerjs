@@ -55,7 +55,7 @@ export function foreach<T, A>(
 }
 
 export function crc16xmodem(buf: Buffer, previous?: number): number {
-  let crc = typeof previous !== 'undefined' ? ~~previous : 0x0;
+  let crc = typeof previous !== "undefined" ? ~~previous : 0x0;
 
   for (var index = 0; index < buf.length; index++) {
     const byte = buf[index];
