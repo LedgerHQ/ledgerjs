@@ -54,7 +54,7 @@ export function foreach<T, A>(
   return Promise.resolve().then(() => iterate(0, arr, []));
 }
 
-export function crc16xmodem(buf, previous) {
+export function crc16xmodem(buf: Buffer, previous?: number): number {
   let crc = typeof previous !== 'undefined' ? ~~previous : 0x0;
 
   for (var index = 0; index < buf.length; index++) {
