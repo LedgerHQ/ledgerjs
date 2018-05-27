@@ -47,7 +47,7 @@ const SW_NOT_ALLOWED = 0x6c66;
 const SW_UNSUPPORTED = 0x6d00;
 const SW_KEEP_ALIVE = 0x6e02;
 
-const TX_MAX_SIZE = 1024;
+const TX_MAX_SIZE = 1540;
 
 /**
  * Stellar API
