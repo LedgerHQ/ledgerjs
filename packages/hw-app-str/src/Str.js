@@ -109,7 +109,7 @@ export default class Str {
     let verifyMsg = Buffer.from("via lumina", "ascii");
     apdus.push(Buffer.concat([buffer, verifyMsg]));
     let keepAlive = false;
-    return foreach(apdus, (data, i) =>
+    return foreach(apdus, (data) =>
       this.transport
         .send(
           CLA,
@@ -269,7 +269,7 @@ export default class Str {
     });
     apdus.push(Buffer.concat([buffer, hash]));
     let keepAlive = false;
-    return foreach(apdus, (data, i) =>
+    return foreach(apdus, (data) =>
       this.transport
         .send(
           CLA,
