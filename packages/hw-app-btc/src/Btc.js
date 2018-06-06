@@ -254,13 +254,13 @@ export default class Btc {
     newTransaction: boolean,
     firstRound: boolean,
     transactionData: Buffer,
-    segwit?: boolean = false
+    bip143?: boolean = false
   ) {
     return this.transport.send(
       0xe0,
       0x44,
       firstRound ? 0x00 : 0x80,
-      newTransaction ? (segwit ? 0x02 : 0x00) : 0x80,
+      newTransaction ? (bip143 ? 0x02 : 0x00) : 0x80,
       transactionData
     );
   }
@@ -269,7 +269,7 @@ export default class Btc {
     newTransaction: boolean,
     transaction: Transaction,
     inputs: Array<{ trustedInput: boolean, value: Buffer }>,
-    segwit?: boolean = false
+    bip143?: boolean = false
   ) {
     let data = Buffer.concat([
       transaction.version,
@@ -280,13 +280,13 @@ export default class Btc {
       newTransaction,
       true,
       data,
-      segwit
+      bip143
     ).then(() => {
       let i = 0;
       return eachSeries(transaction.inputs, input => {
         let prefix;
         if (inputs[i].trustedInput) {
-          if (segwit) {
+          if (bip143) {
             prefix = Buffer.from([0x02]);
           } else {
             prefix = Buffer.from([0x01, inputs[i].value.length]);
@@ -303,7 +303,7 @@ export default class Btc {
           newTransaction,
           false,
           data,
-          segwit
+          bip143
         ).then(() => {
           let scriptBlocks = [];
           let offset = 0;
@@ -335,7 +335,7 @@ export default class Btc {
               newTransaction,
               false,
               scriptBlock,
-              segwit
+              bip143
             );
           }).then(() => {
             i++;
@@ -481,6 +481,7 @@ export default class Btc {
    * @param sigHashType is the hash type of the transaction to sign, or default (all)
    * @param segwit is a boolean indicating wether to use segwit or not
    * @param initialTimestamp is the timestamp when the function is called, not the one that the tx will include
+   * @param additionals list of additionnal options ("abc" for bch, "gold" for btg, "bipxxx" for using BIPxxx)
    * @return the signed transaction ready to be broadcast
    * @example
 btc.createPaymentTransactionNew(
@@ -498,10 +499,17 @@ btc.createPaymentTransactionNew(
     lockTime?: number = DEFAULT_LOCKTIME,
     sigHashType?: number = SIGHASH_ALL,
     segwit?: boolean = false,
-    initialTimestamp?: number
+    initialTimestamp?: number,
+    additionals?: Array<string>
   ) {
     const hasTimestamp = initialTimestamp !== undefined;
     let startTime = Date.now();
+    let useBip143 =
+      segwit ||
+      (!!additionals &&
+        (additionals.includes("abc") ||
+          additionals.includes("gold") ||
+          additionals.includes("bip143")));
     // Inputs are provided as arrays of [transaction, output_index, optional redeem script, optional sequence]
     // associatedKeysets are provided as arrays of [path]
     const nullScript = Buffer.alloc(0);
@@ -519,7 +527,7 @@ btc.createPaymentTransactionNew(
       version: defaultVersion,
       timestamp: Buffer.alloc(0)
     };
-    const getTrustedInputCall = segwit
+    const getTrustedInputCall = useBip143
       ? this.getTrustedInputBIP143.bind(this)
       : this.getTrustedInput.bind(this);
     const outputScript = Buffer.from(outputScriptHex, "hex");
@@ -590,13 +598,13 @@ btc.createPaymentTransactionNew(
         }
       })
       .then(() =>
-        doIf(segwit, () =>
+        doIf(useBip143, () =>
           // Do the first run with all inputs
           this.startUntrustedHashTransactionInput(
             true,
             targetTransaction,
             trustedInputs,
-            segwit
+            true
           ).then(() =>
             doIf(!resuming && typeof changePath != "undefined", () => {
               // $FlowFixMe
@@ -626,13 +634,13 @@ btc.createPaymentTransactionNew(
             pseudoTX.inputs[i].script = script;
           }
           return this.startUntrustedHashTransactionInput(
-            !segwit && firstRun,
+            !useBip143 && firstRun,
             pseudoTX,
             pseudoTrustedInputs,
-            segwit
+            useBip143
           )
             .then(() =>
-              doIf(!segwit, () =>
+              doIf(!useBip143, () =>
                 doIf(!resuming && typeof changePath != "undefined", () => {
                   // $FlowFixMe
                   return this.provideOutputFullChangePath(changePath);
@@ -672,7 +680,7 @@ btc.createPaymentTransactionNew(
               publicKeys[i]
             ]);
           }
-          let offset = segwit ? 0 : 4;
+          let offset = useBip143 ? 0 : 4;
           targetTransaction.inputs[i].prevout = trustedInputs[i].value.slice(
             offset,
             offset + 0x24
