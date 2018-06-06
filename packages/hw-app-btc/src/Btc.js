@@ -504,7 +504,12 @@ btc.createPaymentTransactionNew(
   ) {
     const hasTimestamp = initialTimestamp !== undefined;
     let startTime = Date.now();
-    let useBip143 = segwit || (!!additionals && (additionals.includes("abc") || additionals.includes("gold")))
+    let useBip143 =
+      segwit ||
+      (!!additionals &&
+        (additionals.includes("abc") ||
+          additionals.includes("gold") ||
+          additionals.includes("bip143")));
     // Inputs are provided as arrays of [transaction, output_index, optional redeem script, optional sequence]
     // associatedKeysets are provided as arrays of [path]
     const nullScript = Buffer.alloc(0);
