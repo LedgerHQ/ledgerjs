@@ -34,7 +34,12 @@ export default class Eth {
     this.transport = transport;
     transport.decorateAppAPIMethods(
       this,
-      ["getAddress", "signTransaction", "signPersonalMessage"],
+      [
+        "getAddress",
+        "signTransaction",
+        "signPersonalMessage",
+        "getAppConfiguration"
+      ],
       "w0w"
     );
   }
