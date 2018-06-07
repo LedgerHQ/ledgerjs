@@ -16,7 +16,6 @@
  ********************************************************************************/
 //@flow
 
-import crc16xmodem from "crc/lib/crc16_xmodem";
 import base32 from "base32.js";
 import nacl from "tweetnacl";
 import { sha256 } from "sha.js";
@@ -53,6 +52,26 @@ export function foreach<T, A>(
     }
   }
   return Promise.resolve().then(() => iterate(0, arr, []));
+}
+
+export function crc16xmodem(buf: Buffer, previous?: number): number {
+  let crc = typeof previous !== "undefined" ? ~~previous : 0x0;
+
+  for (var index = 0; index < buf.length; index++) {
+    const byte = buf[index];
+    let code = (crc >>> 8) & 0xff;
+
+    code ^= byte & 0xff;
+    code ^= code >>> 4;
+    crc = (crc << 8) & 0xffff;
+    crc ^= code;
+    code = (code << 5) & 0xffff;
+    crc ^= code;
+    code = (code << 7) & 0xffff;
+    crc ^= code;
+  }
+
+  return crc;
 }
 
 export function encodeEd25519PublicKey(rawPublicKey: Buffer): string {
