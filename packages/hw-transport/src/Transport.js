@@ -344,7 +344,6 @@ TransportFoo.create().then(transport => ...)
           "Ledger Device is busy (lock " + _appAPIlock + ")",
           "TransportLocked"
         );
-        //$FlowFixMe
         Object.assign(e, {
           currentLock: _appAPIlock,
           methodName
