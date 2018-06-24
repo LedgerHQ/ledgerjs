@@ -84,9 +84,11 @@ export default class TransportNodeHid extends Transport<string> {
     const { events, stop } = listenDevices(listenDevicesPollingInterval);
 
     const onAdd = device => {
+      if (unsubscribed || !device) return;
       observer.next({ type: "add", descriptor: device.path, device });
     };
     const onRemove = device => {
+      if (unsubscribed || !device) return;
       observer.next({ type: "remove", descriptor: device.path, device });
     };
     events.on("add", onAdd);
