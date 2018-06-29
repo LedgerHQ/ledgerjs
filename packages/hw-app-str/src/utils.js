@@ -103,13 +103,20 @@ export function hash(data: Buffer) {
   return hasher.digest();
 }
 
+const knownStellarTechBIPs = [
+  "148", // stellar.org
+  "5248" // ficnetwork.com
+];
+
 export function checkStellarBip32Path(path: string): void {
-  if (!path.startsWith("44'/148'")) {
+  if (!knownStellarTechBIPs.some(bip => path.startsWith("44'/" + bip + "'"))) {
     throw new Error(
-      "Not a Stellar BIP32 path. Path: " +
+      "Not a BIP32 path of known networks using Stellar technology. Path: " +
         path +
         "." +
-        " The Stellar app is authorized only for paths starting with 44'/148'." +
+        " The Stellar app is authorized only for paths starting with " +
+        knownStellarTechBIPs.map(bip => "44'/" + bip + "'").join(", ") +
+        "." +
         " Example: 44'/148'/0'"
     );
   }
