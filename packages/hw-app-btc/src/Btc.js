@@ -627,8 +627,10 @@ btc.createPaymentTransactionNew(
                     Buffer.from([OP_EQUALVERIFY, OP_CHECKSIG])
                   ]);
           let pseudoTX = Object.assign({}, targetTransaction);
-          let pseudoTrustedInputs = segwit ? [trustedInputs[i]] : trustedInputs;
-          if (segwit) {
+          let pseudoTrustedInputs = useBip143
+            ? [trustedInputs[i]]
+            : trustedInputs;
+          if (useBip143) {
             pseudoTX.inputs = [{ ...pseudoTX.inputs[i], script }];
           } else {
             pseudoTX.inputs[i].script = script;
