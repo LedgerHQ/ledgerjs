@@ -26,7 +26,8 @@ function defer<T>(): Defer<T> {
   return { promise, resolve, reject };
 }
 
-let listenDevicesPollingInterval = 100;
+let listenDevicesPollingInterval = 500;
+let listenDevicesPollingSkip = () => false;
 
 /**
  * node-hid Transport implementation
@@ -66,6 +67,10 @@ export default class TransportNodeHid extends Transport<string> {
     listenDevicesPollingInterval = delay;
   };
 
+  static setListenDevicesPollingSkip = (conditionToSkip: () => boolean) => {
+    listenDevicesPollingSkip = conditionToSkip;
+  };
+
   /**
    */
   static listen = (
@@ -81,7 +86,10 @@ export default class TransportNodeHid extends Transport<string> {
         }
       }
     });
-    const { events, stop } = listenDevices(listenDevicesPollingInterval);
+    const { events, stop } = listenDevices(
+      listenDevicesPollingInterval,
+      listenDevicesPollingSkip
+    );
 
     const onAdd = device => {
       if (unsubscribed || !device) return;
