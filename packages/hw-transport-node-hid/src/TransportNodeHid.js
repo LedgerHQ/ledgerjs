@@ -40,7 +40,6 @@ export default class TransportNodeHid extends Transport<string> {
   device: HID.HID;
   ledgerTransport: boolean;
   timeout: number;
-  debug: boolean;
   exchangeStack: Array<*>;
 
   constructor(
@@ -244,8 +243,9 @@ export default class TransportNodeHid extends Transport<string> {
         const deferred = this.exchangeStack[0];
 
         const send = content => {
-          if (this.debug) {
-            this.debug("=>" + content.toString("hex"));
+          const { debug } = this;
+          if (debug) {
+            debug("=>" + content.toString("hex"));
           }
           const data = [0x00];
           for (let i = 0; i < content.length; i++) {
@@ -261,8 +261,9 @@ export default class TransportNodeHid extends Transport<string> {
               if (err || !res) reject(err);
               else {
                 const buffer = Buffer.from(res);
-                if (this.debug) {
-                  this.debug("<=" + buffer.toString("hex"));
+                const { debug } = this;
+                if (debug) {
+                  debug("<=" + buffer.toString("hex"));
                 }
                 resolve(buffer);
               }
