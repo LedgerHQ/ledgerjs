@@ -45,16 +45,14 @@ export default class TransportNodeHid extends Transport<string> {
 
   constructor(
     device: HID.HID,
-    ledgerTransport: boolean = true,
-    timeout: number = 0,
-    debug: boolean = false
+    ledgerTransport: boolean = true, // FIXME not used?
+    timeout: number = 0 // FIXME not used?
   ) {
     super();
     this.device = device;
     this.ledgerTransport = ledgerTransport;
     this.timeout = timeout;
     this.exchangeStack = [];
-    this.debug = debug;
   }
 
   static isSupported = (): Promise<boolean> =>
@@ -247,7 +245,7 @@ export default class TransportNodeHid extends Transport<string> {
 
         const send = content => {
           if (this.debug) {
-            console.log("=>" + content.toString("hex"));
+            this.debug("=>" + content.toString("hex"));
           }
           const data = [0x00];
           for (let i = 0; i < content.length; i++) {
@@ -264,7 +262,7 @@ export default class TransportNodeHid extends Transport<string> {
               else {
                 const buffer = Buffer.from(res);
                 if (this.debug) {
-                  console.log("<=" + buffer.toString("hex"));
+                  this.debug("<=" + buffer.toString("hex"));
                 }
                 resolve(buffer);
               }
