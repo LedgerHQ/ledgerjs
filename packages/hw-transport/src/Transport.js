@@ -121,7 +121,7 @@ TransportStatusError.prototype = new Error();
  * it can be for instance an ID, an file path, a URL,...
  */
 export default class Transport<Descriptor> {
-  debug: boolean = false;
+  debug: ?(log: string) => void = null;
   exchangeTimeout: number = 30000;
 
   /**
@@ -221,8 +221,13 @@ TransportFoo.open(descriptor).then(transport => ...)
   /**
    * Enable or not logs of the binary exchange
    */
-  setDebugMode(debug: boolean) {
-    this.debug = debug;
+  setDebugMode(debug: boolean | ((log: string) => void)) {
+    this.debug =
+      typeof debug === "function"
+        ? debug
+        : debug
+          ? log => console.log(log)
+          : null;
   }
 
   /**
