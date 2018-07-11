@@ -33,7 +33,7 @@ const normal64 = (base64: string) =>
 function attemptExchange(
   apdu: Buffer,
   timeoutMillis: number,
-  debug: boolean,
+  debug: *,
   scrambleKey: Buffer
 ): Promise<Buffer> {
   const keyHandle = wrapApdu(apdu, scrambleKey);
@@ -48,7 +48,7 @@ function attemptExchange(
     appId: location.origin
   };
   if (debug) {
-    console.log("=> " + apdu.toString("hex"));
+    debug("=> " + apdu.toString("hex"));
   }
   return sign(signRequest, timeoutMillis / 1000).then(response => {
     const { signatureData } = response;
@@ -56,7 +56,7 @@ function attemptExchange(
       const data = Buffer.from(normal64(signatureData), "base64");
       const result = data.slice(5);
       if (debug) {
-        console.log("<= " + result.toString("hex"));
+        debug("<= " + result.toString("hex"));
       }
       return result;
     } else {

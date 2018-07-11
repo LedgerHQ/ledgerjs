@@ -257,7 +257,7 @@ export default class Btc {
     bip143?: boolean = false,
     overwinter?: boolean = false
   ) {
-    const p2 = (bip143 ? (overwinter ? 0x04 : 0x02 ) : 0x00);
+    const p2 = bip143 ? (overwinter ? 0x04 : 0x02) : 0x00;
     return this.transport.send(
       0xe0,
       0x44,
@@ -394,12 +394,18 @@ export default class Btc {
     });
     const lockTimeBuffer = Buffer.alloc(4);
     lockTimeBuffer.writeUInt32BE(lockTime, 0);
-    let buffer = Buffer.concat([Buffer.from([paths.length]), pathsBuffer, Buffer.from([0x00]), lockTimeBuffer, Buffer.from([sigHashType])]);
-    if(expiryHeight){
+    let buffer = Buffer.concat([
+      Buffer.from([paths.length]),
+      pathsBuffer,
+      Buffer.from([0x00]),
+      lockTimeBuffer,
+      Buffer.from([sigHashType])
+    ]);
+    if (expiryHeight) {
       buffer = Buffer.concat([buffer, expiryHeight]);
     }
     return this.transport.send(0xe0, 0x48, 0x00, 0x00, buffer).then(result => {
-      if (result.length > 0){
+      if (result.length > 0) {
         result[0] = 0x30;
         return result.slice(0, result.length - 2);
       }
@@ -517,16 +523,21 @@ btc.createPaymentTransactionNew(
   ) {
     const hasTimestamp = initialTimestamp !== undefined;
     let startTime = Date.now();
-    let useBip143 = segwit || !!additionals &&
+    let useBip143 =
+      segwit ||
+      (!!additionals &&
         (additionals.includes("abc") ||
           additionals.includes("gold") ||
-          additionals.includes("bip143")) || !!expiryHeight;
+          additionals.includes("bip143"))) ||
+      !!expiryHeight;
     // Inputs are provided as arrays of [transaction, output_index, optional redeem script, optional sequence]
     // associatedKeysets are provided as arrays of [path]
     const nullScript = Buffer.alloc(0);
     const nullPrevout = Buffer.alloc(0);
     const defaultVersion = Buffer.alloc(4);
-    expiryHeight ? defaultVersion.writeUInt32LE(0x80000003, 0) : defaultVersion.writeUInt32LE(1, 0);
+    expiryHeight
+      ? defaultVersion.writeUInt32LE(0x80000003, 0)
+      : defaultVersion.writeUInt32LE(1, 0);
     const trustedInputs: Array<*> = [];
     const regularOutputs: Array<TransactionOutput> = [];
     const signatures = [];
@@ -559,19 +570,26 @@ btc.createPaymentTransactionNew(
             sequence
           });
         })
-      ).then(() => {
-        const { outputs } = input[0];
-        const index = input[1];
-        if (outputs && index <= outputs.length - 1) {
-          regularOutputs.push(outputs[index]);
-        }
-      }).then(() => {
-        if(expiryHeight) {
-          targetTransaction.nVersionGroupId = Buffer.from([0x70, 0x82,0xc4,0x03]);
-          targetTransaction.nExpiryHeight = expiryHeight;
-          targetTransaction.extraData = Buffer.from([0x00]);
-        }
-      });
+      )
+        .then(() => {
+          const { outputs } = input[0];
+          const index = input[1];
+          if (outputs && index <= outputs.length - 1) {
+            regularOutputs.push(outputs[index]);
+          }
+        })
+        .then(() => {
+          if (expiryHeight) {
+            targetTransaction.nVersionGroupId = Buffer.from([
+              0x70,
+              0x82,
+              0xc4,
+              0x03
+            ]);
+            targetTransaction.nExpiryHeight = expiryHeight;
+            targetTransaction.extraData = Buffer.from([0x00]);
+          }
+        });
     })
       .then(() => {
         for (let i = 0; i < inputs.length; i++) {
@@ -672,7 +690,12 @@ btc.createPaymentTransactionNew(
               )
             )
             .then(() =>
-              this.signTransaction(associatedKeysets[i], lockTime, sigHashType, expiryHeight)
+              this.signTransaction(
+                associatedKeysets[i],
+                lockTime,
+                sigHashType,
+                expiryHeight
+              )
             )
             .then(signature => {
               signatures.push(signature);
@@ -737,7 +760,7 @@ btc.createPaymentTransactionNew(
           }
           result = Buffer.concat([result, witness]);
         }
-        if(expiryHeight){
+        if (expiryHeight) {
           result = Buffer.concat([
             result,
             targetTransaction.nExpiryHeight || Buffer.alloc(0),
@@ -910,7 +933,7 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
     let nVersionGroupId = Buffer.alloc(0);
     const transaction = Buffer.from(transactionHex, "hex");
     const version = transaction.slice(offset, offset + 4);
-    const overwinter = version.equals(Buffer.from([0x03,0x00,0x00,0x80]));
+    const overwinter = version.equals(Buffer.from([0x03, 0x00, 0x00, 0x80]));
     offset += 4;
     if (
       !hasTimestamp &&
@@ -924,8 +947,8 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
       timestamp = transaction.slice(offset, 4 + offset);
       offset += 4;
     }
-    if(overwinter) {
-      nVersionGroupId = transaction.slice(offset, 4+offset);
+    if (overwinter) {
+      nVersionGroupId = transaction.slice(offset, 4 + offset);
       offset += 4;
     }
     let varint = this.getVarint(transaction, offset);
@@ -961,7 +984,7 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
     } else {
       locktime = transaction.slice(offset, offset + 4);
     }
-    if(overwinter) {
+    if (overwinter) {
       offset += 4;
       nExpiryHeight = transaction.slice(offset, offset + 4);
     }
