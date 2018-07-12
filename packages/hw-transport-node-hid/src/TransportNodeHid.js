@@ -26,7 +26,8 @@ function defer<T>(): Defer<T> {
   return { promise, resolve, reject };
 }
 
-let listenDevicesPollingInterval = 100;
+let listenDevicesPollingInterval = 500;
+let listenDevicesPollingSkip = () => false;
 
 /**
  * node-hid Transport implementation
@@ -39,21 +40,18 @@ export default class TransportNodeHid extends Transport<string> {
   device: HID.HID;
   ledgerTransport: boolean;
   timeout: number;
-  debug: boolean;
   exchangeStack: Array<*>;
 
   constructor(
     device: HID.HID,
-    ledgerTransport: boolean = true,
-    timeout: number = 0,
-    debug: boolean = false
+    ledgerTransport: boolean = true, // FIXME not used?
+    timeout: number = 0 // FIXME not used?
   ) {
     super();
     this.device = device;
     this.ledgerTransport = ledgerTransport;
     this.timeout = timeout;
     this.exchangeStack = [];
-    this.debug = debug;
   }
 
   static isSupported = (): Promise<boolean> =>
@@ -64,6 +62,10 @@ export default class TransportNodeHid extends Transport<string> {
 
   static setListenDevicesPollingInterval = (delay: number) => {
     listenDevicesPollingInterval = delay;
+  };
+
+  static setListenDevicesPollingSkip = (conditionToSkip: () => boolean) => {
+    listenDevicesPollingSkip = conditionToSkip;
   };
 
   /**
@@ -81,7 +83,10 @@ export default class TransportNodeHid extends Transport<string> {
         }
       }
     });
-    const { events, stop } = listenDevices(listenDevicesPollingInterval);
+    const { events, stop } = listenDevices(
+      listenDevicesPollingInterval,
+      listenDevicesPollingSkip
+    );
 
     const onAdd = device => {
       if (unsubscribed || !device) return;
@@ -238,8 +243,9 @@ export default class TransportNodeHid extends Transport<string> {
         const deferred = this.exchangeStack[0];
 
         const send = content => {
-          if (this.debug) {
-            console.log("=>" + content.toString("hex"));
+          const { debug } = this;
+          if (debug) {
+            debug("=>" + content.toString("hex"));
           }
           const data = [0x00];
           for (let i = 0; i < content.length; i++) {
@@ -255,8 +261,9 @@ export default class TransportNodeHid extends Transport<string> {
               if (err || !res) reject(err);
               else {
                 const buffer = Buffer.from(res);
-                if (this.debug) {
-                  console.log("<=" + buffer.toString("hex"));
+                const { debug } = this;
+                if (debug) {
+                  debug("<=" + buffer.toString("hex"));
                 }
                 resolve(buffer);
               }

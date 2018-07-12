@@ -4,7 +4,8 @@ import EventEmitter from "events";
 import getDevices from "./getDevices";
 
 export default (
-  delay: number = 100
+  delay: number,
+  listenDevicesPollingSkip: () => boolean
 ): {
   events: EventEmitter,
   stop: () => void
@@ -27,7 +28,7 @@ export default (
   let lastDevices = getFlatDevices();
 
   const checkDevices = () => {
-    timeoutDetection = setTimeout(() => {
+    if (!listenDevicesPollingSkip()) {
       const currentDevices = getFlatDevices();
 
       const newDevices = currentDevices.filter(d => !lastDevices.includes(d));
@@ -48,12 +49,11 @@ export default (
       }
 
       lastDevices = currentDevices;
-
-      checkDevices();
-    }, delay);
+    }
+    setTimeout(checkDevices, delay);
   };
 
-  checkDevices();
+  timeoutDetection = setTimeout(checkDevices, delay);
 
   return {
     stop: () => {
