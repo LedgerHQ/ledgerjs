@@ -271,7 +271,8 @@ export default class Btc {
     newTransaction: boolean,
     transaction: Transaction,
     inputs: Array<{ trustedInput: boolean, value: Buffer }>,
-    bip143?: boolean = false
+    bip143?: boolean = false,
+    overwinter?: boolean = false
   ) {
     let data = Buffer.concat([
       transaction.version,
@@ -284,7 +285,7 @@ export default class Btc {
       true,
       data,
       bip143,
-      !!transaction.nVersionGroupId
+      overwinter
     ).then(() => {
       let i = 0;
       return eachSeries(transaction.inputs, input => {
@@ -308,7 +309,7 @@ export default class Btc {
           false,
           data,
           bip143,
-          !!transaction.nVersionGroupId
+          overwinter
         ).then(() => {
           let scriptBlocks = [];
           let offset = 0;
@@ -341,7 +342,7 @@ export default class Btc {
               false,
               scriptBlock,
               bip143,
-              !!transaction.nVersionGroupId
+              overwinter
             );
           }).then(() => {
             i++;
@@ -639,7 +640,8 @@ btc.createPaymentTransactionNew(
             true,
             targetTransaction,
             trustedInputs,
-            true
+            true,
+            !!expiryHeight
           ).then(() =>
             doIf(!resuming && typeof changePath != "undefined", () => {
               // $FlowFixMe
@@ -679,7 +681,8 @@ btc.createPaymentTransactionNew(
             !useBip143 && firstRun,
             pseudoTX,
             pseudoTrustedInputs,
-            useBip143
+            useBip143,
+            !!expiryHeight
           )
             .then(() =>
               doIf(!useBip143, () =>
