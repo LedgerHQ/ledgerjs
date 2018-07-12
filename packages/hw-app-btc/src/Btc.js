@@ -934,6 +934,7 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
     let timestamp = Buffer.alloc(0);
     let nExpiryHeight = Buffer.alloc(0);
     let nVersionGroupId = Buffer.alloc(0);
+    let extraData = Buffer.alloc(0);
     const transaction = Buffer.from(transactionHex, "hex");
     const version = transaction.slice(offset, offset + 4);
     const overwinter = version.equals(Buffer.from([0x03, 0x00, 0x00, 0x80]));
@@ -990,6 +991,8 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
     if (overwinter) {
       offset += 4;
       nExpiryHeight = transaction.slice(offset, offset + 4);
+      offset += 4;
+      extraData = transaction.slice(offset);
     }
     return {
       version,
@@ -999,7 +1002,8 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
       witness: witnessScript,
       timestamp,
       nVersionGroupId,
-      nExpiryHeight
+      nExpiryHeight,
+      extraData
     };
   }
 
