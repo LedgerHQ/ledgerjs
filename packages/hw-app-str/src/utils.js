@@ -104,7 +104,6 @@ export function hash(data: Buffer) {
 }
 
 export function checkStellarBip32Path(path: string): void {
-
   path.split("/").forEach(function(element) {
     if (!element.toString().endsWith("'")) {
       throw new Error(
