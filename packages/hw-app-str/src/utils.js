@@ -104,15 +104,6 @@ export function hash(data: Buffer) {
 }
 
 export function checkStellarBip32Path(path: string): void {
-  if (!path.startsWith("44'/148'")) {
-    throw new Error(
-      "Not a Stellar BIP32 path. Path: " +
-        path +
-        "." +
-        " The Stellar app is authorized only for paths starting with 44'/148'." +
-        " Example: 44'/148'/0'"
-    );
-  }
   path.split("/").forEach(function(element) {
     if (!element.toString().endsWith("'")) {
       throw new Error(
