@@ -17,7 +17,6 @@ export default (
   const events = new EventEmitter();
   events.setMaxListeners(0);
 
-  let timeoutDetection;
   let listDevices = getDevices();
 
   const debug = (...args) => {
@@ -37,51 +36,58 @@ export default (
 
   let lastDevices = getFlatDevices();
 
-  const pollAdd = () => {
-    if (listenDevicesPollingSkip()) {
-      debug("Polling skipped");
-      return;
-    }
+  const poll = type => {
+    let changeFound = false;
 
-    debug("Polling for added device");
+    if (!listenDevicesPollingSkip()) {
+      debug("Polling for " + type);
 
-    const currentDevices = getFlatDevices();
-    const newDevices = currentDevices.filter(d => !lastDevices.includes(d));
+      const currentDevices = getFlatDevices();
 
-    if (newDevices.length > 0) {
-      debug("New device found:", newDevices);
-      listDevices = getDevices();
-      events.emit("add", getDeviceByPaths(newDevices));
+      if (type === "add") {
+        const newDevices = currentDevices.filter(d => !lastDevices.includes(d));
 
-      lastDevices = currentDevices;
+        if (newDevices.length > 0) {
+          debug("New device found:", newDevices);
+
+          listDevices = getDevices();
+          events.emit("add", getDeviceByPaths(newDevices));
+
+          changeFound = true;
+        } else {
+          debug("No new device found");
+        }
+      }
+
+      if (type === "remove") {
+        const removeDevices = lastDevices.filter(
+          d => !currentDevices.includes(d)
+        );
+
+        if (removeDevices.length > 0) {
+          debug("Removed device found:", removeDevices);
+
+          events.emit("remove", getDeviceByPaths(removeDevices));
+          listDevices = listDevices.filter(
+            d => !removeDevices.includes(flatDevice(d))
+          );
+
+          changeFound = true;
+        } else {
+          debug("No removed device found");
+        }
+      }
+
+      if (changeFound) {
+        lastDevices = currentDevices;
+      }
     } else {
-      debug("No new device found, repolling in " + delay);
-      setTimeout(pollAdd, delay);
-    }
-  };
-
-  const pollRemove = () => {
-    if (listenDevicesPollingSkip()) {
       debug("Polling skipped");
-      return;
     }
 
-    debug("Polling for removed device");
-
-    const currentDevices = getFlatDevices();
-    const removeDevices = lastDevices.filter(d => !currentDevices.includes(d));
-
-    if (removeDevices.length > 0) {
-      debug("Removed device found:", removeDevices);
-      events.emit("remove", getDeviceByPaths(removeDevices));
-      listDevices = listDevices.filter(
-        d => !removeDevices.includes(flatDevice(d))
-      );
-
-      lastDevices = currentDevices;
-    } else {
-      debug("No removed device found, repolling in " + delay);
-      setTimeout(pollRemove, delay);
+    if (!changeFound) {
+      debug(`Repolling in ${delay}ms`);
+      setTimeout(poll, delay);
     }
   };
 
@@ -92,14 +98,14 @@ export default (
   usbDetect.on(`add:${VENDOR_ID}`, device => {
     debug("Device add detected:", device.deviceName);
 
-    pollAdd();
+    poll("add");
   });
 
   // Detect remove
   usbDetect.on(`remove:${VENDOR_ID}`, device => {
     debug("Device removal detected:", device.deviceName);
 
-    pollRemove();
+    poll("remove");
   });
 
   return {
