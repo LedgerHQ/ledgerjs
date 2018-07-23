@@ -28,6 +28,7 @@ function defer<T>(): Defer<T> {
 
 let listenDevicesPollingInterval = 500;
 let listenDevicesPollingSkip = () => false;
+let listenDevicesDebugMode = false;
 
 /**
  * node-hid Transport implementation
@@ -68,6 +69,10 @@ export default class TransportNodeHid extends Transport<string> {
     listenDevicesPollingSkip = conditionToSkip;
   };
 
+  static setListenDevicesDebugMode = (bool: boolean) => {
+    listenDevicesDebugMode = bool;
+  };
+
   /**
    */
   static listen = (
@@ -85,7 +90,8 @@ export default class TransportNodeHid extends Transport<string> {
     });
     const { events, stop } = listenDevices(
       listenDevicesPollingInterval,
-      listenDevicesPollingSkip
+      listenDevicesPollingSkip,
+      listenDevicesDebugMode
     );
 
     const onAdd = device => {
