@@ -5,6 +5,7 @@ import usbDetect from "usb-detection";
 import getDevices from "./getDevices";
 
 const VENDOR_ID = 11415; // Ledger's Vendor ID for filtering
+const MAX_ATTEMPTS = 10;
 
 export default (
   delay: number,
@@ -36,11 +37,11 @@ export default (
 
   let lastDevices = getFlatDevices();
 
-  const poll = type => {
+  const poll = (type, attempt = 1) => {
     let changeFound = false;
 
     if (!listenDevicesPollingSkip()) {
-      debug("Polling for " + type);
+      debug(`Polling for ${type} [attempt ${attempt}/${MAX_ATTEMPTS}]`);
 
       const currentDevices = getFlatDevices();
 
@@ -80,14 +81,25 @@ export default (
 
       if (changeFound) {
         lastDevices = currentDevices;
+      } else {
+        if (attempt < MAX_ATTEMPTS) {
+          const newDelay = delay * attempt;
+
+          debug(`Repolling ${type} in ${newDelay}ms`);
+
+          setTimeout(() => {
+            poll(type, attempt + 1);
+          }, newDelay);
+        } else {
+          debug(`Giving up after ${attempt} attempts`);
+        }
       }
     } else {
-      debug("Polling skipped");
-    }
+      debug(`Polling skipped, retrying in ${delay}ms`);
 
-    if (!changeFound) {
-      debug(`Repolling in ${delay}ms`);
-      setTimeout(poll, delay);
+      setTimeout(() => {
+        poll(type);
+      }, delay);
     }
   };
 
