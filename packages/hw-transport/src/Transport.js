@@ -288,12 +288,6 @@ TransportFoo.create().then(transport => ...)
   ): Promise<Transport<Descriptor>> {
     return new Promise((resolve, reject) => {
       let found = false;
-      const listenTimeoutId = setTimeout(() => {
-        sub.unsubscribe();
-        reject(
-          new TransportError(this.ErrorMessage_ListenTimeout, "ListenTimeout")
-        );
-      }, listenTimeout);
       const sub = this.listen({
         next: e => {
           found = true;
@@ -317,6 +311,12 @@ TransportFoo.create().then(transport => ...)
           }
         }
       });
+      const listenTimeoutId = setTimeout(() => {
+        sub.unsubscribe();
+        reject(
+          new TransportError(this.ErrorMessage_ListenTimeout, "ListenTimeout")
+        );
+      }, listenTimeout);
     });
   }
 
