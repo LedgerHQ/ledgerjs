@@ -289,7 +289,7 @@ TransportFoo.create().then(transport => ...)
     return new Promise((resolve, reject) => {
       let found = false;
       const listenTimeoutId = setTimeout(() => {
-        sub.unsubscribe();
+        if (sub) sub.unsubscribe();
         reject(
           new TransportError(this.ErrorMessage_ListenTimeout, "ListenTimeout")
         );
