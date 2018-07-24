@@ -291,7 +291,7 @@ TransportFoo.create().then(transport => ...)
       const sub = this.listen({
         next: e => {
           found = true;
-          sub.unsubscribe();
+          if (sub) sub.unsubscribe();
           clearTimeout(listenTimeoutId);
           this.open(e.descriptor, openTimeout).then(resolve, reject);
         },
