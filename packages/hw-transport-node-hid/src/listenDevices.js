@@ -10,7 +10,7 @@ const VENDOR_ID = 11415; // Ledger's Vendor ID for filtering
 export default (
   delay: number,
   listenDevicesPollingSkip: () => boolean,
-  debugMode: boolean
+  debug: (*) => void
 ): {
   events: EventEmitter,
   stop: () => void
@@ -19,12 +19,6 @@ export default (
   events.setMaxListeners(0);
 
   let listDevices = getDevices();
-
-  const debug = (...args) => {
-    if (debugMode && args[0]) {
-      console.log("[listenDevices]", ...args);
-    }
-  };
 
   const flatDevice = d => d.path;
 
