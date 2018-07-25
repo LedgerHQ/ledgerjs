@@ -2,10 +2,10 @@
 
 import EventEmitter from "events";
 import usbDetect from "usb-detection";
+import debounce from "lodash.debounce";
 import getDevices from "./getDevices";
 
 const VENDOR_ID = 11415; // Ledger's Vendor ID for filtering
-const MAX_ATTEMPTS = 10;
 
 export default (
   delay: number,
@@ -37,71 +37,52 @@ export default (
 
   let lastDevices = getFlatDevices();
 
-  const poll = (type, attempt = 1) => {
-    let changeFound = false;
-
+  const poll = () => {
     if (!listenDevicesPollingSkip()) {
-      debug(`Polling for ${type} [attempt ${attempt}/${MAX_ATTEMPTS}]`);
+      debug("Polling for added or removed devices");
 
+      let changeFound = false;
       const currentDevices = getFlatDevices();
+      const newDevices = currentDevices.filter(d => !lastDevices.includes(d));
 
-      if (type === "add") {
-        const newDevices = currentDevices.filter(d => !lastDevices.includes(d));
+      if (newDevices.length > 0) {
+        debug("New device found:", newDevices);
 
-        if (newDevices.length > 0) {
-          debug("New device found:", newDevices);
+        listDevices = getDevices();
+        events.emit("add", getDeviceByPaths(newDevices));
 
-          listDevices = getDevices();
-          events.emit("add", getDeviceByPaths(newDevices));
-
-          changeFound = true;
-        } else {
-          debug("No new device found");
-        }
+        changeFound = true;
+      } else {
+        debug("No new device found");
       }
 
-      if (type === "remove") {
-        const removeDevices = lastDevices.filter(
-          d => !currentDevices.includes(d)
+      const removeDevices = lastDevices.filter(
+        d => !currentDevices.includes(d)
+      );
+
+      if (removeDevices.length > 0) {
+        debug("Removed device found:", removeDevices);
+
+        events.emit("remove", getDeviceByPaths(removeDevices));
+        listDevices = listDevices.filter(
+          d => !removeDevices.includes(flatDevice(d))
         );
 
-        if (removeDevices.length > 0) {
-          debug("Removed device found:", removeDevices);
-
-          events.emit("remove", getDeviceByPaths(removeDevices));
-          listDevices = listDevices.filter(
-            d => !removeDevices.includes(flatDevice(d))
-          );
-
-          changeFound = true;
-        } else {
-          debug("No removed device found");
-        }
+        changeFound = true;
+      } else {
+        debug("No removed device found");
       }
 
       if (changeFound) {
         lastDevices = currentDevices;
-      } else {
-        if (attempt < MAX_ATTEMPTS) {
-          const newDelay = delay * attempt;
-
-          debug(`Repolling ${type} in ${newDelay}ms`);
-
-          setTimeout(() => {
-            poll(type, attempt + 1);
-          }, newDelay);
-        } else {
-          debug(`Giving up after ${attempt} attempts`);
-        }
       }
     } else {
-      debug(`Polling skipped, retrying in ${delay}ms`);
-
-      setTimeout(() => {
-        poll(type);
-      }, delay);
+      debug("Polling skipped, re-debouncing");
+      debouncedPoll();
     }
   };
+
+  const debouncedPoll = debounce(poll, delay);
 
   debug("Starting to monitor USB for ledger devices");
   usbDetect.startMonitoring();
@@ -110,19 +91,20 @@ export default (
   usbDetect.on(`add:${VENDOR_ID}`, device => {
     debug("Device add detected:", device.deviceName);
 
-    poll("add");
+    debouncedPoll();
   });
 
   // Detect remove
   usbDetect.on(`remove:${VENDOR_ID}`, device => {
     debug("Device removal detected:", device.deviceName);
 
-    poll("remove");
+    debouncedPoll();
   });
 
   return {
     stop: () => {
       debug("Stopping USB monitoring");
+      debouncedPoll.cancel();
       usbDetect.stopMonitoring();
     },
     events
