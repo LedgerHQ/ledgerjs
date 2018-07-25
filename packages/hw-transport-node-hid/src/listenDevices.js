@@ -10,7 +10,7 @@ const VENDOR_ID = 11415; // Ledger's Vendor ID for filtering
 export default (
   delay: number,
   listenDevicesPollingSkip: () => boolean,
-  debug: (*) => void
+  debug: (...any) => void
 ): {
   events: EventEmitter,
   stop: () => void

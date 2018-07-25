@@ -28,7 +28,7 @@ function defer<T>(): Defer<T> {
 
 let listenDevicesPollingInterval = 500;
 let listenDevicesPollingSkip = () => false;
-let listenDevicesDebug = false;
+let listenDevicesDebug = () => {};
 
 /**
  * node-hid Transport implementation
