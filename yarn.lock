@@ -1450,7 +1450,7 @@ block-stream@*:
   dependencies:
     inherits "~2.0.0"
 
-bluebird@^3.0.5, bluebird@^3.4.7, bluebird@^3.5.1:
+bluebird@^3.0.5, bluebird@^3.4.7:
   version "3.5.1"
   resolved "https://registry.yarnpkg.com/bluebird/-/bluebird-3.5.1.tgz#d9551f9de98f1fcda1e683d17ee91a0602ee2eb9"
 
@@ -4061,10 +4061,6 @@ event-emitter@~0.3.5:
   dependencies:
     d "1"
     es5-ext "~0.10.14"
-
-eventemitter2@^5.0.1:
-  version "5.0.1"
-  resolved "https://registry.yarnpkg.com/eventemitter2/-/eventemitter2-5.0.1.tgz#6197a095d5fb6b57e8942f6fd7eaad63a09c9452"
 
 eventemitter3@1.x.x:
   version "1.2.0"
@@ -7293,7 +7289,7 @@ mute-stream@0.0.7:
   version "0.0.7"
   resolved "https://registry.yarnpkg.com/mute-stream/-/mute-stream-0.0.7.tgz#3075ce93bc21b8fab43e1bc4da7e8115ed1e7bab"
 
-nan@^2.0.5, nan@^2.0.7, nan@^2.10.0, nan@^2.2.1, nan@^2.3.0, nan@^2.9.2:
+nan@^2.0.5, nan@^2.0.7, nan@^2.10.0, nan@^2.2.1, nan@^2.3.0, nan@^2.8.0, nan@^2.9.2:
   version "2.10.0"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.10.0.tgz#96d0cd610ebd58d4b4de9cc0c6828cda99c7548f"
 
@@ -7321,6 +7317,14 @@ natural-compare@^1.4.0:
 needle@^2.2.0:
   version "2.2.0"
   resolved "https://registry.yarnpkg.com/needle/-/needle-2.2.0.tgz#f14efc69cee1024b72c8b21c7bdf94a731dc12fa"
+  dependencies:
+    debug "^2.1.2"
+    iconv-lite "^0.4.4"
+    sax "^1.2.4"
+
+needle@^2.2.1:
+  version "2.2.1"
+  resolved "https://registry.yarnpkg.com/needle/-/needle-2.2.1.tgz#b5e325bd3aae8c2678902fa296f729455d1d3a7d"
   dependencies:
     debug "^2.1.2"
     iconv-lite "^0.4.4"
@@ -7421,6 +7425,21 @@ node-notifier@^5.0.2:
     semver "^5.4.1"
     shellwords "^0.1.1"
     which "^1.3.0"
+
+node-pre-gyp@^0.10.0:
+  version "0.10.3"
+  resolved "https://registry.yarnpkg.com/node-pre-gyp/-/node-pre-gyp-0.10.3.tgz#3070040716afdc778747b61b6887bf78880b80fc"
+  dependencies:
+    detect-libc "^1.0.2"
+    mkdirp "^0.5.1"
+    needle "^2.2.1"
+    nopt "^4.0.1"
+    npm-packlist "^1.1.6"
+    npmlog "^4.0.2"
+    rc "^1.2.7"
+    rimraf "^2.6.1"
+    semver "^5.3.0"
+    tar "^4"
 
 node-pre-gyp@^0.6.39:
   version "0.6.39"
@@ -8756,7 +8775,7 @@ rc@^1.0.1, rc@^1.1.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-rc@^1.1.6:
+rc@^1.1.6, rc@^1.2.7:
   version "1.2.8"
   resolved "https://registry.yarnpkg.com/rc/-/rc-1.2.8.tgz#cd924bf5200a075b83c188cd6b9e211b7fc0d3ed"
   dependencies:
@@ -10933,15 +10952,12 @@ url@^0.11.0, url@~0.11.0:
     punycode "1.3.2"
     querystring "0.2.0"
 
-usb-detection@^3.1.0:
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/usb-detection/-/usb-detection-3.2.0.tgz#35ce8bd09e9eed9ed1088c912fe3909c5cbc5848"
+usb@^1.3.2:
+  version "1.3.2"
+  resolved "https://registry.yarnpkg.com/usb/-/usb-1.3.2.tgz#4563a32323856e26c97dae374b34c66c3d83b5f4"
   dependencies:
-    bindings "^1.3.0"
-    bluebird "^3.5.1"
-    eventemitter2 "^5.0.1"
-    nan "^2.10.0"
-    prebuild-install "^4.0.0"
+    nan "^2.8.0"
+    node-pre-gyp "^0.10.0"
 
 use@^3.1.0:
   version "3.1.0"

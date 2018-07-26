@@ -2,7 +2,7 @@
 
 import EventEmitter from "events";
 import usb from "usb";
-import { debounce } from "lodash";
+import debounce from "lodash/debounce";
 import getDevices from "./getDevices";
 
 export default (
