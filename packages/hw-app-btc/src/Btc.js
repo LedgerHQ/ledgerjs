@@ -960,7 +960,8 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
   splitTransaction(
     transactionHex: string,
     isSegwitSupported: ?boolean = false,
-    hasTimestamp?: boolean = false
+    hasTimestamp?: boolean = false,
+    hasExtraData?: boolean = false
   ): Transaction {
     const inputs = [];
     const outputs = [];
@@ -1028,7 +1029,9 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
       nExpiryHeight = transaction.slice(offset, offset + 4);
       offset += 4;
     }
-    extraData = transaction.slice(offset);
+    if (hasExtraData) {
+      extraData = transaction.slice(offset);
+    }
     return {
       version,
       inputs,
