@@ -1,11 +1,9 @@
 // @flow
 
 import EventEmitter from "events";
-import usbDetect from "usb-detection";
+import usb from "usb";
 import { debounce } from "lodash";
 import getDevices from "./getDevices";
-
-const VENDOR_ID = 11415; // Ledger's Vendor ID for filtering
 
 export default (
   delay: number,
@@ -78,28 +76,30 @@ export default (
 
   const debouncedPoll = debounce(poll, delay);
 
-  debug("Starting to monitor USB for ledger devices");
-  usbDetect.startMonitoring();
-
-  // Detect add
-  usbDetect.on(`add:${VENDOR_ID}`, device => {
-    debug("Device add detected:", device.deviceName);
+  const attachDetected = device => {
+    debug("Device add detected:", device);
 
     debouncedPoll();
-  });
+  };
+  usb.on("attach", attachDetected);
+  debug("attach listener added");
 
-  // Detect remove
-  usbDetect.on(`remove:${VENDOR_ID}`, device => {
-    debug("Device removal detected:", device.deviceName);
+  const detachDetected = device => {
+    debug("Device removal detected:", device);
 
     debouncedPoll();
-  });
+  };
+  usb.on("detach", detachDetected);
+  debug("detach listener added");
 
   return {
     stop: () => {
-      debug("Stopping USB monitoring");
+      debug(
+        "Stop received, removing listeners and cancelling pending debounced polls"
+      );
       debouncedPoll.cancel();
-      usbDetect.stopMonitoring();
+      usb.removeListener("attach", attachDetected);
+      usb.removeListener("detach", detachDetected);
     },
     events
   };
