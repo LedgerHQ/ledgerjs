@@ -1026,7 +1026,7 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
     offset += 4;
     if (overwinter) {
       nExpiryHeight = transaction.slice(offset, offset + 4);
-      offset += 4;      
+      offset += 4;
     }
     extraData = transaction.slice(offset);
     return {
