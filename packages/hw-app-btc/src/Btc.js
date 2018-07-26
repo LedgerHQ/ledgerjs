@@ -9,6 +9,7 @@ import type Transport from "@ledgerhq/hw-transport";
 import createHash from "create-hash";
 
 const MAX_SCRIPT_BLOCK = 50;
+const DEFAULT_VERSION = 1;
 const DEFAULT_LOCKTIME = 0;
 const DEFAULT_SEQUENCE = 0xffffffff;
 const SIGHASH_ALL = 1;
@@ -290,14 +291,14 @@ export default class Btc {
       let i = 0;
       return eachSeries(transaction.inputs, input => {
         let prefix;
-        if (inputs[i].trustedInput) {
-          if (bip143) {
-            prefix = Buffer.from([0x02]);
-          } else {
-            prefix = Buffer.from([0x01, inputs[i].value.length]);
-          }
+        if (bip143) {
+          prefix = Buffer.from([0x02]);
         } else {
-          prefix = Buffer.from([0x00]);
+          if (inputs[i].trustedInput) {
+            prefix = Buffer.from([0x01, inputs[i].value.length]);
+          } else {
+            prefix = Buffer.from([0x00]);
+          }
         }
         data = Buffer.concat([
           prefix,
@@ -801,33 +802,48 @@ btc.signP2SHTransaction(
     associatedKeysets: string[],
     outputScriptHex: string,
     lockTime?: number = DEFAULT_LOCKTIME,
-    sigHashType?: number = SIGHASH_ALL
+    sigHashType?: number = SIGHASH_ALL,
+    segwit?: boolean = false,
+    transactionVersion?: number = DEFAULT_VERSION
   ) {
     // Inputs are provided as arrays of [transaction, output_index, redeem script, optional sequence]
     // associatedKeysets are provided as arrays of [path]
     const nullScript = Buffer.alloc(0);
     const nullPrevout = Buffer.alloc(0);
     const defaultVersion = Buffer.alloc(4);
-    defaultVersion.writeUInt32LE(1, 0);
+    defaultVersion.writeUInt32LE(transactionVersion, 0);
     const trustedInputs = [];
     const regularOutputs: Array<TransactionOutput> = [];
     const signatures = [];
     let firstRun = true;
-    let resuming = false;
+    const resuming = false;
     let targetTransaction: Transaction = {
       inputs: [],
       version: defaultVersion
     };
 
+    const getTrustedInputCall = segwit
+      ? this.getTrustedInputBIP143.bind(this)
+      : this.getTrustedInput.bind(this);
     const outputScript = Buffer.from(outputScriptHex, "hex");
 
     return foreach(inputs, input =>
       doIf(!resuming, () =>
-        this.getTrustedInput(input[1], input[0]).then(trustedInput => {
-          let inputItem = {};
-          inputItem.trustedInput = false;
-          inputItem.value = Buffer.from(trustedInput, "hex").slice(4, 4 + 0x24);
-          trustedInputs.push(inputItem);
+        getTrustedInputCall(input[1], input[0]).then(trustedInput => {
+          let sequence = Buffer.alloc(4);
+          sequence.writeUInt32LE(
+            input.length >= 4 && typeof input[3] === "number"
+              ? input[3]
+              : DEFAULT_SEQUENCE,
+            0
+          );
+          trustedInputs.push({
+            trustedInput: false,
+            value: segwit
+              ? Buffer.from(trustedInput, "hex")
+              : Buffer.from(trustedInput, "hex").slice(4, 4 + 0x24),
+            sequence
+          });
         })
       ).then(() => {
         const { outputs } = input[0];
@@ -840,34 +856,51 @@ btc.signP2SHTransaction(
       .then(() => {
         // Pre-build the target transaction
         for (let i = 0; i < inputs.length; i++) {
-          let tmp = Buffer.alloc(4);
-          let sequence;
-          if (inputs[i].length >= 4 && typeof inputs[i][3] === "number") {
-            sequence = inputs[i][3];
-          } else {
-            sequence = DEFAULT_SEQUENCE;
-          }
-          tmp.writeUInt32LE(sequence, 0);
+          let sequence = Buffer.alloc(4);
+          sequence.writeUInt32LE(
+            inputs[i].length >= 4 && typeof inputs[i][3] === "number"
+              ? inputs[i][3]
+              : DEFAULT_SEQUENCE,
+            0
+          );
           targetTransaction.inputs.push({
-            prevout: nullPrevout,
             script: nullScript,
-            sequence: tmp
+            prevout: nullPrevout,
+            sequence
           });
         }
       })
       .then(() =>
+        doIf(segwit, () =>
+          // Do the first run with all inputs
+          this.startUntrustedHashTransactionInput(
+            true,
+            targetTransaction,
+            trustedInputs,
+            true
+          ).then(() => this.hashOutputFull(outputScript))
+        )
+      )
+      .then(() =>
         foreach(inputs, (input, i) => {
-          targetTransaction.inputs[i].script =
+          let script =
             inputs[i].length >= 3 && typeof inputs[i][2] === "string"
               ? Buffer.from(inputs[i][2], "hex")
               : regularOutputs[i].script;
+          let pseudoTX = Object.assign({}, targetTransaction);
+          let pseudoTrustedInputs = segwit ? [trustedInputs[i]] : trustedInputs;
+          if (segwit) {
+            pseudoTX.inputs = [{ ...pseudoTX.inputs[i], script }];
+          } else {
+            pseudoTX.inputs[i].script = script;
+          }
           return this.startUntrustedHashTransactionInput(
-            firstRun,
-            targetTransaction,
-            trustedInputs,
-            false
+            !segwit && firstRun,
+            pseudoTX,
+            pseudoTrustedInputs,
+            segwit
           )
-            .then(() => this.hashOutputFull(outputScript))
+            .then(() => doIf(!segwit, () => this.hashOutputFull(outputScript)))
             .then(() =>
               this.signTransaction(
                 associatedKeysets[i],
@@ -875,7 +908,9 @@ btc.signP2SHTransaction(
                 sigHashType
               ).then(signature => {
                 signatures.push(
-                  signature.slice(0, signature.length - 1).toString("hex")
+                  segwit
+                    ? signature.toString("hex")
+                    : signature.slice(0, signature.length - 1).toString("hex")
                 );
                 targetTransaction.inputs[i].script = nullScript;
                 if (firstRun) {
