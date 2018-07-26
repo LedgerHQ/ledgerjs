@@ -2,7 +2,7 @@
 
 import EventEmitter from "events";
 import usbDetect from "usb-detection";
-import debounce from "lodash.debounce";
+import { debounce } from "lodash";
 import getDevices from "./getDevices";
 
 const VENDOR_ID = 11415; // Ledger's Vendor ID for filtering
