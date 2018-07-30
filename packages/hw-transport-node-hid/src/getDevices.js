@@ -1,6 +1,6 @@
 // @flow
 import HID from "node-hid";
-import isLedgerDevice from "./isLedgerDevice";
+
 export default function getDevices(): Array<*> {
-  return HID.devices().filter(isLedgerDevice);
+  return HID.devices(0x2c97, 0x0);
 }
