@@ -1,11 +1,14 @@
 // @flow
 
 import EventEmitter from "events";
+import usb from "usb";
+import debounce from "lodash/debounce";
 import getDevices from "./getDevices";
 
 export default (
   delay: number,
-  listenDevicesPollingSkip: () => boolean
+  listenDevicesPollingSkip: () => boolean,
+  debug: (...any) => void
 ): {
   events: EventEmitter,
   stop: () => void
@@ -13,7 +16,6 @@ export default (
   const events = new EventEmitter();
   events.setMaxListeners(0);
 
-  let timeoutDetection;
   let listDevices = getDevices();
 
   const flatDevice = d => d.path;
@@ -27,37 +29,77 @@ export default (
 
   let lastDevices = getFlatDevices();
 
-  const checkDevices = () => {
+  const poll = () => {
     if (!listenDevicesPollingSkip()) {
-      const currentDevices = getFlatDevices();
+      debug("Polling for added or removed devices");
 
+      let changeFound = false;
+      const currentDevices = getFlatDevices();
       const newDevices = currentDevices.filter(d => !lastDevices.includes(d));
+
+      if (newDevices.length > 0) {
+        debug("New device found:", newDevices);
+
+        listDevices = getDevices();
+        events.emit("add", getDeviceByPaths(newDevices));
+
+        changeFound = true;
+      } else {
+        debug("No new device found");
+      }
+
       const removeDevices = lastDevices.filter(
         d => !currentDevices.includes(d)
       );
 
-      if (newDevices.length > 0) {
-        listDevices = getDevices();
-        events.emit("add", getDeviceByPaths(newDevices));
-      }
-
       if (removeDevices.length > 0) {
+        debug("Removed device found:", removeDevices);
+
         events.emit("remove", getDeviceByPaths(removeDevices));
         listDevices = listDevices.filter(
           d => !removeDevices.includes(flatDevice(d))
         );
+
+        changeFound = true;
+      } else {
+        debug("No removed device found");
       }
 
-      lastDevices = currentDevices;
+      if (changeFound) {
+        lastDevices = currentDevices;
+      }
+    } else {
+      debug("Polling skipped, re-debouncing");
+      debouncedPoll();
     }
-    setTimeout(checkDevices, delay);
   };
 
-  timeoutDetection = setTimeout(checkDevices, delay);
+  const debouncedPoll = debounce(poll, delay);
+
+  const attachDetected = device => {
+    debug("Device add detected:", device);
+
+    debouncedPoll();
+  };
+  usb.on("attach", attachDetected);
+  debug("attach listener added");
+
+  const detachDetected = device => {
+    debug("Device removal detected:", device);
+
+    debouncedPoll();
+  };
+  usb.on("detach", detachDetected);
+  debug("detach listener added");
 
   return {
     stop: () => {
-      clearTimeout(timeoutDetection);
+      debug(
+        "Stop received, removing listeners and cancelling pending debounced polls"
+      );
+      debouncedPoll.cancel();
+      usb.removeListener("attach", attachDetected);
+      usb.removeListener("detach", detachDetected);
     },
     events
   };
