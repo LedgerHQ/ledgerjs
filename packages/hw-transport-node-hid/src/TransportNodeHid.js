@@ -26,7 +26,7 @@ function defer<T>(): Defer<T> {
   return { promise, resolve, reject };
 }
 
-let listenDevicesPollingInterval = 500;
+let listenDevicesDebounce = 500;
 let listenDevicesPollingSkip = () => false;
 let listenDevicesDebug = () => {};
 
@@ -61,8 +61,8 @@ export default class TransportNodeHid extends Transport<string> {
   static list = (): Promise<string[]> =>
     Promise.resolve(getDevices().map(d => d.path));
 
-  static setListenDevicesPollingInterval = (delay: number) => {
-    listenDevicesPollingInterval = delay;
+  static setListenDevicesDebounce = (delay: number) => {
+    listenDevicesDebounce = delay;
   };
 
   static setListenDevicesPollingSkip = (conditionToSkip: () => boolean) => {
@@ -94,7 +94,7 @@ export default class TransportNodeHid extends Transport<string> {
       }
     });
     const { events, stop } = listenDevices(
-      listenDevicesPollingInterval,
+      listenDevicesDebounce,
       listenDevicesPollingSkip,
       listenDevicesDebug
     );
