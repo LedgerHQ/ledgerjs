@@ -45,12 +45,12 @@ export default class Tezos {
 
   /**
    * get Tezos address for a given BIP 32 path.
-   * @param path a path in BIP 32 format
+   * @param path a path in BIP 32 format, must begin with 44'/1729'
    * @option boolDisplay optionally enable or not the display
    * @option boolChaincode optionally enable or not the chaincode request
    * @return an object with a publicKey
    * @example
-   * tez.getAddress("44'/60'/0'/0'/0").then(o => o.address)
+   * tez.getAddress("44'/1729'/0'/0'").then(o => o.address)
    */
   getAddress(
     path: string,
