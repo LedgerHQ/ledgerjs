@@ -127,8 +127,6 @@ export default class Tezos {
       } else if (i === toSend.length - 1) {
         code = 0x81;
       }
-      console.log(code);
-      console.log(data);
       return this.transport
         .send(0x80, 0x04, code, curve, data)
         .then(apduResponse => {
