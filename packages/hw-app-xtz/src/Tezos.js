@@ -36,7 +36,8 @@ export default class Tezos {
       this,
       [
         "getAddress",
-        "signOperation"
+        "signOperation",
+        "getVersion"
       ],
       "w0w"
     );
@@ -138,5 +139,20 @@ export default class Tezos {
       let signature = response.slice(1, length).toString("hex");
       return { signature };
     });
+  }
+
+  getVersion(): Promise<{
+      major: number,
+      minor: number,
+      patch: number,
+      bakingApp: boolean
+  }> {
+      return this.transport.send(0x80, 0x00, 0x00, 0x00, new Buffer(0)).then(apduResponse => {
+          let major = apduResponse[0];
+          let minor = apduResponse[1];
+          let patch = apduResponse[2];
+          let bakingApp = apduResponse[3] == 1;
+          return { major, minor, patch, bakingApp };
+      });
   }
 }
