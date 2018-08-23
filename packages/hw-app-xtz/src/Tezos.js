@@ -39,7 +39,7 @@ export default class Tezos {
         "signOperation",
         "getVersion"
       ],
-      "w0w"
+      "XTZ"
     );
   }
 
