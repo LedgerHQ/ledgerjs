@@ -135,8 +135,7 @@ export default class Tezos {
         })
     }
     ).then(() => {
-      let length = response[0];
-      let signature = response.slice(1, length).toString("hex");
+      let signature = response.slice(1, response.length - 2).toString("hex");
       return { signature };
     });
   }
