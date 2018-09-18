@@ -48,6 +48,9 @@ export default class Tezos {
    * @param path a path in BIP 32 format, must begin with 44'/1729'
    * @option boolDisplay optionally enable or not the display
    * @option boolChaincode optionally enable or not the chaincode request
+   * @option apdu to use a custom apdu. This should currently only be unset (which will choose
+             an appropriate APDU based on the boolDisplay parameter), or else set to 0x0A
+             for the special "display" APDU which uses the alternate copy "Your Key"
    * @return an object with a publicKey
    * @example
    * tez.getAddress("44'/1729'/0'/0'").then(o => o.address)
@@ -55,10 +58,19 @@ export default class Tezos {
   getAddress(
     path: string,
     boolDisplay?: boolean,
-    curve?: number
+    curve?: number,
+    apdu?: number
   ): Promise<{
     publicKey: string
   }> {
+    if (!apdu) {
+      if (boolDisplay) {
+        apdu = 0x03;
+      } else {
+        apdu = 0x02;
+      }
+    }
+
     let paths = splitPath(path);
     let buffer = new Buffer(1 + paths.length * 4);
     buffer[0] = paths.length;
@@ -68,7 +80,7 @@ export default class Tezos {
     return this.transport
       .send(
         0x80,
-        boolDisplay ? 0x03 : 0x02,
+        apdu,
         0,
         curve ? curve : 0x00, // Defaults to Secp256k1
         buffer
