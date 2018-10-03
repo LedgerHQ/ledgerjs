@@ -13,7 +13,7 @@ const DEFAULT_VERSION = 1;
 const DEFAULT_LOCKTIME = 0;
 const DEFAULT_SEQUENCE = 0xffffffff;
 const SIGHASH_ALL = 1;
-const OP_PUSHDATA1 = 0x76;
+const OP_DUP = 0x76;
 const OP_HASH160 = 0xa9;
 const HASH_SIZE = 0x14;
 const OP_EQUALVERIFY = 0x88;
@@ -665,7 +665,7 @@ btc.createPaymentTransactionNew(
               : !segwit
                 ? regularOutputs[i].script
                 : Buffer.concat([
-                    Buffer.from([OP_PUSHDATA1, OP_HASH160, HASH_SIZE]),
+                    Buffer.from([OP_DUP, OP_HASH160, HASH_SIZE]),
                     this.hashPublicKey(publicKeys[i]),
                     Buffer.from([OP_EQUALVERIFY, OP_CHECKSIG])
                   ]);
