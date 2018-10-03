@@ -28,7 +28,7 @@ const OP_CHECKSIG = 0xac;
 export default class Btc {
   transport: Transport<*>;
 
-  constructor(transport: Transport<*>, scrambleKey: ?string) {
+  constructor(transport: Transport<*>, scrambleKey: string = "BTC") {
     this.transport = transport;
     transport.decorateAppAPIMethods(
       this,
@@ -38,7 +38,7 @@ export default class Btc {
         "signMessageNew",
         "createPaymentTransactionNew"
       ],
-      scrambleKey ? scrambleKey :"BTC"
+      scrambleKey
     );
   }
 

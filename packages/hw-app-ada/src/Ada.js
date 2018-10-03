@@ -53,7 +53,7 @@ export default class Ada {
   transport: Transport<*>;
   methods: Array<string>;
 
-  constructor(transport: Transport<*>, scrambleKey: ?string) {
+  constructor(transport: Transport<*>, scrambleKey: string = "ADA") {
     this.transport = transport;
     this.methods = [
       "isConnected",
@@ -61,7 +61,7 @@ export default class Ada {
       "getWalletPublicKeyWithIndex",
       "signTransaction"
     ];
-    this.transport.decorateAppAPIMethods(this, this.methods, scrambleKey ? scrambleKey : "ADA");
+    this.transport.decorateAppAPIMethods(this, this.methods, scrambleKey);
   }
 
   /**
