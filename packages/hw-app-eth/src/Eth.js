@@ -30,7 +30,7 @@ import type Transport from "@ledgerhq/hw-transport";
 export default class Eth {
   transport: Transport<*>;
 
-  constructor(transport: Transport<*>) {
+  constructor(transport: Transport<*>, scrambleKey: string = "w0w") {
     this.transport = transport;
     transport.decorateAppAPIMethods(
       this,
@@ -40,7 +40,7 @@ export default class Eth {
         "signPersonalMessage",
         "getAppConfiguration"
       ],
-      "w0w"
+      scrambleKey
     );
   }
 
