@@ -2142,10 +2142,10 @@ bser@^2.0.0:
   dependencies:
     node-int64 "^0.4.0"
 
-budo@^11.3.2:
-  version "11.3.2"
-  resolved "https://registry.yarnpkg.com/budo/-/budo-11.3.2.tgz#ab943492cadbb0abaf9126b4c8c94eac2440adae"
-  integrity sha512-aXXaJf/5Kxvs7wXPMB/YVumeyyWZifaZCTOV3nvncLXmMxhHLVRjxG9umXwwdsx+gskRH+r/SU+ASAoKp6XN1A==
+budo@^11.4.1:
+  version "11.4.1"
+  resolved "https://registry.yarnpkg.com/budo/-/budo-11.4.1.tgz#e69185ec343051d9055af3880e3085d497041edb"
+  integrity sha512-TZMC0dYE3agNdVCuRCa7en16Cm3d0G0kLWObZ45tUQieIYdN1ARDOVBCnRxQXuj7NRjRsIunoxxiRSqqEPYDIQ==
   dependencies:
     bole "^2.0.0"
     browserify "^16.1.0"
@@ -4809,6 +4809,11 @@ events@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/events/-/events-2.0.0.tgz#cbbb56bf3ab1ac18d71c43bb32c86255062769f2"
   integrity sha512-r/M5YkNg9zwI8QbSf7tsDWWJvO3PGwZXyG7GpFAxtMASnHL2eblFd7iHiGPtyGKKFPZ59S63NeX10Ws6WqGDcg==
+
+events@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/events/-/events-3.0.0.tgz#9a0a0dfaf62893d92b875b8f2698ca4114973e88"
+  integrity sha512-Dc381HFWJzEOhQ+d8pkNon++bk9h6cdAoAj4iE6Q4y6xgTzySWXlKn05/TVNpjnfRqi/X0EpJEJohPjNI3zpVA==
 
 eventsource@0.1.6:
   version "0.1.6"

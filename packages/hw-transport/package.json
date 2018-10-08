@@ -23,7 +23,7 @@
   "main": "lib/Transport.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "events": "^2.0.0"
+    "events": "^3.0.0"
   },
   "devDependencies": {
     "flow-bin": "^0.68.0",
