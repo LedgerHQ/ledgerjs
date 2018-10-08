@@ -12,7 +12,7 @@
     "@ledgerhq/hw-app-xrp": "^4.23.0",
     "@ledgerhq/hw-transport-mocker": "^4.21.0",
     "@ledgerhq/hw-transport-node-hid": "^4.23.0",
-    "budo": "^11.3.2"
+    "budo": "^11.4.1"
   },
   "devDependencies": {
     "flow-bin": "^0.68.0",

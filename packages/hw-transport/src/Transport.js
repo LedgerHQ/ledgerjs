@@ -121,7 +121,7 @@ TransportStatusError.prototype = new Error();
  * it can be for instance an ID, an file path, a URL,...
  */
 export default class Transport<Descriptor> {
-  debug: ?(log: string) => void = null;
+  debug: ?(log: string) => void = global.__ledgerDebug || null;
   exchangeTimeout: number = 30000;
 
   /**
