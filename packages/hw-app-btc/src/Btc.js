@@ -160,6 +160,13 @@ export default class Btc {
         }
         offset += blockSize;
       }
+
+      // Handle case when no script length: we still want to pass the sequence
+      // relatable: https://github.com/LedgerHQ/ledger-live-desktop/issues/1386
+      if (script.length === 0) {
+        scriptBlocks.push(sequence);
+      }
+
       return eachSeries(scriptBlocks, scriptBlock =>
         this.getTrustedInputRaw(scriptBlock)
       );
