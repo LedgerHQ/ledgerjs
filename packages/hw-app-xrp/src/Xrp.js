@@ -13,7 +13,7 @@ import BIPPath from "bip32-path";
 export default class Xrp {
   transport: Transport<*>;
 
-  constructor(transport: Transport<*>, scrambleKey: string = "w0w") {
+  constructor(transport: Transport<*>, scrambleKey: string = "XRP") {
     this.transport = transport;
     transport.decorateAppAPIMethods(
       this,
