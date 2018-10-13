@@ -545,7 +545,7 @@ btc.createPaymentTransactionNew(
     const nullPrevout = Buffer.alloc(0);
     const defaultVersion = Buffer.alloc(4);
     expiryHeight
-      ? defaultVersion.writeUInt32LE(0x80000003, 0)
+      ? defaultVersion.writeUInt32LE(0x80000004, 0)
       : defaultVersion.writeUInt32LE(1, 0);
     const trustedInputs: Array<*> = [];
     const regularOutputs: Array<TransactionOutput> = [];
@@ -590,13 +590,14 @@ btc.createPaymentTransactionNew(
         .then(() => {
           if (expiryHeight) {
             targetTransaction.nVersionGroupId = Buffer.from([
-              0x70,
-              0x82,
-              0xc4,
-              0x03
+              0x85,
+              0x20,
+              0x2f,
+              0x89
             ]);
             targetTransaction.nExpiryHeight = expiryHeight;
-            targetTransaction.extraData = Buffer.from([0x00]);
+            // valueBalance (8), nShieldedSpend (1), nShieldedOutput (1), nJoinSplit (1)
+            targetTransaction.extraData = Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
           }
         });
     })
@@ -980,7 +981,8 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
     let extraData = Buffer.alloc(0);
     const transaction = Buffer.from(transactionHex, "hex");
     const version = transaction.slice(offset, offset + 4);
-    const overwinter = version.equals(Buffer.from([0x03, 0x00, 0x00, 0x80]));
+    const overwinter = (version.equals(Buffer.from([0x03, 0x00, 0x00, 0x80])) ||
+                        version.equals(Buffer.from([0x04, 0x00, 0x00, 0x80])))
     offset += 4;
     if (
       !hasTimestamp &&
