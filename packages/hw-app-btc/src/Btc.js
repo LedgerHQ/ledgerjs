@@ -263,9 +263,10 @@ export default class Btc {
     firstRound: boolean,
     transactionData: Buffer,
     bip143?: boolean = false,
-    overwinter?: boolean = false
+    overwinter?: boolean = false,
+    sapling?: boolean = false
   ) {
-    const p2 = bip143 ? (overwinter ? 0x04 : 0x02) : 0x00;
+    const p2 = bip143 ? (sapling ? 0x05 : overwinter ? 0x04 : 0x02) : 0x00;
     return this.transport.send(
       0xe0,
       0x44,
@@ -280,7 +281,8 @@ export default class Btc {
     transaction: Transaction,
     inputs: Array<{ trustedInput: boolean, value: Buffer }>,
     bip143?: boolean = false,
-    overwinter?: boolean = false
+    overwinter?: boolean = false,
+    sapling?: boolean = false
   ) {
     let data = Buffer.concat([
       transaction.version,
@@ -293,7 +295,8 @@ export default class Btc {
       true,
       data,
       bip143,
-      overwinter
+      overwinter,
+      sapling
     ).then(() => {
       let i = 0;
       return eachSeries(transaction.inputs, input => {
@@ -317,7 +320,8 @@ export default class Btc {
           false,
           data,
           bip143,
-          overwinter
+          overwinter,
+          sapling
         ).then(() => {
           let scriptBlocks = [];
           let offset = 0;
@@ -350,7 +354,8 @@ export default class Btc {
               false,
               scriptBlock,
               bip143,
-              overwinter
+              overwinter,
+              sapling              
             );
           }).then(() => {
             i++;
@@ -508,7 +513,8 @@ export default class Btc {
    * @param segwit is an optional boolean indicating wether to use segwit or not
    * @param initialTimestamp is an optional timestamp of the function call to use for coins that necessitate timestamps only, (not the one that the tx will include)
    * @param additionals list of additionnal options ("abc" for bch, "gold" for btg, "bipxxx" for using BIPxxx)
-   * @param expiryHeight is an optional Buffer for zec overwinter Txs
+   * @param expiryHeight is an optional Buffer for zec overwinter / sapling Txs
+   * @param sapling is an optional boolean indicating whether a zec transaction is supporting sapling (to be set over block 419200)
    * @return the signed transaction ready to be broadcast
    * @example
 btc.createPaymentTransactionNew(
@@ -528,7 +534,8 @@ btc.createPaymentTransactionNew(
     segwit?: boolean = false,
     initialTimestamp?: number,
     additionals?: Array<string>,
-    expiryHeight?: Buffer
+    expiryHeight?: Buffer,
+    sapling?: boolean = false
   ) {
     const hasTimestamp = initialTimestamp !== undefined;
     let startTime = Date.now();
@@ -545,7 +552,7 @@ btc.createPaymentTransactionNew(
     const nullPrevout = Buffer.alloc(0);
     const defaultVersion = Buffer.alloc(4);
     expiryHeight
-      ? defaultVersion.writeUInt32LE(0x80000004, 0)
+      ? defaultVersion.writeUInt32LE(sapling ? 0x80000004 : 0x80000003, 0)
       : defaultVersion.writeUInt32LE(1, 0);
     const trustedInputs: Array<*> = [];
     const regularOutputs: Array<TransactionOutput> = [];
@@ -587,17 +594,23 @@ btc.createPaymentTransactionNew(
             regularOutputs.push(outputs[index]);
           }
         })
-        .then(() => {
+        .then(() => {          
           if (expiryHeight) {
-            targetTransaction.nVersionGroupId = Buffer.from([
+            targetTransaction.nVersionGroupId = Buffer.from(sapling ? [
               0x85,
               0x20,
               0x2f,
               0x89
+            ] : [
+              0x70,
+              0x82,
+              0xc4,
+              0x03
             ]);
             targetTransaction.nExpiryHeight = expiryHeight;
-            // valueBalance (8), nShieldedSpend (1), nShieldedOutput (1), nJoinSplit (1)
-            targetTransaction.extraData = Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
+            // For sapling : valueBalance (8), nShieldedSpend (1), nShieldedOutput (1), nJoinSplit (1)
+            // Overwinter : use nJoinSplit (1)            
+            targetTransaction.extraData = Buffer.from(sapling ? [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00] : [0x00]);
           }
         });
     })
@@ -650,7 +663,8 @@ btc.createPaymentTransactionNew(
             targetTransaction,
             trustedInputs,
             true,
-            !!expiryHeight
+            !!expiryHeight,
+            sapling
           ).then(() =>
             doIf(!resuming && typeof changePath != "undefined", () => {
               // $FlowFixMe
@@ -691,7 +705,8 @@ btc.createPaymentTransactionNew(
             pseudoTX,
             pseudoTrustedInputs,
             useBip143,
-            !!expiryHeight
+            !!expiryHeight,
+            sapling
           )
             .then(() =>
               doIf(!useBip143, () =>
