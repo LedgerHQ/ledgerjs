@@ -30,9 +30,11 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/hw-transport-node-hid": "^4.24.0",
+    "babel-polyfill": "^6.26.0",
     "body-parser": "^1.18.3",
     "cors": "^2.8.4",
-    "express": "^4.16.3"
+    "express": "^4.16.3",
+    "ws": "^6.1.0"
   },
   "devDependencies": {
     "flow-bin": "^0.68.0",

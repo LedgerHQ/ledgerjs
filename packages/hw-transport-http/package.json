@@ -22,10 +22,12 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "lib/HttpTransport.js",
+  "main": "lib/withStaticURLs.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^4.24.0"
+    "@ledgerhq/hw-transport": "^4.24.0",
+    "axios": "^0.18.0",
+    "ws": "^6.1.0"
   },
   "devDependencies": {
     "flow-bin": "^0.68.0",
