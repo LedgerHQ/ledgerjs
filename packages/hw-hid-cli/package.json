@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-hid-cli",
-  "version": "4.24.0",
+  "version": "4.26.0",
   "description": "Ledger Hardware Wallet cli utility to send apdu to hid",
   "keywords": [
     "Ledger",
