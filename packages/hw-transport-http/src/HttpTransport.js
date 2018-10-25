@@ -16,7 +16,7 @@ export default class HttpTransport extends Transport<string> {
   });
 
   static check = async (url: string, timeout: number = 5000) => {
-    const response = await axios(url, { timeout });
+    const response = await axios({ url, timeout });
     if (response.status !== 200) {
       throw new TransportError(
         "failed to access HttpTransport(" +
