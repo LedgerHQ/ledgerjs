@@ -264,9 +264,15 @@ export default class Btc {
     transactionData: Buffer,
     bip143?: boolean = false,
     overwinter?: boolean = false,
-    sapling?: boolean = false
+    additionals: string[] = []
   ) {
-    const p2 = bip143 ? (sapling ? 0x05 : overwinter ? 0x04 : 0x02) : 0x00;
+    const p2 = bip143
+      ? additionals.includes("sapling")
+        ? 0x05
+        : overwinter
+          ? 0x04
+          : 0x02
+      : 0x00;
     return this.transport.send(
       0xe0,
       0x44,
@@ -282,7 +288,7 @@ export default class Btc {
     inputs: Array<{ trustedInput: boolean, value: Buffer }>,
     bip143?: boolean = false,
     overwinter?: boolean = false,
-    sapling?: boolean = false
+    additionals: string[] = []
   ) {
     let data = Buffer.concat([
       transaction.version,
@@ -296,7 +302,7 @@ export default class Btc {
       data,
       bip143,
       overwinter,
-      sapling
+      additionals
     ).then(() => {
       let i = 0;
       return eachSeries(transaction.inputs, input => {
@@ -321,7 +327,7 @@ export default class Btc {
           data,
           bip143,
           overwinter,
-          sapling
+          additionals
         ).then(() => {
           let scriptBlocks = [];
           let offset = 0;
@@ -355,7 +361,7 @@ export default class Btc {
               scriptBlock,
               bip143,
               overwinter,
-              sapling              
+              additionals
             );
           }).then(() => {
             i++;
@@ -512,9 +518,12 @@ export default class Btc {
    * @param sigHashType is the hash type of the transaction to sign, or default (all)
    * @param segwit is an optional boolean indicating wether to use segwit or not
    * @param initialTimestamp is an optional timestamp of the function call to use for coins that necessitate timestamps only, (not the one that the tx will include)
-   * @param additionals list of additionnal options ("abc" for bch, "gold" for btg, "bipxxx" for using BIPxxx)
+   * @param additionals list of additionnal options
+   * - "abc" for bch
+   * - "gold" for btg
+   * - "bipxxx" for using BIPxxx
+   * - "sapling" to indicate a zec transaction is supporting sapling (to be set over block 419200)
    * @param expiryHeight is an optional Buffer for zec overwinter / sapling Txs
-   * @param sapling is an optional boolean indicating whether a zec transaction is supporting sapling (to be set over block 419200)
    * @return the signed transaction ready to be broadcast
    * @example
 btc.createPaymentTransactionNew(
@@ -533,12 +542,12 @@ btc.createPaymentTransactionNew(
     sigHashType?: number = SIGHASH_ALL,
     segwit?: boolean = false,
     initialTimestamp?: number,
-    additionals?: Array<string>,
-    expiryHeight?: Buffer,
-    sapling?: boolean = false
+    additionals: Array<string> = [],
+    expiryHeight?: Buffer
   ) {
     const hasTimestamp = initialTimestamp !== undefined;
     let startTime = Date.now();
+    const sapling = additionals.includes("sapling");
     let useBip143 =
       segwit ||
       (!!additionals &&
@@ -594,23 +603,31 @@ btc.createPaymentTransactionNew(
             regularOutputs.push(outputs[index]);
           }
         })
-        .then(() => {          
+        .then(() => {
           if (expiryHeight) {
-            targetTransaction.nVersionGroupId = Buffer.from(sapling ? [
-              0x85,
-              0x20,
-              0x2f,
-              0x89
-            ] : [
-              0x70,
-              0x82,
-              0xc4,
-              0x03
-            ]);
+            targetTransaction.nVersionGroupId = Buffer.from(
+              sapling ? [0x85, 0x20, 0x2f, 0x89] : [0x70, 0x82, 0xc4, 0x03]
+            );
             targetTransaction.nExpiryHeight = expiryHeight;
             // For sapling : valueBalance (8), nShieldedSpend (1), nShieldedOutput (1), nJoinSplit (1)
-            // Overwinter : use nJoinSplit (1)            
-            targetTransaction.extraData = Buffer.from(sapling ? [0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00] : [0x00]);
+            // Overwinter : use nJoinSplit (1)
+            targetTransaction.extraData = Buffer.from(
+              sapling
+                ? [
+                    0x00,
+                    0x00,
+                    0x00,
+                    0x00,
+                    0x00,
+                    0x00,
+                    0x00,
+                    0x00,
+                    0x00,
+                    0x00,
+                    0x00
+                  ]
+                : [0x00]
+            );
           }
         });
     })
@@ -664,7 +681,7 @@ btc.createPaymentTransactionNew(
             trustedInputs,
             true,
             !!expiryHeight,
-            sapling
+            additionals
           ).then(() =>
             doIf(!resuming && typeof changePath != "undefined", () => {
               // $FlowFixMe
@@ -706,7 +723,7 @@ btc.createPaymentTransactionNew(
             pseudoTrustedInputs,
             useBip143,
             !!expiryHeight,
-            sapling
+            additionals
           )
             .then(() =>
               doIf(!useBip143, () =>
@@ -996,8 +1013,9 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
     let extraData = Buffer.alloc(0);
     const transaction = Buffer.from(transactionHex, "hex");
     const version = transaction.slice(offset, offset + 4);
-    const overwinter = (version.equals(Buffer.from([0x03, 0x00, 0x00, 0x80])) ||
-                        version.equals(Buffer.from([0x04, 0x00, 0x00, 0x80])))
+    const overwinter =
+      version.equals(Buffer.from([0x03, 0x00, 0x00, 0x80])) ||
+      version.equals(Buffer.from([0x04, 0x00, 0x00, 0x80]));
     offset += 4;
     if (
       !hasTimestamp &&
