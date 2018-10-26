@@ -34,7 +34,8 @@ function attemptExchange(
   apdu: Buffer,
   timeoutMillis: number,
   debug: *,
-  scrambleKey: Buffer
+  scrambleKey: Buffer,
+  unwrap: boolean
 ): Promise<Buffer> {
   const keyHandle = wrapApdu(apdu, scrambleKey);
   const challenge = Buffer.from(
@@ -54,7 +55,12 @@ function attemptExchange(
     const { signatureData } = response;
     if (typeof signatureData === "string") {
       const data = Buffer.from(normal64(signatureData), "base64");
-      const result = data.slice(5);
+      let result;
+      if (!unwrap) {
+        result = data;
+      } else {
+        result = data.slice(5);
+      }
       if (debug) {
         debug("<= " + result.toString("hex"));
       }
@@ -117,6 +123,8 @@ export default class TransportU2F extends Transport<null> {
 
   scrambleKey: Buffer;
 
+  unwrap: boolean = true;
+
   /**
    * static function to create a new Transport from a connected Ledger device discoverable via U2F (browser support)
    */
@@ -165,7 +173,8 @@ export default class TransportU2F extends Transport<null> {
         apdu,
         this.exchangeTimeout,
         this.debug,
-        this.scrambleKey
+        this.scrambleKey,
+        this.unwrap
       );
     } catch (e) {
       const isU2FError = typeof e.metaData === "object";
@@ -187,6 +196,10 @@ export default class TransportU2F extends Transport<null> {
 
   setScrambleKey(scrambleKey: string) {
     this.scrambleKey = Buffer.from(scrambleKey, "ascii");
+  }
+
+  setUnwrap(unwrap: boolean) {
+    this.unwrap = unwrap;
   }
 
   close(): Promise<void> {
