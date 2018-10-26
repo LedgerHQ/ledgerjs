@@ -68,6 +68,7 @@ export default class WebSocketTransport extends Transport<string> {
         };
         socket.onclose = () => {
           exchangeMethods.onDisconnect();
+          reject(new TransportError("OpenFailed", "OpenFailed"));
         };
         socket.onmessage = e => {
           if (typeof e.data !== "string") return;

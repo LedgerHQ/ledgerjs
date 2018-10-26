@@ -67,17 +67,23 @@ app.post("/", bodyParser.json(), async (req, res) => {
 });
 
 let wsIndex = 0;
+let transportP = null;
 wss.on("connection", ws => {
   const index = ++wsIndex;
   try {
-    let transportP;
     let transport;
     let destroyed = false;
 
     ws.on("close", () => {
       destroyed = true;
       if (transportP) {
-        transportP.then(transport => transport.close());
+        transportP.then(
+          transport => {
+            transportP = null;
+            transport.close();
+          },
+          () => {}
+        );
         console.log(`WS(${index}): close`);
       }
     });
@@ -85,12 +91,31 @@ wss.on("connection", ws => {
     ws.on("message", async apduHex => {
       if (apduHex === "open") {
         console.log(`WS(${index}): opening...`);
-        transportP = TransportNodeHid.create(5000);
-        if (destroyed) return;
-        transport = await transportP;
-        transport.on("disconnect", () => ws.close());
-        console.log(`WS(${index}): opened!`);
-        ws.send(JSON.stringify({ type: "opened" }));
+        try {
+          if (transportP) {
+            const p = transportP;
+            await transportP.then(
+              t => {
+                if (p !== transportP) return;
+                transportP = null;
+                console.warn(
+                  "/!\\ /!\\ /!\\ warning: you didn't transport.close() the previous transport. force closing it! /!\\ /!\\ /!\\"
+                );
+                return t.close();
+              },
+              () => {}
+            );
+          }
+          transportP = TransportNodeHid.create(2000);
+          if (destroyed) return;
+          transport = await transportP;
+          transport.on("disconnect", () => ws.close());
+          console.log(`WS(${index}): opened!`);
+          ws.send(JSON.stringify({ type: "opened" }));
+        } catch (e) {
+          console.log(`WS(${index}): open failed! ${e}`);
+          ws.close();
+        }
         return;
       }
       if (!transport) {
