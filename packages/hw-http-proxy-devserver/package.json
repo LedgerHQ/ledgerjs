@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-http-proxy-devserver",
-  "version": "4.29.1",
+  "version": "4.29.2",
   "description": "Ledger Hardware Wallet debug communication layer http proxy (for development only)",
   "keywords": [
     "Ledger",
