@@ -104,8 +104,6 @@ wss.on("connection", ws => {
         transportP = TransportNodeHid.create(2000);
         wsBusyIndex = index;
 
-        ws.close();
-
         console.log(`WS(${index}): opening...`);
         try {
           transport = await transportP;
