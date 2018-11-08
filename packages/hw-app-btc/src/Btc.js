@@ -173,22 +173,24 @@ export default class Btc {
       );
     };
 
-    const processWholeScriptBlock = (script, sequence) => this.getTrustedInputRaw(Buffer.concat([script, sequence]))
+    const processWholeScriptBlock = (script, sequence) =>
+      this.getTrustedInputRaw(Buffer.concat([script, sequence]));
 
     const processInputs = () => {
       return eachSeries(inputs, input => {
         const data = Buffer.concat([
           input.prevout,
-          isDecred ? Buffer.from([0x00]) : Buffer.alloc(0),//tree
+          isDecred ? Buffer.from([0x00]) : Buffer.alloc(0), //tree
           this.createVarint(input.script.length)
         ]);
-        return this.getTrustedInputRaw(data).then(() =>{
+        return this.getTrustedInputRaw(data).then(() => {
           // iteration (eachSeries) ended
           // TODO notify progress
           // deferred.notify("input");
-          return isDecred ? processWholeScriptBlock(input.script, input.sequence) : processScriptBlocks(input.script, input.sequence)
-        }
-        );
+          return isDecred
+            ? processWholeScriptBlock(input.script, input.sequence)
+            : processScriptBlocks(input.script, input.sequence);
+        });
       }).then(() => {
         const data = this.createVarint(outputs.length);
         return this.getTrustedInputRaw(data);
@@ -200,7 +202,7 @@ export default class Btc {
         let data = output.amount;
         data = Buffer.concat([
           data,
-          isDecred ? Buffer.from([0x00,0x00]) : Buffer.alloc(0),//Version script
+          isDecred ? Buffer.from([0x00, 0x00]) : Buffer.alloc(0), //Version script
           this.createVarint(output.script.length),
           output.script
         ]);
@@ -211,8 +213,10 @@ export default class Btc {
         });
       }).then(() => {
         //Add expiry height for decred
-        const finalData = isDecred ? Buffer.concat([locktime, Buffer.from([0x00, 0x00, 0x00, 0x00])]) : locktime
-        return this.getTrustedInputRaw(finalData)
+        const finalData = isDecred
+          ? Buffer.concat([locktime, Buffer.from([0x00, 0x00, 0x00, 0x00])])
+          : locktime;
+        return this.getTrustedInputRaw(finalData);
       });
 
     const data = Buffer.concat([
@@ -225,9 +229,12 @@ export default class Btc {
       .then(processOutputs);
   }
 
-  async getTrustedInputBIP143(indexLookup: number, transaction: Transaction) {
+  async getTrustedInputBIP143(indexLookup: number, transaction: Transaction, isDecred?: boolean = false) {
     if (!transaction) {
       throw new Error("getTrustedInputBIP143: missing tx");
+    }
+    if (isDecred) {
+      throw new Error("Decred does not implement BIP143");
     }
     let sha = createHash("sha256");
     sha.update(this.serializeTransaction(transaction, true));
@@ -315,7 +322,7 @@ export default class Btc {
       additionals
     ).then(() => {
       let i = 0;
-      const isDecred = !!additionals && additionals.includes('decred')
+      const isDecred = !!additionals && additionals.includes("decred");
       return eachSeries(transaction.inputs, input => {
         let prefix;
         if (bip143) {
@@ -393,13 +400,16 @@ export default class Btc {
     return this.transport.send(0xe0, 0x4a, 0xff, 0x00, buffer);
   }
 
-  hashOutputFull(outputScript: Buffer, additionals?: Array<string>): Promise<*> {
+  hashOutputFull(
+    outputScript: Buffer,
+    additionals?: Array<string>
+  ): Promise<*> {
     let offset = 0;
     let p1 = 0x80;
-    const isDecred = !!additionals && additionals.includes('decred')
+    const isDecred = !!additionals && additionals.includes("decred");
     ///WARNING: Decred works only with one call (without chunking)
     if (isDecred) {
-        return this.transport.send(0xe0, 0x4a, p1, 0x00, outputScript)
+      return this.transport.send(0xe0, 0x4a, p1, 0x00, outputScript);
     }
     return asyncWhile(
       () => offset < outputScript.length,
@@ -414,7 +424,7 @@ export default class Btc {
         return this.transport.send(0xe0, 0x4a, p1, 0x00, data).then(() => {
           offset += blockSize;
         });
-     }
+      }
     );
   }
 
@@ -425,7 +435,7 @@ export default class Btc {
     expiryHeight?: Buffer,
     additionals?: Array<string>
   ): Promise<Buffer> {
-    const isDecred = !!additionals && additionals.includes("decred")
+    const isDecred = !!additionals && additionals.includes("decred");
     const paths = splitPath(path);
     let offset = 0;
     const pathsBuffer = Buffer.alloc(paths.length * 4);
@@ -435,19 +445,21 @@ export default class Btc {
     });
     const lockTimeBuffer = Buffer.alloc(4);
     lockTimeBuffer.writeUInt32BE(lockTime, 0);
-    let buffer = isDecred ? Buffer.concat([
-      Buffer.from([paths.length]),
-      pathsBuffer,
-      lockTimeBuffer,
-      expiryHeight,
-      Buffer.from([sigHashType])
-    ]) : Buffer.concat([
+    let buffer = isDecred
+      ? Buffer.concat([
+          Buffer.from([paths.length]),
+          pathsBuffer,
+          lockTimeBuffer,
+          expiryHeight || Buffer.from([0x00, 0x00, 0x00, 0x00]),
+          Buffer.from([sigHashType])
+        ])
+      : Buffer.concat([
           Buffer.from([paths.length]),
           pathsBuffer,
           Buffer.from([0x00]),
           lockTimeBuffer,
           Buffer.from([sigHashType])
-    ]);
+        ]);
     if (expiryHeight && !isDecred) {
       buffer = Buffer.concat([buffer, expiryHeight]);
     }
@@ -572,7 +584,7 @@ btc.createPaymentTransactionNew(
     additionals: Array<string> = [],
     expiryHeight?: Buffer
   ) {
-    const isDecred = !!additionals && additionals.includes("decred")
+    const isDecred = !!additionals && additionals.includes("decred");
     const hasTimestamp = initialTimestamp !== undefined;
     let startTime = Date.now();
     const sapling = additionals.includes("sapling");
@@ -588,7 +600,7 @@ btc.createPaymentTransactionNew(
     const nullScript = Buffer.alloc(0);
     const nullPrevout = Buffer.alloc(0);
     const defaultVersion = Buffer.alloc(4);
-    (!!expiryHeight && !isDecred)
+    !!expiryHeight && !isDecred
       ? defaultVersion.writeUInt32LE(sapling ? 0x80000004 : 0x80000003, 0)
       : defaultVersion.writeUInt32LE(1, 0);
     const trustedInputs: Array<*> = [];
@@ -608,23 +620,24 @@ btc.createPaymentTransactionNew(
     const outputScript = Buffer.from(outputScriptHex, "hex");
 
     return foreach(inputs, input => {
-      return doIf(!resuming, () =>{
-        return getTrustedInputCall(input[1], input[0], isDecred).then(trustedInput => {
-          let sequence = Buffer.alloc(4);
-          sequence.writeUInt32LE(
-            input.length >= 4 && typeof input[3] === "number"
-              ? input[3]
-              : DEFAULT_SEQUENCE,
-            0
-          );
-          trustedInputs.push({
-            trustedInput: true,
-            value: Buffer.from(trustedInput, "hex"),
-            sequence
-          });
-        })
-      }
-      )
+      return doIf(!resuming, () => {
+        return getTrustedInputCall(input[1], input[0], isDecred).then(
+          trustedInput => {
+            let sequence = Buffer.alloc(4);
+            sequence.writeUInt32LE(
+              input.length >= 4 && typeof input[3] === "number"
+                ? input[3]
+                : DEFAULT_SEQUENCE,
+              0
+            );
+            trustedInputs.push({
+              trustedInput: true,
+              value: Buffer.from(trustedInput, "hex"),
+              sequence
+            });
+          }
+        );
+      })
         .then(() => {
           const { outputs } = input[0];
           const index = input[1];
@@ -660,7 +673,7 @@ btc.createPaymentTransactionNew(
           } else if (isDecred) {
             targetTransaction.nExpiryHeight = expiryHeight;
           }
-        })
+        });
     })
       .then(() => {
         for (let i = 0; i < inputs.length; i++) {
@@ -722,7 +735,7 @@ btc.createPaymentTransactionNew(
         )
       )
       .then(() =>
-        doIf((!!expiryHeight && !isDecred), () =>
+        doIf(!!expiryHeight && !isDecred, () =>
           this.signTransaction("", undefined, SIGHASH_ALL, expiryHeight)
         )
       )
@@ -753,7 +766,7 @@ btc.createPaymentTransactionNew(
             pseudoTX,
             pseudoTrustedInputs,
             useBip143,
-            (!!expiryHeight && !isDecred),
+            !!expiryHeight && !isDecred,
             additionals
           )
             .then(() =>
@@ -771,9 +784,8 @@ btc.createPaymentTransactionNew(
                 sigHashType,
                 expiryHeight,
                 additionals
-              )
-            }
-            )
+              );
+            })
             .then(signature => {
               signatures.push(signature);
               targetTransaction.inputs[i].script = nullScript;
@@ -849,22 +861,19 @@ btc.createPaymentTransactionNew(
         result = Buffer.concat([result, lockTimeBuffer]);
 
         if (isDecred) {
-          let decredWitness = Buffer.from([targetTransaction.inputs.length])
+          let decredWitness = Buffer.from([targetTransaction.inputs.length]);
           inputs.forEach((input, inputIndex) => {
             decredWitness = Buffer.concat([
               decredWitness,
-              Buffer.from([0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00]),
-              Buffer.from([0x00,0x00,0x00,0x00]),//Block height
-              Buffer.from([0xff,0xff,0xff,0xff]),//Block index
+              Buffer.from([0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]),
+              Buffer.from([0x00, 0x00, 0x00, 0x00]), //Block height
+              Buffer.from([0xff, 0xff, 0xff, 0xff]), //Block index
               Buffer.from([targetTransaction.inputs[inputIndex].script.length]),
-              targetTransaction.inputs[inputIndex].script,
-            ])
-          })
+              targetTransaction.inputs[inputIndex].script
+            ]);
+          });
 
-          result = Buffer.concat([
-            result,
-            decredWitness
-          ]);
+          result = Buffer.concat([result, decredWitness]);
         }
 
         return result.toString("hex");
@@ -993,7 +1002,11 @@ btc.signP2SHTransaction(
             pseudoTrustedInputs,
             segwit
           )
-            .then(() => doIf(!segwit, () => this.hashOutputFull(outputScript, additionals)))
+            .then(() =>
+              doIf(!segwit, () =>
+                this.hashOutputFull(outputScript)
+              )
+            )
             .then(() =>
               this.signTransaction(
                 associatedKeysets[i],
@@ -1108,9 +1121,9 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
       const amount = transaction.slice(offset, offset + 8);
       offset += 8;
 
-      if (additionals.includes("decred")) {
+      if (!!additionals && additionals.includes("decred")) {
         //Script version
-        offset += 2
+        offset += 2;
       }
 
       varint = this.getVarint(transaction, offset);
@@ -1127,7 +1140,7 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
       locktime = transaction.slice(offset, offset + 4);
     }
     offset += 4;
-    if (overwinter || additionals.includes("decred")) {
+    if (overwinter || (!!additionals && additionals.includes("decred"))) {
       nExpiryHeight = transaction.slice(offset, offset + 4);
       offset += 4;
     }
@@ -1135,20 +1148,6 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
       extraData = transaction.slice(offset);
     }
 
-    // //Get witness for decred
-    // if (additionals.includes("decred")) {
-    //   //Byte for nb of witnesses
-    //   offset += 1
-    //   let decredWitness = transaction.slice(offset);
-    //   for (let i = 0; i < numberInputs; i++) {
-    //     const tmpInput = inputs[i];
-    //     inputs[i] = {
-    //       prevout : tmpInput.prevout,
-    //       script : decredWitness,
-    //       sequence : tmpInput.sequence
-    //     };
-    //   }
-    // }
     return {
       version,
       inputs,
@@ -1194,23 +1193,25 @@ const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
     timestamp?: Buffer,
     additionals?: Array<string>
   ) {
-    const isDecred = !!additionals && additionals.includes('decred')
+    const isDecred = !!additionals && additionals.includes("decred");
     let inputBuffer = Buffer.alloc(0);
     let useWitness =
       typeof transaction["witness"] != "undefined" && !skipWitness;
     transaction.inputs.forEach(input => {
-      inputBuffer = isDecred ? Buffer.concat([
-        inputBuffer,
-        input.prevout,
-        Buffer.from([0x00]), //tree
-        input.sequence
-      ]) : Buffer.concat([
-        inputBuffer,
-        input.prevout,
-        this.createVarint(input.script.length),
-        input.script,
-        input.sequence
-      ]);
+      inputBuffer = isDecred
+        ? Buffer.concat([
+            inputBuffer,
+            input.prevout,
+            Buffer.from([0x00]), //tree
+            input.sequence
+          ])
+        : Buffer.concat([
+            inputBuffer,
+            input.prevout,
+            this.createVarint(input.script.length),
+            input.script,
+            input.sequence
+          ]);
     });
 
     let outputBuffer = this.serializeTransactionOutputs(transaction);
