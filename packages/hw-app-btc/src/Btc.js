@@ -137,13 +137,13 @@ export default class Btc {
   getTrustedInput(
     indexLookup: number,
     transaction: Transaction,
-    isDecred?: boolean = false
+    additionals: Array<string> = []
   ): Promise<string> {
     const { inputs, outputs, locktime } = transaction;
     if (!outputs || !locktime) {
       throw new Error("getTrustedInput: locktime & outputs is expected");
     }
-
+    const isDecred = !!additionals && additionals.includes("decred");
     const processScriptBlocks = (script, sequence) => {
       const scriptBlocks = [];
       let offset = 0;
@@ -229,10 +229,15 @@ export default class Btc {
       .then(processOutputs);
   }
 
-  async getTrustedInputBIP143(indexLookup: number, transaction: Transaction, isDecred?: boolean = false) {
+  async getTrustedInputBIP143(
+    indexLookup: number,
+    transaction: Transaction,
+    additionals: Array<string> = []
+  ) {
     if (!transaction) {
       throw new Error("getTrustedInputBIP143: missing tx");
     }
+    const isDecred = !!additionals && additionals.includes("decred");
     if (isDecred) {
       throw new Error("Decred does not implement BIP143");
     }
@@ -621,7 +626,7 @@ btc.createPaymentTransactionNew(
 
     return foreach(inputs, input => {
       return doIf(!resuming, () => {
-        return getTrustedInputCall(input[1], input[0], isDecred).then(
+        return getTrustedInputCall(input[1], input[0], additionals).then(
           trustedInput => {
             let sequence = Buffer.alloc(4);
             sequence.writeUInt32LE(
@@ -1002,11 +1007,7 @@ btc.signP2SHTransaction(
             pseudoTrustedInputs,
             segwit
           )
-            .then(() =>
-              doIf(!segwit, () =>
-                this.hashOutputFull(outputScript)
-              )
-            )
+            .then(() => doIf(!segwit, () => this.hashOutputFull(outputScript)))
             .then(() =>
               this.signTransaction(
                 associatedKeysets[i],
