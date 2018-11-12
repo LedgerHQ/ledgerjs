@@ -143,7 +143,7 @@ export default class Btc {
     if (!outputs || !locktime) {
       throw new Error("getTrustedInput: locktime & outputs is expected");
     }
-    const isDecred = !!additionals && additionals.includes("decred");
+    const isDecred = additionals.includes("decred");
     const processScriptBlocks = (script, sequence) => {
       const scriptBlocks = [];
       let offset = 0;
@@ -237,7 +237,7 @@ export default class Btc {
     if (!transaction) {
       throw new Error("getTrustedInputBIP143: missing tx");
     }
-    const isDecred = !!additionals && additionals.includes("decred");
+    const isDecred = additionals.includes("decred");
     if (isDecred) {
       throw new Error("Decred does not implement BIP143");
     }
@@ -286,7 +286,7 @@ export default class Btc {
     transactionData: Buffer,
     bip143?: boolean = false,
     overwinter?: boolean = false,
-    additionals: string[] = []
+    additionals: Array<string> = []
   ) {
     const p2 = bip143
       ? additionals.includes("sapling")
@@ -310,7 +310,7 @@ export default class Btc {
     inputs: Array<{ trustedInput: boolean, value: Buffer }>,
     bip143?: boolean = false,
     overwinter?: boolean = false,
-    additionals?: Array<string>
+    additionals: Array<string> = []
   ) {
     let data = Buffer.concat([
       transaction.version,
@@ -327,7 +327,7 @@ export default class Btc {
       additionals
     ).then(() => {
       let i = 0;
-      const isDecred = !!additionals && additionals.includes("decred");
+      const isDecred = additionals.includes("decred");
       return eachSeries(transaction.inputs, input => {
         let prefix;
         if (bip143) {
@@ -407,12 +407,13 @@ export default class Btc {
 
   hashOutputFull(
     outputScript: Buffer,
-    additionals?: Array<string>
+    additionals: Array<string> = []
   ): Promise<*> {
     let offset = 0;
     let p1 = 0x80;
-    const isDecred = !!additionals && additionals.includes("decred");
+    const isDecred = additionals.includes("decred");
     ///WARNING: Decred works only with one call (without chunking)
+    //TODO: test without this for Decred
     if (isDecred) {
       return this.transport.send(0xe0, 0x4a, p1, 0x00, outputScript);
     }
@@ -438,9 +439,9 @@ export default class Btc {
     lockTime?: number = DEFAULT_LOCKTIME,
     sigHashType?: number = SIGHASH_ALL,
     expiryHeight?: Buffer,
-    additionals?: Array<string>
+    additionals: Array<string> = []
   ): Promise<Buffer> {
-    const isDecred = !!additionals && additionals.includes("decred");
+    const isDecred = additionals.includes("decred");
     const paths = splitPath(path);
     let offset = 0;
     const pathsBuffer = Buffer.alloc(paths.length * 4);
@@ -589,7 +590,7 @@ btc.createPaymentTransactionNew(
     additionals: Array<string> = [],
     expiryHeight?: Buffer
   ) {
-    const isDecred = !!additionals && additionals.includes("decred");
+    const isDecred = additionals.includes("decred");
     const hasTimestamp = initialTimestamp !== undefined;
     let startTime = Date.now();
     const sapling = additionals.includes("sapling");
@@ -1069,7 +1070,7 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
     isSegwitSupported: ?boolean = false,
     hasTimestamp?: boolean = false,
     hasExtraData?: boolean = false,
-    additionals?: Array<string>
+    additionals: Array<string> = []
   ): Transaction {
     const inputs = [];
     const outputs = [];
@@ -1079,6 +1080,7 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
     let nExpiryHeight = Buffer.alloc(0);
     let nVersionGroupId = Buffer.alloc(0);
     let extraData = Buffer.alloc(0);
+    const isDecred = additionals.includes("decred");
     const transaction = Buffer.from(transactionHex, "hex");
     const version = transaction.slice(offset, offset + 4);
     const overwinter =
@@ -1122,7 +1124,7 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
       const amount = transaction.slice(offset, offset + 8);
       offset += 8;
 
-      if (!!additionals && additionals.includes("decred")) {
+      if (isDecred) {
         //Script version
         offset += 2;
       }
@@ -1141,7 +1143,7 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
       locktime = transaction.slice(offset, offset + 4);
     }
     offset += 4;
-    if (overwinter || (!!additionals && additionals.includes("decred"))) {
+    if (overwinter || isDecred) {
       nExpiryHeight = transaction.slice(offset, offset + 4);
       offset += 4;
     }
@@ -1192,9 +1194,9 @@ const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
     transaction: Transaction,
     skipWitness: boolean,
     timestamp?: Buffer,
-    additionals?: Array<string>
+    additionals: Array<string> = []
   ) {
-    const isDecred = !!additionals && additionals.includes("decred");
+    const isDecred = additionals.includes("decred");
     let inputBuffer = Buffer.alloc(0);
     let useWitness =
       typeof transaction["witness"] != "undefined" && !skipWitness;
