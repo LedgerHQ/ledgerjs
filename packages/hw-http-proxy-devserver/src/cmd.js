@@ -80,7 +80,7 @@ wss.on("connection", ws => {
       destroyed = true;
       if (wsBusyIndex === index) {
         console.log(`WS(${index}): close`);
-        await transportP.then(transport => transport.close());
+        await transportP.then(transport => transport.close(), () => {});
         wsBusyIndex = 0;
       }
     };
@@ -101,7 +101,7 @@ wss.on("connection", ws => {
           destroyed = true;
           return;
         }
-        transportP = TransportNodeHid.create(2000);
+        transportP = TransportNodeHid.create(5000);
         wsBusyIndex = index;
 
         console.log(`WS(${index}): opening...`);
@@ -149,10 +149,11 @@ wss.on("connection", ws => {
   }
 });
 
+console.log(
+  "DEBUG_COMM_HTTP_PROXY=" +
+    ["localhost", ...ips].map(ip => `ws://${ip}:${PORT}`).join("|")
+);
+
 server.listen(PORT, () => {
-  console.log("hw-transport-http-proxy-debug listening on " + PORT + "...");
-  console.log(
-    "DEBUG_COMM_HTTP_PROXY=" +
-      ["localhost", ...ips].map(ip => `ws://${ip}:${PORT}`).join("|")
-  );
+  console.log(`\nNano S proxy started on ${ips[0]}\n`);
 });
