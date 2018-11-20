@@ -22,7 +22,7 @@
     "rebuild": "lerna run clean && lerna run build",
     "publish": "yarn && lerna run clean && lerna run build && lerna publish --registry=https://registry.npmjs.org/"
   },
-  "dependencies": {
+  "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-eslint": "^8.0.2",
     "babel-plugin-transform-runtime": "^6.23.0",
