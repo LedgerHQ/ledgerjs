@@ -5,7 +5,7 @@ import HookedWalletSubprovider from "web3-provider-engine/dist/es5/subproviders/
 import stripHexPrefix from "strip-hex-prefix";
 import EthereumTx from "ethereumjs-tx";
 
-const allowedHdPaths = ["44'/0'","44'/1'", "44'/60'", "44'/61'"];
+const allowedHdPaths = ["44'/0'", "44'/1'", "44'/60'", "44'/61'"];
 
 function makeError(msg, id) {
   const err = new Error(msg);
