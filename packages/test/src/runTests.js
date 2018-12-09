@@ -3,6 +3,7 @@ import testBtc2 from "./testBtc2";
 import testBtc3 from "./testBtc3";
 import testBtc4 from "./testBtc4";
 import testBtcSegMulti from "./testBtcSegMulti";
+import testBtcSignP2SHSeg from "./testBtcSignP2SHSeg";
 import testEth from "./testEth";
 import testEth2 from "./testEth2";
 import testEth3 from "./testEth3";
@@ -29,6 +30,7 @@ var tests = [
   { name: "testBtc3", run: testBtc3 },
   { name: "testBtc4", run: testBtc4 },
   { name: "testBtcSegMulti", run: testBtcSegMulti },
+  { name: "testBtcSignP2SHSeg", run: testBtcSignP2SHSeg },
   expectAppContext("Ethereum (eth)"),
   { name: "testEth", run: testEth },
   { name: "testEth2", run: testEth2 },

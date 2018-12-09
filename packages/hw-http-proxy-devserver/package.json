@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-http-proxy-devserver",
-  "version": "4.2.0",
+  "version": "4.30.1",
   "description": "Ledger Hardware Wallet debug communication layer http proxy (for development only)",
   "keywords": [
     "Ledger",
@@ -29,20 +29,22 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport-node-hid": "^4.2.0",
-    "body-parser": "^1.18.2",
+    "@ledgerhq/hw-transport-node-hid": "^4.24.0",
+    "babel-polyfill": "^6.26.0",
+    "body-parser": "^1.18.3",
     "cors": "^2.8.4",
-    "express": "^4.16.2"
+    "express": "^4.16.3",
+    "ws": "^6.1.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.66.0",
-    "flow-typed": "^2.3.0"
+    "flow-bin": "^0.68.0",
+    "flow-typed": "^2.4.0"
   },
   "scripts": {
     "flow": "flow",
-    "clean": "rm -rf lib/",
     "start": "node ./lib/cmd.js",
-    "build": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src && flow-copy-source -v src lib",
-    "watch": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src & flow-copy-source -w -v src lib"
+    "clean": "bash ../../script/clean.sh",
+    "build": "bash ../../script/build.sh",
+    "watch": "bash ../../script/watch.sh"
   }
 }

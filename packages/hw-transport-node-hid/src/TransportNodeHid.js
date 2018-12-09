@@ -26,6 +26,10 @@ function defer<T>(): Defer<T> {
   return { promise, resolve, reject };
 }
 
+let listenDevicesDebounce = 500;
+let listenDevicesPollingSkip = () => false;
+let listenDevicesDebug = () => {};
+
 /**
  * node-hid Transport implementation
  * @example
@@ -37,21 +41,18 @@ export default class TransportNodeHid extends Transport<string> {
   device: HID.HID;
   ledgerTransport: boolean;
   timeout: number;
-  debug: boolean;
   exchangeStack: Array<*>;
 
   constructor(
     device: HID.HID,
-    ledgerTransport: boolean = true,
-    timeout: number = 0,
-    debug: boolean = false
+    ledgerTransport: boolean = true, // FIXME not used?
+    timeout: number = 0 // FIXME not used?
   ) {
     super();
     this.device = device;
     this.ledgerTransport = ledgerTransport;
     this.timeout = timeout;
     this.exchangeStack = [];
-    this.debug = debug;
   }
 
   static isSupported = (): Promise<boolean> =>
@@ -59,6 +60,23 @@ export default class TransportNodeHid extends Transport<string> {
 
   static list = (): Promise<string[]> =>
     Promise.resolve(getDevices().map(d => d.path));
+
+  static setListenDevicesDebounce = (delay: number) => {
+    listenDevicesDebounce = delay;
+  };
+
+  static setListenDevicesPollingSkip = (conditionToSkip: () => boolean) => {
+    listenDevicesPollingSkip = conditionToSkip;
+  };
+
+  static setListenDevicesDebug = (debug: boolean | ((log: string) => void)) => {
+    listenDevicesDebug =
+      typeof debug === "function"
+        ? debug
+        : debug
+          ? (...log) => console.log("[listenDevices]", ...log)
+          : () => {};
+  };
 
   /**
    */
@@ -75,12 +93,18 @@ export default class TransportNodeHid extends Transport<string> {
         }
       }
     });
-    const { events, stop } = listenDevices();
+    const { events, stop } = listenDevices(
+      listenDevicesDebounce,
+      listenDevicesPollingSkip,
+      listenDevicesDebug
+    );
 
     const onAdd = device => {
+      if (unsubscribed || !device) return;
       observer.next({ type: "add", descriptor: device.path, device });
     };
     const onRemove = device => {
+      if (unsubscribed || !device) return;
       observer.next({ type: "remove", descriptor: device.path, device });
     };
     events.on("add", onAdd);
@@ -205,7 +229,15 @@ export default class TransportNodeHid extends Transport<string> {
       return response;
     }
 
+    const { debug } = this;
     const deferred = defer();
+    if (debug) {
+      debug("=>" + apdu.toString("hex"));
+      deferred.promise.then(result => {
+        debug("<= " + result.toString("hex"));
+      });
+    }
+
     let exchangeTimeout;
     let transport;
     if (!this.ledgerTransport) {
@@ -230,9 +262,6 @@ export default class TransportNodeHid extends Transport<string> {
         const deferred = this.exchangeStack[0];
 
         const send = content => {
-          if (this.debug) {
-            console.log("=>" + content.toString("hex"));
-          }
           const data = [0x00];
           for (let i = 0; i < content.length; i++) {
             data.push(content[i]);
@@ -247,9 +276,6 @@ export default class TransportNodeHid extends Transport<string> {
               if (err || !res) reject(err);
               else {
                 const buffer = Buffer.from(res);
-                if (this.debug) {
-                  console.log("<=" + buffer.toString("hex"));
-                }
                 resolve(buffer);
               }
             })

@@ -30,12 +30,17 @@ import type Transport from "@ledgerhq/hw-transport";
 export default class Eth {
   transport: Transport<*>;
 
-  constructor(transport: Transport<*>) {
+  constructor(transport: Transport<*>, scrambleKey: string = "w0w") {
     this.transport = transport;
     transport.decorateAppAPIMethods(
       this,
-      ["getAddress", "signTransaction", "signPersonalMessage"],
-      "w0w"
+      [
+        "getAddress",
+        "signTransaction",
+        "signPersonalMessage",
+        "getAppConfiguration"
+      ],
+      scrambleKey
     );
   }
 
@@ -46,7 +51,7 @@ export default class Eth {
    * @option boolChaincode optionally enable or not the chaincode request
    * @return an object with a publicKey, address and (optionally) chainCode
    * @example
-   * eth.getAddress("44'/60'/0'/0'/0").then(o => o.address)
+   * eth.getAddress("44'/60'/0'/0/0").then(o => o.address)
    */
   getAddress(
     path: string,
@@ -101,7 +106,7 @@ export default class Eth {
   /**
    * You can sign a transaction and retrieve v, r, s given the raw transaction and the BIP 32 path of the account to sign
    * @example
-   eth.signTransaction("44'/60'/0'/0'/0", "e8018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a2487400080").then(result => ...)
+   eth.signTransaction("44'/60'/0'/0/0", "e8018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a2487400080").then(result => ...)
    */
   signTransaction(
     path: string,
@@ -168,7 +173,7 @@ export default class Eth {
   /**
   * You can sign a message according to eth_sign RPC call and retrieve v, r, s given the message and the BIP 32 path of the account to sign.
   * @example
-eth.signPersonalMessage("44'/60'/0'/0'/0", Buffer.from("test").toString("hex")).then(result => {
+eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).then(result => {
   var v = result['v'] - 27;
   v = v.toString(16);
   if (v.length < 2) {

@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-hid-cli",
-  "version": "4.2.1",
+  "version": "4.26.0",
   "description": "Ledger Hardware Wallet cli utility to send apdu to hid",
   "keywords": [
     "Ledger",
@@ -29,17 +29,18 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport-node-hid": "^4.2.0"
+    "@ledgerhq/hw-transport-node-hid": "^4.24.0",
+    "babel-polyfill": "^6.26.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.66.0",
-    "flow-typed": "^2.2.3"
+    "flow-bin": "^0.68.0",
+    "flow-typed": "^2.4.0"
   },
   "scripts": {
     "flow": "flow",
-    "clean": "rm -rf lib/",
     "start": "node ./lib/cmd.js",
-    "build": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src && flow-copy-source -v src lib",
-    "watch": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src & flow-copy-source -w -v src lib"
+    "clean": "bash ../../script/clean.sh",
+    "build": "bash ../../script/build.sh",
+    "watch": "bash ../../script/watch.sh"
   }
 }

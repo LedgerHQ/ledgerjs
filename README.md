@@ -10,29 +10,27 @@ applications. There are implementations for Node and Browser.
 
 ### Published Packages
 
-| Package                                                                              | Version                                                                                                                                                   | Description                                                                                         |
-| ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| [`create-dapp`](/packages/create-dapp)                                               | [![npm](https://img.shields.io/npm/v/create-dapp.svg)](https://www.npmjs.com/package/create-dapp)                                                         | Ledger DApp Ethereum starter kit                                                                    |
-| [`@ledgerhq/web3-subprovider`](/packages/web3-subprovider)                           | [![npm](https://img.shields.io/npm/v/@ledgerhq/web3-subprovider.svg)](https://www.npmjs.com/package/@ledgerhq/web3-subprovider)                           | web3 subprovider implementation for web3-provider-engine                                            |
+| Package                                                                              | Version                                                                                                                                                   | Description                                                                                                  |
+| ------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| [`create-dapp`](/packages/create-dapp)                                               | [![npm](https://img.shields.io/npm/v/create-dapp.svg)](https://www.npmjs.com/package/create-dapp)                                                         | Ledger DApp Ethereum starter kit                                                                             |
+| [`@ledgerhq/web3-subprovider`](/packages/web3-subprovider)                           | [![npm](https://img.shields.io/npm/v/@ledgerhq/web3-subprovider.svg)](https://www.npmjs.com/package/@ledgerhq/web3-subprovider)                           | web3 subprovider implementation for web3-provider-engine                                                     |
 | **Apps**                                                                             |
-| [`@ledgerhq/hw-app-eth`](/packages/hw-app-eth)                                       | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-app-eth.svg)](https://www.npmjs.com/package/@ledgerhq/hw-app-eth)                                       | Ethereum Application API                                                                            |
-| [`@ledgerhq/hw-app-btc`](/packages/hw-app-btc)                                       | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-app-btc.svg)](https://www.npmjs.com/package/@ledgerhq/hw-app-btc)                                       | Bitcoin Application API                                                                             |
-| [`@ledgerhq/hw-app-xrp`](/packages/hw-app-xrp)                                       | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-app-xrp.svg)](https://www.npmjs.com/package/@ledgerhq/hw-app-xrp)                                       | Ripple Application API                                                                              |
-| [`@ledgerhq/hw-app-str`](/packages/hw-app-str)                                       | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-app-str.svg)](https://www.npmjs.com/package/@ledgerhq/hw-app-str)                                       | Stellar Application API                                                                             |
+| [`@ledgerhq/hw-app-eth`](/packages/hw-app-eth)                                       | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-app-eth.svg)](https://www.npmjs.com/package/@ledgerhq/hw-app-eth)                                       | Ethereum Application API                                                                                     |
+| [`@ledgerhq/hw-app-btc`](/packages/hw-app-btc)                                       | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-app-btc.svg)](https://www.npmjs.com/package/@ledgerhq/hw-app-btc)                                       | Bitcoin Application API                                                                                      |
+| [`@ledgerhq/hw-app-xrp`](/packages/hw-app-xrp)                                       | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-app-xrp.svg)](https://www.npmjs.com/package/@ledgerhq/hw-app-xrp)                                       | Ripple Application API                                                                                       |
+| [`@ledgerhq/hw-app-str`](/packages/hw-app-str)                                       | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-app-str.svg)](https://www.npmjs.com/package/@ledgerhq/hw-app-str)                                       | Stellar Application API                                                                                      |
+| [`@ledgerhq/hw-app-ada`](/packages/hw-app-ada)                                       | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-app-ada.svg)](https://www.npmjs.com/package/@ledgerhq/hw-app-ada)                                       | Cardano ADA Application API                                                                                  |
 | **Transports**                                                                       |
-| [`@ledgerhq/hw-transport-node-hid`](/packages/hw-transport-node-hid)                 | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-node-hid.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-node-hid)                 | Node implementation of the communication layer, using `node-hid` (USB)                              |
-| [`@ledgerhq/hw-transport-u2f`](/packages/hw-transport-u2f)                           | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-u2f.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-u2f)                           | Web implementation of the communication layer, using [U2F api](https://github.com/grantila/u2f-api) |
-| [`@ledgerhq/react-native-hw-transport-ble`](/packages/react-native-hw-transport-ble) | [![npm](https://img.shields.io/npm/v/@ledgerhq/react-native-hw-transport-ble.svg)](https://www.npmjs.com/package/@ledgerhq/react-native-hw-transport-ble) | BLE bluetooth for react-native communication layer                                                  |
-| [`@ledgerhq/react-native-hid`](/packages/react-native-hid)                           | [![npm](https://img.shields.io/npm/v/@ledgerhq/react-native-hid.svg)](https://www.npmjs.com/package/@ledgerhq/react-native-hid)                           | USB hid for react-native communication layer                                                        |
-| [`@ledgerhq/hw-transport-http`](/packages/hw-transport-http)                         | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-http.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-http)                         | communicate to the device over HTTP. **NB: DEV & testing purpose only. DO NOT use in PROD**                                                                 |
-| [`@ledgerhq/hw-transport`](/packages/hw-transport)                                   | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport)                                   | The generic interface of the communication layer                                                    |
-| **internal utility libraries**                                                       |
-| [`@ledgerhq/currencies`](/packages/currencies)                                       | [![npm](https://img.shields.io/npm/v/@ledgerhq/currencies.svg)](https://www.npmjs.com/package/@ledgerhq/currencies)                                       | deal with crypto currencies                                                                         |
-| [`@ledgerhq/common`](/packages/common)                                               | [![npm](https://img.shields.io/npm/v/@ledgerhq/common.svg)](https://www.npmjs.com/package/@ledgerhq/common)                                               | internal library which share code across Ledger projects                                            |
+| [`@ledgerhq/hw-transport-node-hid`](/packages/hw-transport-node-hid)                 | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-node-hid.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-node-hid)                 | Node implementation of the communication layer, using `node-hid` (USB)                                       |
+| [`@ledgerhq/hw-transport-u2f`](/packages/hw-transport-u2f)                           | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-u2f.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-u2f)                           | Web implementation of the communication layer, using [U2F api](https://github.com/grantila/u2f-api)          |
+| [`@ledgerhq/react-native-hw-transport-ble`](/packages/react-native-hw-transport-ble) | [![npm](https://img.shields.io/npm/v/@ledgerhq/react-native-hw-transport-ble.svg)](https://www.npmjs.com/package/@ledgerhq/react-native-hw-transport-ble) | BLE bluetooth for react-native communication layer                                                           |
+| [`@ledgerhq/react-native-hid`](/packages/react-native-hid)                           | [![npm](https://img.shields.io/npm/v/@ledgerhq/react-native-hid.svg)](https://www.npmjs.com/package/@ledgerhq/react-native-hid)                           | USB hid for react-native communication layer                                                                 |
+| [`@ledgerhq/hw-transport-http`](/packages/hw-transport-http)                         | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-http.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-http)                         | communicate to the device over HTTP. **NB: DEV & testing purpose only. DO NOT use in PROD**                  |
+| [`@ledgerhq/hw-transport`](/packages/hw-transport)                                   | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport)                                   | The generic interface of the communication layer                                                             |
 | **Development Tools**                                                                |
-| [`@ledgerhq/hw-http-proxy-devserver`](/packages/hw-http-proxy-devserver)             | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-http-proxy-devserver.svg)](https://www.npmjs.com/package/@ledgerhq/hw-http-proxy-devserver)             | HTTP server proxy to use with `hw-transport-node-hid` **NB: DEV & testing purpose only. DO NOT use in PROD**                           |
-| [`@ledgerhq/hw-hid-cli`](/packages/hw-hid-cli)                                       | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-hid-cli.svg)](https://www.npmjs.com/package/@ledgerhq/hw-hid-cli)                                       | CLI utility to send APDU to the device via node-hid                                                 |
-| [`@ledgerhq/hw-transport-mocker`](/packages/hw-transport-mocker)                     | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-mocker.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-mocker)                     | Tool used for test to record and replay APDU calls.                                                 |
+| [`@ledgerhq/hw-http-proxy-devserver`](/packages/hw-http-proxy-devserver)             | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-http-proxy-devserver.svg)](https://www.npmjs.com/package/@ledgerhq/hw-http-proxy-devserver)             | HTTP server proxy to use with `hw-transport-node-hid` **NB: DEV & testing purpose only. DO NOT use in PROD** |
+| [`@ledgerhq/hw-hid-cli`](/packages/hw-hid-cli)                                       | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-hid-cli.svg)](https://www.npmjs.com/package/@ledgerhq/hw-hid-cli)                                       | CLI utility to send APDU to the device via node-hid                                                          |
+| [`@ledgerhq/hw-transport-mocker`](/packages/hw-transport-mocker)                     | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-mocker.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-mocker)                     | Tool used for test to record and replay APDU calls.                                                          |
 
 ## Examples
 
@@ -45,7 +43,7 @@ import AppBtc from "@ledgerhq/hw-app-btc";
 const getBtcAddress = async () => {
   const transport = await Transport.create();
   const btc = new AppBtc(transport);
-  const result = await btc.getWalletPublicKey("44'/0'/0'/0");
+  const result = await btc.getWalletPublicKey("44'/0'/0'/0/0");
   return result.bitcoinAddress;
 };
 getBtcAddress().then(a => console.log(a));
@@ -81,7 +79,15 @@ yarn
 Build all packages
 
 ```bash
-yarn run build
+yarn build
+```
+
+### Watch
+
+Watch all packages change. Very useful during development to build only file that changes.
+
+```bash
+yarn watch
 ```
 
 ### Lint
@@ -89,7 +95,7 @@ yarn run build
 Lint all packages
 
 ```bash
-yarn run lint
+yarn lint
 ```
 
 ### Run Tests
@@ -108,13 +114,13 @@ Then run the test and accept the commands on the devices for the tests to
 continue.
 
 ```bash
-yarn run test-node
+yarn test-node
 ```
 
 You can also test on the web:
 
 ```bash
-yarn run test-browser
+yarn test-browser
 ```
 
 > make sure to configure your device app with "Browser support" set to "YES".

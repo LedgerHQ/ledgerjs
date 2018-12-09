@@ -1,11 +1,11 @@
 //@flow
 import AppEth from "@ledgerhq/hw-app-eth";
 import type Transport from "@ledgerhq/hw-transport";
-import HookedWalletSubprovider from "web3-provider-engine/subproviders/hooked-wallet";
+import HookedWalletSubprovider from "web3-provider-engine/dist/es5/subproviders/hooked-wallet";
 import stripHexPrefix from "strip-hex-prefix";
 import EthereumTx from "ethereumjs-tx";
 
-const allowedHdPaths = ["44'/60'", "44'/61'"];
+const allowedHdPaths = ["44'/1'", "44'/60'", "44'/61'"];
 
 function makeError(msg, id) {
   const err = new Error(msg);
@@ -16,7 +16,7 @@ function makeError(msg, id) {
 
 function obtainPathComponentsFromDerivationPath(derivationPath) {
   // check if derivation path follows 44'/60'/x'/n pattern
-  const regExp = /^(44'\/6[0|1]'\/\d+'?\/)(\d+)$/;
+  const regExp = /^(44'\/(?:1|60|61)'\/\d+'?\/)(\d+)$/;
   const matchResult = regExp.exec(derivationPath);
   if (matchResult === null) {
     throw makeError(
@@ -102,7 +102,7 @@ export default function createLedgerSubprovider(
           pathComponents.basePath + (pathComponents.index + i).toString();
         const address = await eth.getAddress(path, askConfirm, false);
         addresses[path] = address.address;
-        addressToPathMap[address.address] = path;
+        addressToPathMap[address.address.toLowerCase()] = path;
       }
       return addresses;
     } finally {
@@ -111,7 +111,7 @@ export default function createLedgerSubprovider(
   }
 
   async function signPersonalMessage(msgData) {
-    const path = addressToPathMap[msgData.from];
+    const path = addressToPathMap[msgData.from.toLowerCase()];
     if (!path) throw new Error("address unknown '" + msgData.from + "'");
     const transport = await getTransport();
     try {
@@ -132,7 +132,7 @@ export default function createLedgerSubprovider(
   }
 
   async function signTransaction(txData) {
-    const path = addressToPathMap[txData.from];
+    const path = addressToPathMap[txData.from.toLowerCase()];
     if (!path) throw new Error("address unknown '" + txData.from + "'");
     const transport = await getTransport();
     try {

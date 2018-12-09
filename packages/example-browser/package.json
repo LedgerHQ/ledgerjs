@@ -1,22 +1,23 @@
 {
-  "private": true,
   "name": "@ledgerhq/example-browser",
-  "version": "4.2.2",
-  "main": "index.js",
   "license": "Apache-2.0",
+  "scripts": {
+    "start": "cross-env NODE_ENV=development parcel index.html --https",
+    "build": "cross-env NODE_ENV=production parcel build index.html --no-minify --public-url /"
+  },
   "dependencies": {
-    "@ledgerhq/hw-app-btc": "^4.2.2",
-    "@ledgerhq/hw-app-eth": "^4.2.0",
-    "@ledgerhq/hw-transport-u2f": "^4.2.0"
+    "@ledgerhq/hw-app-btc": "^4.30.0",
+    "@ledgerhq/hw-app-eth": "^4.24.0",
+    "@ledgerhq/hw-transport-u2f": "^4.31.0",
+    "react": "^16.5.2",
+    "react-dom": "^16.5.2"
   },
   "devDependencies": {
-    "flow-bin": "^0.66.0",
-    "flow-typed": "^2.3.0"
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-preset-react-app": "^3.1.1",
+    "cross-env": "^5.2.0",
+    "parcel-bundler": "^1.6.2"
   },
-  "scripts": {
-    "flow": "flow",
-    "clean": "rm -rf lib/",
-    "build": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src",
-    "watch": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src & flow-copy-source -w -v src lib"
-  }
+  "private": true,
+  "version": "4.31.0"
 }

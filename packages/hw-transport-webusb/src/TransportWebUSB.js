@@ -70,21 +70,18 @@ export default class TransportWebUSB extends Transport<USBDevice> {
   device: USBDevice;
   ledgerTransport: boolean;
   timeout: number;
-  debug: boolean;
   exchangeStack: Array<*>;
 
   constructor(
     device: USBDevice,
     ledgerTransport: boolean = true,
-    timeout: number = 0,
-    debug: boolean = false
+    timeout: number = 0
   ) {
     super();
     this.device = device;
     this.ledgerTransport = ledgerTransport;
     this.timeout = timeout;
     this.exchangeStack = [];
-    this.debug = debug;
   }
 
   static isSupported = (): Promise<boolean> =>
@@ -138,6 +135,8 @@ export default class TransportWebUSB extends Transport<USBDevice> {
   }
 
   exchange(apdu: Buffer): Promise<Buffer> {
+    const { debug } = this;
+
     function ledgerWrap(channel, command, packetSize) {
       let sequenceIdx = 0;
       let offset = 0;
@@ -267,8 +266,8 @@ export default class TransportWebUSB extends Transport<USBDevice> {
         const deferred = this.exchangeStack[0];
 
         const send = async content => {
-          if (this.debug) {
-            console.log("=>" + content.toString("hex"));
+          if (debug) {
+            debug("=>" + content.toString("hex"));
           }
           const res = await this.device.transferOut(endpointNumber, content);
           return res.bytesWritten;
@@ -277,8 +276,8 @@ export default class TransportWebUSB extends Transport<USBDevice> {
         const recv = async () => {
           const res = await this.device.transferIn(endpointNumber, 64);
           const buffer = Buffer.from(res.data.buffer);
-          if (this.debug) {
-            console.log("<=" + buffer.toString("hex"));
+          if (debug) {
+            debug("<=" + buffer.toString("hex"));
           }
           return buffer;
         };

@@ -19,11 +19,11 @@ export type DescriptorEvent<Descriptor> = {
 };
 /**
  */
-export type Observer<Ev> = {
-  next: (event: Ev) => void,
-  error: (e: ?Error) => void,
-  complete: () => void
-};
+export type Observer<Ev> = $ReadOnly<{
+  next: (event: Ev) => mixed,
+  error: (e: any) => mixed,
+  complete: () => mixed
+}>;
 
 /**
  * all possible status codes.
@@ -121,7 +121,7 @@ TransportStatusError.prototype = new Error();
  * it can be for instance an ID, an file path, a URL,...
  */
 export default class Transport<Descriptor> {
-  debug: boolean = false;
+  debug: ?(log: string) => void = global.__ledgerDebug || null;
   exchangeTimeout: number = 30000;
 
   /**
@@ -221,8 +221,13 @@ TransportFoo.open(descriptor).then(transport => ...)
   /**
    * Enable or not logs of the binary exchange
    */
-  setDebugMode(debug: boolean) {
-    this.debug = debug;
+  setDebugMode(debug: boolean | ((log: string) => void)) {
+    this.debug =
+      typeof debug === "function"
+        ? debug
+        : debug
+          ? log => console.log(log)
+          : null;
   }
 
   /**
@@ -283,16 +288,10 @@ TransportFoo.create().then(transport => ...)
   ): Promise<Transport<Descriptor>> {
     return new Promise((resolve, reject) => {
       let found = false;
-      const listenTimeoutId = setTimeout(() => {
-        sub.unsubscribe();
-        reject(
-          new TransportError(this.ErrorMessage_ListenTimeout, "ListenTimeout")
-        );
-      }, listenTimeout);
       const sub = this.listen({
         next: e => {
           found = true;
-          sub.unsubscribe();
+          if (sub) sub.unsubscribe();
           clearTimeout(listenTimeoutId);
           this.open(e.descriptor, openTimeout).then(resolve, reject);
         },
@@ -312,6 +311,12 @@ TransportFoo.create().then(transport => ...)
           }
         }
       });
+      const listenTimeoutId = setTimeout(() => {
+        sub.unsubscribe();
+        reject(
+          new TransportError(this.ErrorMessage_ListenTimeout, "ListenTimeout")
+        );
+      }, listenTimeout);
     });
   }
 
@@ -344,7 +349,6 @@ TransportFoo.create().then(transport => ...)
           "Ledger Device is busy (lock " + _appAPIlock + ")",
           "TransportLocked"
         );
-        //$FlowFixMe
         Object.assign(e, {
           currentLock: _appAPIlock,
           methodName

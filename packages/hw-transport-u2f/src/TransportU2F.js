@@ -33,8 +33,9 @@ const normal64 = (base64: string) =>
 function attemptExchange(
   apdu: Buffer,
   timeoutMillis: number,
-  debug: boolean,
-  scrambleKey: Buffer
+  debug: *,
+  scrambleKey: Buffer,
+  unwrap: boolean
 ): Promise<Buffer> {
   const keyHandle = wrapApdu(apdu, scrambleKey);
   const challenge = Buffer.from(
@@ -48,15 +49,20 @@ function attemptExchange(
     appId: location.origin
   };
   if (debug) {
-    console.log("=> " + apdu.toString("hex"));
+    debug("=> " + apdu.toString("hex"));
   }
   return sign(signRequest, timeoutMillis / 1000).then(response => {
     const { signatureData } = response;
     if (typeof signatureData === "string") {
       const data = Buffer.from(normal64(signatureData), "base64");
-      const result = data.slice(5);
+      let result;
+      if (!unwrap) {
+        result = data;
+      } else {
+        result = data.slice(5);
+      }
       if (debug) {
-        console.log("<= " + result.toString("hex"));
+        debug("<= " + result.toString("hex"));
       }
       return result;
     } else {
@@ -117,11 +123,13 @@ export default class TransportU2F extends Transport<null> {
 
   scrambleKey: Buffer;
 
+  unwrap: boolean = true;
+
   /**
    * static function to create a new Transport from a connected Ledger device discoverable via U2F (browser support)
    */
-  static async open(_: *, openTimeout?: number = 5000): Promise<TransportU2F> {
-    try {
+  static async open(_: *, _openTimeout?: number = 5000): Promise<TransportU2F> {
+    /*try {
       // This is not a valid exchange at all, but this allows to have a way to know if there is a device.
       // in case it reaches the timeout, we will throw timeout error, in other case, we will return the U2FTransport.
       await attemptExchange(
@@ -150,7 +158,7 @@ export default class TransportU2F extends Transport<null> {
       } else {
         throw e;
       }
-    }
+    }*/
     return new TransportU2F();
   }
 
@@ -165,7 +173,8 @@ export default class TransportU2F extends Transport<null> {
         apdu,
         this.exchangeTimeout,
         this.debug,
-        this.scrambleKey
+        this.scrambleKey,
+        this.unwrap
       );
     } catch (e) {
       const isU2FError = typeof e.metaData === "object";
@@ -189,12 +198,12 @@ export default class TransportU2F extends Transport<null> {
     this.scrambleKey = Buffer.from(scrambleKey, "ascii");
   }
 
+  setUnwrap(unwrap: boolean) {
+    this.unwrap = unwrap;
+  }
+
   close(): Promise<void> {
-    const i = transportInstances.indexOf(this);
-    if (i === -1) {
-      throw new Error("invalid transport instance");
-    }
-    transportInstances.splice(i, 1);
+    // u2f have no way to clean things up
     return Promise.resolve();
   }
 }

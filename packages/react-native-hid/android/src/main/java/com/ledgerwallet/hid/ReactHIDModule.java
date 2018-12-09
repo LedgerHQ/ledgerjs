@@ -186,7 +186,7 @@ public class ReactHIDModule extends ReactContextBaseJavaModule {
                             }
 
                         } else {
-                            p.resolve(new Exception(
+                            p.reject(new Exception(
                                     String.format("Permission denied by user for device %s", device.getDeviceName())));
                         }
                     }
