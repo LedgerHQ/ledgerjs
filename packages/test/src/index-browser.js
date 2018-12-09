@@ -2,13 +2,16 @@ import "babel-polyfill";
 
 import TransportU2F from "@ledgerhq/hw-transport-u2f";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
+import TransportWebBLE from "@ledgerhq/hw-transport-web-ble";
 import runTests from "./runTests";
 
+window.TransportWebBLE = TransportWebBLE;
 window.TransportWebUSB = TransportWebUSB;
 
 const transports = [
   { name: "U2F transport", clazz: TransportU2F },
-  { name: "WebUSB transport", clazz: TransportWebUSB }
+  { name: "WebUSB transport", clazz: TransportWebUSB },
+  { name: "Web Bluetooth transport", clazz: TransportWebBLE }
 ];
 const transportSelect = document.createElement("select");
 transports.forEach((t, i) => {
