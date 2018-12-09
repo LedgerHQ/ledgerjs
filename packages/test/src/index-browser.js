@@ -4,6 +4,8 @@ import TransportU2F from "@ledgerhq/hw-transport-u2f";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import runTests from "./runTests";
 
+window.TransportWebUSB = TransportWebUSB;
+
 const transports = [
   { name: "U2F transport", clazz: TransportU2F },
   { name: "WebUSB transport", clazz: TransportWebUSB }
