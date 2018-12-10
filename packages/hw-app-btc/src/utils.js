@@ -14,91 +14,75 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-//@flow
-
-type Defer<T> = {
-  promise: Promise<T>,
-  resolve: T => void,
-  reject: any => void
-};
-
-export function defer<T>(): Defer<T> {
-  let resolve, reject;
-  let promise = new Promise(function(success, failure) {
-    resolve = success;
-    reject = failure;
-  });
-  if (!resolve || !reject) throw "defer() error"; // this never happens and is just to make flow happy
-  return { promise, resolve, reject };
+exports.defer = function defer () {
+  let _resolve, _reject
+  let promise = new Promise((resolve, reject) => {
+    _resolve = resolve
+    _reject = reject
+  })
+  // if (!_resolve || !_reject) throw new Error('defer() error')
+  return { promise, resolve: _resolve, reject: _reject }
 }
 
 // TODO use bip32-path library
-export function splitPath(path: string): number[] {
-  let result = [];
-  let components = path.split("/");
+exports.splitPth = function splitPath (path) {
+  let result = []
+  let components = path.split('/')
   components.forEach(element => {
-    let number = parseInt(element, 10);
+    let number = parseInt(element, 10)
     if (isNaN(number)) {
-      return; // FIXME shouldn't it throws instead?
+      return // FIXME shouldn't it throws instead?
     }
-    if (element.length > 1 && element[element.length - 1] === "'") {
-      number += 0x80000000;
+    if (element.length > 1 && element[element.length - 1] === `'`) {
+      number += 0x80000000
     }
-    result.push(number);
-  });
-  return result;
+    result.push(number)
+  })
+  return result
 }
 
 // TODO use async await
 
-export function eachSeries<A>(arr: A[], fun: A => Promise<*>): Promise<*> {
-  return arr.reduce((p, e) => p.then(() => fun(e)), Promise.resolve());
+exports.eachSeries = async function eachSeries (arr, fun) {
+  return arr.reduce((p, e) => p.then(() => fun(e)), Promise.resolve())
 }
 
-export function foreach<T, A>(
-  arr: T[],
-  callback: (T, number) => Promise<A>
-): Promise<A[]> {
-  function iterate(index, array, result) {
+exports.foreach = async function foreach (arr, callback) {
+  function iterate (index, array, result) {
     if (index >= array.length) {
-      return result;
-    } else
-      return callback(array[index], index).then(function(res) {
-        result.push(res);
-        return iterate(index + 1, array, result);
-      });
+      return result
+    } else {
+      return callback(array[index], index).then((res) => {
+        result.push(res)
+        return iterate(index + 1, array, result)
+      })
+    }
   }
-  return Promise.resolve().then(() => iterate(0, arr, []));
+  return Promise.resolve().then(() => iterate(0, arr, []))
 }
 
-export function doIf(
-  condition: boolean,
-  callback: () => any | Promise<any>
-): Promise<void> {
+exports.doIf = async function doIf (condition, callback) {
   return Promise.resolve().then(() => {
     if (condition) {
-      return callback();
+      return callback()
     }
-  });
+  })
 }
 
-export function asyncWhile<T>(
-  predicate: () => boolean,
-  callback: () => Promise<T>
-): Promise<Array<T>> {
-  function iterate(result) {
+exports.asyncWhile = async function asyncWhile (predicate, callback) {
+  function iterate (result) {
     if (!predicate()) {
-      return result;
+      return result
     } else {
       return callback().then(res => {
-        result.push(res);
-        return iterate(result);
-      });
+        result.push(res)
+        return iterate(result)
+      })
     }
   }
-  return Promise.resolve([]).then(iterate);
+  return Promise.resolve([]).then(iterate)
 }
 
-export const isLedgerDevice = (device: Object) =>
-  (device.vendorId === 0x2581 && device.productId === 0x3b7c) ||
-  device.vendorId === 0x2c97;
+exports.isLedgerDevice = function (device) {
+  return (device.vendorId === 0x2581 && device.productId === 0x3b7c) || device.vendorId === 0x2c97
+}
