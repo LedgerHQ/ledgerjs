@@ -1,5 +1,5 @@
 {
-  "name": "@ExodusMovement/hw-transport-node-hid",
+  "name": "@exodus/hw-transport-node-hid",
   "version": "4.24.1",
   "description": "Ledger Hardware Wallet Node implementation of the communication layer, using node-hid",
   "keywords": [

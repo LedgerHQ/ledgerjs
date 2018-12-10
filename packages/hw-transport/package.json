@@ -1,5 +1,5 @@
 {
-  "name": "@ExodusMovement/hw-transport",
+  "name": "@exodus/hw-transport",
   "version": "4.24.1",
   "description": "Ledger Hardware Wallet common interface of the communication layer",
   "keywords": [

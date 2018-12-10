@@ -1,5 +1,5 @@
 {
-  "name": "@ledgerhq/hw-app-eth",
+  "name": "@exodus/hw-app-eth",
   "version": "4.24.0",
   "description": "Ledger Hardware Wallet Ethereum Application API",
   "keywords": [

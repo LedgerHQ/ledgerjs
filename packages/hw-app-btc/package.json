@@ -1,5 +1,5 @@
 {
-  "name": "@ExodusMovement/hw-app-btc",
+  "name": "@exodus/hw-app-btc",
   "version": "4.30.1",
   "description": "Ledger Hardware Wallet Bitcoin Application API",
   "keywords": [
@@ -19,6 +19,9 @@
     "url": "https://github.com/ExodusMovement/ledgerjs/issues"
   },
   "homepage": "https://github.com/ExodusMovement/ledgerjs",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "lib/Btc.js",
   "license": "Apache-2.0",
   "dependencies": {
