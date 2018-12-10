@@ -1,6 +1,6 @@
 {
-  "name": "@ledgerhq/hw-transport-node-hid",
-  "version": "4.24.0",
+  "name": "@ExodusMovement/hw-transport-node-hid",
+  "version": "4.24.1",
   "description": "Ledger Hardware Wallet Node implementation of the communication layer, using node-hid",
   "keywords": [
     "Ledger",
@@ -13,29 +13,24 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/LedgerHQ/ledgerjs"
+    "url": "https://github.com/ExodusMovement/ledgerjs"
   },
   "bugs": {
-    "url": "https://github.com/LedgerHQ/ledgerjs/issues"
+    "url": "https://github.com/ExodusMovement/ledgerjs/issues"
   },
-  "homepage": "https://github.com/LedgerHQ/ledgerjs",
+  "homepage": "https://github.com/ExodusMovement/ledgerjs",
   "publishConfig": {
     "access": "public"
   },
   "main": "lib/TransportNodeHid.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^4.24.0",
+    "@ExodusMovement/hw-transport": "^4.24.0",
     "lodash": "^4.17.11",
     "node-hid": "^0.7.2",
     "usb": "^1.3.3"
   },
-  "devDependencies": {
-    "flow-bin": "^0.68.0",
-    "flow-typed": "^2.4.0"
-  },
   "scripts": {
-    "flow": "flow",
     "clean": "bash ../../script/clean.sh",
     "build": "bash ../../script/build.sh",
     "watch": "bash ../../script/watch.sh"
