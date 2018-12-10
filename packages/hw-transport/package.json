@@ -1,6 +1,6 @@
 {
-  "name": "@ledgerhq/hw-transport",
-  "version": "4.24.0",
+  "name": "@ExodusMovement/hw-transport",
+  "version": "4.24.1",
   "description": "Ledger Hardware Wallet common interface of the communication layer",
   "keywords": [
     "Ledger",
@@ -11,12 +11,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/LedgerHQ/ledgerjs"
+    "url": "https://github.com/ExodusMovement/ledgerjs"
   },
   "bugs": {
-    "url": "https://github.com/LedgerHQ/ledgerjs/issues"
+    "url": "https://github.com/ExodusMovement/ledgerjs/issues"
   },
-  "homepage": "https://github.com/LedgerHQ/ledgerjs",
+  "homepage": "https://github.com/ExodusMovement/ledgerjs",
   "publishConfig": {
     "access": "public"
   },
@@ -25,12 +25,7 @@
   "dependencies": {
     "events": "^3.0.0"
   },
-  "devDependencies": {
-    "flow-bin": "^0.68.0",
-    "flow-typed": "^2.4.0"
-  },
   "scripts": {
-    "flow": "flow",
     "clean": "bash ../../script/clean.sh",
     "build": "bash ../../script/build.sh",
     "watch": "bash ../../script/watch.sh"
