@@ -12,6 +12,7 @@
     "@ledgerhq/hw-app-xrp": "^4.25.0",
     "@ledgerhq/hw-transport-mocker": "^4.24.0",
     "@ledgerhq/hw-transport-node-hid": "^4.24.0",
+    "@ledgerhq/hw-transport-webusb": "*",
     "budo": "^11.4.1"
   },
   "devDependencies": {
