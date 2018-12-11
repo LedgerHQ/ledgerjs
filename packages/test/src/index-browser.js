@@ -5,6 +5,8 @@ import TransportWebUSB from "@ledgerhq/hw-transport-webusb";
 import TransportWebBLE from "@ledgerhq/hw-transport-web-ble";
 import runTests from "./runTests";
 
+window.Buffer = require("buffer").Buffer;
+
 window.TransportWebBLE = TransportWebBLE;
 window.TransportWebUSB = TransportWebUSB;
 

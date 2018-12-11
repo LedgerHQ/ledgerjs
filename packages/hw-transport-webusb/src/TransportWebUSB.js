@@ -6,7 +6,7 @@ import type {
   Subscription
 } from "@ledgerhq/hw-transport";
 import { getLedgerDevices, requestLedgerDevice, isSupported } from "./webusb";
-import { ledgerWrap, ledgerUnwrap } from "./hid-wrap";
+import hidFraming from "./hid-framing";
 
 const configurationValue = 1;
 const interfaceNumber = 2;
@@ -21,7 +21,7 @@ const endpointNumber = 3;
  */
 export default class TransportWebUSB extends Transport<USBDevice> {
   device: USBDevice;
-  channel = 0x0101;
+  channel = Math.floor(Math.random() * 0xffff);
   packetSize = 64;
 
   constructor(device: USBDevice) {
@@ -72,41 +72,26 @@ export default class TransportWebUSB extends Transport<USBDevice> {
         debug("=>" + apdu.toString("hex"));
       }
 
+      const framing = hidFraming(channel, packetSize);
+
       // Write...
-      const dataToSend = ledgerWrap(channel, apdu, packetSize);
-      let offsetSent = 0;
-      while (offsetSent < dataToSend.length) {
-        const blockSize =
-          dataToSend.length - offsetSent > packetSize
-            ? packetSize
-            : dataToSend.length - offsetSent;
-        let block = dataToSend.slice(offsetSent, offsetSent + blockSize);
-        const paddingSize = packetSize - block.length;
-        if (paddingSize !== 0) {
-          let padding = Buffer.alloc(paddingSize).fill(0);
-          block = Buffer.concat([block, padding], block.length + paddingSize);
-        }
-        await this.device.transferOut(endpointNumber, block);
-        offsetSent += blockSize;
+      const blocks = framing.makeBlocks(apdu);
+      for (let i = 0; i < blocks.length; i++) {
+        await this.device.transferOut(endpointNumber, blocks[i]);
       }
 
       // Read...
-      let response;
-      let received = Buffer.alloc(0);
-      while (!response) {
-        const res = await this.device.transferIn(endpointNumber, 64);
-        const buffer = Buffer.from(res.data.buffer);
-        received = Buffer.concat(
-          [received, buffer],
-          received.length + buffer.length
-        );
-        response = ledgerUnwrap(channel, received, packetSize);
+      let result;
+      let acc;
+      while (!(result = framing.getReducedResult(acc))) {
+        const r = await this.device.transferIn(endpointNumber, packetSize);
+        acc = framing.reduceResponse(acc, Buffer.from(r.data.buffer));
       }
 
       if (debug) {
-        debug("<=" + response.toString("hex"));
+        debug("<=" + result.toString("hex"));
       }
-      return response;
+      return result;
     });
 
   setScrambleKey() {}
