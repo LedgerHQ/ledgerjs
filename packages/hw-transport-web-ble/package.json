@@ -1,0 +1,41 @@
+{
+  "name": "@ledgerhq/hw-transport-web-ble",
+  "version": "4.32.0",
+  "description": "Ledger Hardware Wallet Web Bluetooth implementation of the communication layer",
+  "keywords": [
+    "Ledger",
+    "LedgerWallet",
+    "bluetooth",
+    "ble",
+    "NanoS",
+    "Blue",
+    "Hardware Wallet"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LedgerHQ/ledgerjs"
+  },
+  "bugs": {
+    "url": "https://github.com/LedgerHQ/ledgerjs/issues"
+  },
+  "homepage": "https://github.com/LedgerHQ/ledgerjs",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "lib/TransportWebBLE.js",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@ledgerhq/hw-transport": "^4.32.0",
+    "rxjs": "^6.3.3"
+  },
+  "devDependencies": {
+    "flow-bin": "^0.66.0",
+    "flow-typed": "^2.3.0"
+  },
+  "scripts": {
+    "flow": "flow",
+    "clean": "rm -rf lib/",
+    "build": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d lib src && flow-copy-source -v src lib",
+    "watch": "cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --watch --source-maps -d lib src & flow-copy-source -w -v src lib"
+  }
+}
