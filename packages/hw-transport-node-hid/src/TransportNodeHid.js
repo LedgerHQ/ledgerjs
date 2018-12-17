@@ -37,7 +37,7 @@ let listenDevicesDebug = () => {};
  * ...
  * TransportNodeHid.create().then(transport => ...)
  */
-export default class TransportNodeHid extends Transport<string> {
+export default class TransportNodeHid extends Transport<?string> {
   device: HID.HID;
   ledgerTransport: boolean;
   timeout: number;
@@ -119,11 +119,15 @@ export default class TransportNodeHid extends Transport<string> {
   };
 
   /**
+   * if path is not provided, the library will take the first device
    */
-  static async open(path: string) {
-    return Promise.resolve(
-      new TransportNodeHid(path ? new HID.HID(path) : new HID.HID(0x2c97, 0x01))
-    );
+  static async open(path: ?string) {
+    if (path) {
+      return Promise.resolve(new TransportNodeHid(new HID.HID(path)));
+    }
+    const device = getDevices()[0];
+    if (!device) throw new TransportError("NoDevice", "NoDevice");
+    return Promise.resolve(new TransportNodeHid(device));
   }
 
   exchange(apdu: Buffer): Promise<Buffer> {
