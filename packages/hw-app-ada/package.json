@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-app-ada",
-  "version": "4.33.2",
+  "version": "4.33.3",
   "description": "Ledger Hardware Wallet Cardano ADA API",
   "main": "lib/Ada.js",
   "repository": "git+ssh://git@github.com/LedgerHQ/ledgerjs.git",
@@ -21,7 +21,7 @@
     "node-int64": "^0.4.0"
   },
   "devDependencies": {
-    "@ledgerhq/hw-transport-node-hid": "^4.33.2",
+    "@ledgerhq/hw-transport-node-hid": "^4.33.3",
     "chai": "^4.2.0",
     "chalk": "^2.3.1",
     "flow-bin": "^0.68.0",
