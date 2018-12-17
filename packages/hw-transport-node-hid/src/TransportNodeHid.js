@@ -127,7 +127,7 @@ export default class TransportNodeHid extends Transport<string> {
     }
     const device = getDevices()[0];
     if (!device) throw new TransportError("NoDevice", "NoDevice");
-    return Promise.resolve(new TransportNodeHid(device));
+    return Promise.resolve(new TransportNodeHid(new HID.HID(device.path)));
   }
 
   exchange(apdu: Buffer): Promise<Buffer> {
