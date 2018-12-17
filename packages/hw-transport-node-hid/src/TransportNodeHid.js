@@ -121,7 +121,9 @@ export default class TransportNodeHid extends Transport<string> {
   /**
    */
   static async open(path: string) {
-    return Promise.resolve(new TransportNodeHid(new HID.HID(path)));
+    return Promise.resolve(
+      new TransportNodeHid(path ? new HID.HID(path) : new HID.HID(0x2c97, 0x01))
+    );
   }
 
   exchange(apdu: Buffer): Promise<Buffer> {
