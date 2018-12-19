@@ -715,15 +715,15 @@ btc.createPaymentTransactionNew(
                 value: Buffer.from(trustedInput, "hex"),
                 sequence
               });
-              let offset = useBip143 ? 0 : 4
+              let offset = useBip143 ? 0 : 4;
               targetTransaction.inputs.push({
-                prevout: Buffer.from(trustedInput, 'hex').slice(offset, offset + 0x24),
+                prevout: Buffer.from(trustedInput, "hex").slice(offset, offset + 0x24),
                 script: Buffer.alloc(0),
                 sequence
-              })
+              });
             })
-          )
-        })
+          );
+        });
       })
       .then(() =>
         doIf(!resuming, () =>
@@ -789,7 +789,7 @@ btc.createPaymentTransactionNew(
                       Buffer.from([OP_EQUALVERIFY, OP_CHECKSIG])
                     ]);
           } else {
-            script = Buffer.alloc(0)
+            script = Buffer.alloc(0);
           }
           let pseudoTX = Object.assign({}, targetTransaction);
           let pseudoTrustedInputs = useBip143
@@ -823,9 +823,9 @@ btc.createPaymentTransactionNew(
                   lockTime,
                   sigHashType,
                   expiryHeight
-                )
+                );
               } else {
-                return false
+                return false;
               }
             })
             .then(signature => {
