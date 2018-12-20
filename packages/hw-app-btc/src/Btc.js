@@ -590,7 +590,7 @@ btc.createPaymentTransactionNew(
     initialTimestamp?: number,
     additionals: Array<string> = [],
     expiryHeight?: Buffer,
-    multisigInputs?: Array<[Transaction, number]>=[]
+    multisigInputs?: Array<[Transaction, number, ?string, ?number]> = []
   ) {
     const isDecred = additionals.includes("decred");
     const hasTimestamp = initialTimestamp !== undefined;
