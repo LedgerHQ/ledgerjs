@@ -98,7 +98,7 @@ export default class TransportWebUSB extends Transport<USBDevice> {
 
   busy: ?Promise<void>;
 
-  atomic = async f => {
+  atomic = async <T>(f: () => Promise<T>): Promise<T> => {
     if (this.busy) {
       throw new TransportError("Transport race condition", "RaceCondition");
     }
