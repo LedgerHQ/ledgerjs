@@ -702,7 +702,7 @@ btc.createPaymentTransactionNew(
       .then(() => {
         return foreach(multisigInputs, input => {
           return doIf(!resuming, () =>
-            getTrustedInputCall(input[1], input[0]).then(trustedInput => {
+            getTrustedInputCall(input[1], input[0], additionals).then(trustedInput => {
               let sequence = Buffer.alloc(4);
               sequence.writeUInt32LE(
                 input.length >= 4 && typeof input[3] === "number"
