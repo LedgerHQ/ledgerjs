@@ -1117,7 +1117,7 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
       offset += 4;
       prevout = Buffer.concat([prevout, prevOutIndex]);
 
-      let script;
+      let script = Buffer.alloc(0);
       //No script for decred, it has a witness
       if (!isDecred) {
         varint = this.getVarint(transaction, offset);
@@ -1162,6 +1162,29 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
     }
     if (hasExtraData) {
       extraData = transaction.slice(offset);
+    }
+
+    //Get witnesses for Decred
+    if (isDecred) {
+      varint = this.getVarint(transaction, offset);
+      offset += varint[1];
+      if (varint[0] !== numberInputs) {
+        throw new Error("splitTransaction: incoherent number of witnesses");
+      }
+      for (let i = 0; i < numberInputs; i++) {
+        //amount
+        offset += 8;
+        //block height
+        offset += 4;
+        //block index
+        offset += 4;
+        //Script size
+        varint = this.getVarint(transaction, offset);
+        offset += varint[1];
+        const script = transaction.slice(offset, offset + varint[0]);
+        offset += varint[0];
+        inputs[i].script = script;
+      }
     }
 
     return {
