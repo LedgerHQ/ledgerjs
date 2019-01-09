@@ -24,6 +24,8 @@ const HARDENED = 0x80000000;
 
 const INS_GET_VERSION = 0x00;
 const INS_GET_EXT_PUBLIC_KEY = 0x10;
+const INS_ATTEST_UTXO = 0x20;
+const INS_RUN_TESTS = 0xF0;
 
 // These are just JS error codes (no parallel with in-ledger app codes)
 const INVALID_PATH = 0x5001;
@@ -70,6 +72,50 @@ export default class Ada {
 
     const [major, minor, patch] = response;
     return { major, minor, patch };
+  }
+
+
+  async runTests(): Promise<void> {
+    await this.transport.send(CLA, INS_RUN_TESTS, 0x00, 0x00);
+  }
+
+  async attestUTxO(
+    txHex: string,
+    outputIndex: number,
+  ): Promise<{amount: number}> {
+    const P1_INIT = 0x01;
+    const P1_CONTINUE = 0x02;
+    const P2_UNUSED = 0x00;
+
+    const CHUNK_SIZE = 255;
+
+    const txRaw = Buffer.from(txHex, "hex");
+    { // init. TODO(ppershing): we can pack some data here as well
+      const data = Buffer.alloc(4);
+      data.writeUInt32BE(outputIndex, 0);
+      await this.transport.send(
+        CLA,
+        INS_ATTEST_UTXO,
+        P1_INIT,
+        P2_UNUSED,
+        data
+      );
+    }
+
+    let i = 0;
+    let result = -1;
+    while (i < txRaw.length) {
+      const chunk = txRaw.slice(i, i + CHUNK_SIZE);
+      i += CHUNK_SIZE;
+      result = await this.transport.send(
+        CLA,
+        INS_ATTEST_UTXO,
+        P1_CONTINUE,
+        P2_UNUSED,
+        chunk
+      );
+    }
+    return {amount: result};
   }
 
   /**
