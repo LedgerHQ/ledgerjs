@@ -119,9 +119,15 @@ export default class TransportNodeHid extends Transport<string> {
   };
 
   /**
+   * if path="" is not provided, the library will take the first device
    */
   static async open(path: string) {
-    return Promise.resolve(new TransportNodeHid(new HID.HID(path)));
+    if (path) {
+      return Promise.resolve(new TransportNodeHid(new HID.HID(path)));
+    }
+    const device = getDevices()[0];
+    if (!device) throw new TransportError("NoDevice", "NoDevice");
+    return Promise.resolve(new TransportNodeHid(new HID.HID(device.path)));
   }
 
   exchange(apdu: Buffer): Promise<Buffer> {
