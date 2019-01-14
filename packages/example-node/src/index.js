@@ -6,15 +6,15 @@ async function example() {
   transport.setDebugMode(true);
   const appAda = new AppAda(transport);
 
-  // console.log(
-  //   await appAda.getExtendedPublicKey([
-  //     0x80000000 + 44,
-  //     0x80000000 + 1815,
-  //     0x80000000 + 1
-  //   ])
-  // );
+  console.log(
+    await appAda.getExtendedPublicKey([
+      0x80000000 + 44,
+      0x80000000 + 1815,
+      0x80000000 + 1
+    ])
+  );
 
-  console.log(await appAda.getVersion());
+  // console.log(await appAda.getVersion());
 }
 
 example();

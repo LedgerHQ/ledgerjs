@@ -19,13 +19,13 @@
 import type Transport from "@ledgerhq/hw-transport";
 import { TransportStatusError } from "@ledgerhq/hw-transport";
 
-const CLA = 0xD7;
+const CLA = 0xd7;
 const HARDENED = 0x80000000;
 
 const INS_GET_VERSION = 0x00;
 const INS_GET_EXT_PUBLIC_KEY = 0x10;
 const INS_ATTEST_UTXO = 0x20;
-const INS_RUN_TESTS = 0xF0;
+const INS_RUN_TESTS = 0xf0;
 
 // These are just JS error codes (no parallel with in-ledger app codes)
 const INVALID_PATH = 0x5001;
@@ -45,11 +45,7 @@ export default class Ada {
 
   constructor(transport: Transport<*>, scrambleKey: string = "ADA") {
     this.transport = transport;
-    this.methods = [
-      "getVersion",
-      "getExtendedPublicKey",
-      "signTransaction"
-    ];
+    this.methods = ["getVersion", "getExtendedPublicKey", "signTransaction"];
     this.transport.decorateAppAPIMethods(this, this.methods, scrambleKey);
   }
 
@@ -68,12 +64,16 @@ export default class Ada {
     minor: string,
     patch: string
   }> {
-    const response = await this.transport.send(CLA, INS_GET_VERSION, 0x00, 0x00);
+    const response = await this.transport.send(
+      CLA,
+      INS_GET_VERSION,
+      0x00,
+      0x00
+    );
 
     const [major, minor, patch] = response;
     return { major, minor, patch };
   }
-
 
   async runTests(): Promise<void> {
     await this.transport.send(CLA, INS_RUN_TESTS, 0x00, 0x00);
@@ -81,8 +81,8 @@ export default class Ada {
 
   async attestUTxO(
     txHex: string,
-    outputIndex: number,
-  ): Promise<{amount: number}> {
+    outputIndex: number
+  ): Promise<{ amount: number }> {
     const P1_INIT = 0x01;
     const P1_CONTINUE = 0x02;
     const P2_UNUSED = 0x00;
@@ -90,16 +90,11 @@ export default class Ada {
     const CHUNK_SIZE = 255;
 
     const txRaw = Buffer.from(txHex, "hex");
-    { // init. TODO(ppershing): we can pack some data here as well
+    {
+      // init. TODO(ppershing): we can pack some data here as well
       const data = Buffer.alloc(4);
       data.writeUInt32BE(outputIndex, 0);
-      await this.transport.send(
-        CLA,
-        INS_ATTEST_UTXO,
-        P1_INIT,
-        P2_UNUSED,
-        data
-      );
+      await this.transport.send(CLA, INS_ATTEST_UTXO, P1_INIT, P2_UNUSED, data);
     }
 
     let i = 0;
@@ -115,7 +110,7 @@ export default class Ada {
         chunk
       );
     }
-    return {amount: result};
+    return { amount: result };
   }
 
   /**
@@ -142,7 +137,11 @@ export default class Ada {
     if (indexes.some(index => isNaN(index))) {
       throw new TransportStatusError(INDEX_NAN);
     }
-    if (indexes.slice(0, 3).some(x => x < HARDENED)) {
+    if (
+      indexes[0] != HARDENED + 44 ||
+      indexes[1] != HARDENED + 1815 ||
+      indexes[2] < HARDENED
+    ) {
       throw new TransportStatusError(INVALID_PATH);
     }
 

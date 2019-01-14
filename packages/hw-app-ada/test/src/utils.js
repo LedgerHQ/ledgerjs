@@ -5,8 +5,25 @@ import { yellow } from "chalk";
 
 import Ada from "./TestAda";
 
+const HARDENED = 0x80000000;
+
 export function isHeadless() {
   return process.argv.includes("--headless");
+}
+
+/**
+ * Transforms path string e.g. /44'/1 into array [0x80000000 + 44, 1]
+ */
+export function pathToArray(path) {
+  return path
+    .split("/")
+    .filter(x => x != "")
+    .map(
+      x =>
+        x.endsWith("'")
+          ? HARDENED + Number.parseInt(x.slice(0, -1))
+          : Number.parseInt(x)
+    );
 }
 
 /**
@@ -15,7 +32,9 @@ export function isHeadless() {
  * This is useful for stress tests which are too laborious to run with user interaction.
  */
 export function ifHeadlessIt(title, test) {
-  return isHeadless() ? it(title, test) : it.skip(`[SKIPPED: NOT IN HEADLESS] ${title}`, () => {});
+  return isHeadless()
+    ? it(title, test)
+    : it.skip(`[SKIPPED: NOT IN HEADLESS] ${title}`, () => {});
 }
 
 /**
@@ -24,7 +43,9 @@ export function ifHeadlessIt(title, test) {
  * This is useful for tests which always require interaction.
  */
 export function ifNotHeadlessIt(title, test) {
-  return isHeadless() ? it.skip(`[SKIPPED: RUNNING HEADLESSLY] ${title}`, () => {}) : it(title, test);
+  return isHeadless()
+    ? it.skip(`[SKIPPED: RUNNING HEADLESSLY] ${title}`, () => {})
+    : it(title, test);
 }
 
 /**
@@ -38,6 +59,10 @@ export async function getAda() {
   return Promise.resolve(new Ada(transport));
 }
 
+export async function getTransport() {
+  return await TransportNodeHid.create(1000);
+}
+
 /**
  * Convenience function for prompting user to interact with ledger device.
  *
@@ -46,8 +71,10 @@ export async function getAda() {
  * If --headless is supplied, then this is suppressed.
  */
 export function promptUser(message) {
-  if (isHeadless()) return
-  console.log(yellow.bgBlack("\n LEDGER DEVICE ") + yellow(` ${message.toUpperCase()}\n`));
+  if (isHeadless()) return;
+  console.log(
+    yellow.bgBlack("\n LEDGER DEVICE ") + yellow(` ${message.toUpperCase()}\n`)
+  );
 }
 
 /**
