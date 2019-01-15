@@ -770,7 +770,8 @@ btc.createPaymentTransactionNew(
       )
       .then(() =>
         doIf(!!expiryHeight && !isDecred, () =>
-          this.signTransaction("", undefined, SIGHASH_ALL, expiryHeight)
+          // FIXME: I think we should always pass lockTime here.
+          this.signTransaction("", lockTime, SIGHASH_ALL, expiryHeight)
         )
       )
       .then(() =>
@@ -894,6 +895,13 @@ btc.createPaymentTransactionNew(
           }
           result = Buffer.concat([result, witness]);
         }
+
+        // FIXME: In ZEC or KMD sapling lockTime is serialized before expiryHeight.
+        // expiryHeight is used only in overwinter/sapling so I moved lockTimeBuffer here
+        // and it should not break other coins because expiryHeight is false for them.
+        // Don't know about Decred though.
+        result = Buffer.concat([result, lockTimeBuffer]);
+
         if (expiryHeight) {
           result = Buffer.concat([
             result,
@@ -901,8 +909,6 @@ btc.createPaymentTransactionNew(
             targetTransaction.extraData || Buffer.alloc(0)
           ]);
         }
-
-        result = Buffer.concat([result, lockTimeBuffer]);
 
         if (isDecred) {
           let decredWitness = Buffer.from([targetTransaction.inputs.length]);
