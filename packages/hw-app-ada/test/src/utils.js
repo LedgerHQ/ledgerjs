@@ -64,6 +64,21 @@ export async function getTransport() {
 }
 
 /**
+ * Converts path string e.g "44'/1815'/1'" into buffer, where first byte is path length followed by path.
+ */
+export function pathToBuffer(path) {
+  const pathArray = pathToArray(path);
+  const buffer = Buffer.alloc(1 + 4 * pathArray.length);
+  buffer.writeUInt8(pathArray.length, 0);
+
+  for (let i = 0; i < pathArray.length; i++) {
+    buffer.writeUInt32BE(pathArray[i], 1 + i * 4);
+  }
+
+  return buffer;
+}
+
+/**
  * Convenience function for prompting user to interact with ledger device.
  *
  * @param {String} message The messsage to display.

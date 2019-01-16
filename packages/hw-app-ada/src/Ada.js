@@ -24,6 +24,7 @@ const HARDENED = 0x80000000;
 
 const INS_GET_VERSION = 0x00;
 const INS_GET_EXT_PUBLIC_KEY = 0x10;
+const INS_DERIVE_ADDRESS = 0x11;
 const INS_ATTEST_UTXO = 0x20;
 const INS_RUN_TESTS = 0xf0;
 
@@ -31,6 +32,28 @@ const INS_RUN_TESTS = 0xf0;
 const INVALID_PATH = 0x5001;
 const INVALID_PATH_LENGTH = 0x5002;
 const INDEX_NAN = 0x5003;
+
+const chunkBy = (data, chunkLengths) => {
+  const chunkLengthsSum = chunkLengths.reduce((x, y) => x + y);
+
+  if (chunkLengthsSum > data.length) {
+    throw new Error("Chunks exceed data length.");
+  }
+
+  let offset = 0;
+
+  const result = [];
+
+  const restLength = data.length - chunkLengthsSum;
+
+  for (let c of [...chunkLengths, restLength]) {
+    result.push(data.slice(offset, offset + c));
+
+    offset += c;
+  }
+
+  return result;
+};
 
 /**
  * Cardano ADA API
@@ -45,7 +68,13 @@ export default class Ada {
 
   constructor(transport: Transport<*>, scrambleKey: string = "ADA") {
     this.transport = transport;
-    this.methods = ["getVersion", "getExtendedPublicKey", "signTransaction"];
+    this.methods = [
+      "getVersion",
+      "getExtendedPublicKey",
+      "signTransaction",
+      "attestUtxo",
+      "deriveAddress"
+    ];
     this.transport.decorateAppAPIMethods(this, this.methods, scrambleKey);
   }
 
@@ -79,10 +108,20 @@ export default class Ada {
     await this.transport.send(CLA, INS_RUN_TESTS, 0x00, 0x00);
   }
 
-  async attestUTxO(
+  /**
+   * Attests the utxo.
+   *
+   * @returns {Promise<{txHash:string, outputNumber:number, amount:number, hmac:string}>}.
+   */
+  async attestUtxo(
     txHex: string,
     outputIndex: number
-  ): Promise<{ amount: number }> {
+  ): Promise<{
+    txHash: string,
+    outputNumber: number,
+    amount: number,
+    hmac: string
+  }> {
     const P1_INIT = 0x01;
     const P1_CONTINUE = 0x02;
     const P2_UNUSED = 0x00;
@@ -98,7 +137,7 @@ export default class Ada {
     }
 
     let i = 0;
-    let result = -1;
+    let result = Buffer.alloc(0);
     while (i < txRaw.length) {
       const chunk = txRaw.slice(i, i + CHUNK_SIZE);
       i += CHUNK_SIZE;
@@ -110,7 +149,24 @@ export default class Ada {
         chunk
       );
     }
-    return { amount: result };
+
+    const [txHash, outputNumber, amount, hmac, returnCode] = chunkBy(result, [
+      32,
+      4,
+      8,
+      16
+    ]);
+
+    if (returnCode.length != 2 || returnCode.readUIntBE(0, 2) != 0x9000) {
+      throw new Error("Invalid return code");
+    }
+
+    return {
+      txHash: txHash.toString("hex"),
+      outputNumber: outputNumber.readUIntBE(0, 4),
+      amount: amount.readUIntBE(0, 8),
+      hmac: hmac.toString("hex")
+    };
   }
 
   /**
@@ -167,5 +223,56 @@ export default class Ada {
       .toString("hex");
 
     return { publicKey, chainCode };
+  }
+
+  /**
+   * @description Gets an address from the specified BIP 32 path.
+   *
+   * @param {Array<number>} indexes The path indexes. Path must begin with `44'/1815'/i'/(0 or 1)/j`, and may be up to 10 indexes long.
+   * @return {Promise<{ address:string }>} The address for the given path.
+   *
+   * @throws 5001 - The path provided does not have the first 3 indexes hardened or 4th index is not 0 or 1
+   * @throws 5002 - The path provided is less than 5 indexes
+   * @throws 5003 - Some of the indexes is not a number
+   *
+   * @example
+   * const { address } = await ada.deriveAddress([ HARDENED + 44, HARDENED + 1815, HARDENED + 1, 0, 5 ]);
+   *
+   */
+  async deriveAddress(indexes: Array<number>): Promise<{ address: string }> {
+    if (indexes.length < 5 || indexes.length > 10) {
+      throw new TransportStatusError(INVALID_PATH_LENGTH);
+    }
+    if (indexes.some(index => isNaN(index))) {
+      throw new TransportStatusError(INDEX_NAN);
+    }
+    if (
+      indexes[0] != HARDENED + 44 ||
+      indexes[1] != HARDENED + 1815 ||
+      indexes[2] < HARDENED ||
+      (indexes[3] != 0 && indexes[3] != 1)
+    ) {
+      throw new TransportStatusError(INVALID_PATH);
+    }
+
+    const data = Buffer.alloc(1 + 4 * indexes.length);
+    data.writeUInt8(indexes.length, 0);
+
+    for (let i = 0; i < indexes.length; i++) {
+      data.writeUInt32BE(indexes[i], 1 + i * 4);
+    }
+
+    const response = await this.transport.send(
+      CLA,
+      INS_DERIVE_ADDRESS,
+      0x00,
+      0x00,
+      data
+    );
+
+    const addressLength = response[0];
+    const address = response.slice(1, 1 + addressLength).toString();
+
+    return { address };
   }
 }
