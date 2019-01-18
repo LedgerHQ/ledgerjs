@@ -1,13 +1,9 @@
 {
   "name": "@ledgerhq/errors",
   "version": "4.32.0",
-  "description": "Ledger Hardware Wallet common interface of the communication layer",
+  "description": "Ledger common errors",
   "keywords": [
-    "Ledger",
-    "LedgerWallet",
-    "NanoS",
-    "Blue",
-    "Hardware Wallet"
+    "Ledger"
   ],
   "repository": {
     "type": "git",
