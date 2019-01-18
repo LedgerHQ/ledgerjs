@@ -1,0 +1,33 @@
+{
+  "name": "@ledgerhq/errors",
+  "version": "4.32.0",
+  "description": "Ledger common errors",
+  "keywords": [
+    "Ledger"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LedgerHQ/ledgerjs"
+  },
+  "bugs": {
+    "url": "https://github.com/LedgerHQ/ledgerjs/issues"
+  },
+  "homepage": "https://github.com/LedgerHQ/ledgerjs",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "lib/index.js",
+  "license": "Apache-2.0",
+  "dependencies": {
+  },
+  "devDependencies": {
+    "flow-bin": "^0.68.0",
+    "flow-typed": "^2.4.0"
+  },
+  "scripts": {
+    "flow": "flow",
+    "clean": "bash ../../script/clean.sh",
+    "build": "bash ../../script/build.sh",
+    "watch": "bash ../../script/watch.sh"
+  }
+}
