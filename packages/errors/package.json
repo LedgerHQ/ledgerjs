@@ -1,15 +1,9 @@
 {
-  "name": "@ledgerhq/hw-app-btc",
+  "name": "@ledgerhq/errors",
   "version": "4.33.7",
-  "description": "Ledger Hardware Wallet Bitcoin Application API",
+  "description": "Ledger common errors",
   "keywords": [
-    "Ledger",
-    "LedgerWallet",
-    "btc",
-    "Bitcoin",
-    "NanoS",
-    "Blue",
-    "Hardware Wallet"
+    "Ledger"
   ],
   "repository": {
     "type": "git",
@@ -22,12 +16,8 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "lib/Btc.js",
+  "main": "lib/index.js",
   "license": "Apache-2.0",
-  "dependencies": {
-    "@ledgerhq/hw-transport": "^4.32.0",
-    "create-hash": "^1.1.3"
-  },
   "devDependencies": {
     "flow-bin": "^0.68.0",
     "flow-typed": "^2.4.0"

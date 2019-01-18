@@ -203,11 +203,7 @@ export default class TransportU2F extends Transport<null> {
   }
 
   close(): Promise<void> {
-    const i = transportInstances.indexOf(this);
-    if (i === -1) {
-      throw new Error("invalid transport instance");
-    }
-    transportInstances.splice(i, 1);
+    // u2f have no way to clean things up
     return Promise.resolve();
   }
 }

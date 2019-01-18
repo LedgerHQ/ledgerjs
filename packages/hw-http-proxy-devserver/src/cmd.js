@@ -7,7 +7,7 @@ import bodyParser from "body-parser";
 import os from "os";
 
 const ifaces = os.networkInterfaces();
-const ips = Object.keys(ifaces)
+export const ips = Object.keys(ifaces)
   .reduce(
     (acc, ifname) =>
       acc.concat(
@@ -67,57 +67,66 @@ app.post("/", bodyParser.json(), async (req, res) => {
 });
 
 let wsIndex = 0;
-let transportP = null;
+let wsBusyIndex = 0;
+
 wss.on("connection", ws => {
   const index = ++wsIndex;
   try {
-    let transport;
+    let transport, transportP;
     let destroyed = false;
 
-    ws.on("close", () => {
+    const onClose = async () => {
+      if (destroyed) return;
       destroyed = true;
-      if (transportP) {
-        transportP.then(
-          transport => {
-            transportP = null;
-            transport.close();
-          },
-          () => {}
-        );
+      if (wsBusyIndex === index) {
         console.log(`WS(${index}): close`);
+        await transportP.then(transport => transport.close(), () => {});
+        wsBusyIndex = 0;
       }
-    });
+    };
+
+    ws.on("close", onClose);
 
     ws.on("message", async apduHex => {
+      if (destroyed) return;
+
       if (apduHex === "open") {
+        if (wsBusyIndex) {
+          ws.send(
+            JSON.stringify({
+              error: "WebSocket is busy (previous session not closed)"
+            })
+          );
+          ws.close();
+          destroyed = true;
+          return;
+        }
+        transportP = TransportNodeHid.create(5000);
+        wsBusyIndex = index;
+
         console.log(`WS(${index}): opening...`);
         try {
-          if (transportP) {
-            const p = transportP;
-            await transportP.then(
-              t => {
-                if (p !== transportP) return;
-                transportP = null;
-                console.warn(
-                  "/!\\ /!\\ /!\\ warning: you didn't transport.close() the previous transport. force closing it! /!\\ /!\\ /!\\"
-                );
-                return t.close();
-              },
-              () => {}
-            );
-          }
-          transportP = TransportNodeHid.create(2000);
-          if (destroyed) return;
           transport = await transportP;
           transport.on("disconnect", () => ws.close());
           console.log(`WS(${index}): opened!`);
           ws.send(JSON.stringify({ type: "opened" }));
         } catch (e) {
           console.log(`WS(${index}): open failed! ${e}`);
+          ws.send(
+            JSON.stringify({
+              error: e.message
+            })
+          );
           ws.close();
         }
         return;
       }
+
+      if (wsBusyIndex !== index) {
+        console.warn("ignoring message because busy transport");
+        return;
+      }
+
       if (!transport) {
         console.warn("received message before device was opened");
         return;
@@ -140,10 +149,11 @@ wss.on("connection", ws => {
   }
 });
 
+console.log(
+  "DEBUG_COMM_HTTP_PROXY=" +
+    ["localhost", ...ips].map(ip => `ws://${ip}:${PORT}`).join("|")
+);
+
 server.listen(PORT, () => {
-  console.log("hw-transport-http-proxy-debug listening on " + PORT + "...");
-  console.log(
-    "DEBUG_COMM_HTTP_PROXY=" +
-      ["localhost", ...ips].map(ip => `ws://${ip}:${PORT}`).join("|")
-  );
+  console.log(`\nNano S proxy started on ${ips[0]}\n`);
 });

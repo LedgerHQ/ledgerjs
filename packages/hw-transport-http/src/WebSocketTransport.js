@@ -77,6 +77,7 @@ export default class WebSocketTransport extends Transport<string> {
             case "opened":
               return resolve(exchangeMethods);
             case "error":
+              reject(new Error(data.error));
               return exchangeMethods.rejectExchange(
                 new TransportError(data.error, "WSError")
               );
