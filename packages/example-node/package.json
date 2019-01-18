@@ -10,7 +10,7 @@
     "@ledgerhq/hw-transport-node-hid": "^4.33.3"
   },
   "devDependencies": {
-    "flow-bin": "^0.68.0",
+    "flow-bin": "^0.78.0",
     "flow-typed": "^2.4.0"
   },
   "scripts": {

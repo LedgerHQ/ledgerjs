@@ -20,17 +20,20 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "lib/index.js",
+  "main": "lib/BleTransport.js",
   "license": "Apache-2.0",
   "peerDependencies": {
-    "react-native-ble-plx": "^0.8.0"
+    "react-native-ble-plx": "^1.0.1"
   },
   "dependencies": {
+    "@ledgerhq/errors": "^4.33.7",
     "@ledgerhq/hw-transport": "^4.32.0",
-    "invariant": "^2.2.4"
+    "invariant": "^2.2.4",
+    "rxjs": "^6.3.3",
+    "uuid": "^3.3.2"
   },
   "devDependencies": {
-    "flow-bin": "^0.68.0",
+    "flow-bin": "^0.78.0",
     "flow-typed": "^2.4.0"
   },
   "scripts": {
