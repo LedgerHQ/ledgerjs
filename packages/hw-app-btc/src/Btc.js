@@ -570,7 +570,6 @@ export default class Btc {
    * - "bipxxx" for using BIPxxx
    * - "sapling" to indicate a zec transaction is supporting sapling (to be set over block 419200)
    * @param expiryHeight is an optional Buffer for zec overwinter / sapling Txs
-   * @param multisigInputs is an optional array of [ transaction, output_index ] that cannot be signed by the device
    * @return the signed transaction ready to be broadcast
    * @example
 btc.createPaymentTransactionNew(
@@ -590,8 +589,7 @@ btc.createPaymentTransactionNew(
     segwit?: boolean = false,
     initialTimestamp?: number,
     additionals: Array<string> = [],
-    expiryHeight?: Buffer,
-    multisigInputs?: Array<[Transaction, number, ?string, ?number]> = []
+    expiryHeight?: Buffer
   ) {
     const isDecred = additionals.includes("decred");
     const hasTimestamp = initialTimestamp !== undefined;
@@ -700,32 +698,6 @@ btc.createPaymentTransactionNew(
           });
         }
       })
-      .then(() => {
-        return foreach(multisigInputs, input => {
-          return doIf(!resuming, () =>
-            getTrustedInputCall(input[1], input[0], additionals).then(trustedInput => {
-              let sequence = Buffer.alloc(4);
-              sequence.writeUInt32LE(
-                input.length >= 4 && typeof input[3] === "number"
-                  ? input[3]
-                  : DEFAULT_SEQUENCE,
-                0
-              );
-              trustedInputs.push({
-                trustedInput: false,
-                value: Buffer.from(trustedInput, "hex"),
-                sequence
-              });
-              let offset = useBip143 ? 0 : 4;
-              targetTransaction.inputs.push({
-                prevout: Buffer.from(trustedInput, "hex").slice(offset, offset + 0x24),
-                script: Buffer.alloc(0),
-                sequence
-              });
-            })
-          );
-        });
-      })
       .then(() =>
         doIf(!resuming, () =>
           // Collect public keys
@@ -777,22 +749,17 @@ btc.createPaymentTransactionNew(
       )
       .then(() =>
         // Do the second run with the individual transaction
-        foreach(inputs.concat(multisigInputs), (input, i) => {
-          let script;
-          if (inputs[i]) {
-            script =
-              inputs[i].length >= 3 && typeof inputs[i][2] === "string"
-                ? Buffer.from(inputs[i][2], "hex")
-                : !segwit
-                  ? regularOutputs[i].script
-                  : Buffer.concat([
-                      Buffer.from([OP_DUP, OP_HASH160, HASH_SIZE]),
-                      this.hashPublicKey(publicKeys[i]),
-                      Buffer.from([OP_EQUALVERIFY, OP_CHECKSIG])
-                    ]);
-          } else {
-            script = Buffer.alloc(0);
-          }
+        foreach(inputs, (input, i) => {
+          let script =
+            inputs[i].length >= 3 && typeof inputs[i][2] === "string"
+              ? Buffer.from(inputs[i][2], "hex")
+              : !segwit
+                ? regularOutputs[i].script
+                : Buffer.concat([
+                    Buffer.from([OP_DUP, OP_HASH160, HASH_SIZE]),
+                    this.hashPublicKey(publicKeys[i]),
+                    Buffer.from([OP_EQUALVERIFY, OP_CHECKSIG])
+                  ]);
           let pseudoTX = Object.assign({}, targetTransaction);
           let pseudoTrustedInputs = useBip143
             ? [trustedInputs[i]]
@@ -819,24 +786,19 @@ btc.createPaymentTransactionNew(
               )
             )
             .then(() => {
-              if (associatedKeysets[i]) {
-                return this.signTransaction(
-                  associatedKeysets[i],
-                  lockTime,
-                  sigHashType,
-                  expiryHeight
-                );
-              } else {
-                return false;
-              }
+              return this.signTransaction(
+                associatedKeysets[i],
+                lockTime,
+                sigHashType,
+                expiryHeight,
+                additionals
+              );
             })
             .then(signature => {
-              if (signature) {
-                signatures.push(signature);
-                targetTransaction.inputs[i].script = nullScript;
-                if (firstRun) {
-                  firstRun = false;
-                }
+              signatures.push(signature);
+              targetTransaction.inputs[i].script = nullScript;
+              if (firstRun) {
+                firstRun = false;
               }
             });
         })
