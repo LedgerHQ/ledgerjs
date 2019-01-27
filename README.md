@@ -21,8 +21,10 @@ applications. There are implementations for Node and Browser.
 | [`@ledgerhq/hw-app-str`](/packages/hw-app-str)                                       | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-app-str.svg)](https://www.npmjs.com/package/@ledgerhq/hw-app-str)                                       | Stellar Application API                                                                                      |
 | [`@ledgerhq/hw-app-ada`](/packages/hw-app-ada)                                       | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-app-ada.svg)](https://www.npmjs.com/package/@ledgerhq/hw-app-ada)                                       | Cardano ADA Application API                                                                                  |
 | **Transports**                                                                       |
-| [`@ledgerhq/hw-transport-node-hid`](/packages/hw-transport-node-hid)                 | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-node-hid.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-node-hid)                 | Node implementation of the communication layer, using `node-hid` (USB)                                       |
 | [`@ledgerhq/hw-transport-u2f`](/packages/hw-transport-u2f)                           | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-u2f.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-u2f)                           | Web implementation of the communication layer, using [U2F api](https://github.com/grantila/u2f-api)          |
+| [`@ledgerhq/hw-transport-webusb`](/packages/hw-transport-webusb)                     | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-webusb.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-webusb)                     | WebUSB implementation of the communication layer (experimental)                                              |
+| [`@ledgerhq/hw-transport-web-ble`](/packages/hw-transport-web-ble)                   | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-web-ble.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-webusb)                    | Bluetooth implementation of the communication layer (experimental)                                           |
+| [`@ledgerhq/hw-transport-node-hid`](/packages/hw-transport-node-hid)                 | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-node-hid.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-node-hid)                 | Node implementation of the communication layer, using `node-hid` (USB)                                       |
 | [`@ledgerhq/react-native-hw-transport-ble`](/packages/react-native-hw-transport-ble) | [![npm](https://img.shields.io/npm/v/@ledgerhq/react-native-hw-transport-ble.svg)](https://www.npmjs.com/package/@ledgerhq/react-native-hw-transport-ble) | BLE bluetooth for react-native communication layer                                                           |
 | [`@ledgerhq/react-native-hid`](/packages/react-native-hid)                           | [![npm](https://img.shields.io/npm/v/@ledgerhq/react-native-hid.svg)](https://www.npmjs.com/package/@ledgerhq/react-native-hid)                           | USB hid for react-native communication layer                                                                 |
 | [`@ledgerhq/hw-transport-http`](/packages/hw-transport-http)                         | [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-http.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-http)                         | communicate to the device over HTTP. **NB: DEV & testing purpose only. DO NOT use in PROD**                  |
@@ -54,11 +56,11 @@ getBtcAddress().then(a => console.log(a));
 
 **More advanced examples:**
 
-* TODO
+- TODO
 
 ## Documentation
 
-* **[API doc](http://ledgerhq.github.io/ledgerjs/)**
+- **[API doc](http://ledgerhq.github.io/ledgerjs/)**
 
 ## Contributing
 
@@ -129,12 +131,12 @@ yarn test-browser
 
 Checklist before deploying a new release:
 
-* you have the right in the LedgerHQ org on NPM
-* you have run `npm login` once (check `npm whoami`)
-* Go to **master** branch
-  * your master point on LedgerHQ repository (check with `git config remote.$(git config branch.master.remote).url` and fix it with `git branch --set-upstream master origin/master`)
-  * you are in sync (`git pull`) and there is no changes in `git status`
-* Run `yarn` once, there is still no changes in `git status`
+- you have the right in the LedgerHQ org on NPM
+- you have run `npm login` once (check `npm whoami`)
+- Go to **master** branch
+  - your master point on LedgerHQ repository (check with `git config remote.$(git config branch.master.remote).url` and fix it with `git branch --set-upstream master origin/master`)
+  - you are in sync (`git pull`) and there is no changes in `git status`
+- Run `yarn` once, there is still no changes in `git status`
 
 **deploy a new release**
 

@@ -103,11 +103,6 @@
     lodash "^4.2.0"
     to-fast-properties "^2.0.0"
 
-"@ledgerhq/errors@^4.33.7":
-  version "4.33.7"
-  resolved "https://registry.yarnpkg.com/@ledgerhq/errors/-/errors-4.33.7.tgz#b78becd20e8a68f7115ad0986fa357a8adddf6b7"
-  integrity sha512-1vKWcttI5NHpT6rMKKuxWPAjfwDgfgUTf/AyNAT5KXHlhiLvqnA3NDCdNUVadajVNKSa/s1u1ZWKismtbfePzg==
-
 "@octokit/rest@^15.2.6":
   version "15.18.0"
   resolved "https://registry.yarnpkg.com/@octokit/rest/-/rest-15.18.0.tgz#e6de702b57dec94c71e806f1cff0ecb9725b3054"
