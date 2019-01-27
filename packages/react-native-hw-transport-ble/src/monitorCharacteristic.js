@@ -6,26 +6,26 @@ import type { Characteristic } from "./types";
 import { logSubject } from "./debug";
 
 export const monitorCharacteristic = (
-  characteristic: Characteristic,
+  characteristic: Characteristic
 ): Observable<Buffer> =>
   Observable.create(o => {
     logSubject.next({
       type: "verbose",
-      message: "start monitor " + characteristic.uuid,
+      message: "start monitor " + characteristic.uuid
     });
     const subscription = characteristic.monitor((error, c) => {
       if (error) {
         logSubject.next({
           type: "verbose",
-          message: "error monitor " + characteristic.uuid + ": " + error,
+          message: "error monitor " + characteristic.uuid + ": " + error
         });
         o.error(error);
       } else if (!c) {
         o.error(
           new TransportError(
             "characteristic monitor null value",
-            "CharacteristicMonitorNull",
-          ),
+            "CharacteristicMonitorNull"
+          )
         );
       } else {
         try {
@@ -40,7 +40,7 @@ export const monitorCharacteristic = (
     return () => {
       logSubject.next({
         type: "verbose",
-        message: "end monitor " + characteristic.uuid,
+        message: "end monitor " + characteristic.uuid
       });
       subscription.remove();
     };

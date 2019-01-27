@@ -9,7 +9,7 @@ const TagId = 0x05;
 
 function chunkBuffer(
   buffer: Buffer,
-  sizeForIndex: number => number,
+  sizeForIndex: number => number
 ): Array<Buffer> {
   const chunks = [];
   for (
@@ -26,7 +26,7 @@ export const sendAPDU = (
   bleManager: BleManager,
   write: (Buffer, ?string) => Promise<void>,
   apdu: Buffer,
-  mtuSize: number,
+  mtuSize: number
 ) => {
   const chunks = chunkBuffer(apdu, i => mtuSize - (i === 0 ? 5 : 3)).map(
     (buffer, i) => {
@@ -37,7 +37,7 @@ export const sendAPDU = (
         head.writeUInt16BE(apdu.length, 3);
       }
       return Buffer.concat([head, buffer]);
-    },
+    }
   );
 
   return Observable.create(o => {
@@ -60,17 +60,17 @@ export const sendAPDU = (
         terminated = true;
         logSubject.next({
           type: "ble-error",
-          message: "sendAPDU failure " + String(e),
+          message: "sendAPDU failure " + String(e)
         });
         o.error(e);
-      },
+      }
     );
 
     const unsubscribe = () => {
       if (!terminated) {
         logSubject.next({
           type: "verbose",
-          message: "sendAPDU interruption",
+          message: "sendAPDU interruption"
         });
         terminated = true;
         bleManager.cancelTransaction(txId);
