@@ -178,7 +178,9 @@ export default class Btc {
 
     const processInputs = () => {
       return eachSeries(inputs, input => {
-        const treeField = isDecred ? (input.tree || Buffer.from([0x00])) : Buffer.alloc(0);
+        const treeField = isDecred
+          ? input.tree || Buffer.from([0x00])
+          : Buffer.alloc(0);
         const data = Buffer.concat([
           input.prevout,
           treeField,
