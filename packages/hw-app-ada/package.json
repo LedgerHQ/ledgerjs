@@ -18,6 +18,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/hw-transport": "^4.35.0",
+    "base-x": "^3.0.5",
     "node-int64": "^0.4.0"
   },
   "devDependencies": {

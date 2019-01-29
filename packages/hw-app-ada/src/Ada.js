@@ -19,41 +19,39 @@
 import type Transport from "@ledgerhq/hw-transport";
 import { TransportStatusError } from "@ledgerhq/hw-transport";
 
+import utils, { Precondition, Assert } from "./utils";
+
 const CLA = 0xd7;
-const HARDENED = 0x80000000;
 
-const INS_GET_VERSION = 0x00;
-const INS_GET_EXT_PUBLIC_KEY = 0x10;
-const INS_DERIVE_ADDRESS = 0x11;
-const INS_ATTEST_UTXO = 0x20;
-const INS_RUN_TESTS = 0xf0;
+const INS = {
+  GET_VERSION: 0x00,
 
-// These are just JS error codes (no parallel with in-ledger app codes)
-const INVALID_PATH = 0x5001;
-const INVALID_PATH_LENGTH = 0x5002;
-const INDEX_NAN = 0x5003;
+  GET_EXT_PUBLIC_KEY: 0x10,
+  DERIVE_ADDRESS: 0x11,
 
-const chunkBy = (data, chunkLengths) => {
-  const chunkLengthsSum = chunkLengths.reduce((x, y) => x + y);
+  ATTEST_UTXO: 0x20,
+  SIGN_TX: 0x21,
 
-  if (chunkLengthsSum > data.length) {
-    throw new Error("Chunks exceed data length.");
-  }
-
-  let offset = 0;
-
-  const result = [];
-
-  const restLength = data.length - chunkLengthsSum;
-
-  for (let c of [...chunkLengths, restLength]) {
-    result.push(data.slice(offset, offset + c));
-
-    offset += c;
-  }
-
-  return result;
+  RUN_TESTS: 0xf0
 };
+
+type BIP32Path = Array<number>;
+
+type InputTypeUTxO = {|
+  txDataHex: string,
+  outputIndex: number,
+  path: BIP32Path
+|};
+
+type OutputTypeAddress = {|
+  amountStr: string,
+  address58: string
+|};
+
+type OutputTypeChange = {|
+  amountStr: string,
+  path: BIP32Path
+|};
 
 /**
  * Cardano ADA API
@@ -72,7 +70,6 @@ export default class Ada {
       "getVersion",
       "getExtendedPublicKey",
       "signTransaction",
-      "attestUtxo",
       "deriveAddress"
     ];
     this.transport.decorateAppAPIMethods(this, this.methods, scrambleKey);
@@ -93,80 +90,111 @@ export default class Ada {
     minor: string,
     patch: string
   }> {
-    const response = await this.transport.send(
-      CLA,
-      INS_GET_VERSION,
-      0x00,
-      0x00
-    );
+    const _send = (p1, p2, data) =>
+      this.transport
+        .send(CLA, INS.GET_VERSION, p1, p2, data)
+        .then(utils.stripRetcodeFromResponse);
 
+    const P1_UNUSED = 0x00;
+    const P2_UNUSED = 0x00;
+    const response = await _send(P1_UNUSED, P2_UNUSED, utils.hex_to_buf(""));
+    Assert.assert(response.length == 3);
     const [major, minor, patch] = response;
     return { major, minor, patch };
   }
 
+  /**
+   * Runs unit tests on the device (DEVEL app build only)
+   *
+   * @returns {Promise<void>}
+   */
   async runTests(): Promise<void> {
-    await this.transport.send(CLA, INS_RUN_TESTS, 0x00, 0x00);
+    await this.transport.send(CLA, INS.RUN_TESTS, 0x00, 0x00);
   }
 
-  /**
-   * Attests the utxo.
-   *
-   * @returns {Promise<{txHash:string, outputNumber:number, amount:number, hmac:string}>}.
-   */
-  async attestUtxo(
-    txHex: string,
+  async _attestUtxo(
+    txDataHex: string,
     outputIndex: number
   ): Promise<{
-    txHash: string,
-    outputNumber: number,
-    amount: number,
-    hmac: string
+    txHashHex: string,
+    outputIndex: number,
+    amountStr: string,
+    hmacHex: string,
+    rawBuffer: Buffer
   }> {
+    Precondition.checkIsHexString(txDataHex);
+    Precondition.checkIsUint32(outputIndex);
+
+    const _send = (p1, p2, data) =>
+      this.transport
+        .send(CLA, INS.ATTEST_UTXO, p1, p2, data)
+        .then(utils.stripRetcodeFromResponse);
+
     const P1_INIT = 0x01;
     const P1_CONTINUE = 0x02;
+
     const P2_UNUSED = 0x00;
 
     const CHUNK_SIZE = 255;
 
-    const txRaw = Buffer.from(txHex, "hex");
     {
-      // init. TODO(ppershing): we can pack some data here as well
-      const data = Buffer.alloc(4);
-      data.writeUInt32BE(outputIndex, 0);
-      await this.transport.send(CLA, INS_ATTEST_UTXO, P1_INIT, P2_UNUSED, data);
+      // Initial request
+      const data = utils.uint32_to_buf(outputIndex);
+      const result = await _send(P1_INIT, P2_UNUSED, data);
+      Assert.assert(result.length == 0);
     }
+
+    const txData = utils.hex_to_buf(txDataHex);
 
     let i = 0;
-    let result = Buffer.alloc(0);
-    while (i < txRaw.length) {
-      const chunk = txRaw.slice(i, i + CHUNK_SIZE);
-      i += CHUNK_SIZE;
-      result = await this.transport.send(
-        CLA,
-        INS_ATTEST_UTXO,
-        P1_CONTINUE,
-        P2_UNUSED,
-        chunk
-      );
+    {
+      // middle requests
+      while (i + CHUNK_SIZE < txData.length) {
+        const chunk = txData.slice(i, i + CHUNK_SIZE);
+        const result = await _send(P1_CONTINUE, P2_UNUSED, chunk);
+        Assert.assert(result.length == 0);
+        i += CHUNK_SIZE;
+      }
     }
 
-    const [txHash, outputNumber, amount, hmac, returnCode] = chunkBy(result, [
-      32,
-      4,
-      8,
-      16
-    ]);
+    // final request
+    {
+      const chunk = txData.slice(i);
+      const result = await _send(P1_CONTINUE, P2_UNUSED, chunk);
 
-    if (returnCode.length != 2 || returnCode.readUIntBE(0, 2) != 0x9000) {
-      throw new Error("Invalid return code");
+      const sum = arr => arr.reduce((x, y) => x + y, 0);
+
+      const sizes = [32, 4, 8, 16];
+      Assert.assert(result.length == sum(sizes));
+
+      const [txHash, outputNumber, amount, hmac] = utils.chunkBy(result, sizes);
+
+      return {
+        rawBuffer: result,
+        txHashHex: utils.buf_to_hex(txHash),
+        outputIndex: utils.buf_to_uint32(outputNumber),
+        amountStr: utils.buf_to_amount(amount),
+        hmacHex: utils.buf_to_hex(hmac)
+      };
     }
+  }
 
-    return {
-      txHash: txHash.toString("hex"),
-      outputNumber: outputNumber.readUIntBE(0, 4),
-      amount: amount.readUIntBE(0, 8),
-      hmac: hmac.toString("hex")
-    };
+  /**
+   * @param string Raw transaction data (without witnesses) encoded as hex string
+   * @param number Output indes
+   *
+   */
+  async attestUtxo(
+    txDataHex: string,
+    outputIndex: number
+  ): Promise<{
+    txHashHex: string,
+    outputIndex: number,
+    amountStr: string,
+    hmacHex: string,
+    rawBuffer: Buffer
+  }> {
+    return this._attestUtxo(txDataHex, outputIndex);
   }
 
   /**
@@ -175,54 +203,35 @@ export default class Ada {
    * @param {Array<number>} indexes The path indexes. Path must begin with `44'/1815'/n'`, and may be up to 10 indexes long.
    * @return {Promise<{ publicKey:string, chainCode:string }>} The public key with chaincode for the given path.
    *
-   * @throws 5001 - The path provided does not have the first 3 indexes hardened
-   * @throws 5002 - The path provided is less than 3 indexes
-   * @throws 5003 - Some of the indexes is not a number
-   *
    * @example
    * const { publicKey, chainCode } = await ada.getExtendedPublicKey([ HARDENED + 44, HARDENED + 1815, HARDENED + 1 ]);
    * console.log(publicKey);
    *
    */
   async getExtendedPublicKey(
-    indexes: Array<number>
-  ): Promise<{ publicKey: string, chainCode: string }> {
-    if (indexes.length < 3 || indexes.length > 10) {
-      throw new TransportStatusError(INVALID_PATH_LENGTH);
-    }
-    if (indexes.some(index => isNaN(index))) {
-      throw new TransportStatusError(INDEX_NAN);
-    }
-    if (
-      indexes[0] != HARDENED + 44 ||
-      indexes[1] != HARDENED + 1815 ||
-      indexes[2] < HARDENED
-    ) {
-      throw new TransportStatusError(INVALID_PATH);
-    }
+    path: BIP32Path
+  ): Promise<{ publicKeyHex: string, chainCodeHex: string }> {
+    Precondition.checkIsValidPath(path);
 
-    const data = Buffer.alloc(1 + 4 * indexes.length);
-    data.writeUInt8(indexes.length, 0);
+    const _send = (p1, p2, data) =>
+      this.transport
+        .send(CLA, INS.GET_EXT_PUBLIC_KEY, p1, p2, data)
+        .then(utils.stripRetcodeFromResponse);
 
-    for (let i = 0; i < indexes.length; i++) {
-      data.writeUInt32BE(indexes[i], 1 + i * 4);
-    }
+    const P1_UNUSED = 0x00;
+    const P2_UNUSED = 0x00;
 
-    const response = await this.transport.send(
-      CLA,
-      INS_GET_EXT_PUBLIC_KEY,
-      0x00,
-      0x00,
-      data
-    );
+    const data = utils.path_to_buf(path);
 
-    const publicKeyLength = response[0];
-    const publicKey = response.slice(1, 1 + publicKeyLength).toString("hex");
-    const chainCode = response
-      .slice(1 + publicKeyLength, 1 + publicKeyLength + 32)
-      .toString("hex");
+    const response = await _send(P1_UNUSED, P2_UNUSED, data);
 
-    return { publicKey, chainCode };
+    const [publicKey, chainCode, rest] = utils.chunkBy(response, [32, 32]);
+    Assert.assert(rest.length == 0);
+
+    return {
+      publicKeyHex: publicKey.toString("hex"),
+      chainCodeHex: chainCode.toString("hex")
+    };
   }
 
   /**
@@ -239,40 +248,175 @@ export default class Ada {
    * const { address } = await ada.deriveAddress([ HARDENED + 44, HARDENED + 1815, HARDENED + 1, 0, 5 ]);
    *
    */
-  async deriveAddress(indexes: Array<number>): Promise<{ address: string }> {
-    if (indexes.length < 5 || indexes.length > 10) {
-      throw new TransportStatusError(INVALID_PATH_LENGTH);
+  async deriveAddress(path: BIP32Path): Promise<{ address58: string }> {
+    Precondition.checkIsValidPath(path);
+
+    const _send = (p1, p2, data) =>
+      this.transport
+        .send(CLA, INS.DERIVE_ADDRESS, p1, p2, data)
+        .then(utils.stripRetcodeFromResponse);
+
+    const P1_RETURN = 0x01;
+    const P2_UNUSED = 0x00;
+    const data = utils.path_to_buf(path);
+    const response = await _send(P1_RETURN, P2_UNUSED, data);
+
+    return {
+      address58: utils.base58_encode(response)
+    };
+  }
+
+  async showAddress(path: BIP32Path): Promise<void> {
+    Precondition.checkIsValidPath(path);
+
+    const _send = (p1, p2, data) =>
+      this.transport
+        .send(CLA, INS.DERIVE_ADDRESS, p1, p2, data)
+        .then(utils.stripRetcodeFromResponse);
+
+    const P1_DISPLAY = 0x02;
+    const P2_UNUSED = 0x00;
+    const data = utils.path_to_buf(path);
+    const response = await _send(P1_DISPLAY, P2_UNUSED, data);
+    Assert.assert(response.length == 0);
+  }
+
+  async signTransaction(
+    inputs: Array<InputTypeUTxO>,
+    outputs: Array<OutputTypeAddress | OutputTypeChange>
+  ) {
+    console.log("sign");
+
+    const P1_STAGE_INIT = 0x01;
+    const P1_STAGE_INPUTS = 0x02;
+    const P1_STAGE_OUTPUTS = 0x03;
+    const P1_STAGE_CONFIRM = 0x04;
+    const P1_STAGE_WITNESSES = 0x05;
+    const P2_UNUSED = 0x00;
+    const SIGN_TX_INPUT_TYPE_ATTESTED_UTXO = 0x01;
+
+    const _send = (p1, p2, data) =>
+      this.transport
+        .send(CLA, INS.SIGN_TX, p1, p2, data)
+        .then(utils.stripRetcodeFromResponse);
+
+    const signTx_init = async (
+      numInputs: number,
+      numOutputs: number
+    ): Promise<void> => {
+      const data = Buffer.concat([
+        utils.uint32_to_buf(numInputs),
+        utils.uint32_to_buf(numOutputs)
+      ]);
+      const response = await _send(P1_STAGE_INIT, P2_UNUSED, data);
+      Assert.assert(response.length == 0);
+    };
+
+    const signTx_addInput = async (attestation): Promise<void> => {
+      const data = Buffer.concat([
+        utils.uint8_to_buf(SIGN_TX_INPUT_TYPE_ATTESTED_UTXO),
+        attestation.rawBuffer
+      ]);
+      const response = await _send(P1_STAGE_INPUTS, P2_UNUSED, data);
+      Assert.assert(response.length == 0);
+    };
+
+    const signTx_addAddressOutput = async (
+      address58: string,
+      amountStr: string
+    ): Promise<void> => {
+      const data = Buffer.concat([
+        utils.amount_to_buf(amountStr),
+        utils.uint8_to_buf(0x01),
+        utils.base58_decode(address58)
+      ]);
+      const response = await _send(P1_STAGE_OUTPUTS, P2_UNUSED, data);
+      Assert.assert(response.length == 0);
+    };
+
+    const signTx_addChangeOutput = async (
+      path: BIP32Path,
+      amountStr: string
+    ): Promise<void> => {
+      const data = Buffer.concat([
+        utils.amount_to_buf(amountStr),
+        utils.uint8_to_buf(0x02),
+        utils.path_to_buf(path)
+      ]);
+      const response = await _send(P1_STAGE_OUTPUTS, P2_UNUSED, data);
+      Assert.assert(response.length == 0);
+    };
+
+    const signTx_awaitConfirm = async (): Promise<{
+      txHashHex: string
+    }> => {
+      const response = await _send(
+        P1_STAGE_CONFIRM,
+        P2_UNUSED,
+        utils.hex_to_buf("")
+      );
+      return {
+        txHashHex: response.toString("hex")
+      };
+    };
+
+    const signTx_getWitness = async (
+      path: BIP32Path
+    ): Promise<{
+      path: BIP32Path,
+      witnessHex: string
+    }> => {
+      const data = Buffer.concat([utils.path_to_buf(path)]);
+      const response = await _send(P1_STAGE_WITNESSES, P2_UNUSED, data);
+      return {
+        path: path,
+        witnessHex: utils.buf_to_hex(response)
+      };
+    };
+
+    console.log("attest");
+    const attestedInputs = [];
+    // attest
+    for (const { txDataHex, outputIndex } of inputs) {
+      const attestation = await this._attestUtxo(txDataHex, outputIndex);
+      attestedInputs.push(attestation);
     }
-    if (indexes.some(index => isNaN(index))) {
-      throw new TransportStatusError(INDEX_NAN);
-    }
-    if (
-      indexes[0] != HARDENED + 44 ||
-      indexes[1] != HARDENED + 1815 ||
-      indexes[2] < HARDENED ||
-      (indexes[3] != 0 && indexes[3] != 1)
-    ) {
-      throw new TransportStatusError(INVALID_PATH);
-    }
 
-    const data = Buffer.alloc(1 + 4 * indexes.length);
-    data.writeUInt8(indexes.length, 0);
+    // init
+    console.log("init");
+    await signTx_init(attestedInputs.length, outputs.length);
 
-    for (let i = 0; i < indexes.length; i++) {
-      data.writeUInt32BE(indexes[i], 1 + i * 4);
+    // inputs
+    console.log("inputs");
+    for (const attestation of attestedInputs) {
+      await signTx_addInput(attestation);
     }
 
-    const response = await this.transport.send(
-      CLA,
-      INS_DERIVE_ADDRESS,
-      0x00,
-      0x00,
-      data
-    );
+    // outputs
+    console.log("outputs");
+    for (const output of outputs) {
+      if (output.address58) {
+        await signTx_addAddressOutput(output.address58, output.amountStr);
+      } else if (output.path) {
+        await signTx_addChangeOutput(output.path, output.amountStr);
+      } else {
+        throw "TODO";
+      }
+    }
 
-    const addressLength = response[0];
-    const address = response.slice(1, 1 + addressLength).toString();
+    // confirm
+    console.log("confirm");
+    const { txHashHex } = await signTx_awaitConfirm();
 
-    return { address };
+    console.log("witnesses");
+    const witnesses = [];
+    for (const input of inputs) {
+      const witness = await signTx_getWitness(input.path);
+      witnesses.push(witness);
+    }
+    return {
+      txHashHex,
+      witnesses
+    };
   }
 }
