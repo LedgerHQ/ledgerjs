@@ -1,0 +1,22 @@
+{
+  "private": true,
+  "name": "@ledgerhq/example-node-ada",
+  "version": "4.33.3",
+  "main": "index.js",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@ledgerhq/hw-app-ada": "^4.33.0",
+    "@ledgerhq/hw-transport-node-hid": "^4.33.3"
+  },
+  "devDependencies": {
+    "flow-bin": "^0.68.0",
+    "flow-typed": "^2.4.0"
+  },
+  "scripts": {
+    "start": "node lib/index.js",
+    "flow": "flow",
+    "clean": "bash ../../script/clean.sh",
+    "build": "bash ../../script/build.sh",
+    "watch": "bash ../../script/watch.sh"
+  }
+}
