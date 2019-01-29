@@ -27,7 +27,8 @@
     "flow-bin": "^0.78.0",
     "flow-typed": "^2.4.0",
     "joi": "^13.1.2",
-    "mocha": "^5.0.1"
+    "mocha": "^5.0.1",
+    "prettier": "^1.16.1"
   },
   "bugs": {
     "url": "https://github.com/LedgerHQ/ledgerjs/issues"
