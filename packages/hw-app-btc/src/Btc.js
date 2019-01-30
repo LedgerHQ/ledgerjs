@@ -955,7 +955,7 @@ btc.signP2SHTransaction(
             0
           );
           trustedInputs.push({
-            trustedInput: segwit ? false : true,
+            trustedInput: !segwit,
             value: segwit
               ? Buffer.from(trustedInput, "hex")
               : Buffer.from(trustedInput, "hex"),
