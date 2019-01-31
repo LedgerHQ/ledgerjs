@@ -42,9 +42,8 @@
     "watch": "bash ../../script/watch.sh",
     "clean-test": "rm -rf test/lib",
     "build-test": "yarn run clean-test && cd ../.. && export PATH=$(yarn bin):$PATH && cd - && babel --source-maps -d test/lib test/src && flow-copy-source -v test/src test/lib",
-    "core-test": "yarn run build-test && yarn run flow && mocha --timeout 3500 test/lib/core",
-    "api-test": "yarn run build-test && mocha --timeout 15000 test/lib/api",
-    "integration-test": "yarn run build-test && mocha --timeout 15000 test/lib/current/integration",
-    "direct-test": "yarn run build-test && mocha --timeout 15000 test/lib/current/direct"
+    "test-integration": "yarn run build-test && mocha --timeout 15000 test/lib/integration",
+    "test-direct": "yarn run build-test && mocha --timeout 3600000 test/lib/direct",
+    "test": "yarn test-integration && yarn test-direct"
   }
 }

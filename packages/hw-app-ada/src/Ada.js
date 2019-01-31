@@ -81,7 +81,7 @@ export default class Ada {
    * @returns {Promise<{major:number, minor:number, patch:number}>} Result object containing the application version number.
    *
    * @example
-   * const { major, minor, patch } = await ada.getVersion();
+   * const { major, minor, patch, flags } = await ada.getVersion();
    * console.log(`App version ${major}.${minor}.${patch}`);
    *
    */
@@ -98,9 +98,16 @@ export default class Ada {
     const P1_UNUSED = 0x00;
     const P2_UNUSED = 0x00;
     const response = await _send(P1_UNUSED, P2_UNUSED, utils.hex_to_buf(""));
-    Assert.assert(response.length == 3);
-    const [major, minor, patch] = response;
-    return { major, minor, patch };
+    Assert.assert(response.length == 4);
+    const [major, minor, patch, flags_value] = response;
+
+    const FLAG_IS_DEBUG = 1;
+    //const FLAG_IS_HEADLESS = 2;
+
+    const flags = {
+      isDebug: (flags_value & FLAG_IS_DEBUG) == FLAG_IS_DEBUG
+    };
+    return { major, minor, patch, flags };
   }
 
   /**
@@ -285,7 +292,7 @@ export default class Ada {
     inputs: Array<InputTypeUTxO>,
     outputs: Array<OutputTypeAddress | OutputTypeChange>
   ) {
-    console.log("sign");
+    //console.log("sign");
 
     const P1_STAGE_INIT = 0x01;
     const P1_STAGE_INPUTS = 0x02;
@@ -374,7 +381,7 @@ export default class Ada {
       };
     };
 
-    console.log("attest");
+    //console.log("attest");
     const attestedInputs = [];
     // attest
     for (const { txDataHex, outputIndex } of inputs) {
@@ -383,32 +390,32 @@ export default class Ada {
     }
 
     // init
-    console.log("init");
+    //console.log("init");
     await signTx_init(attestedInputs.length, outputs.length);
 
     // inputs
-    console.log("inputs");
+    //console.log("inputs");
     for (const attestation of attestedInputs) {
       await signTx_addInput(attestation);
     }
 
     // outputs
-    console.log("outputs");
+    //console.log("outputs");
     for (const output of outputs) {
       if (output.address58) {
         await signTx_addAddressOutput(output.address58, output.amountStr);
       } else if (output.path) {
         await signTx_addChangeOutput(output.path, output.amountStr);
       } else {
-        throw "TODO";
+        throw new Error("TODO");
       }
     }
 
     // confirm
-    console.log("confirm");
+    //console.log("confirm");
     const { txHashHex } = await signTx_awaitConfirm();
 
-    console.log("witnesses");
+    //console.log("witnesses");
     const witnesses = [];
     for (const input of inputs) {
       const witness = await signTx_getWitness(input.path);
@@ -420,3 +427,7 @@ export default class Ada {
     };
   }
 }
+
+export {
+  utils // reexport
+};

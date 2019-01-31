@@ -5,6 +5,8 @@ const BASE58_ALPHABET =
   "123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz";
 const bs58 = basex(BASE58_ALPHABET);
 
+const HARDENED = 0x80000000;
+
 // We use bs10 as an easy way to parse/encode amount strings
 const bs10 = basex("0123456789");
 
@@ -14,7 +16,7 @@ const MAX_LOVELACE_SUPPLY_STR = ["45", "000", "000", "000", "000000"].join("");
 export const Precondition = {
   // Generic check
   check: (cond: boolean) => {
-    if (!cond) throw "Precondition failed";
+    if (!cond) throw new Error("Precondition failed");
   },
   // Basic types
   checkIsString: (data: any) => {
@@ -79,7 +81,7 @@ export const Precondition = {
 
 export const Assert = {
   assert: (cond: boolean) => {
-    if (!cond) throw "Assertion failed";
+    if (!cond) throw new Error("Assertion failed");
   }
 };
 
@@ -161,7 +163,7 @@ export function stripRetcodeFromResponse(response: Buffer): Buffer {
   const retcode = response.slice(L, L + 2);
 
   if (retcode.toString("hex") != "9000")
-    throw `Invalid retcode ${retcode.toString("hex")}`;
+    throw new Error(`Invalid retcode ${retcode.toString("hex")}`);
   return response.slice(0, L);
 }
 
@@ -171,7 +173,7 @@ export function buf_to_amount(data: Buffer): string {
 
   const encoded = bs10.encode(data);
   // Strip leading zeros
-  return encoded.replace(/^0*./, "");
+  return encoded.replace(/^0*(.)/, "$1");
 }
 
 export function amount_to_buf(amount: string): Buffer {
@@ -197,7 +199,40 @@ export function base58_decode(data: string): Buffer {
   return bs58.decode(data);
 }
 
+function safe_parseInt(str: string): number {
+  Precondition.checkIsString(str);
+  const i = parseInt(str);
+  // Check that we parsed everything
+  Precondition.check("" + i == str);
+  // Could be invalid
+  Precondition.check(!isNaN(i));
+  // Could still be float
+  Precondition.checkIsInteger(i);
+  return i;
+}
+
+function parseBIP32Index(str: string): number {
+  let base = 0;
+  if (str.endsWith("'")) {
+    str = str.slice(0, -1);
+    base = HARDENED;
+  }
+  const i = safe_parseInt(str);
+  Precondition.check(i >= 0);
+  Precondition.check(i < HARDENED);
+  return base + i;
+}
+
+export function str_to_path(data: string): Array<number> {
+  Precondition.checkIsString(data);
+  Precondition.check(data.length > 0);
+
+  return data.split("/").map(parseBIP32Index);
+}
+
 export default {
+  HARDENED,
+
   hex_to_buf,
   buf_to_hex,
 
@@ -217,5 +252,7 @@ export default {
   base58_decode,
 
   chunkBy,
-  stripRetcodeFromResponse
+  stripRetcodeFromResponse,
+
+  str_to_path
 };
