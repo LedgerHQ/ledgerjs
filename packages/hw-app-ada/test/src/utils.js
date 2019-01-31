@@ -1,108 +1,19 @@
-import Joi from "joi";
 import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
-import { expect } from "chai";
-import { yellow } from "chalk";
 
-import Ada from "./TestAda";
+// FIXME: import
+import Ada, { utils } from "../..";
 
-const HARDENED = 0x80000000;
-
-export function isHeadless() {
-  return process.argv.includes("--headless");
-}
-
-/**
- * Transforms path string e.g. /44'/1 into array [0x80000000 + 44, 1]
- */
-export function pathToArray(path) {
-  return path
-    .split("/")
-    .filter(x => x != "")
-    .map(
-      x =>
-        x.endsWith("'")
-          ? HARDENED + Number.parseInt(x.slice(0, -1))
-          : Number.parseInt(x)
-    );
-}
-
-/**
- * Run a mocha test only if the build is headless.
- *
- * This is useful for stress tests which are too laborious to run with user interaction.
- */
-export function ifHeadlessIt(title, test) {
-  return isHeadless()
-    ? it(title, test)
-    : it.skip(`[SKIPPED: NOT IN HEADLESS] ${title}`, () => {});
-}
-
-/**
- * Run a mocha test only if the build is not headless.
- *
- * This is useful for tests which always require interaction.
- */
-export function ifNotHeadlessIt(title, test) {
-  return isHeadless()
-    ? it.skip(`[SKIPPED: RUNNING HEADLESSLY] ${title}`, () => {})
-    : it(title, test);
-}
-
-/**
- * Convenience function for retrieving the Ada instance.
- *
- * @returns {Promise<Object>} A promise that contains the Ada instance when fulfilled.
- */
-export async function getAda() {
-  const transport = await TransportNodeHid.create(1000);
-
-  return Promise.resolve(new Ada(transport));
-}
+export const str_to_path = utils.str_to_path;
+export const pathToBuffer = str => utils.path_to_buf(utils.str_to_path(str));
 
 export async function getTransport() {
   return await TransportNodeHid.create(1000);
 }
 
-/**
- * Converts path string e.g "44'/1815'/1'" into buffer, where first byte is path length followed by path.
- */
-export function pathToBuffer(path) {
-  const pathArray = pathToArray(path);
-  const buffer = Buffer.alloc(1 + 4 * pathArray.length);
-  buffer.writeUInt8(pathArray.length, 0);
+export async function getAda() {
+  const transport = await TransportNodeHid.create(1000);
 
-  for (let i = 0; i < pathArray.length; i++) {
-    buffer.writeUInt32BE(pathArray[i], 1 + i * 4);
-  }
-
-  return buffer;
-}
-
-/**
- * Convenience function for prompting user to interact with ledger device.
- *
- * @param {String} message The messsage to display.
- *
- * If --headless is supplied, then this is suppressed.
- */
-export function promptUser(message) {
-  if (isHeadless()) return;
-  console.log(
-    yellow.bgBlack("\n LEDGER DEVICE ") + yellow(` ${message.toUpperCase()}\n`)
-  );
-}
-
-/**
- * Validate a response against a Joi schema.
- *
- * @param {Object} response   The response to validate.
- * @param {Joi.object} schema The Joi schema to validate against.
- */
-export function validate(response, schema) {
-  if (response === null || response === undefined) {
-    throw new Error("Validation Error: Response was empty");
-  }
-
-  const { error, value } = Joi.validate(response, schema);
-  expect(error).to.be.null;
+  const ada = new Ada(transport);
+  ada.t = transport;
+  return Promise.resolve(ada);
 }

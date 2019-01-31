@@ -1,7 +1,7 @@
 import { expect } from "chai";
-import transactions from "../../fixtures/transactions";
+import transactions from "./__fixtures__/transactions";
 
-import { getAda } from "../../utils";
+import { getAda } from "../utils";
 
 describe("attestUtxo", async () => {
   let ada = {};
@@ -18,14 +18,14 @@ describe("attestUtxo", async () => {
     const transaction = transactions[0];
 
     for (let i = 0; i < transaction.outputs.length; i++) {
-      const { txHash, outputNumber, amount } = await ada.attestUtxo(
+      const { txHashHex, outputIndex, amountStr } = await ada.attestUtxo(
         transaction.tx,
         i
       );
 
-      expect(outputNumber).to.equal(i);
-      expect(txHash).to.equal(transaction.txHash);
-      expect(amount).to.equal(transaction.outputs[i].amount);
+      expect(outputIndex).to.equal(i);
+      expect(txHashHex).to.equal(transaction.txHash);
+      expect(amountStr).to.equal(transaction.outputs[i].amount);
     }
   });
 

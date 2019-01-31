@@ -19,11 +19,17 @@ export default [
     ].join(""),
     txHash: "f33b1f56240c9f4afc9dd9a9141737b2937b6cd856dd67fda81cc794d2670580",
     outputs: [
-      { amount: 1673668090925 },
-      { amount: 372500000 },
-      { amount: 433000500 },
-      { amount: 3280715000 },
-      { amount: 2035261700 }
+      {
+        amount: "1673668090925",
+        response:
+          "f33b1f56240c9f4afc9dd9a9141737b2937b6cd856dd67fda81cc794d2670580" +
+          "0000000000000185ae645c2db3c57a36de095da2a510fa551880b4e8" +
+          "9000"
+      },
+      { amount: "372500000" },
+      { amount: "433000500" },
+      { amount: "3280715000" },
+      { amount: "2035261700" }
     ]
   }
 ];
