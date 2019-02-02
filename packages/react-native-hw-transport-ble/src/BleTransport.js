@@ -24,6 +24,7 @@ import { sendAPDU } from "./sendAPDU";
 import { receiveAPDU } from "./receiveAPDU";
 import { monitorCharacteristic } from "./monitorCharacteristic";
 import { awaitsBleOn } from "./awaitsBleOn";
+import { decoratePromiseErrors, remapError } from "./remapErrors";
 
 const ServiceUuid = "d973f2e0-b19e-11e2-9e96-0800200c9a66";
 const WriteCharacteristicUuid = "d973f2e2-b19e-11e2-9e96-0800200c9a66";
@@ -329,7 +330,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
           // in such case we will always disconnect because something is bad.
           await bleManager.cancelDeviceConnection(this.id).catch(() => {}); // but we ignore if disconnect worked.
         }
-        throw e;
+        throw remapError(e);
       }
     });
 
@@ -356,7 +357,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
             message: "inferMTU got " + String(e)
           });
           await bleManager.cancelDeviceConnection(this.id).catch(() => {}); // but we ignore if disconnect worked.
-          throw e;
+          throw remapError(e);
         }
       });
     }
@@ -378,8 +379,10 @@ export default class BluetoothTransport extends Transport<Device | string> {
   async requestConnectionPriority(
     connectionPriority: "Balanced" | "High" | "LowPower"
   ) {
-    await this.device.requestConnectionPriority(
-      ConnectionPriority[connectionPriority]
+    await decoratePromiseErrors(
+      this.device.requestConnectionPriority(
+        ConnectionPriority[connectionPriority]
+      )
     );
   }
 
