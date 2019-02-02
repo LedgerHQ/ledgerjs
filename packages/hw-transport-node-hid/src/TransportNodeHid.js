@@ -9,13 +9,16 @@ import type {
 } from "@ledgerhq/hw-transport";
 import hidFraming from "@ledgerhq/devices/lib/hid-framing";
 import { identifyUSBProductId } from "@ledgerhq/devices";
-import { TransportError } from "@ledgerhq/errors";
+import { TransportError, DisconnectedDevice } from "@ledgerhq/errors";
 import getDevices from "./getDevices";
 import listenDevices from "./listenDevices";
 
 let listenDevicesDebounce = 500;
 let listenDevicesPollingSkip = () => false;
 let listenDevicesDebug = () => {};
+
+const isDisconnectedError = e =>
+  e && e.message && e.message.indexOf("HID") >= 0;
 
 /**
  * node-hid Transport implementation
@@ -114,26 +117,50 @@ export default class TransportNodeHid extends Transport<string> {
   device: HID.HID;
   channel = Math.floor(Math.random() * 0xffff);
   packetSize = 64;
+  disconnected = false;
 
   constructor(device: HID.HID) {
     super();
     this.device = device;
   }
 
+  setDisconnected = () => {
+    if (!this.disconnected) {
+      this.emit("disconnect");
+      this.disconnected = true;
+    }
+  };
+
   writeHID = (content: Buffer): Promise<void> => {
     const data = [0x00];
     for (let i = 0; i < content.length; i++) {
       data.push(content[i]);
     }
-    this.device.write(data);
-    return Promise.resolve();
+    try {
+      this.device.write(data);
+      return Promise.resolve();
+    } catch (e) {
+      if (isDisconnectedError(e)) {
+        this.setDisconnected();
+        return Promise.reject(new DisconnectedDevice(e.message));
+      }
+      return Promise.reject(e);
+    }
   };
 
   readHID = (): Promise<Buffer> =>
     new Promise((resolve, reject) =>
-      this.device.read((err, res) => {
-        if (err || !res) reject(err);
-        else {
+      this.device.read((e, res) => {
+        if (!res) {
+          return reject(new DisconnectedDevice());
+        }
+        if (e) {
+          if (isDisconnectedError(e)) {
+            this.setDisconnected();
+            return reject(new DisconnectedDevice(e.message));
+          }
+          reject(e);
+        } else {
           const buffer = Buffer.from(res);
           resolve(buffer);
         }
