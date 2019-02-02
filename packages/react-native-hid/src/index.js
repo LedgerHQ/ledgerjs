@@ -1,5 +1,6 @@
 //@flow
 import { NativeModules } from "react-native";
+import { ledgerUSBVendorId, identifyUSBProductId } from "@ledgerhq/devices";
 import Transport from "@ledgerhq/hw-transport";
 
 type DeviceObj = {
@@ -14,11 +15,7 @@ export default class HIDTransport extends Transport<DeviceObj> {
   static async list(): * {
     if (!NativeModules.HID) return Promise.resolve([]);
     const list = await NativeModules.HID.getDeviceList();
-    return list.filter(
-      d =>
-        (d.vendorId === 0x2581 && d.productId === 0x3b7c) ||
-        d.vendorId === 0x2c97
-    );
+    return list.filter(d => d.vendorId === ledgerUSBVendorId);
   }
 
   static listen(observer: *) {
@@ -27,7 +24,8 @@ export default class HIDTransport extends Transport<DeviceObj> {
     HIDTransport.list().then(candidates => {
       for (const c of candidates) {
         if (!unsubscribed) {
-          observer.next({ type: "add", descriptor: c });
+          const deviceInfo = identifyUSBProductId(c.productId);
+          observer.next({ type: "add", descriptor: c, deviceInfo });
         }
       }
     });
@@ -51,14 +49,17 @@ export default class HIDTransport extends Transport<DeviceObj> {
   }
 
   async exchange(value: Buffer) {
-    const resultHex = await NativeModules.HID.exchange(
-      this.id,
-      value.toString("hex")
-    );
-    return Buffer.from(resultHex, "hex");
+    return this.exchangeAtomicImpl(async () => {
+      const resultHex = await NativeModules.HID.exchange(
+        this.id,
+        value.toString("hex")
+      );
+      return Buffer.from(resultHex, "hex");
+    });
   }
 
-  close() {
+  async close() {
+    await this.exchangeBusyPromise;
     return NativeModules.HID.closeDevice(this.id);
   }
 

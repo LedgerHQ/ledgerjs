@@ -1,6 +1,10 @@
 //@flow
 
 import EventEmitter from "events";
+import type { DeviceInfo } from "@ledgerhq/devices";
+import { TransportError } from "@ledgerhq/errors";
+
+export { TransportError };
 
 /**
  */
@@ -15,7 +19,7 @@ export type Device = Object;
 export type DescriptorEvent<Descriptor> = {
   type: "add" | "remove",
   descriptor: Descriptor,
-  device?: Device
+  deviceInfo?: ?DeviceInfo
 };
 /**
  */
@@ -82,19 +86,6 @@ export function getAltStatusMessage(code: number): ?string {
     return "Internal error, please report";
   }
 }
-
-/**
- * TransportError is used for any generic transport errors.
- * e.g. Error thrown when data received by exchanges are incorrect or if exchanged failed to communicate with the device for various reason.
- */
-export function TransportError(message: string, id: string) {
-  this.name = "TransportError";
-  this.message = message;
-  this.stack = new Error().stack;
-  this.id = id;
-}
-//$FlowFixMe
-TransportError.prototype = new Error();
 
 /**
  * Error thrown when a device returned a non success status.
@@ -325,6 +316,27 @@ TransportFoo.create().then(transport => ...)
     });
   }
 
+  exchangeBusyPromise: ?Promise<void>;
+
+  // $FlowFixMe
+  exchangeAtomicImpl = async f => {
+    if (this.exchangeBusyPromise) {
+      throw new TransportError("Transport race condition", "RaceCondition");
+    }
+    let resolveBusy;
+    const busyPromise = new Promise(r => {
+      resolveBusy = r;
+    });
+    this.exchangeBusyPromise = busyPromise;
+    try {
+      const res = await f();
+      return res;
+    } finally {
+      if (resolveBusy) resolveBusy();
+      this.exchangeBusyPromise = null;
+    }
+  };
+
   decorateAppAPIMethods(
     self: Object,
     methods: Array<string>,
@@ -350,15 +362,12 @@ TransportFoo.create().then(transport => ...)
     return async (...args) => {
       const { _appAPIlock } = this;
       if (_appAPIlock) {
-        const e = new TransportError(
-          "Ledger Device is busy (lock " + _appAPIlock + ")",
-          "TransportLocked"
+        return Promise.reject(
+          new TransportError(
+            "Ledger Device is busy (lock " + _appAPIlock + ")",
+            "TransportLocked"
+          )
         );
-        Object.assign(e, {
-          currentLock: _appAPIlock,
-          methodName
-        });
-        return Promise.reject(e);
       }
       try {
         this._appAPIlock = methodName;

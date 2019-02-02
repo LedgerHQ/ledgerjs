@@ -27,6 +27,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/hw-transport": "^4.35.0",
+    "@ledgerhq/errors": "^4.35.0",
     "u2f-api": "0.2.7"
   },
   "devDependencies": {

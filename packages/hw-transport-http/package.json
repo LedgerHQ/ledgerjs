@@ -26,6 +26,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/hw-transport": "^4.35.0",
+    "@ledgerhq/errors": "^4.35.0",
     "axios": "^0.18.0",
     "ws": "^6.1.0"
   },

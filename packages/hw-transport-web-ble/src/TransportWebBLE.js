@@ -1,9 +1,17 @@
 // @flow
 /* eslint-disable prefer-template */
 
-import Transport, { TransportError } from "@ledgerhq/hw-transport";
-import { Observable, merge } from "rxjs";
-import { share, tap } from "rxjs/operators";
+import Transport from "@ledgerhq/hw-transport";
+import { DisconnectedDevice } from "@ledgerhq/errors";
+import { Observable, defer, merge, from } from "rxjs";
+import {
+  share,
+  ignoreElements,
+  first,
+  map,
+  tap,
+  timeout
+} from "rxjs/operators";
 import { logSubject } from "./debug";
 import type { Device, Characteristic } from "./types";
 import { sendAPDU } from "./sendAPDU";
@@ -153,6 +161,12 @@ export default class BluetoothTransport extends Transport<Device | string> {
 
     const transport = new BluetoothTransport(device, writeC, notifyObservable);
 
+    await transport.inferMTU();
+
+    if (!device.gatt.connected) {
+      throw new DisconnectedDevice();
+    }
+
     transportsCache[transport.id] = transport;
     const onDisconnect = e => {
       delete transportsCache[transport.id];
@@ -210,8 +224,56 @@ export default class BluetoothTransport extends Transport<Device | string> {
     });
   }
 
+  async reconnect() {
+    await this.device.gatt.disconnect();
+    await this.device.gatt.connect();
+  }
+
+  async inferMTU() {
+    let mtu = 23;
+
+    await this.exchangeAtomicImpl(async () => {
+      try {
+        mtu =
+          (await merge(
+            this.notifyObservable.pipe(
+              first(buffer => buffer.readUInt8(0) === 0x08),
+              map(buffer => buffer.readUInt8(5)),
+              timeout(30000)
+            ),
+            defer(() => from(this.write(Buffer.from([0x08, 0, 0, 0, 0])))).pipe(
+              ignoreElements()
+            )
+          ).toPromise()) + 3;
+
+        // workaround for #279
+        await this.reconnect();
+      } catch (e) {
+        logSubject.next({
+          type: "ble-error",
+          message: "inferMTU got " + String(e)
+        });
+        await this.device.gatt.disconnect().catch(() => {});
+        throw e;
+      }
+    });
+
+    if (mtu > 23) {
+      const mtuSize = mtu - 3;
+      logSubject.next({
+        type: "verbose",
+        message: `BleTransport(${String(this.id)}) mtu set to ${String(
+          mtuSize
+        )}`
+      });
+      this.mtuSize = mtuSize;
+    }
+
+    return this.mtuSize;
+  }
+
   exchange = (apdu: Buffer): Promise<Buffer> =>
-    this.atomic(async () => {
+    this.exchangeAtomicImpl(async () => {
       try {
         const { debug } = this;
 
@@ -252,28 +314,9 @@ export default class BluetoothTransport extends Transport<Device | string> {
     await this.writeCharacteristic.writeValue(buffer);
   };
 
-  busy: ?Promise<void>;
-  atomic = async (f: *) => {
-    if (this.busy) {
-      throw new TransportError("Transport race condition", "RaceCondition");
-    }
-    let resolveBusy;
-    const busyPromise = new Promise(r => {
-      resolveBusy = r;
-    });
-    this.busy = busyPromise;
-    try {
-      const res = await f();
-      return res;
-    } finally {
-      if (resolveBusy) resolveBusy();
-      this.busy = null;
-    }
-  };
-
   async close() {
-    if (this.busy) {
-      await this.busy;
+    if (this.exchangeBusyPromise) {
+      await this.exchangeBusyPromise;
     }
   }
 }

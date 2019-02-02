@@ -1,5 +1,6 @@
 // @flow
 import HID from "node-hid";
+import { ledgerUSBVendorId } from "@ledgerhq/devices";
 
 const filterInterface = device =>
   ["win32", "darwin"].includes(process.platform)
@@ -9,5 +10,5 @@ const filterInterface = device =>
 
 export default function getDevices(): Array<*> {
   // $FlowFixMe bug in HID flow def
-  return HID.devices(0x2c97, 0x0).filter(filterInterface);
+  return HID.devices(ledgerUSBVendorId, 0x0).filter(filterInterface);
 }

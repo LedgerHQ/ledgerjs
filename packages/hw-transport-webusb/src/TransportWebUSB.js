@@ -1,12 +1,13 @@
 //@flow
-import Transport, { TransportError } from "@ledgerhq/hw-transport";
+import Transport from "@ledgerhq/hw-transport";
 import type {
   Observer,
   DescriptorEvent,
   Subscription
 } from "@ledgerhq/hw-transport";
+import hidFraming from "@ledgerhq/devices/lib/hid-framing";
+import { identifyUSBProductId } from "@ledgerhq/devices";
 import { getLedgerDevices, requestLedgerDevice, isSupported } from "./webusb";
-import hidFraming from "./hid-framing";
 
 const configurationValue = 1;
 const interfaceNumber = 2;
@@ -39,7 +40,8 @@ export default class TransportWebUSB extends Transport<USBDevice> {
     let unsubscribed = false;
     requestLedgerDevice().then(device => {
       if (!unsubscribed) {
-        observer.next({ type: "add", descriptor: device, device });
+        const deviceInfo = identifyUSBProductId(device.productId);
+        observer.next({ type: "add", descriptor: device, deviceInfo });
         observer.complete();
       }
     });
@@ -60,13 +62,14 @@ export default class TransportWebUSB extends Transport<USBDevice> {
   }
 
   async close(): Promise<void> {
+    await this.exchangeBusyPromise;
     await this.device.releaseInterface(interfaceNumber);
     await this.device.reset();
     await this.device.close();
   }
 
   exchange = (apdu: Buffer): Promise<Buffer> =>
-    this.atomic(async () => {
+    this.exchangeAtomicImpl(async () => {
       const { debug, channel, packetSize } = this;
       if (debug) {
         debug("=>" + apdu.toString("hex"));
@@ -95,25 +98,4 @@ export default class TransportWebUSB extends Transport<USBDevice> {
     });
 
   setScrambleKey() {}
-
-  busy: ?Promise<void>;
-
-  // $FlowFixMe
-  atomic = async f => {
-    if (this.busy) {
-      throw new TransportError("Transport race condition", "RaceCondition");
-    }
-    let resolveBusy;
-    const busyPromise = new Promise(r => {
-      resolveBusy = r;
-    });
-    this.busy = busyPromise;
-    try {
-      const res = await f();
-      return res;
-    } finally {
-      if (resolveBusy) resolveBusy();
-      this.busy = null;
-    }
-  };
 }

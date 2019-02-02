@@ -99,3 +99,16 @@ export const GenuineCheckFailed = createCustomErrorClass("GenuineCheckFailed");
 export const NoDBPathGiven = createCustomErrorClass("NoDBPathGiven");
 export const DBWrongPassword = createCustomErrorClass("DBWrongPassword");
 export const DBNotReset = createCustomErrorClass("DBNotReset");
+
+/**
+ * TransportError is used for any generic transport errors.
+ * e.g. Error thrown when data received by exchanges are incorrect or if exchanged failed to communicate with the device for various reason.
+ */
+export function TransportError(message: string, id: string) {
+  this.name = "TransportError";
+  this.message = message;
+  this.stack = new Error().stack;
+  this.id = id;
+}
+//$FlowFixMe
+TransportError.prototype = new Error();

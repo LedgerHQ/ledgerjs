@@ -1,6 +1,6 @@
 // @flow
 
-import { TransportError } from "@ledgerhq/hw-transport";
+import { TransportError } from "@ledgerhq/errors";
 
 export type ResponseAcc = ?{
   data: Buffer,

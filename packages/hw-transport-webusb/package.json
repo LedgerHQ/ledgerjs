@@ -24,6 +24,8 @@
   "main": "lib/TransportWebUSB.js",
   "license": "Apache-2.0",
   "dependencies": {
+    "@ledgerhq/devices": "^4.35.0",
+    "@ledgerhq/errors": "^4.35.0",
     "@ledgerhq/hw-transport": "^4.35.0"
   },
   "devDependencies": {

@@ -23,6 +23,8 @@
   "main": "lib/Transport.js",
   "license": "Apache-2.0",
   "dependencies": {
+    "@ledgerhq/errors": "^4.35.0",
+    "@ledgerhq/devices": "^4.35.0",
     "events": "^3.0.0"
   },
   "devDependencies": {

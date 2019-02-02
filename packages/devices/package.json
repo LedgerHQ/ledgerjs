@@ -1,17 +1,9 @@
 {
-  "name": "@ledgerhq/react-native-hid",
+  "name": "@ledgerhq/devices",
   "version": "4.35.0",
-  "nativePackage": true,
-  "description": "Ledger Hardware Wallet Web implementation of the communication layer, using U2F api",
+  "description": "Ledger devices",
   "keywords": [
-    "Ledger",
-    "LedgerWallet",
-    "U2F",
-    "browser",
-    "web",
-    "NanoS",
-    "Blue",
-    "Hardware Wallet"
+    "Ledger"
   ],
   "repository": {
     "type": "git",
@@ -26,13 +18,12 @@
   },
   "main": "lib/index.js",
   "license": "Apache-2.0",
-  "dependencies": {
-    "@ledgerhq/hw-transport": "^4.35.0",
-    "@ledgerhq/devices": "^4.35.0"
-  },
   "devDependencies": {
     "flow-bin": "^0.78.0",
     "flow-typed": "^2.4.0"
+  },
+  "dependencies": {
+    "@ledgerhq/errors": "^4.35.0"
   },
   "scripts": {
     "flow": "flow",

@@ -1,7 +1,7 @@
 // @flow
 /* eslint-disable prefer-template */
 
-import Transport, { TransportError } from "@ledgerhq/hw-transport";
+import Transport from "@ledgerhq/hw-transport";
 import {
   BleManager,
   ConnectionPriority,
@@ -16,7 +16,7 @@ import {
   tap,
   timeout
 } from "rxjs/operators";
-import { CantOpenDevice } from "@ledgerhq/errors";
+import { CantOpenDevice, TransportError } from "@ledgerhq/errors";
 import { logSubject } from "./debug";
 
 import type { Device, Characteristic } from "./types";
@@ -302,7 +302,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
   }
 
   exchange = (apdu: Buffer): Promise<Buffer> =>
-    this.atomic(async () => {
+    this.exchangeAtomicImpl(async () => {
       try {
         const { debug } = this;
 
@@ -337,7 +337,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
   async inferMTU() {
     let { mtu } = this.device;
     if (mtu <= 23) {
-      await this.atomic(async () => {
+      await this.exchangeAtomicImpl(async () => {
         try {
           mtu =
             (await merge(
@@ -396,29 +396,9 @@ export default class BluetoothTransport extends Transport<Device | string> {
     );
   };
 
-  busy: ?Promise<void>;
-  // $FlowFixMe
-  atomic = async f => {
-    if (this.busy) {
-      throw new TransportError("BLE Transport race condition", "RaceCondition");
-    }
-    let resolveBusy;
-    const busyPromise = new Promise(r => {
-      resolveBusy = r;
-    });
-    this.busy = busyPromise;
-    try {
-      const res = await f();
-      return res;
-    } finally {
-      if (resolveBusy) resolveBusy();
-      this.busy = null;
-    }
-  };
-
   async close() {
-    if (this.busy) {
-      await this.busy;
+    if (this.exchangeBusyPromise) {
+      await this.exchangeBusyPromise;
     }
   }
 }
