@@ -29,6 +29,9 @@ export const FeeEstimationFailed = createCustomErrorClass(
 );
 export const HardResetFail = createCustomErrorClass("HardResetFail");
 export const InvalidAddress = createCustomErrorClass("InvalidAddress");
+export const InvalidAddressBecauseDestinationIsAlsoSource = createCustomErrorClass(
+  "InvalidAddressBecauseDestinationIsAlsoSource"
+);
 export const LatestMCUInstalledError = createCustomErrorClass(
   "LatestMCUInstalledError"
 );
