@@ -7,6 +7,11 @@ import {
   ConnectionPriority,
   BleErrorCode
 } from "react-native-ble-plx";
+import {
+  getBluetoothServiceUuids,
+  getInfosForServiceUuid
+} from "@ledgerhq/devices";
+import type { DeviceInfo } from "@ledgerhq/devices";
 import { Observable, defer, merge, from } from "rxjs";
 import {
   share,
@@ -16,7 +21,11 @@ import {
   tap,
   timeout
 } from "rxjs/operators";
-import { CantOpenDevice, TransportError } from "@ledgerhq/errors";
+import {
+  CantOpenDevice,
+  TransportError,
+  DisconnectedDevice
+} from "@ledgerhq/errors";
 import { logSubject } from "./debug";
 
 import type { Device, Characteristic } from "./types";
@@ -26,16 +35,20 @@ import { monitorCharacteristic } from "./monitorCharacteristic";
 import { awaitsBleOn } from "./awaitsBleOn";
 import { decoratePromiseErrors, remapError } from "./remapErrors";
 
-const ServiceUuid = "d973f2e0-b19e-11e2-9e96-0800200c9a66";
-const WriteCharacteristicUuid = "d973f2e2-b19e-11e2-9e96-0800200c9a66";
-const NotifyCharacteristicUuid = "d973f2e1-b19e-11e2-9e96-0800200c9a66";
-
 let connectOptions = {
   requestMTU: 156
 };
 
 const transportsCache = {};
 const bleManager = new BleManager();
+
+const retrieveInfos = device => {
+  const [serviceUUID] = device.serviceUUIDs;
+  if (!serviceUUID) throw new Error("bluetooth service not found");
+  const infos = getInfosForServiceUuid(serviceUUID);
+  if (!infos) throw new Error("bluetooth service infos not found");
+  return infos;
+};
 
 /**
  * react-native bluetooth BLE implementation
@@ -80,7 +93,9 @@ export default class BluetoothTransport extends Transport<Device | string> {
       if (state === "PoweredOn") {
         stateSub.remove();
 
-        const devices = await bleManager.connectedDevices([ServiceUuid]);
+        const devices = await bleManager.connectedDevices(
+          getBluetoothServiceUuids()
+        );
         if (unsubscribed) return;
 
         await Promise.all(
@@ -88,14 +103,19 @@ export default class BluetoothTransport extends Transport<Device | string> {
         );
         if (unsubscribed) return;
 
-        bleManager.startDeviceScan([ServiceUuid], null, (bleError, device) => {
-          if (bleError) {
-            observer.error(bleError);
-            unsubscribe();
-            return;
+        bleManager.startDeviceScan(
+          getBluetoothServiceUuids(),
+          null,
+          (bleError, device) => {
+            if (bleError) {
+              observer.error(bleError);
+              unsubscribe();
+              return;
+            }
+            const { deviceInfo } = retrieveInfos(device);
+            observer.next({ type: "add", descriptor: device, deviceInfo });
           }
-          observer.next({ type: "add", descriptor: device });
-        });
+        );
       }
     }, true);
     const unsubscribe = () => {
@@ -138,9 +158,9 @@ export default class BluetoothTransport extends Transport<Device | string> {
       }
 
       if (!device) {
-        const connectedDevices = await bleManager.connectedDevices([
-          ServiceUuid
-        ]);
+        const connectedDevices = await bleManager.connectedDevices(
+          getBluetoothServiceUuids()
+        );
         const connectedDevicesFiltered = connectedDevices.filter(
           d => d.id === deviceOrId
         );
@@ -194,16 +214,19 @@ export default class BluetoothTransport extends Transport<Device | string> {
 
     await device.discoverAllServicesAndCharacteristics();
 
-    const characteristics = await device.characteristicsForService(ServiceUuid);
+    const { deviceInfo, serviceUuid, writeUuid, notifyUuid } = retrieveInfos(
+      device
+    );
+    const characteristics = await device.characteristicsForService(serviceUuid);
     if (!characteristics) {
       throw new TransportError("service not found", "BLEServiceNotFound");
     }
     let writeC;
     let notifyC;
     for (const c of characteristics) {
-      if (c.uuid === WriteCharacteristicUuid) {
+      if (c.uuid === writeUuid) {
         writeC = c;
-      } else if (c.uuid === NotifyCharacteristicUuid) {
+      } else if (c.uuid === notifyUuid) {
         notifyC = c;
       }
     }
@@ -246,10 +269,14 @@ export default class BluetoothTransport extends Transport<Device | string> {
 
     const notif = notifyObservable.subscribe();
 
-    const transport = new BluetoothTransport(device, writeC, notifyObservable);
+    const transport = new BluetoothTransport(
+      device,
+      writeC,
+      notifyObservable,
+      deviceInfo
+    );
 
-    transportsCache[transport.id] = transport;
-    const disconnectedSub = device.onDisconnected(e => {
+    const onDisconnect = e => {
       transport.notYetDisconnected = false;
       notif.unsubscribe();
       disconnectedSub.remove();
@@ -259,9 +286,29 @@ export default class BluetoothTransport extends Transport<Device | string> {
         message: `BleTransport(${transport.id}) disconnected`
       });
       transport.emit("disconnect", e);
+    };
+
+    let disconnectedIgnored = false;
+    transportsCache[transport.id] = transport;
+    const disconnectedSub = device.onDisconnected(e => {
+      if (disconnectedIgnored) return;
+      onDisconnect(e);
     });
 
-    await transport.inferMTU();
+    try {
+      try {
+        await transport.inferMTU();
+      } finally {
+        disconnectedIgnored = true;
+        // workaround for #279
+        await this.reconnect();
+        disconnectedIgnored = false;
+      }
+    } catch (e) {
+      // any failure is assumed as a disconnection
+      onDisconnect(e);
+      throw new DisconnectedDevice();
+    }
 
     return transport;
   }
@@ -284,22 +331,31 @@ export default class BluetoothTransport extends Transport<Device | string> {
 
   notifyObservable: Observable<Buffer>;
 
+  deviceInfo: DeviceInfo;
+
   notYetDisconnected = true;
 
   constructor(
     device: Device,
     writeCharacteristic: Characteristic,
-    notifyObservable: Observable<Buffer>
+    notifyObservable: Observable<Buffer>,
+    deviceInfo: DeviceInfo
   ) {
     super();
     this.id = device.id;
     this.device = device;
     this.writeCharacteristic = writeCharacteristic;
     this.notifyObservable = notifyObservable;
+    this.deviceInfo = deviceInfo;
     logSubject.next({
       type: "verbose",
       message: `BleTransport(${String(this.id)}) new instance`
     });
+  }
+
+  async reconnect() {
+    await this.device.cancelDeviceConnection();
+    await this.device.connect();
   }
 
   exchange = (apdu: Buffer): Promise<Buffer> =>

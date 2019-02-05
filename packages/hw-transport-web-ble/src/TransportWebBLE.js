@@ -3,6 +3,11 @@
 
 import Transport from "@ledgerhq/hw-transport";
 import { DisconnectedDevice } from "@ledgerhq/errors";
+import {
+  getBluetoothServiceUuids,
+  getInfosForServiceUuid
+} from "@ledgerhq/devices";
+import type { DeviceInfo } from "@ledgerhq/devices";
 import { Observable, defer, merge, from } from "rxjs";
 import {
   share,
@@ -17,10 +22,6 @@ import type { Device, Characteristic } from "./types";
 import { sendAPDU } from "./sendAPDU";
 import { receiveAPDU } from "./receiveAPDU";
 import { monitorCharacteristic } from "./monitorCharacteristic";
-
-const ServiceUuid = "d973f2e0-b19e-11e2-9e96-0800200c9a66";
-const WriteCharacteristicUuid = "d973f2e2-b19e-11e2-9e96-0800200c9a66";
-const NotifyCharacteristicUuid = "d973f2e1-b19e-11e2-9e96-0800200c9a66";
 
 const requiresBluetooth = () => {
   // $FlowFixMe
@@ -57,6 +58,15 @@ const availability = () =>
 
 const transportsCache = {};
 
+const retrieveService = async device => {
+  if (!device.gatt) throw new Error("bluetooth gatt not found");
+  const [service] = await device.gatt.getPrimaryServices();
+  if (!service) throw new Error("bluetooth service not found");
+  const infos = getInfosForServiceUuid(service.uuid);
+  if (!infos) throw new Error("bluetooth service infos not found");
+  return [service, infos];
+};
+
 /**
  * react-native bluetooth BLE implementation
  * @example
@@ -92,13 +102,18 @@ export default class BluetoothTransport extends Transport<Device | string> {
       .requestDevice({
         filters: [
           {
-            services: [ServiceUuid]
+            services: getBluetoothServiceUuids()
           }
         ]
       })
-      .then(device => {
+      .then(async device => {
+        const [, deviceInfo] = await retrieveService(device);
         if (!unsubscribed) {
-          observer.next({ type: "add", descriptor: device, device });
+          observer.next({
+            type: "add",
+            descriptor: device,
+            deviceInfo
+          });
           observer.complete();
         }
       });
@@ -125,7 +140,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
       device = await bluetooth.requestDevice({
         filters: [
           {
-            services: [ServiceUuid]
+            services: getBluetoothServiceUuids()
           }
         ]
       });
@@ -141,10 +156,11 @@ export default class BluetoothTransport extends Transport<Device | string> {
       await device.gatt.connect();
     }
 
-    const service = await device.gatt.getPrimaryService(ServiceUuid);
+    const [service, infos] = retrieveService(device);
+    const { deviceInfo, writeUuid, notifyUuid } = infos;
     const [writeC, notifyC] = await Promise.all([
-      service.getCharacteristic(WriteCharacteristicUuid),
-      service.getCharacteristic(NotifyCharacteristicUuid)
+      service.getCharacteristic(writeUuid),
+      service.getCharacteristic(notifyUuid)
     ]);
 
     const notifyObservable = monitorCharacteristic(notifyC).pipe(
@@ -159,9 +175,19 @@ export default class BluetoothTransport extends Transport<Device | string> {
 
     const notif = notifyObservable.subscribe();
 
-    const transport = new BluetoothTransport(device, writeC, notifyObservable);
+    const transport = new BluetoothTransport(
+      device,
+      writeC,
+      notifyObservable,
+      deviceInfo
+    );
 
-    await transport.inferMTU();
+    try {
+      await transport.inferMTU();
+    } finally {
+      // workaround for #279
+      await this.reconnect();
+    }
 
     if (!device.gatt.connected) {
       throw new DisconnectedDevice();
@@ -207,16 +233,20 @@ export default class BluetoothTransport extends Transport<Device | string> {
 
   notYetDisconnected = true;
 
+  deviceInfo: DeviceInfo;
+
   constructor(
     device: Device,
     writeCharacteristic: Characteristic,
-    notifyObservable: Observable<*>
+    notifyObservable: Observable<*>,
+    deviceInfo: DeviceInfo
   ) {
     super();
     this.id = device.id;
     this.device = device;
     this.writeCharacteristic = writeCharacteristic;
     this.notifyObservable = notifyObservable;
+    this.deviceInfo = deviceInfo;
 
     logSubject.next({
       type: "verbose",
@@ -245,9 +275,6 @@ export default class BluetoothTransport extends Transport<Device | string> {
               ignoreElements()
             )
           ).toPromise()) + 3;
-
-        // workaround for #279
-        await this.reconnect();
       } catch (e) {
         logSubject.next({
           type: "ble-error",

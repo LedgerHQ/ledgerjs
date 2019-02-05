@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@ledgerhq/errors": "^4.35.1",
+    "@ledgerhq/devices": "^4.35.0",
     "@ledgerhq/hw-transport": "^4.35.0",
     "invariant": "^2.2.4",
     "rxjs": "^6.3.3",
