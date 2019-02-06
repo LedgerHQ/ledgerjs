@@ -23,6 +23,9 @@ export const DeviceSocketNoBulkStatus = createCustomErrorClass(
   "DeviceSocketNoBulkStatus"
 );
 export const DisconnectedDevice = createCustomErrorClass("DisconnectedDevice");
+export const DisconnectedDeviceDuringOperation = createCustomErrorClass(
+  "DisconnectedDeviceDuringOperation"
+);
 export const EnpointConfigError = createCustomErrorClass("EnpointConfig");
 export const FeeEstimationFailed = createCustomErrorClass(
   "FeeEstimationFailed"
