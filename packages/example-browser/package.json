@@ -7,7 +7,7 @@
   },
   "dependencies": {
     "@ledgerhq/hw-app-btc": "^4.35.0",
-    "@ledgerhq/hw-app-eth": "^4.35.0",
+    "@ledgerhq/hw-app-eth": "^4.36.0",
     "@ledgerhq/hw-transport-u2f": "^4.35.0",
     "react": "^16.5.2",
     "react-dom": "^16.5.2"
@@ -19,5 +19,5 @@
     "parcel-bundler": "^1.6.2"
   },
   "private": true,
-  "version": "4.35.0"
+  "version": "4.36.0"
 }
