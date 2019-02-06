@@ -41,25 +41,20 @@ public class ReactHIDModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public void getDeviceList(Promise p) {
-        try {
-            UsbManager usbManager = getUsbManager();
-            HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
-            WritableArray deviceArray = Arguments.createArray();
-            for (String key : usbDevices.keySet()) {
-                UsbDevice device = usbDevices.get(key);
-                WritableMap map = Arguments.createMap();
-                map.putString("name", device.getDeviceName());
-                map.putInt("deviceId", device.getDeviceId());
-                map.putInt("productId", device.getProductId());
-                map.putInt("vendorId", device.getVendorId());
-                map.putString("deviceName", device.getDeviceName());
-                deviceArray.pushMap(map);
-            }
-            p.resolve(deviceArray);
-        } catch (Exception e) {
-            e.printStackTrace();
-            p.reject(e);
+        UsbManager usbManager = getUsbManager();
+        HashMap<String, UsbDevice> usbDevices = usbManager.getDeviceList();
+        WritableArray deviceArray = Arguments.createArray();
+        for (String key : usbDevices.keySet()) {
+            UsbDevice device = usbDevices.get(key);
+            WritableMap map = Arguments.createMap();
+            map.putString("name", device.getDeviceName());
+            map.putInt("deviceId", device.getDeviceId());
+            map.putInt("productId", device.getProductId());
+            map.putInt("vendorId", device.getVendorId());
+            map.putString("deviceName", device.getDeviceName());
+            deviceArray.pushMap(map);
         }
+        p.resolve(deviceArray);
     }
 
     private static UsbDevice getDevice(int prodId, UsbManager manager) {

@@ -48,56 +48,67 @@ public class HIDDevice {
         transferBuffer = new byte[HID_BUFFER_SIZE];
     }
 
-    public void exchange(byte[] command, Promise p) throws Exception {
-        ByteArrayOutputStream response = new ByteArrayOutputStream();
-        byte[] responseData = null;
-        int offset = 0;
-        int responseSize;
-        command = LedgerHelper.wrapCommandAPDU(LEDGER_DEFAULT_CHANNEL, command, HID_BUFFER_SIZE);
-        if (debug) {
-            Log.d("HIDDevice", "=> " + toHex(command));
-        }
+    public void exchange(final byte[] commandSource, final Promise p) throws Exception {
 
-        UsbRequest request = new UsbRequest();
-        if (!request.initialize(connection, out)) {
-            throw new Exception("I/O error");
-        }
-        while (offset != command.length) {
-            int blockSize = (command.length - offset > HID_BUFFER_SIZE ? HID_BUFFER_SIZE : command.length - offset);
-            System.arraycopy(command, offset, transferBuffer, 0, blockSize);
-            if (!request.queue(ByteBuffer.wrap(transferBuffer), HID_BUFFER_SIZE)) {
-                request.close();
-                throw new Exception("I/O error");
+         Thread nonBlocking = new Thread(new Runnable() {
+            public void run() {
+                try {
+                    ByteArrayOutputStream response = new ByteArrayOutputStream();
+                    byte[] responseData = null;
+                    int offset = 0;
+                    int responseSize;
+                    byte[] command = LedgerHelper.wrapCommandAPDU(LEDGER_DEFAULT_CHANNEL, commandSource, HID_BUFFER_SIZE);
+                    if (debug) {
+                        Log.d("SHIDDevice", "=> " + toHex(command));
+                    }
+
+                    UsbRequest request = new UsbRequest();
+                    if (!request.initialize(connection, out)) {
+                        throw new Exception("I/O error");
+                    }
+                    while (offset != command.length) {
+                        int blockSize = (command.length - offset > HID_BUFFER_SIZE ? HID_BUFFER_SIZE : command.length - offset);
+                        System.arraycopy(command, offset, transferBuffer, 0, blockSize);
+                        if (!request.queue(ByteBuffer.wrap(transferBuffer), HID_BUFFER_SIZE)) {
+                            request.close();
+                            throw new Exception("I/O error");
+                        }
+                        connection.requestWait();
+                        offset += blockSize;
+                    }
+                    ByteBuffer responseBuffer = ByteBuffer.allocate(HID_BUFFER_SIZE);
+                    request = new UsbRequest();
+                    if (!request.initialize(connection, in)) {
+                        request.close();
+                        throw new Exception("I/O error");
+                    }
+
+                    while ((responseData = LedgerHelper.unwrapResponseAPDU(LEDGER_DEFAULT_CHANNEL, response.toByteArray(),
+                            HID_BUFFER_SIZE)) == null) {
+                        responseBuffer.clear();
+                        if (!request.queue(responseBuffer, HID_BUFFER_SIZE)) {
+                            request.close();
+                            throw new Exception("I/O error");
+                        }
+                        connection.requestWait();
+                        responseBuffer.rewind();
+                        responseBuffer.get(transferBuffer, 0, HID_BUFFER_SIZE);
+                        response.write(transferBuffer, 0, HID_BUFFER_SIZE);
+                    }
+
+                    if (debug) {
+                        Log.d("SHIDDevice", "<= " + toHex(responseData));
+                    }
+
+                    request.close();
+                    p.resolve(toHex(responseData));
+                }catch(Exception e){
+                    e.printStackTrace();
+                    p.reject(e);
+                }
             }
-            connection.requestWait();
-            offset += blockSize;
-        }
-        ByteBuffer responseBuffer = ByteBuffer.allocate(HID_BUFFER_SIZE);
-        request = new UsbRequest();
-        if (!request.initialize(connection, in)) {
-            request.close();
-            throw new Exception("I/O error");
-        }
-
-        while ((responseData = LedgerHelper.unwrapResponseAPDU(LEDGER_DEFAULT_CHANNEL, response.toByteArray(),
-                HID_BUFFER_SIZE)) == null) {
-            responseBuffer.clear();
-            if (!request.queue(responseBuffer, HID_BUFFER_SIZE)) {
-                request.close();
-                throw new Exception("I/O error");
-            }
-            connection.requestWait();
-            responseBuffer.rewind();
-            responseBuffer.get(transferBuffer, 0, HID_BUFFER_SIZE);
-            response.write(transferBuffer, 0, HID_BUFFER_SIZE);
-        }
-
-        if (debug) {
-            Log.d("HIDDevice", "<= " + toHex(responseData));
-        }
-
-        request.close();
-        p.resolve(toHex(responseData));
+        });
+        nonBlocking.start();
     }
 
     public static String toHex(byte[] buffer, int offset, int length) {
