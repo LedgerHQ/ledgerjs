@@ -10,6 +10,9 @@ import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
 import android.util.Log;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import com.facebook.react.bridge.Promise;
 
 import java.io.ByteArrayOutputStream;
@@ -24,8 +27,10 @@ public class HIDDevice {
     private byte transferBuffer[];
     private boolean debug;
     private boolean ledger;
+    private ExecutorService executor;
 
     public HIDDevice(UsbManager manager, UsbDevice device) {
+
         UsbInterface dongleInterface = device.getInterface(0);
         UsbEndpoint in = null;
         UsbEndpoint out = null;
@@ -46,11 +51,11 @@ public class HIDDevice {
         this.out = out;
 
         transferBuffer = new byte[HID_BUFFER_SIZE];
+        executor = Executors.newSingleThreadExecutor();
     }
 
     public void exchange(final byte[] commandSource, final Promise p) throws Exception {
-
-         Thread nonBlocking = new Thread(new Runnable() {
+        Runnable exchange = new Runnable() {
             public void run() {
                 try {
                     ByteArrayOutputStream response = new ByteArrayOutputStream();
@@ -102,13 +107,13 @@ public class HIDDevice {
 
                     request.close();
                     p.resolve(toHex(responseData));
-                }catch(Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                     p.reject(e);
                 }
             }
-        });
-        nonBlocking.start();
+        };
+        this.executor.submit(exchange);
     }
 
     public static String toHex(byte[] buffer, int offset, int length) {
@@ -130,7 +135,7 @@ public class HIDDevice {
     public void close(Promise p) throws Exception {
         connection.releaseInterface(dongleInterface);
         connection.close();
-
+        this.executor.shutdown();
         p.resolve(null);
     }
 
