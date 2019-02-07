@@ -16,7 +16,10 @@ import {
   tap,
   timeout
 } from "rxjs/operators";
-import { CantOpenDevice } from "@ledgerhq/errors";
+import {
+  CantOpenDevice,
+  DisconnectedDeviceDuringOperation
+} from "@ledgerhq/errors";
 import { logSubject } from "./debug";
 
 import type { Device, Characteristic } from "./types";
@@ -393,10 +396,14 @@ export default class BluetoothTransport extends Transport<Device | string> {
       type: "ble-frame-write",
       message: buffer.toString("hex")
     });
-    await this.writeCharacteristic.writeWithResponse(
-      buffer.toString("base64"),
-      txid
-    );
+    try {
+      await this.writeCharacteristic.writeWithResponse(
+        buffer.toString("base64"),
+        txid
+      );
+    } catch (e) {
+      throw new DisconnectedDeviceDuringOperation(e.message);
+    }
   };
 
   busy: ?Promise<void>;
