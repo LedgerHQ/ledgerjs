@@ -42,12 +42,11 @@ export const sendAPDU = (
 
   return Observable.create(o => {
     let terminated = false;
-    const txId = uuid();
 
     async function main() {
       for (const chunk of chunks) {
         if (terminated) return;
-        await write(chunk, txId);
+        await write(chunk);
       }
     }
 
@@ -73,7 +72,6 @@ export const sendAPDU = (
           message: "sendAPDU interruption"
         });
         terminated = true;
-        bleManager.cancelTransaction(txId);
       }
     };
 
