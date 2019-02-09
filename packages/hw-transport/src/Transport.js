@@ -1,7 +1,7 @@
 //@flow
 
 import EventEmitter from "events";
-import type { DeviceInfo } from "@ledgerhq/devices";
+import type { DeviceModel } from "@ledgerhq/devices";
 import {
   TransportError,
   StatusCodes,
@@ -29,7 +29,7 @@ export type Device = Object;
 export type DescriptorEvent<Descriptor> = {
   type: "add" | "remove",
   descriptor: Descriptor,
-  deviceInfo?: ?DeviceInfo
+  deviceModel?: ?DeviceModel
 };
 /**
  */

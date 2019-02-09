@@ -40,8 +40,8 @@ export default class TransportWebUSB extends Transport<USBDevice> {
     let unsubscribed = false;
     requestLedgerDevice().then(device => {
       if (!unsubscribed) {
-        const deviceInfo = identifyUSBProductId(device.productId);
-        observer.next({ type: "add", descriptor: device, deviceInfo });
+        const deviceModel = identifyUSBProductId(device.productId);
+        observer.next({ type: "add", descriptor: device, deviceModel });
         observer.complete();
       }
     });

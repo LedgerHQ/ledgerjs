@@ -7,7 +7,7 @@ import {
   getBluetoothServiceUuids,
   getInfosForServiceUuid
 } from "@ledgerhq/devices";
-import type { DeviceInfo } from "@ledgerhq/devices";
+import type { DeviceModel } from "@ledgerhq/devices";
 import { Observable, defer, merge, from } from "rxjs";
 import {
   share,
@@ -107,12 +107,12 @@ export default class BluetoothTransport extends Transport<Device | string> {
         ]
       })
       .then(async device => {
-        const [, deviceInfo] = await retrieveService(device);
+        const [, deviceModel] = await retrieveService(device);
         if (!unsubscribed) {
           observer.next({
             type: "add",
             descriptor: device,
-            deviceInfo
+            deviceModel
           });
           observer.complete();
         }
@@ -157,7 +157,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
     }
 
     const [service, infos] = retrieveService(device);
-    const { deviceInfo, writeUuid, notifyUuid } = infos;
+    const { deviceModel, writeUuid, notifyUuid } = infos;
     const [writeC, notifyC] = await Promise.all([
       service.getCharacteristic(writeUuid),
       service.getCharacteristic(notifyUuid)
@@ -179,7 +179,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
       device,
       writeC,
       notifyObservable,
-      deviceInfo
+      deviceModel
     );
 
     try {
@@ -233,20 +233,20 @@ export default class BluetoothTransport extends Transport<Device | string> {
 
   notYetDisconnected = true;
 
-  deviceInfo: DeviceInfo;
+  deviceModel: DeviceModel;
 
   constructor(
     device: Device,
     writeCharacteristic: Characteristic,
     notifyObservable: Observable<*>,
-    deviceInfo: DeviceInfo
+    deviceModel: DeviceModel
   ) {
     super();
     this.id = device.id;
     this.device = device;
     this.writeCharacteristic = writeCharacteristic;
     this.notifyObservable = notifyObservable;
-    this.deviceInfo = deviceInfo;
+    this.deviceModel = deviceModel;
 
     logSubject.next({
       type: "verbose",

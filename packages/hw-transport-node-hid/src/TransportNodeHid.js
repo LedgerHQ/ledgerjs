@@ -62,8 +62,8 @@ export default class TransportNodeHid extends Transport<string> {
       for (const device of devices) {
         if (!unsubscribed) {
           const descriptor: string = device.path;
-          const deviceInfo = identifyUSBProductId(device.productId);
-          observer.next({ type: "add", descriptor, deviceInfo });
+          const deviceModel = identifyUSBProductId(device.productId);
+          observer.next({ type: "add", descriptor, deviceModel });
         }
       }
     });
@@ -75,20 +75,20 @@ export default class TransportNodeHid extends Transport<string> {
 
     const onAdd = device => {
       if (unsubscribed || !device) return;
-      const deviceInfo = identifyUSBProductId(device.productId);
+      const deviceModel = identifyUSBProductId(device.productId);
       observer.next({
         type: "add",
         descriptor: device.path,
-        deviceInfo
+        deviceModel
       });
     };
     const onRemove = device => {
       if (unsubscribed || !device) return;
-      const deviceInfo = identifyUSBProductId(device.productId);
+      const deviceModel = identifyUSBProductId(device.productId);
       observer.next({
         type: "remove",
         descriptor: device.path,
-        deviceInfo
+        deviceModel
       });
     };
     events.on("add", onAdd);

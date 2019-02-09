@@ -11,7 +11,7 @@ import {
   getBluetoothServiceUuids,
   getInfosForServiceUuid
 } from "@ledgerhq/devices";
-import type { DeviceInfo } from "@ledgerhq/devices";
+import type { DeviceModel } from "@ledgerhq/devices";
 import { Observable, defer, merge, from } from "rxjs";
 import {
   share,
@@ -112,8 +112,8 @@ export default class BluetoothTransport extends Transport<Device | string> {
               unsubscribe();
               return;
             }
-            const { deviceInfo } = retrieveInfos(device);
-            observer.next({ type: "add", descriptor: device, deviceInfo });
+            const { deviceModel } = retrieveInfos(device);
+            observer.next({ type: "add", descriptor: device, deviceModel });
           }
         );
       }
@@ -214,7 +214,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
 
     await device.discoverAllServicesAndCharacteristics();
 
-    const { deviceInfo, serviceUuid, writeUuid, notifyUuid } = retrieveInfos(
+    const { deviceModel, serviceUuid, writeUuid, notifyUuid } = retrieveInfos(
       device
     );
     const characteristics = await device.characteristicsForService(serviceUuid);
@@ -273,7 +273,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
       device,
       writeC,
       notifyObservable,
-      deviceInfo
+      deviceModel
     );
 
     const onDisconnect = e => {
@@ -331,7 +331,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
 
   notifyObservable: Observable<Buffer>;
 
-  deviceInfo: DeviceInfo;
+  deviceModel: DeviceModel;
 
   notYetDisconnected = true;
 
@@ -339,14 +339,14 @@ export default class BluetoothTransport extends Transport<Device | string> {
     device: Device,
     writeCharacteristic: Characteristic,
     notifyObservable: Observable<Buffer>,
-    deviceInfo: DeviceInfo
+    deviceModel: DeviceModel
   ) {
     super();
     this.id = device.id;
     this.device = device;
     this.writeCharacteristic = writeCharacteristic;
     this.notifyObservable = notifyObservable;
-    this.deviceInfo = deviceInfo;
+    this.deviceModel = deviceModel;
     logSubject.next({
       type: "verbose",
       message: `BleTransport(${String(this.id)}) new instance`

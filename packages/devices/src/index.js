@@ -1,6 +1,6 @@
 // @flow
 
-export type DeviceInfo = {
+export type DeviceModel = {
   id: string,
   productName: string,
   usbProductId: number,
@@ -11,7 +11,7 @@ export type DeviceInfo = {
   }>
 };
 
-const devices: { [id: string]: DeviceInfo } = {
+const devices: { [id: string]: DeviceModel } = {
   blue: {
     id: "blue",
     productName: "Ledger Blue",
@@ -43,21 +43,21 @@ const devices: { [id: string]: DeviceInfo } = {
 };
 
 // $FlowFixMe
-const devicesList: DeviceInfo[] = Object.values(devices);
+const devicesList: DeviceModel[] = Object.values(devices);
 
 export const ledgerUSBVendorId = 0x2c97;
 
-export const getDeviceInfo = (id: string): DeviceInfo => {
+export const getDeviceModel = (id: string): DeviceModel => {
   const info = devices[id];
   if (!info) throw new Error("device '" + id + "' does not exist");
   return info;
 };
 
-export const identifyUSBProductId = (usbProductId: number): ?DeviceInfo =>
+export const identifyUSBProductId = (usbProductId: number): ?DeviceModel =>
   devicesList.find(d => d.usbProductId === usbProductId);
 
 export type BluetoothInfos = {
-  deviceInfo: DeviceInfo,
+  deviceModel: DeviceModel,
   serviceUuid: string,
   writeUuid: string,
   notifyUuid: string
@@ -69,13 +69,13 @@ const serviceUuidToInfos: {
 } = {};
 
 for (let id in devices) {
-  const deviceInfo = devices[id];
-  const { bluetoothSpec } = deviceInfo;
+  const deviceModel = devices[id];
+  const { bluetoothSpec } = deviceModel;
   if (bluetoothSpec) {
     for (let i = 0; i < bluetoothSpec.length; i++) {
       const spec = bluetoothSpec[i];
       bluetoothServices.push(spec.serviceUuid);
-      serviceUuidToInfos[spec.serviceUuid] = { deviceInfo, ...spec };
+      serviceUuidToInfos[spec.serviceUuid] = { deviceModel, ...spec };
     }
   }
 }

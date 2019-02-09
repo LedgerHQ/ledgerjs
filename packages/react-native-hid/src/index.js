@@ -24,8 +24,8 @@ export default class HIDTransport extends Transport<DeviceObj> {
     HIDTransport.list().then(candidates => {
       for (const c of candidates) {
         if (!unsubscribed) {
-          const deviceInfo = identifyUSBProductId(c.productId);
-          observer.next({ type: "add", descriptor: c, deviceInfo });
+          const deviceModel = identifyUSBProductId(c.productId);
+          observer.next({ type: "add", descriptor: c, deviceModel });
         }
       }
     });
