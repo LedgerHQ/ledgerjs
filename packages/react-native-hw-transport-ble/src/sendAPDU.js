@@ -1,6 +1,5 @@
 // @flow
 
-import uuid from "uuid/v4";
 import { Observable } from "rxjs";
 import type { BleManager } from "./types";
 import { logSubject } from "./debug";
