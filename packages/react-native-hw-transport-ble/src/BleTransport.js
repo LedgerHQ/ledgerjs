@@ -24,7 +24,8 @@ import {
 import {
   CantOpenDevice,
   TransportError,
-  DisconnectedDevice
+  DisconnectedDevice,
+  DisconnectedDeviceDuringOperation
 } from "@ledgerhq/errors";
 import { logSubject } from "./debug";
 
@@ -449,10 +450,14 @@ export default class BluetoothTransport extends Transport<Device | string> {
       type: "ble-frame-write",
       message: buffer.toString("hex")
     });
-    await this.writeCharacteristic.writeWithResponse(
-      buffer.toString("base64"),
-      txid
-    );
+    try {
+      await this.writeCharacteristic.writeWithResponse(
+        buffer.toString("base64"),
+        txid
+      );
+    } catch (e) {
+      throw new DisconnectedDeviceDuringOperation(e.message);
+    }
   };
 
   async close() {
