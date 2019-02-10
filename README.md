@@ -1,15 +1,22 @@
-<img src="https://user-images.githubusercontent.com/211411/34776833-6f1ef4da-f618-11e7-8b13-f0697901d6a8.png" height="64" />
+<img src="https://user-images.githubusercontent.com/211411/34776833-6f1ef4da-f618-11e7-8b13-f0697901d6a8.png" height="80" /> <img src="https://user-images.githubusercontent.com/211411/52533081-e679d380-2d2e-11e9-9c5e-571e4ad0107b.png" height="80" />
 
 [![Ledger Devs Slack](https://img.shields.io/badge/Slack-LedgerDevs-yellow.svg?style=flat)](https://ledger-dev.slack.com/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 Welcome to Ledger's JavaScript libraries.
 
+**See also:**
+
+- [**LedgerJS examples**](https://github.com/LedgerHQ/ledgerjs-examples)
+- [Ledger Live Desktop](https://github.com/ledgerhq/ledger-live-desktop)
+- [Ledger Live Mobile](https://github.com/ledgerhq/ledger-live-mobile)
+- [live-common](https://github.com/ledgerhq/ledger-live-common)
+
 ## `@ledgerhq/hw-transport-*`
 
 **To communicate with a Ledger device, you first need to identify which transport(s) to use.**
 
-The _hw-transport_ libraries implement communication protocol for our [hardware wallet devices](https://www.ledger.com/) (Ledger Nano / Ledger Nano S / Ledger Nano X / Ledger Blue) in many platforms: **Web, Node, Electron, React Native,...** and using many different communication channels: **U2F, HID, WebUSB, Bluetooth,...**
+> The _hw-transport_ libraries implement communication protocol for our [hardware wallet devices](https://www.ledger.com/) (Ledger Nano / Ledger Nano S / Ledger Nano X / Ledger Blue) in many platforms: **Web, Node, Electron, React Native,...** and using many different communication channels: **U2F, HID, WebUSB, Bluetooth,...**
 
 | Channels | U2F | HID | WebUSB | Bluetooth |
 | -------- | --- | --- | ------ | --------- |
@@ -19,18 +26,18 @@ The _hw-transport_ libraries implement communication protocol for our [hardware 
 
 **Please find respective documentation for each transport:**
 
-- [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-u2f.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-u2f) [@ledgerhq/hw-transport-u2f](./packages/@ledgerhq/hw-transport-u2f) **[Web]** **(U2F)** (legacy but reliable) – FIDO U2F api. [check browser support](https://caniuse.com/u2f).
-- [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-webusb.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-webusb) [@ledgerhq/hw-transport-webusb](./packages/@ledgerhq/hw-transport-webusb) **[Web]** **(WebUSB)** – WebUSB [check browser support](https://caniuse.com/webusb).
-- [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-web-ble.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-web-ble) [@ledgerhq/hw-transport-web-ble](./packages/@ledgerhq/hw-transport-web-ble) **[Web]** **(Bluetooth)** – [check browser support](https://caniuse.com/web-bluetooth).
-- [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-node-hid.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-node-hid) [@ledgerhq/hw-transport-node-hid](./packages/@ledgerhq/hw-transport-node-hid) **[Node]** **(HID)** – depends on `node-hid` and `usb`. Can be used in Electron.
-- [![npm](https://img.shields.io/npm/v/@ledgerhq/react-native-hw-transport-ble.svg)](https://www.npmjs.com/package/@ledgerhq/react-native-hw-transport-ble) [@ledgerhq/react-native-hw-transport-ble](./packages/@ledgerhq/react-native-hw-transport-ble) **[React Native]** **(Bluetooth)** – depends on `react-native-ble-plx`
-- [![npm](https://img.shields.io/npm/v/@ledgerhq/react-native-hid.svg)](https://www.npmjs.com/package/@ledgerhq/react-native-hid) [@ledgerhq/react-native-hid](./packages/@ledgerhq/react-native-hid) **[React Native]** **(HID)** _Android_ – Ledger's native implementation
-- [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-http.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-http) [@ledgerhq/hw-transport-http](./packages/@ledgerhq/hw-transport-http) **[FOR DEV & TEST only]** a universal HTTP implementation that allows communicate to the device over HTTP. **DO NOT use in PROD**. Works great in combination with [@ledgerhq/hw-http-proxy-devserver](./packages/@ledgerhq/hw-http-proxy-devserver) CLI utility.
+- [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-u2f.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-u2f) [@ledgerhq/hw-transport-u2f](./packages/hw-transport-u2f) **[Web]** **(U2F)** (legacy but reliable) – FIDO U2F api. [check browser support](https://caniuse.com/u2f).
+- [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-webusb.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-webusb) [@ledgerhq/hw-transport-webusb](./packages/hw-transport-webusb) **[Web]** **(WebUSB)** – WebUSB [check browser support](https://caniuse.com/webusb).
+- [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-web-ble.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-web-ble) [@ledgerhq/hw-transport-web-ble](./packages/hw-transport-web-ble) **[Web]** **(Bluetooth)** – [check browser support](https://caniuse.com/web-bluetooth).
+- [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-node-hid.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-node-hid) [@ledgerhq/hw-transport-node-hid](./packages/hw-transport-node-hid) **[Node]**/Electron **(HID)** – uses `node-hid` and `usb`.
+- [![npm](https://img.shields.io/npm/v/@ledgerhq/react-native-hw-transport-ble.svg)](https://www.npmjs.com/package/@ledgerhq/react-native-hw-transport-ble) [@ledgerhq/react-native-hw-transport-ble](./packages/react-native-hw-transport-ble) **[React Native]** **(Bluetooth)** – uses `react-native-ble-plx`
+- [![npm](https://img.shields.io/npm/v/@ledgerhq/react-native-hid.svg)](https://www.npmjs.com/package/@ledgerhq/react-native-hid) [@ledgerhq/react-native-hid](./packages/react-native-hid) **[React Native]** **(HID)** _Android_ – Ledger's native implementation
+- [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-http.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-http) [@ledgerhq/hw-transport-http](./packages/hw-transport-http) **[DEV only]** universal HTTP channel. **NOT for PROD**.
 
-### A unified transport interface
+### An unified _Transport_ interface
 
 All these transports implement a generic interface exposed by
-[@ledgerhq/hw-transport](./packages/@ledgerhq/hw-transport).
+[@ledgerhq/hw-transport](./packages/hw-transport).
 There are specifics for each transport which are explained in each package.
 
 A Transport is essentially:
@@ -61,7 +68,7 @@ We also provide libraries that help implementing the low level exchanges. These 
 - [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-app-str.svg)](https://www.npmjs.com/package/@ledgerhq/hw-app-str) [@ledgerhq/hw-app-str](@ledgerhq/hw-app-str): Stellar Application API
 - [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-app-ada.svg)](https://www.npmjs.com/package/@ledgerhq/hw-app-ada) [@ledgerhq/hw-app-ada](@ledgerhq/hw-app-ada): Cardano ADA Application API
 
-> We invite third party apps developer to not send PR to this repository to provide more implementations but instead to maintain your own version in your own repository.
+> We invite all third party app developers to not send PR to this repository to provide more implementations but instead to maintain your own version in your own repository and we would be happy to reference them here ♥.
 
 ## Other packages
 
@@ -80,7 +87,8 @@ We also provide libraries that help implementing the low level exchanges. These 
 
 ```js
 import Transport from "@ledgerhq/hw-transport-node-hid";
-// import Transport from "@ledgerhq/hw-transport-u2f"; // for browser
+// import Transport from "@ledgerhq/hw-transport-web-usb";
+// import Transport from "@ledgerhq/react-native-hw-transport-ble";
 import AppBtc from "@ledgerhq/hw-app-btc";
 const getBtcAddress = async () => {
   const transport = await Transport.create();
@@ -90,15 +98,6 @@ const getBtcAddress = async () => {
 };
 getBtcAddress().then(a => console.log(a));
 ```
-
-> When using in a browser, make sure to set up "Browser mode" in the application
-> settings on the device if available.
-
-## Other examples
-
-- [Ledger Live Desktop](https://github.com/ledgerhq/ledger-live-desktop)
-- [Ledger Live Mobile](https://github.com/ledgerhq/ledger-live-mobile)
-- [Bluetooth BLE examples](https://github.com/LedgerHQ/ble-integration-examples)
 
 ## Contributing
 

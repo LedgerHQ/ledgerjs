@@ -20,7 +20,7 @@ yarn add @ledgerhq/react-native-hw-transport-ble
 
 ## Full example
 
-[Click here to browse a full example that can be used as starter kit](https://github.com/LedgerHQ/ble-integration-examples/tree/master/react-native)
+[Click here to browse a full example that can be used as starter kit](https://github.com/LedgerHQ/ledgerjs-examples/tree/master/react-native)
 
 <img width=300 src="https://user-images.githubusercontent.com/211411/52532385-90a02e00-2d24-11e9-9b94-f552ca350b65.jpg" />
 
