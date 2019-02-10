@@ -20,7 +20,7 @@
   "license": "Apache-2.0",
   "devDependencies": {
     "flow-bin": "^0.78.0",
-    "flow-typed": "^2.4.0"
+    "flow-typed": "^2.5.1"
   },
   "scripts": {
     "flow": "flow",

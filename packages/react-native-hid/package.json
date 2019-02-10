@@ -27,12 +27,12 @@
   "main": "lib/index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^4.35.0",
-    "@ledgerhq/devices": "^4.35.0"
+    "@ledgerhq/devices": "^4.35.0",
+    "@ledgerhq/hw-transport": "^4.35.0"
   },
   "devDependencies": {
     "flow-bin": "^0.78.0",
-    "flow-typed": "^2.4.0"
+    "flow-typed": "^2.5.1"
   },
   "scripts": {
     "flow": "flow",

@@ -249,8 +249,6 @@ TransportFoo.create().then(transport => ...)
     });
   }
 
-  deviceModel: ?DeviceModel;
-
   exchangeBusyPromise: ?Promise<void>;
 
   // $FlowFixMe

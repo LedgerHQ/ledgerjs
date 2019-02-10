@@ -9,6 +9,7 @@ import type {
 } from "@ledgerhq/hw-transport";
 import hidFraming from "@ledgerhq/devices/lib/hid-framing";
 import { identifyUSBProductId } from "@ledgerhq/devices";
+import type { DeviceModel } from "@ledgerhq/devices";
 import { TransportError, DisconnectedDevice } from "@ledgerhq/errors";
 import getDevices from "./getDevices";
 import listenDevices from "./listenDevices";
@@ -115,6 +116,8 @@ export default class TransportNodeHid extends Transport<string> {
   }
 
   device: HID.HID;
+  deviceModel: ?DeviceModel;
+
   channel = Math.floor(Math.random() * 0xffff);
   packetSize = 64;
   disconnected = false;
@@ -122,7 +125,12 @@ export default class TransportNodeHid extends Transport<string> {
   constructor(device: HID.HID) {
     super();
     this.device = device;
-    this.deviceModel = identifyUSBProductId(device.productId);
+    // $FlowFixMe
+    const info = device.getDeviceInfo();
+    this.deviceModel =
+      info && info.serialNumber
+        ? identifyUSBProductId(parseInt(info.serialNumber, 16))
+        : null;
   }
 
   setDisconnected = () => {

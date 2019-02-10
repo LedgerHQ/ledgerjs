@@ -26,13 +26,13 @@
   "main": "lib/TransportU2F.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^4.35.0",
     "@ledgerhq/errors": "^4.35.0",
+    "@ledgerhq/hw-transport": "^4.35.0",
     "u2f-api": "0.2.7"
   },
   "devDependencies": {
     "flow-bin": "^0.78.0",
-    "flow-typed": "^2.4.0"
+    "flow-typed": "^2.5.1"
   },
   "scripts": {
     "flow": "flow",
