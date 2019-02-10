@@ -48,8 +48,8 @@ export default class TransportNodeHid extends Transport<string> {
       typeof debug === "function"
         ? debug
         : debug
-          ? (...log) => console.log("[listenDevices]", ...log)
-          : () => {};
+        ? (...log) => console.log("[listenDevices]", ...log)
+        : () => {};
   };
 
   /**

@@ -5,7 +5,10 @@ import { logSubject } from "./debug";
 import timer from "./timer";
 import type { BleManager } from "./types";
 
-export const awaitsBleOn = (bleManager: BleManager, ms: number = 3000) =>
+export const awaitsBleOn = (
+  bleManager: BleManager,
+  ms: number = 3000
+): Promise<void> =>
   new Promise((resolve, reject) => {
     let done = false;
     let lastState = "Unknown";

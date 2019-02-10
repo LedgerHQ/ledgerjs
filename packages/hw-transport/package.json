@@ -28,7 +28,7 @@
     "events": "^3.0.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.78.0",
+    "flow-bin": "^0.92.1",
     "flow-typed": "^2.5.1"
   },
   "scripts": {

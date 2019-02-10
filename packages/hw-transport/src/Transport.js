@@ -150,8 +150,8 @@ TransportFoo.open(descriptor).then(transport => ...)
       typeof debug === "function"
         ? debug
         : debug
-          ? log => console.log(log)
-          : null;
+        ? log => console.log(log)
+        : null;
   }
 
   /**

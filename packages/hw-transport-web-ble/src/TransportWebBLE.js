@@ -32,7 +32,7 @@ const requiresBluetooth = () => {
   return bluetooth;
 };
 
-const availability = () =>
+const availability = (): Observable<boolean> =>
   Observable.create(observer => {
     const bluetooth = requiresBluetooth();
     const onAvailabilityChanged = e => {
@@ -45,14 +45,12 @@ const availability = () =>
         observer.next(available);
       }
     });
-    return {
-      unsubscribe: () => {
-        unsubscribed = true;
-        bluetooth.removeEventListener(
-          "availabilitychanged",
-          onAvailabilityChanged
-        );
-      }
+    return () => {
+      unsubscribed = true;
+      bluetooth.removeEventListener(
+        "availabilitychanged",
+        onAvailabilityChanged
+      );
     };
   });
 

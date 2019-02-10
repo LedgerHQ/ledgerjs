@@ -36,8 +36,8 @@ export const deserializeError = (object: mixed): Error => {
       object.name === "Error"
         ? Error
         : typeof object.name === "string"
-          ? errorClasses[object.name] || createCustomErrorClass(object.name)
-          : Error;
+        ? errorClasses[object.name] || createCustomErrorClass(object.name)
+        : Error;
 
     const error = Object.create(constructor.prototype);
     for (const prop in object) {

@@ -26,7 +26,7 @@ export const sendAPDU = (
   write: (Buffer, ?string) => Promise<void>,
   apdu: Buffer,
   mtuSize: number
-) => {
+): Observable<void> => {
   const chunks = chunkBuffer(apdu, i => mtuSize - (i === 0 ? 5 : 3)).map(
     (buffer, i) => {
       const head = Buffer.alloc(i === 0 ? 5 : 3);
