@@ -24,7 +24,6 @@ import {
 import {
   CantOpenDevice,
   TransportError,
-  DisconnectedDevice,
   DisconnectedDeviceDuringOperation
 } from "@ledgerhq/errors";
 import { logSubject } from "./debug";
@@ -50,6 +49,193 @@ const retrieveInfos = device => {
   if (!infos) throw new Error("bluetooth service infos not found");
   return infos;
 };
+
+async function open(deviceOrId: Device | string, needsReconnect: boolean) {
+  let device;
+  if (typeof deviceOrId === "string") {
+    if (transportsCache[deviceOrId]) {
+      logSubject.next({
+        type: "verbose",
+        message: "Transport in cache, using that."
+      });
+      return transportsCache[deviceOrId];
+    }
+
+    logSubject.next({ type: "verbose", message: `open(${deviceOrId})` });
+
+    await awaitsBleOn(bleManager);
+
+    if (!device) {
+      // works for iOS but not Android
+      const devices = await bleManager.devices([deviceOrId]);
+      logSubject.next({
+        type: "verbose",
+        message: `found ${devices.length} devices`
+      });
+      [device] = devices;
+    }
+
+    if (!device) {
+      const connectedDevices = await bleManager.connectedDevices(
+        getBluetoothServiceUuids()
+      );
+      const connectedDevicesFiltered = connectedDevices.filter(
+        d => d.id === deviceOrId
+      );
+      logSubject.next({
+        type: "verbose",
+        message: `found ${connectedDevicesFiltered.length} connected devices`
+      });
+      [device] = connectedDevicesFiltered;
+    }
+
+    if (!device) {
+      logSubject.next({
+        type: "verbose",
+        message: `connectToDevice(${deviceOrId})`
+      });
+      try {
+        device = await bleManager.connectToDevice(deviceOrId, connectOptions);
+      } catch (e) {
+        if (e.errorCode === BleErrorCode.DeviceMTUChangeFailed) {
+          connectOptions = {};
+          device = await bleManager.connectToDevice(deviceOrId);
+        } else {
+          throw e;
+        }
+      }
+    }
+
+    if (!device) {
+      throw new CantOpenDevice();
+    }
+  } else {
+    device = deviceOrId;
+  }
+
+  if (!(await device.isConnected())) {
+    logSubject.next({
+      type: "verbose",
+      message: "not connected. connecting..."
+    });
+    try {
+      await device.connect(connectOptions);
+    } catch (e) {
+      if (e.errorCode === BleErrorCode.DeviceMTUChangeFailed) {
+        connectOptions = {};
+        await device.connect();
+      } else {
+        throw e;
+      }
+    }
+  }
+
+  await device.discoverAllServicesAndCharacteristics();
+
+  const { deviceModel, serviceUuid, writeUuid, notifyUuid } = retrieveInfos(
+    device
+  );
+  const characteristics = await device.characteristicsForService(serviceUuid);
+  if (!characteristics) {
+    throw new TransportError("service not found", "BLEServiceNotFound");
+  }
+  let writeC;
+  let notifyC;
+  for (const c of characteristics) {
+    if (c.uuid === writeUuid) {
+      writeC = c;
+    } else if (c.uuid === notifyUuid) {
+      notifyC = c;
+    }
+  }
+  if (!writeC) {
+    throw new TransportError(
+      "write characteristic not found",
+      "BLEChracteristicNotFound"
+    );
+  }
+  if (!notifyC) {
+    throw new TransportError(
+      "notify characteristic not found",
+      "BLEChracteristicNotFound"
+    );
+  }
+  if (!writeC.isWritableWithResponse) {
+    throw new TransportError(
+      "write characteristic not writableWithResponse",
+      "BLEChracteristicInvalid"
+    );
+  }
+  if (!notifyC.isNotifiable) {
+    throw new TransportError(
+      "notify characteristic not notifiable",
+      "BLEChracteristicInvalid"
+    );
+  }
+
+  logSubject.next({ type: "verbose", message: `device.mtu=${device.mtu}` });
+
+  const notifyObservable = monitorCharacteristic(notifyC).pipe(
+    tap(value => {
+      logSubject.next({
+        type: "ble-frame-read",
+        message: value.toString("hex")
+      });
+    }),
+    share()
+  );
+
+  const notif = notifyObservable.subscribe();
+
+  const transport = new BluetoothTransport(
+    device,
+    writeC,
+    notifyObservable,
+    deviceModel
+  );
+
+  const onDisconnect = e => {
+    transport.notYetDisconnected = false;
+    notif.unsubscribe();
+    disconnectedSub.remove();
+    delete transportsCache[transport.id];
+    logSubject.next({
+      type: "verbose",
+      message: `BleTransport(${transport.id}) disconnected`
+    });
+    transport.emit("disconnect", e);
+  };
+
+  transportsCache[transport.id] = transport;
+  const disconnectedSub = device.onDisconnected(e => {
+    onDisconnect(e);
+  });
+
+  let beforeMTUTime = Date.now();
+  try {
+    await transport.inferMTU();
+  } finally {
+    let afterMTUTime = Date.now();
+
+    // workaround for #279: we need to open() again if we come the first time here,
+    // to make sure we do a disconnect() after the first pairing time
+    // because of a firmware bug
+
+    if (afterMTUTime - beforeMTUTime < 1000) {
+      needsReconnect = false; // (optim) there is likely no new pairing done because mtu answer was fast.
+    }
+
+    if (needsReconnect) {
+      await device.cancelConnection();
+    }
+  }
+
+  if (needsReconnect) {
+    return open(device, false);
+  }
+
+  return transport;
+}
 
 /**
  * react-native bluetooth BLE implementation
@@ -131,187 +317,8 @@ export default class BluetoothTransport extends Transport<Device | string> {
     return { unsubscribe };
   }
 
-  static async open(deviceOrId: Device | string, _timeout: number = 30000) {
-    // TODO implement timeout
-
-    let device;
-    if (typeof deviceOrId === "string") {
-      if (transportsCache[deviceOrId]) {
-        logSubject.next({
-          type: "verbose",
-          message: "Transport in cache, using that."
-        });
-        return transportsCache[deviceOrId];
-      }
-
-      logSubject.next({ type: "verbose", message: `open(${deviceOrId})` });
-
-      await awaitsBleOn(bleManager);
-
-      if (!device) {
-        // works for iOS but not Android
-        const devices = await bleManager.devices([deviceOrId]);
-        logSubject.next({
-          type: "verbose",
-          message: `found ${devices.length} devices`
-        });
-        [device] = devices;
-      }
-
-      if (!device) {
-        const connectedDevices = await bleManager.connectedDevices(
-          getBluetoothServiceUuids()
-        );
-        const connectedDevicesFiltered = connectedDevices.filter(
-          d => d.id === deviceOrId
-        );
-        logSubject.next({
-          type: "verbose",
-          message: `found ${connectedDevicesFiltered.length} connected devices`
-        });
-        [device] = connectedDevicesFiltered;
-      }
-
-      if (!device) {
-        logSubject.next({
-          type: "verbose",
-          message: `connectToDevice(${deviceOrId})`
-        });
-        try {
-          device = await bleManager.connectToDevice(deviceOrId, connectOptions);
-        } catch (e) {
-          if (e.errorCode === BleErrorCode.DeviceMTUChangeFailed) {
-            connectOptions = {};
-            device = await bleManager.connectToDevice(deviceOrId);
-          } else {
-            throw e;
-          }
-        }
-      }
-
-      if (!device) {
-        throw new CantOpenDevice();
-      }
-    } else {
-      device = deviceOrId;
-    }
-
-    if (!(await device.isConnected())) {
-      logSubject.next({
-        type: "verbose",
-        message: "not connected. connecting..."
-      });
-      try {
-        await device.connect(connectOptions);
-      } catch (e) {
-        if (e.errorCode === BleErrorCode.DeviceMTUChangeFailed) {
-          connectOptions = {};
-          await device.connect();
-        } else {
-          throw e;
-        }
-      }
-    }
-
-    await device.discoverAllServicesAndCharacteristics();
-
-    const { deviceModel, serviceUuid, writeUuid, notifyUuid } = retrieveInfos(
-      device
-    );
-    const characteristics = await device.characteristicsForService(serviceUuid);
-    if (!characteristics) {
-      throw new TransportError("service not found", "BLEServiceNotFound");
-    }
-    let writeC;
-    let notifyC;
-    for (const c of characteristics) {
-      if (c.uuid === writeUuid) {
-        writeC = c;
-      } else if (c.uuid === notifyUuid) {
-        notifyC = c;
-      }
-    }
-    if (!writeC) {
-      throw new TransportError(
-        "write characteristic not found",
-        "BLEChracteristicNotFound"
-      );
-    }
-    if (!notifyC) {
-      throw new TransportError(
-        "notify characteristic not found",
-        "BLEChracteristicNotFound"
-      );
-    }
-    if (!writeC.isWritableWithResponse) {
-      throw new TransportError(
-        "write characteristic not writableWithResponse",
-        "BLEChracteristicInvalid"
-      );
-    }
-    if (!notifyC.isNotifiable) {
-      throw new TransportError(
-        "notify characteristic not notifiable",
-        "BLEChracteristicInvalid"
-      );
-    }
-
-    logSubject.next({ type: "verbose", message: `device.mtu=${device.mtu}` });
-
-    const notifyObservable = monitorCharacteristic(notifyC).pipe(
-      tap(value => {
-        logSubject.next({
-          type: "ble-frame-read",
-          message: value.toString("hex")
-        });
-      }),
-      share()
-    );
-
-    const notif = notifyObservable.subscribe();
-
-    const transport = new BluetoothTransport(
-      device,
-      writeC,
-      notifyObservable,
-      deviceModel
-    );
-
-    const onDisconnect = e => {
-      transport.notYetDisconnected = false;
-      notif.unsubscribe();
-      disconnectedSub.remove();
-      delete transportsCache[transport.id];
-      logSubject.next({
-        type: "verbose",
-        message: `BleTransport(${transport.id}) disconnected`
-      });
-      transport.emit("disconnect", e);
-    };
-
-    let disconnectedIgnored = false;
-    transportsCache[transport.id] = transport;
-    const disconnectedSub = device.onDisconnected(e => {
-      if (disconnectedIgnored) return;
-      onDisconnect(e);
-    });
-
-    try {
-      try {
-        await transport.inferMTU();
-      } finally {
-        disconnectedIgnored = true;
-        // workaround for #279
-        await this.reconnect();
-        disconnectedIgnored = false;
-      }
-    } catch (e) {
-      // any failure is assumed as a disconnection
-      onDisconnect(e);
-      throw new DisconnectedDevice();
-    }
-
-    return transport;
+  static async open(deviceOrId: Device | string) {
+    return open(deviceOrId, true);
   }
 
   static disconnect = async (id: *) => {
@@ -352,11 +359,6 @@ export default class BluetoothTransport extends Transport<Device | string> {
       type: "verbose",
       message: `BleTransport(${String(this.id)}) new instance`
     });
-  }
-
-  async reconnect() {
-    await this.device.cancelDeviceConnection();
-    await this.device.connect();
   }
 
   exchange = (apdu: Buffer): Promise<Buffer> =>

@@ -6,15 +6,35 @@
 
 ## @ledgerhq/react-native-hw-transport-ble
 
-Bluetooth BLE transport for React Native.
+**Ledger Hardware Wallet Bluetooth BLE transport for React Native.**
+
+```
+yarn add @ledgerhq/react-native-hw-transport-ble
+```
 
 ### Pre-requisite
 
-- [Install and link library `react-native-ble-plx`, configure your app for Bluetooth permissions](https://github.com/Polidea/react-native-ble-plx) (Open the link for documentation)
-- **You should use a recent version of JavaScriptCore** instead of React Native's default one. You can simply set up [jsc-android](https://www.npmjs.com/package/jsc-android). Otherwise, if you keep React Native one's you will fall into this error https://github.com/facebook/react-native/issues/15902 (you can alternatively figure out the polyfill to install). In future, we expect React Native to upgrade JSC.
-- You need to set up a **Buffer** polyfill. You can simply have a `polyfill.js` that you `import "./polyfill";` at first line of your entry point with `global.Buffer = require("buffer").Buffer;`.
+- [**Install and link library `react-native-ble-plx` + configure your app for Bluetooth permissions**](https://github.com/Polidea/react-native-ble-plx) (Open the link for documentation)
+- [for Android] **a recent version of JavaScriptCore** instead of React Native's default one. The simplest way is to set up [jsc-android](https://www.npmjs.com/package/jsc-android). In future, [we expect](https://github.com/facebook/react-native/issues/19737) React Native to upgrade JSC for Android.
+- **global.Buffer** available. Typically `global.Buffer = require("buffer").Buffer;` that can be placed in a `polyfill.js` and imported with `import "./polyfill";` at first line of the main JavaScript entry file.
 
-### Getting started
+## Full example
+
+[Click here to browse a full example that can be used as starter kit](https://github.com/LedgerHQ/ble-integration-examples/tree/master/react-native)
+
+<img width=300 src="https://user-images.githubusercontent.com/211411/52532385-90a02e00-2d24-11e9-9b94-f552ca350b65.jpg" />
+
+## Troubleshootings
+
+### Bad BLE link between the Phone and the device
+
+It can sometimes happen that the phone have a broken link, it is in this case recommended to users to go to their phone settings and manually Forget the Nano X. There is at the moment no other ways: there is no programmatic way to unpair a bonded device but you can however have a button that opens that phone settings Bluetooth section.
+
+### `undefined is not a function(evaluating '\_iterator[typeof Symbol === "function"?Symbol.iterator:"@@iterator"]()')`
+
+Read again our Pre-requisites, you must set up jsc-android, alternatively you can figure out what polyfills are required. https://github.com/facebook/react-native/issues/15902
+
+## Minimal getting started
 
 `@ledgerhq/react-native-hw-transport-ble` works like any of our `@ledgerhq/hw-transport` libraries.
 
@@ -79,7 +99,3 @@ const transport = await TransportBLE.open(deviceId); // deviceId can come from p
 ```
 
 **and now we can just use the transport like any other Ledger transport!**
-
-### Full example
-
-[Here is a full example that you can use as boilerplate](https://github.com/LedgerHQ/ble-integration-examples/tree/master/react-native)

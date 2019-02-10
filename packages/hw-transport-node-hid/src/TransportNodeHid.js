@@ -122,6 +122,7 @@ export default class TransportNodeHid extends Transport<string> {
   constructor(device: HID.HID) {
     super();
     this.device = device;
+    this.deviceModel = identifyUSBProductId(device.productId);
   }
 
   setDisconnected = () => {
