@@ -35,10 +35,10 @@
     "eslint-plugin-flowtype": "^3.2.1",
     "eslint-plugin-react": "^7.12.4",
     "flow-bin": "^0.92.1",
-    "flow-copy-source": "^1.2.2",
+    "flow-copy-source": "^2.0.2",
     "flow-mono-cli": "^1.4.3",
     "flow-typed": "^2.5.1",
-    "lerna": "2.9.0",
+    "lerna": "3.11.0",
     "prettier": "^1.16.4",
     "uglify-js": "^3.4.9"
   }
