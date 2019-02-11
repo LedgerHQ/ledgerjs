@@ -285,7 +285,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
           type: "ble-error",
           message: "inferMTU got " + String(e)
         });
-        await this.device.gatt.disconnect().catch(() => {});
+        this.device.gatt.disconnect();
         throw e;
       }
     });
