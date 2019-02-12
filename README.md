@@ -186,7 +186,7 @@ then, go to [/releases](https://github.com/LedgerHQ/ledgerjs/releases) and creat
 deploy a canary release (beta, etc)
 
 ```
- yarn run publish -- -c beta
+ yarn run publish -c
 ```
 
 > NB: if there is a new package, AFAIK you need to manually `npm publish` it once on NPM.
