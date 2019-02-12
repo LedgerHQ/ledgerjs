@@ -36,6 +36,7 @@
     "flow": "flow",
     "clean": "bash ../../script/clean.sh",
     "build": "bash ../../script/build.sh",
-    "watch": "bash ../../script/watch.sh"
+    "watch": "bash ../../script/watch.sh",
+    "doc": "bash ../../script/doc.sh"
   }
 }

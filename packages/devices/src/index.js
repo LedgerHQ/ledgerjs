@@ -1,16 +1,5 @@
 // @flow
 
-export type DeviceModel = {
-  id: string,
-  productName: string,
-  usbProductId: number,
-  bluetoothSpec?: Array<{
-    serviceUuid: string,
-    writeUuid: string,
-    notifyUuid: string
-  }>
-};
-
 const devices: { [id: string]: DeviceModel } = {
   blue: {
     id: "blue",
@@ -45,23 +34,25 @@ const devices: { [id: string]: DeviceModel } = {
 // $FlowFixMe
 const devicesList: DeviceModel[] = Object.values(devices);
 
+/**
+ *
+ */
 export const ledgerUSBVendorId = 0x2c97;
 
+/**
+ *
+ */
 export const getDeviceModel = (id: string): DeviceModel => {
   const info = devices[id];
   if (!info) throw new Error("device '" + id + "' does not exist");
   return info;
 };
 
+/**
+ *
+ */
 export const identifyUSBProductId = (usbProductId: number): ?DeviceModel =>
   devicesList.find(d => d.usbProductId === usbProductId);
-
-export type BluetoothInfos = {
-  deviceModel: DeviceModel,
-  serviceUuid: string,
-  writeUuid: string,
-  notifyUuid: string
-};
 
 const bluetoothServices: string[] = [];
 const serviceUuidToInfos: {
@@ -80,7 +71,37 @@ for (let id in devices) {
   }
 }
 
+/**
+ *
+ */
 export const getBluetoothServiceUuids = () => bluetoothServices;
 
+/**
+ *
+ */
 export const getInfosForServiceUuid = (uuid: string): ?BluetoothInfos =>
   serviceUuidToInfos[uuid.toLowerCase()];
+
+/**
+ *
+ */
+export type DeviceModel = {
+  id: string,
+  productName: string,
+  usbProductId: number,
+  bluetoothSpec?: Array<{
+    serviceUuid: string,
+    writeUuid: string,
+    notifyUuid: string
+  }>
+};
+
+/**
+ *
+ */
+export type BluetoothInfos = {
+  deviceModel: DeviceModel,
+  serviceUuid: string,
+  writeUuid: string,
+  notifyUuid: string
+};

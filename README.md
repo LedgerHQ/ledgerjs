@@ -52,8 +52,6 @@ and some derivates:
 - `transport.create(): Promise<Transport>`: make use of `listen` and `open` for the most simple scenario.
 - `transport.send(cla, ins, p1, p2, data): Promise<Buffer>`: a small abstraction of `exchange`
 
-[More Transport API documentation...](#coming-soon)
-
 > NB: [APDU](https://en.wikipedia.org/wiki/Smart_card_application_protocol_data_unit) is the encoding primitive for all binary exchange with the devices. (it comes from smart card industry)
 
 ## `@ledgerhq/hw-app-*`
