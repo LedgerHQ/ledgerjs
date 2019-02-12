@@ -401,30 +401,28 @@ export default class BluetoothTransport extends Transport<Device | string> {
   // TODO we probably will do this at end of open
   async inferMTU() {
     let { mtu } = this.device;
-    if (mtu <= 23) {
-      await this.exchangeAtomicImpl(async () => {
-        try {
-          mtu =
-            (await merge(
-              this.notifyObservable.pipe(
-                first(buffer => buffer.readUInt8(0) === 0x08),
-                map(buffer => buffer.readUInt8(5)),
-                timeout(30000)
-              ),
-              defer(() =>
-                from(this.write(Buffer.from([0x08, 0, 0, 0, 0])))
-              ).pipe(ignoreElements())
-            ).toPromise()) + 3;
-        } catch (e) {
-          logSubject.next({
-            type: "ble-error",
-            message: "inferMTU got " + String(e)
-          });
-          await bleManager.cancelDeviceConnection(this.id).catch(() => {}); // but we ignore if disconnect worked.
-          throw remapError(e);
-        }
-      });
-    }
+    await this.exchangeAtomicImpl(async () => {
+      try {
+        mtu =
+          (await merge(
+            this.notifyObservable.pipe(
+              first(buffer => buffer.readUInt8(0) === 0x08),
+              map(buffer => buffer.readUInt8(5)),
+              timeout(30000)
+            ),
+            defer(() => from(this.write(Buffer.from([0x08, 0, 0, 0, 0])))).pipe(
+              ignoreElements()
+            )
+          ).toPromise()) + 3;
+      } catch (e) {
+        logSubject.next({
+          type: "ble-error",
+          message: "inferMTU got " + String(e)
+        });
+        await bleManager.cancelDeviceConnection(this.id).catch(() => {}); // but we ignore if disconnect worked.
+        throw remapError(e);
+      }
+    });
 
     if (mtu > 23) {
       const mtuSize = mtu - 3;
