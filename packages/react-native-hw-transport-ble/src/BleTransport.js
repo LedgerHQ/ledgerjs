@@ -24,7 +24,6 @@ import {
 import {
   CantOpenDevice,
   TransportError,
-  DisconnectedDevice,
   DisconnectedDeviceDuringOperation
 } from "@ledgerhq/errors";
 import { logSubject } from "./debug";
