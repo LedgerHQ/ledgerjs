@@ -24,6 +24,7 @@ import {
 import {
   CantOpenDevice,
   TransportError,
+  DisconnectedDevice,
   DisconnectedDeviceDuringOperation
 } from "@ledgerhq/errors";
 import { logSubject } from "./debug";
@@ -208,6 +209,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
 
   transportsCache[transport.id] = transport;
   const disconnectedSub = device.onDisconnected(e => {
+    if (!transport.notYetDisconnected) return;
     onDisconnect(e);
   });
 
@@ -226,7 +228,8 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
     }
 
     if (needsReconnect) {
-      await BluetoothTransport.disconnect(transport.id).catch(() => {})
+      onDisconnect(new DisconnectedDevice());
+      await BluetoothTransport.disconnect(transport.id).catch(() => {});
       // necessary time for the bonding workaround
       await new Promise(s => setTimeout(s, 500));
     }
