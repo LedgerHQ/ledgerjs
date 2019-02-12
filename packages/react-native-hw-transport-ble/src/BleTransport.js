@@ -226,7 +226,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
     }
 
     if (needsReconnect) {
-      await device.cancelConnection();
+      await BluetoothTransport.disconnect(transport.id).catch(() => {})
       // necessary time for the bonding workaround
       await new Promise(s => setTimeout(s, 500));
     }
