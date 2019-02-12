@@ -136,7 +136,9 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
   const { deviceModel, serviceUuid, writeUuid, notifyUuid } = retrieveInfos(
     device
   );
+
   const characteristics = await device.characteristicsForService(serviceUuid);
+
   if (!characteristics) {
     throw new TransportError("service not found", "BLEServiceNotFound");
   }
@@ -228,9 +230,9 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
     }
 
     if (needsReconnect) {
-      onDisconnect(new DisconnectedDevice());
-      await BluetoothTransport.disconnect(transport.id).catch(() => {});
       // necessary time for the bonding workaround
+      await new Promise(s => setTimeout(s, 500));
+      await BluetoothTransport.disconnect(transport.id).catch(() => {});
       await new Promise(s => setTimeout(s, 500));
     }
   }
