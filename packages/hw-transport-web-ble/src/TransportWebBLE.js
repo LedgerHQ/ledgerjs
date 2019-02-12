@@ -158,8 +158,8 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
 
     if (needsReconnect) {
       await device.gatt.disconnect();
-      // It seems web ble needs some time to really disconnect?!
-      await new Promise(s => setTimeout(s, 200));
+      // necessary time for the bonding workaround
+      await new Promise(s => setTimeout(s, 500));
     }
   }
 
