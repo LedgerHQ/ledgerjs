@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-transport-web-ble",
-  "version": "4.38.4",
+  "version": "4.38.6",
   "description": "Ledger Hardware Wallet Web Bluetooth implementation of the communication layer",
   "keywords": [
     "Ledger",
@@ -27,7 +27,7 @@
   "dependencies": {
     "@ledgerhq/devices": "^4.38.0",
     "@ledgerhq/errors": "^4.38.0",
-    "@ledgerhq/hw-transport": "^4.38.0",
+    "@ledgerhq/hw-transport": "^4.38.6",
     "rxjs": "^6.4.0"
   },
   "devDependencies": {
