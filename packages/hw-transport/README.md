@@ -63,13 +63,19 @@ Type: [Object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Globa
 
 ### DescriptorEvent
 
-Type: {type: (`"add"` \| `"remove"`), descriptor: Descriptor, deviceModel: DeviceModel??}
+type: add or remove event
+descriptor: a parameter that can be passed to open(descriptor)
+deviceModel: device info on the model (is it a nano s, nano x, ...)
+device: transport specific device info
+
+Type: {type: (`"add"` \| `"remove"`), descriptor: Descriptor, deviceModel: DeviceModel??, device: [Device](#device)?}
 
 #### Properties
 
 -   `type` **(`"add"` \| `"remove"`)** 
 -   `descriptor` **Descriptor** 
 -   `deviceModel` **DeviceModel??** 
+-   `device` **[Device](#device)?** 
 
 ### Observer
 

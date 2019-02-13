@@ -64,7 +64,7 @@ export default class TransportNodeHid extends Transport<string> {
         if (!unsubscribed) {
           const descriptor: string = device.path;
           const deviceModel = identifyUSBProductId(device.productId);
-          observer.next({ type: "add", descriptor, deviceModel });
+          observer.next({ type: "add", descriptor, device, deviceModel });
         }
       }
     });

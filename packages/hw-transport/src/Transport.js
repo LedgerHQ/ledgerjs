@@ -25,11 +25,16 @@ export type Subscription = { unsubscribe: () => void };
 export type Device = Object;
 
 /**
+ * type: add or remove event
+ * descriptor: a parameter that can be passed to open(descriptor)
+ * deviceModel: device info on the model (is it a nano s, nano x, ...)
+ * device: transport specific device info
  */
 export type DescriptorEvent<Descriptor> = {
   type: "add" | "remove",
   descriptor: Descriptor,
-  deviceModel?: ?DeviceModel
+  deviceModel?: ?DeviceModel,
+  device?: Device
 };
 /**
  */
