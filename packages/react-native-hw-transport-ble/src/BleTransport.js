@@ -36,10 +36,11 @@ const transportsCache = {};
 const bleManager = new BleManager();
 
 const retrieveInfos = device => {
+  if (!device || !device.serviceUUIDs) return;
   const [serviceUUID] = device.serviceUUIDs;
-  if (!serviceUUID) throw new Error("bluetooth service not found");
+  if (!serviceUUID) return;
   const infos = getInfosForServiceUuid(serviceUUID);
-  if (!infos) throw new Error("bluetooth service infos not found");
+  if (!infos) return;
   return infos;
 };
 
@@ -141,11 +142,28 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
 
   await device.discoverAllServicesAndCharacteristics();
 
-  const { deviceModel, serviceUuid, writeUuid, notifyUuid } = retrieveInfos(
-    device
-  );
+  let res = retrieveInfos(device);
+  let characteristics;
+  if (!res) {
+    for (const uuid of getBluetoothServiceUuids()) {
+      try {
+        characteristics = await device.characteristicsForService(uuid);
+        res = getInfosForServiceUuid(uuid);
+        break;
+      } catch (e) {
+        // we attempt to connect to service
+      }
+    }
+  }
+  if (!res) {
+    throw new TransportError("service not found", "BLEServiceNotFound");
+  }
 
-  const characteristics = await device.characteristicsForService(serviceUuid);
+  const { deviceModel, serviceUuid, writeUuid, notifyUuid } = res;
+
+  if (!characteristics) {
+    characteristics = await device.characteristicsForService(serviceUuid);
+  }
 
   if (!characteristics) {
     throw new TransportError("service not found", "BLEServiceNotFound");
@@ -318,7 +336,8 @@ export default class BluetoothTransport extends Transport<Device | string> {
               unsubscribe();
               return;
             }
-            const { deviceModel } = retrieveInfos(device);
+            const res = retrieveInfos(device);
+            const deviceModel = res && res.deviceModel;
             observer.next({ type: "add", descriptor: device, deviceModel });
           }
         );
