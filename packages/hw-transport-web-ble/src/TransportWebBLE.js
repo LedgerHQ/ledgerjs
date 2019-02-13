@@ -1,18 +1,20 @@
 // @flow
 /* eslint-disable prefer-template */
 
-import Transport, { TransportError } from "@ledgerhq/hw-transport";
-import { Observable, merge } from "rxjs";
-import { share, tap } from "rxjs/operators";
+import Transport from "@ledgerhq/hw-transport";
+import { DisconnectedDevice } from "@ledgerhq/errors";
+import {
+  getBluetoothServiceUuids,
+  getInfosForServiceUuid
+} from "@ledgerhq/devices";
+import type { DeviceModel } from "@ledgerhq/devices";
+import { Observable, defer, merge, from } from "rxjs";
+import { share, ignoreElements, first, map, tap } from "rxjs/operators";
 import { logSubject } from "./debug";
 import type { Device, Characteristic } from "./types";
 import { sendAPDU } from "./sendAPDU";
 import { receiveAPDU } from "./receiveAPDU";
 import { monitorCharacteristic } from "./monitorCharacteristic";
-
-const ServiceUuid = "d973f2e0-b19e-11e2-9e96-0800200c9a66";
-const WriteCharacteristicUuid = "d973f2e2-b19e-11e2-9e96-0800200c9a66";
-const NotifyCharacteristicUuid = "d973f2e1-b19e-11e2-9e96-0800200c9a66";
 
 const requiresBluetooth = () => {
   // $FlowFixMe
@@ -23,7 +25,7 @@ const requiresBluetooth = () => {
   return bluetooth;
 };
 
-const availability = () =>
+const availability = (): Observable<boolean> =>
   Observable.create(observer => {
     const bluetooth = requiresBluetooth();
     const onAvailabilityChanged = e => {
@@ -36,18 +38,130 @@ const availability = () =>
         observer.next(available);
       }
     });
-    return {
-      unsubscribe: () => {
-        unsubscribed = true;
-        bluetooth.removeEventListener(
-          "availabilitychanged",
-          onAvailabilityChanged
-        );
-      }
+    return () => {
+      unsubscribed = true;
+      bluetooth.removeEventListener(
+        "availabilitychanged",
+        onAvailabilityChanged
+      );
     };
   });
 
 const transportsCache = {};
+
+const requestDeviceParam = () => ({
+  filters: getBluetoothServiceUuids().map(uuid => ({
+    services: [uuid]
+  }))
+});
+
+const retrieveService = async device => {
+  if (!device.gatt) throw new Error("bluetooth gatt not found");
+  const [service] = await device.gatt.getPrimaryServices();
+  if (!service) throw new Error("bluetooth service not found");
+  const infos = getInfosForServiceUuid(service.uuid);
+  if (!infos) throw new Error("bluetooth service infos not found");
+  return [service, infos];
+};
+
+async function open(deviceOrId: Device | string, needsReconnect: boolean) {
+  let device;
+  if (typeof deviceOrId === "string") {
+    if (transportsCache[deviceOrId]) {
+      logSubject.next({
+        type: "verbose",
+        message: "Transport in cache, using that."
+      });
+      return transportsCache[deviceOrId];
+    }
+
+    const bluetooth = requiresBluetooth();
+
+    // TODO instead we should "query" the device by its ID
+    device = await bluetooth.requestDevice(requestDeviceParam());
+  } else {
+    device = deviceOrId;
+  }
+
+  if (!device.gatt.connected) {
+    logSubject.next({
+      type: "verbose",
+      message: "not connected. connecting..."
+    });
+    await device.gatt.connect();
+  }
+
+  const [service, infos] = await retrieveService(device);
+  const { deviceModel, writeUuid, notifyUuid } = infos;
+  const [writeC, notifyC] = await Promise.all([
+    service.getCharacteristic(writeUuid),
+    service.getCharacteristic(notifyUuid)
+  ]);
+
+  const notifyObservable = monitorCharacteristic(notifyC).pipe(
+    tap(value => {
+      logSubject.next({
+        type: "ble-frame-read",
+        message: value.toString("hex")
+      });
+    }),
+    share()
+  );
+
+  const notif = notifyObservable.subscribe();
+
+  const transport = new BluetoothTransport(
+    device,
+    writeC,
+    notifyObservable,
+    deviceModel
+  );
+
+  if (!device.gatt.connected) {
+    throw new DisconnectedDevice();
+  }
+
+  transportsCache[transport.id] = transport;
+  const onDisconnect = e => {
+    delete transportsCache[transport.id];
+    transport.notYetDisconnected = false;
+    notif.unsubscribe();
+    device.removeEventListener("gattserverdisconnected", onDisconnect);
+    logSubject.next({
+      type: "verbose",
+      message: `BleTransport(${transport.id}) disconnected`
+    });
+    transport.emit("disconnect", e);
+  };
+  device.addEventListener("gattserverdisconnected", onDisconnect);
+
+  let beforeMTUTime = Date.now();
+  try {
+    await transport.inferMTU();
+  } finally {
+    let afterMTUTime = Date.now();
+
+    // workaround for #279: we need to open() again if we come the first time here,
+    // to make sure we do a disconnect() after the first pairing time
+    // because of a firmware bug
+
+    if (afterMTUTime - beforeMTUTime < 500) {
+      needsReconnect = false; // (optim) there is likely no new pairing done because mtu answer was fast.
+    }
+
+    if (needsReconnect) {
+      await device.gatt.disconnect();
+      // necessary time for the bonding workaround
+      await new Promise(s => setTimeout(s, 500));
+    }
+  }
+
+  if (needsReconnect) {
+    return open(device, false);
+  }
+
+  return transport;
+}
 
 /**
  * react-native bluetooth BLE implementation
@@ -80,20 +194,15 @@ export default class BluetoothTransport extends Transport<Device | string> {
 
     const bluetooth = requiresBluetooth();
 
-    bluetooth
-      .requestDevice({
-        filters: [
-          {
-            services: [ServiceUuid]
-          }
-        ]
-      })
-      .then(device => {
-        if (!unsubscribed) {
-          observer.next({ type: "add", descriptor: device, device });
-          observer.complete();
-        }
-      });
+    bluetooth.requestDevice(requestDeviceParam()).then(async device => {
+      if (!unsubscribed) {
+        observer.next({
+          type: "add",
+          descriptor: device
+        });
+        observer.complete();
+      }
+    });
     function unsubscribe() {
       unsubscribed = true;
     }
@@ -101,73 +210,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
   }
 
   static async open(deviceOrId: Device | string) {
-    let device;
-    if (typeof deviceOrId === "string") {
-      if (transportsCache[deviceOrId]) {
-        logSubject.next({
-          type: "verbose",
-          message: "Transport in cache, using that."
-        });
-        return transportsCache[deviceOrId];
-      }
-
-      const bluetooth = requiresBluetooth();
-
-      // TODO instead we should "query" the device by its ID
-      device = await bluetooth.requestDevice({
-        filters: [
-          {
-            services: [ServiceUuid]
-          }
-        ]
-      });
-    } else {
-      device = deviceOrId;
-    }
-
-    if (!device.gatt.connected) {
-      logSubject.next({
-        type: "verbose",
-        message: "not connected. connecting..."
-      });
-      await device.gatt.connect();
-    }
-
-    const service = await device.gatt.getPrimaryService(ServiceUuid);
-    const [writeC, notifyC] = await Promise.all([
-      service.getCharacteristic(WriteCharacteristicUuid),
-      service.getCharacteristic(NotifyCharacteristicUuid)
-    ]);
-
-    const notifyObservable = monitorCharacteristic(notifyC).pipe(
-      tap(value => {
-        logSubject.next({
-          type: "ble-frame-read",
-          message: value.toString("hex")
-        });
-      }),
-      share()
-    );
-
-    const notif = notifyObservable.subscribe();
-
-    const transport = new BluetoothTransport(device, writeC, notifyObservable);
-
-    transportsCache[transport.id] = transport;
-    const onDisconnect = e => {
-      delete transportsCache[transport.id];
-      transport.notYetDisconnected = false;
-      notif.unsubscribe();
-      device.removeEventListener("gattserverdisconnected", onDisconnect);
-      logSubject.next({
-        type: "verbose",
-        message: `BleTransport(${transport.id}) disconnected`
-      });
-      transport.emit("disconnect", e);
-    };
-    device.addEventListener("gattserverdisconnected", onDisconnect);
-
-    return transport;
+    return open(deviceOrId, true);
   }
 
   static disconnect = async (id: *) => {
@@ -193,16 +236,20 @@ export default class BluetoothTransport extends Transport<Device | string> {
 
   notYetDisconnected = true;
 
+  deviceModel: DeviceModel;
+
   constructor(
     device: Device,
     writeCharacteristic: Characteristic,
-    notifyObservable: Observable<*>
+    notifyObservable: Observable<*>,
+    deviceModel: DeviceModel
   ) {
     super();
     this.id = device.id;
     this.device = device;
     this.writeCharacteristic = writeCharacteristic;
     this.notifyObservable = notifyObservable;
+    this.deviceModel = deviceModel;
 
     logSubject.next({
       type: "verbose",
@@ -210,8 +257,47 @@ export default class BluetoothTransport extends Transport<Device | string> {
     });
   }
 
+  async inferMTU() {
+    let mtu = 23;
+
+    await this.exchangeAtomicImpl(async () => {
+      try {
+        mtu =
+          (await merge(
+            this.notifyObservable.pipe(
+              first(buffer => buffer.readUInt8(0) === 0x08),
+              map(buffer => buffer.readUInt8(5))
+            ),
+            defer(() => from(this.write(Buffer.from([0x08, 0, 0, 0, 0])))).pipe(
+              ignoreElements()
+            )
+          ).toPromise()) + 3;
+      } catch (e) {
+        logSubject.next({
+          type: "ble-error",
+          message: "inferMTU got " + String(e)
+        });
+        this.device.gatt.disconnect();
+        throw e;
+      }
+    });
+
+    if (mtu > 23) {
+      const mtuSize = mtu - 3;
+      logSubject.next({
+        type: "verbose",
+        message: `BleTransport(${String(this.id)}) mtu set to ${String(
+          mtuSize
+        )}`
+      });
+      this.mtuSize = mtuSize;
+    }
+
+    return this.mtuSize;
+  }
+
   exchange = (apdu: Buffer): Promise<Buffer> =>
-    this.atomic(async () => {
+    this.exchangeAtomicImpl(async () => {
       try {
         const { debug } = this;
 
@@ -252,28 +338,9 @@ export default class BluetoothTransport extends Transport<Device | string> {
     await this.writeCharacteristic.writeValue(buffer);
   };
 
-  busy: ?Promise<void>;
-  atomic = async (f: *) => {
-    if (this.busy) {
-      throw new TransportError("Transport race condition", "RaceCondition");
-    }
-    let resolveBusy;
-    const busyPromise = new Promise(r => {
-      resolveBusy = r;
-    });
-    this.busy = busyPromise;
-    try {
-      const res = await f();
-      return res;
-    } finally {
-      if (resolveBusy) resolveBusy();
-      this.busy = null;
-    }
-  };
-
   async close() {
-    if (this.busy) {
-      await this.busy;
+    if (this.exchangeBusyPromise) {
+      await this.exchangeBusyPromise;
     }
   }
 }

@@ -1,7 +1,7 @@
 // @flow
 
 import { Observable } from "rxjs";
-import { TransportError } from "@ledgerhq/hw-transport";
+import { TransportError } from "@ledgerhq/errors";
 import type { Characteristic } from "./types";
 import { logSubject } from "./debug";
 

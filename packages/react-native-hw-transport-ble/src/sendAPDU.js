@@ -1,6 +1,5 @@
 // @flow
 
-import uuid from "uuid/v4";
 import { Observable } from "rxjs";
 import type { BleManager } from "./types";
 import { logSubject } from "./debug";
@@ -27,7 +26,7 @@ export const sendAPDU = (
   write: (Buffer, ?string) => Promise<void>,
   apdu: Buffer,
   mtuSize: number
-) => {
+): Observable<void> => {
   const chunks = chunkBuffer(apdu, i => mtuSize - (i === 0 ? 5 : 3)).map(
     (buffer, i) => {
       const head = Buffer.alloc(i === 0 ? 5 : 3);
@@ -42,12 +41,11 @@ export const sendAPDU = (
 
   return Observable.create(o => {
     let terminated = false;
-    const txId = uuid();
 
     async function main() {
       for (const chunk of chunks) {
         if (terminated) return;
-        await write(chunk, txId);
+        await write(chunk);
       }
     }
 
@@ -73,7 +71,6 @@ export const sendAPDU = (
           message: "sendAPDU interruption"
         });
         terminated = true;
-        bleManager.cancelTransaction(txId);
       }
     };
 

@@ -1,7 +1,8 @@
 //@flow
 
 import { sign, isSupported } from "u2f-api";
-import Transport, { TransportError } from "@ledgerhq/hw-transport";
+import Transport from "@ledgerhq/hw-transport";
+import { TransportError } from "@ledgerhq/errors";
 
 function wrapU2FTransportError(originalError, message, id) {
   const err = new TransportError(message, id);

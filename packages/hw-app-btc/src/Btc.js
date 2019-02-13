@@ -295,8 +295,8 @@ export default class Btc {
       ? additionals.includes("sapling")
         ? 0x05
         : overwinter
-          ? 0x04
-          : 0x02
+        ? 0x04
+        : 0x02
       : 0x00;
     return this.transport.send(
       0xe0,
@@ -756,12 +756,12 @@ btc.createPaymentTransactionNew(
             inputs[i].length >= 3 && typeof inputs[i][2] === "string"
               ? Buffer.from(inputs[i][2], "hex")
               : !segwit
-                ? regularOutputs[i].script
-                : Buffer.concat([
-                    Buffer.from([OP_DUP, OP_HASH160, HASH_SIZE]),
-                    this.hashPublicKey(publicKeys[i]),
-                    Buffer.from([OP_EQUALVERIFY, OP_CHECKSIG])
-                  ]);
+              ? regularOutputs[i].script
+              : Buffer.concat([
+                  Buffer.from([OP_DUP, OP_HASH160, HASH_SIZE]),
+                  this.hashPublicKey(publicKeys[i]),
+                  Buffer.from([OP_EQUALVERIFY, OP_CHECKSIG])
+                ]);
           let pseudoTX = Object.assign({}, targetTransaction);
           let pseudoTrustedInputs = useBip143
             ? [trustedInputs[i]]

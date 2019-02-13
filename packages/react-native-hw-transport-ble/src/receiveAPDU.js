@@ -1,6 +1,6 @@
 // @flow
 
-import { TransportError } from "@ledgerhq/hw-transport";
+import { TransportError } from "@ledgerhq/errors";
 import { Observable } from "rxjs";
 import { DisconnectedDevice } from "@ledgerhq/errors";
 import { logSubject } from "./debug";

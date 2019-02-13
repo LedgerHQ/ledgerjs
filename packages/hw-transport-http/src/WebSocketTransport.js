@@ -1,5 +1,6 @@
 //@flow
-import Transport, { TransportError } from "@ledgerhq/hw-transport";
+import Transport from "@ledgerhq/hw-transport";
+import { TransportError } from "@ledgerhq/errors";
 
 const WebSocket = global.WebSocket || require("ws");
 
@@ -54,7 +55,7 @@ export default class WebSocketTransport extends Transport<string> {
         const socket = new WebSocket(url);
         const exchangeMethods = {
           resolveExchange: (_b: Buffer) => {},
-          rejectExchange: (_e: TransportError) => {},
+          rejectExchange: (_e: *) => {},
           onDisconnect: () => {},
           close: () => socket.close(),
           send: msg => socket.send(msg)
@@ -109,7 +110,7 @@ export default class WebSocketTransport extends Transport<string> {
 
   exchange(apdu: Buffer): Promise<Buffer> {
     return new Promise((resolve, reject) => {
-      this.hook.rejectExchange = (e: TransportError) => reject(e);
+      this.hook.rejectExchange = (e: *) => reject(e);
       this.hook.resolveExchange = (b: Buffer) => resolve(b);
       this.hook.send(apdu.toString("hex"));
     });
