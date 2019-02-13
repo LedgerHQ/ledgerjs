@@ -9,14 +9,7 @@ import {
 } from "@ledgerhq/devices";
 import type { DeviceModel } from "@ledgerhq/devices";
 import { Observable, defer, merge, from } from "rxjs";
-import {
-  share,
-  ignoreElements,
-  first,
-  map,
-  tap,
-  timeout
-} from "rxjs/operators";
+import { share, ignoreElements, first, map, tap } from "rxjs/operators";
 import { logSubject } from "./debug";
 import type { Device, Characteristic } from "./types";
 import { sendAPDU } from "./sendAPDU";
@@ -273,8 +266,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
           (await merge(
             this.notifyObservable.pipe(
               first(buffer => buffer.readUInt8(0) === 0x08),
-              map(buffer => buffer.readUInt8(5)),
-              timeout(30000)
+              map(buffer => buffer.readUInt8(5))
             ),
             defer(() => from(this.write(Buffer.from([0x08, 0, 0, 0, 0])))).pipe(
               ignoreElements()

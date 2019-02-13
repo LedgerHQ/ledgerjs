@@ -13,14 +13,7 @@ import {
 } from "@ledgerhq/devices";
 import type { DeviceModel } from "@ledgerhq/devices";
 import { Observable, defer, merge, from } from "rxjs";
-import {
-  share,
-  ignoreElements,
-  first,
-  map,
-  tap,
-  timeout
-} from "rxjs/operators";
+import { share, ignoreElements, first, map, tap } from "rxjs/operators";
 import {
   CantOpenDevice,
   TransportError,
@@ -49,6 +42,22 @@ const retrieveInfos = device => {
   if (!infos) throw new Error("bluetooth service infos not found");
   return infos;
 };
+
+type ReconnectionConfig = {
+  pairingThreshold: number,
+  delayBeforeDisconnect: number,
+  delayAfterDisconnect: number
+};
+let reconnectionConfig: ?ReconnectionConfig = {
+  pairingThreshold: 1000,
+  delayBeforeDisconnect: 500,
+  delayAfterDisconnect: 500
+};
+export function setReconnectionConfig(config: ?ReconnectionConfig) {
+  reconnectionConfig = config;
+}
+
+const delay = ms => new Promise(success => setTimeout(success, ms));
 
 async function open(deviceOrId: Device | string, needsReconnect: boolean) {
   let device;
@@ -220,19 +229,23 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
   } finally {
     let afterMTUTime = Date.now();
 
-    // workaround for #279: we need to open() again if we come the first time here,
-    // to make sure we do a disconnect() after the first pairing time
-    // because of a firmware bug
+    if (reconnectionConfig) {
+      // workaround for #279: we need to open() again if we come the first time here,
+      // to make sure we do a disconnect() after the first pairing time
+      // because of a firmware bug
 
-    if (afterMTUTime - beforeMTUTime < 1000) {
-      needsReconnect = false; // (optim) there is likely no new pairing done because mtu answer was fast.
-    }
+      if (afterMTUTime - beforeMTUTime < reconnectionConfig.pairingThreshold) {
+        needsReconnect = false; // (optim) there is likely no new pairing done because mtu answer was fast.
+      }
 
-    if (needsReconnect) {
-      // necessary time for the bonding workaround
-      await new Promise(s => setTimeout(s, 500));
-      await BluetoothTransport.disconnect(transport.id).catch(() => {});
-      await new Promise(s => setTimeout(s, 500));
+      if (needsReconnect) {
+        // necessary time for the bonding workaround
+        await delay(reconnectionConfig.delayBeforeDisconnect);
+        await BluetoothTransport.disconnect(transport.id).catch(() => {});
+        await delay(reconnectionConfig.delayAfterDisconnect);
+      }
+    } else {
+      needsReconnect = false;
     }
   }
 
@@ -408,8 +421,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
           (await merge(
             this.notifyObservable.pipe(
               first(buffer => buffer.readUInt8(0) === 0x08),
-              map(buffer => buffer.readUInt8(5)),
-              timeout(30000)
+              map(buffer => buffer.readUInt8(5))
             ),
             defer(() => from(this.write(Buffer.from([0x08, 0, 0, 0, 0])))).pipe(
               ignoreElements()
