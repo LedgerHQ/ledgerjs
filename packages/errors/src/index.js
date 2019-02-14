@@ -97,6 +97,7 @@ export const WrongDeviceForAccount = createCustomErrorClass(
 export const ETHAddressNonEIP = createCustomErrorClass("ETHAddressNonEIP");
 export const CantScanQRCode = createCustomErrorClass("CantScanQRCode");
 export const FeeNotLoaded = createCustomErrorClass("FeeNotLoaded");
+export const FeeRequired = createCustomErrorClass("FeeRequired");
 export const SyncError = createCustomErrorClass("SyncError");
 export const PairingFailed = createCustomErrorClass("PairingFailed");
 export const GenuineCheckFailed = createCustomErrorClass("GenuineCheckFailed");
