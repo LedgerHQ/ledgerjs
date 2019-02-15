@@ -80,7 +80,8 @@ export default class TransportNodeHid extends Transport<string> {
       observer.next({
         type: "add",
         descriptor: device.path,
-        deviceModel
+        deviceModel,
+        device
       });
     };
     const onRemove = device => {
@@ -89,7 +90,8 @@ export default class TransportNodeHid extends Transport<string> {
       observer.next({
         type: "remove",
         descriptor: device.path,
-        deviceModel
+        deviceModel,
+        device
       });
     };
     events.on("add", onAdd);
