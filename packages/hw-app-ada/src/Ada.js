@@ -35,20 +35,20 @@ const INS = {
   RUN_TESTS: 0xf0
 };
 
-type BIP32Path = Array<number>;
+export type BIP32Path = Array<number>;
 
-type InputTypeUTxO = {|
+export type InputTypeUTxO = {|
   txDataHex: string,
   outputIndex: number,
   path: BIP32Path
 |};
 
-type OutputTypeAddress = {|
+export type OutputTypeAddress = {|
   amountStr: string,
   address58: string
 |};
 
-type OutputTypeChange = {|
+export type OutputTypeChange = {|
   amountStr: string,
   path: BIP32Path
 |};
