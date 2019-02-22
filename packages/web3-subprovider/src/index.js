@@ -15,12 +15,12 @@ function makeError(msg, id) {
 }
 
 function obtainPathComponentsFromDerivationPath(derivationPath) {
-  // check if derivation path follows 44'/60'/x'/n pattern
-  const regExp = /^(44'\/(?:0|1|60|61)'\/\d+'?\/)(\d+)$/;
+  // check if derivation path follows 44'/60'/x'/n or 44'/60'/x'/y/n pattern
+  const regExp = /^(44'\/(?:0|1|60|61)'\/\d+'?\/(?:\d+\/)?)(\d+)$/;
   const matchResult = regExp.exec(derivationPath);
   if (matchResult === null) {
     throw makeError(
-      "To get multiple accounts your derivation path must follow pattern 44'/60|61'/x'/n ",
+      "To get multiple accounts your derivation path must follow pattern 44'/60|61'/x'/n or 44'/60'/x'/y/n ",
       "InvalidDerivationPath"
     );
   }

@@ -118,8 +118,18 @@ export default class Eth {
    * if (zrxInfo) await appEth.provideERC20TokenInformation(zrxInfo)
    * const signed = await appEth.signTransaction(path, rawTxHex)
    */
-  provideERC20TokenInformation({ data }: { data: Buffer }): Promise<void> {
-    return this.transport.send(0xe0, 0x0a, 0x00, 0x00, data);
+  provideERC20TokenInformation({ data }: { data: Buffer }): Promise<boolean> {
+    return this.transport.send(0xe0, 0x0a, 0x00, 0x00, data).then(
+      () => true,
+      e => {
+        if (e && e.statusCode === 0x6d00) {
+          // this case happen for older version of ETH app, since older app version had the ERC20 data hardcoded, it's fine to assume it worked.
+          // we return a flag to know if the call was effective or not
+          return false;
+        }
+        throw e;
+      }
+    );
   }
 
   /**
