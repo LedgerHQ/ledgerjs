@@ -106,7 +106,7 @@ if (zrxInfo) await appEth.provideERC20TokenInformation(zrxInfo)
 const signed = await appEth.signTransaction(path, rawTxHex)
 ```
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;void>** 
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** 
 
 #### signTransaction
 
