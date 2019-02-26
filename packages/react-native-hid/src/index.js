@@ -1,5 +1,5 @@
 //@flow
-import { NativeModules } from "react-native";
+import { NativeModules, DeviceEventEmitter } from "react-native";
 import { ledgerUSBVendorId, identifyUSBProductId } from "@ledgerhq/devices";
 import Transport from "@ledgerhq/hw-transport";
 
@@ -9,6 +9,34 @@ type DeviceObj = {
 };
 
 export default class HIDTransport extends Transport<DeviceObj> {
+  static observer: *;
+  static unsubscribed: boolean;
+
+  id: number;
+
+  constructor(id: number) {
+    super();
+    this.id = id;
+  }
+
+  static onDeviceConnect = device => {
+    if (HIDTransport.observer && !HIDTransport.unsubscribed) {
+      const deviceModel = identifyUSBProductId(device.productId);
+      HIDTransport.observer.next({
+        type: "add",
+        descriptor: device,
+        deviceModel
+      });
+    }
+  };
+
+  static onDeviceDisconnect = event => {
+    if (HIDTransport.observer && !HIDTransport.unsubscribed) {
+      HIDTransport.observer.next({ type: "reset" });
+      HIDTransport.listDevices();
+    }
+  };
+
   static isSupported = (): Promise<boolean> =>
     Promise.resolve(!!NativeModules.HID);
 
@@ -18,20 +46,29 @@ export default class HIDTransport extends Transport<DeviceObj> {
     return list.filter(d => d.vendorId === ledgerUSBVendorId);
   }
 
-  static listen(observer: *) {
-    if (!NativeModules.HID) return { unsubscribe: () => {} };
-    let unsubscribed = false;
+  static listDevices(){
     HIDTransport.list().then(candidates => {
       for (const c of candidates) {
-        if (!unsubscribed) {
+        if (!HIDTransport.unsubscribed) {
+          console.log("wadus device listed",c)
           const deviceModel = identifyUSBProductId(c.productId);
-          observer.next({ type: "add", descriptor: c, deviceModel });
+          console.log("wadus device detected model", deviceModel)
+          HIDTransport.observer.next({ type: "add", descriptor: c, deviceModel });
         }
       }
     });
+  }
+
+  static listen(observer: *) {
+    HIDTransport.observer = observer;
+    HIDTransport.unsubscribed = false;
+    if (!NativeModules.HID) return { unsubscribe: () => {} };
+
+    HIDTransport.listDevices();
     return {
       unsubscribe: () => {
-        unsubscribed = true;
+        HIDTransport.unsubscribed = true;
+        HIDTransport.observer = null;
       }
     };
   }
@@ -39,13 +76,6 @@ export default class HIDTransport extends Transport<DeviceObj> {
   static async open(deviceObj: DeviceObj) {
     const nativeObj = await NativeModules.HID.openDevice(deviceObj);
     return new HIDTransport(nativeObj.id);
-  }
-
-  id: number;
-
-  constructor(id: number) {
-    super();
-    this.id = id;
   }
 
   async exchange(value: Buffer) {
@@ -65,3 +95,12 @@ export default class HIDTransport extends Transport<DeviceObj> {
 
   setScrambleKey() {}
 }
+
+DeviceEventEmitter.addListener(
+  "onDeviceConnect",
+  HIDTransport.onDeviceConnect
+);
+DeviceEventEmitter.addListener(
+  "onDeviceDisconnect",
+  HIDTransport.onDeviceDisconnect
+);
