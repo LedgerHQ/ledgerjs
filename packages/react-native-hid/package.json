@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/react-native-hid",
-  "version": "4.39.0",
+  "version": "4.41.1",
   "nativePackage": true,
   "description": "Ledger Hardware Wallet Web implementation of the communication layer, using U2F api",
   "keywords": [
@@ -27,8 +27,8 @@
   "main": "lib/index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/devices": "^4.39.0",
-    "@ledgerhq/hw-transport": "^4.39.0"
+    "@ledgerhq/devices": "^4.41.1",
+    "@ledgerhq/hw-transport": "^4.41.1"
   },
   "devDependencies": {
     "flow-bin": "^0.92.1",
