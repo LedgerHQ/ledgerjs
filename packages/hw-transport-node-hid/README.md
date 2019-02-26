@@ -37,7 +37,7 @@ node-hid Transport implementation
 #### Examples
 
 ```javascript
-import TransportNodeHid from "@ledgerhq/hw-transport-node-u2f";
+import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
 ...
 TransportNodeHid.create().then(transport => ...)
 ```
