@@ -19,10 +19,10 @@ export default class HIDTransport extends Transport<DeviceObj> {
     this.id = id;
   }
 
-  static onDeviceConnect = device => {
-    if (HIDTransport.observer && !HIDTransport.unsubscribed) {
+  static onDeviceConnect = (device: *) => {
+    if (!HIDTransport.unsubscribed) {
       const deviceModel = identifyUSBProductId(device.productId);
-      HIDTransport.observer.next({
+      HIDTransport.observer && HIDTransport.observer.next({
         type: "add",
         descriptor: device,
         deviceModel
@@ -30,7 +30,7 @@ export default class HIDTransport extends Transport<DeviceObj> {
     }
   };
 
-  static onDeviceDisconnect = event => {
+  static onDeviceDisconnect = (_: *) => {
     if (HIDTransport.observer && !HIDTransport.unsubscribed) {
       HIDTransport.observer.next({ type: "reset" });
       HIDTransport.listDevices();
@@ -50,10 +50,8 @@ export default class HIDTransport extends Transport<DeviceObj> {
     HIDTransport.list().then(candidates => {
       for (const c of candidates) {
         if (!HIDTransport.unsubscribed) {
-          console.log("wadus device listed",c)
           const deviceModel = identifyUSBProductId(c.productId);
-          console.log("wadus device detected model", deviceModel)
-          HIDTransport.observer.next({ type: "add", descriptor: c, deviceModel });
+          HIDTransport.observer && HIDTransport.observer.next({ type: "add", descriptor: c, deviceModel });
         }
       }
     });
