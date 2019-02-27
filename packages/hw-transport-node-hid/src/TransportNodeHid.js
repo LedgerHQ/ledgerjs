@@ -24,7 +24,7 @@ const isDisconnectedError = e =>
 /**
  * node-hid Transport implementation
  * @example
- * import TransportNodeHid from "@ledgerhq/hw-transport-node-u2f";
+ * import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
  * ...
  * TransportNodeHid.create().then(transport => ...)
  */
