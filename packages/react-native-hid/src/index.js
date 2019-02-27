@@ -2,16 +2,38 @@
 import { NativeModules, DeviceEventEmitter } from "react-native";
 import { ledgerUSBVendorId, identifyUSBProductId } from "@ledgerhq/devices";
 import Transport from "@ledgerhq/hw-transport";
+import type { DescriptorEvent } from "@ledgerhq/hw-transport";
+import { Subject, from, concat } from "rxjs";
+import { mergeMap } from "rxjs/operators";
 
 type DeviceObj = {
   vendorId: number,
   productId: number
 };
 
-export default class HIDTransport extends Transport<DeviceObj> {
-  static observer: *;
-  static unsubscribed: boolean;
+const onDeviceConnect = (device: *) => {
+  const deviceModel = identifyUSBProductId(device.productId);
+  liveDeviceEventsSubject.next({
+    type: "add",
+    descriptor: device,
+    deviceModel
+  });
+};
 
+const onDeviceDisconnect = (device: *) => {
+  const deviceModel = identifyUSBProductId(device.productId);
+  liveDeviceEventsSubject.next({
+    type: "remove",
+    descriptor: device,
+    deviceModel
+  });
+};
+
+const liveDeviceEventsSubject: Subject<DescriptorEvent<*>> = new Subject();
+DeviceEventEmitter.addListener("onDeviceConnect", onDeviceConnect);
+DeviceEventEmitter.addListener("onDeviceDisconnect", onDeviceDisconnect);
+
+export default class HIDTransport extends Transport<DeviceObj> {
   id: number;
 
   constructor(id: number) {
@@ -19,56 +41,28 @@ export default class HIDTransport extends Transport<DeviceObj> {
     this.id = id;
   }
 
-  static onDeviceConnect = (device: *) => {
-    if (!HIDTransport.unsubscribed) {
-      const deviceModel = identifyUSBProductId(device.productId);
-      HIDTransport.observer && HIDTransport.observer.next({
-        type: "add",
-        descriptor: device,
-        deviceModel
-      });
-    }
-  };
-
-  static onDeviceDisconnect = (_: *) => {
-    if (HIDTransport.observer && !HIDTransport.unsubscribed) {
-      HIDTransport.observer.next({ type: "reset" });
-      HIDTransport.listDevices();
-    }
-  };
-
   static isSupported = (): Promise<boolean> =>
     Promise.resolve(!!NativeModules.HID);
 
   static async list(): * {
     if (!NativeModules.HID) return Promise.resolve([]);
-    const list = await NativeModules.HID.getDeviceList();
-    return list.filter(d => d.vendorId === ledgerUSBVendorId);
-  }
+    let rawList = await NativeModules.HID.getDeviceList();
 
-  static listDevices(){
-    HIDTransport.list().then(candidates => {
-      for (const c of candidates) {
-        if (!HIDTransport.unsubscribed) {
-          const deviceModel = identifyUSBProductId(c.productId);
-          HIDTransport.observer && HIDTransport.observer.next({ type: "add", descriptor: c, deviceModel });
-        }
+    return rawList.reduce((filteredList, candidate) => {
+      if (candidate.vendorId === ledgerUSBVendorId) {
+        const deviceModel = identifyUSBProductId(candidate.productId);
+        filteredList.push({ type: "add", descriptor: candidate, deviceModel });
       }
-    });
+      return filteredList;
+    }, []);
   }
 
   static listen(observer: *) {
-    HIDTransport.observer = observer;
-    HIDTransport.unsubscribed = false;
     if (!NativeModules.HID) return { unsubscribe: () => {} };
-
-    HIDTransport.listDevices();
-    return {
-      unsubscribe: () => {
-        HIDTransport.unsubscribed = true;
-        HIDTransport.observer = null;
-      }
-    };
+    return concat(
+      from(HIDTransport.list()).pipe(mergeMap(a => from(a))),
+      liveDeviceEventsSubject
+    ).subscribe(observer);
   }
 
   static async open(deviceObj: DeviceObj) {
@@ -93,12 +87,3 @@ export default class HIDTransport extends Transport<DeviceObj> {
 
   setScrambleKey() {}
 }
-
-DeviceEventEmitter.addListener(
-  "onDeviceConnect",
-  HIDTransport.onDeviceConnect
-);
-DeviceEventEmitter.addListener(
-  "onDeviceDisconnect",
-  HIDTransport.onDeviceDisconnect
-);

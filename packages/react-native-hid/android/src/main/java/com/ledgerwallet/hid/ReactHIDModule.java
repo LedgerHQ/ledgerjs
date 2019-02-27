@@ -54,20 +54,11 @@ public class ReactHIDModule extends ReactContextBaseJavaModule {
         receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context  context, Intent intent) {
-                switch (intent.getAction()) {
-                    case ACTION_USB_ATTACHED:
-
-                    UsbDevice device = (UsbDevice) intent.getExtras().get(UsbManager.EXTRA_DEVICE);
-                    getReactApplicationContext()
-                            .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                            .emit("onDeviceConnect", buildMapFromDevice(device));
-                        break;
-                    case ACTION_USB_DETACHED:
-                        getReactApplicationContext()
-                                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
-                                .emit("onDeviceDisconnect", null);
-                        break;
-                }
+                String event = intent.getAction().equals(ACTION_USB_ATTACHED)?"onDeviceConnect":"onDeviceDisconnect";
+                UsbDevice device = (UsbDevice) intent.getExtras().get(UsbManager.EXTRA_DEVICE);
+                getReactApplicationContext()
+                        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                        .emit(event, buildMapFromDevice(device));
             }
         };
         getReactApplicationContext().registerReceiver(receiver, filter);
