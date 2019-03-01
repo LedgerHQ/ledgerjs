@@ -46,13 +46,11 @@ const retrieveInfos = device => {
 
 type ReconnectionConfig = {
   pairingThreshold: number,
-  delayBeforeDisconnect: number,
-  delayAfterDisconnect: number
+  delayAfterFirstPairing: number
 };
 let reconnectionConfig: ?ReconnectionConfig = {
   pairingThreshold: 1000,
-  delayBeforeDisconnect: 500,
-  delayAfterDisconnect: 500
+  delayAfterFirstPairing: 4000
 };
 export function setReconnectionConfig(config: ?ReconnectionConfig) {
   reconnectionConfig = config;
@@ -258,9 +256,8 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
 
       if (needsReconnect) {
         // necessary time for the bonding workaround
-        await delay(reconnectionConfig.delayBeforeDisconnect);
         await BluetoothTransport.disconnect(transport.id).catch(() => {});
-        await delay(reconnectionConfig.delayAfterDisconnect);
+        await delay(reconnectionConfig.delayAfterFirstPairing);
       }
     } else {
       needsReconnect = false;
