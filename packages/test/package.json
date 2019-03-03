@@ -13,10 +13,10 @@
     "@ledgerhq/hw-transport-mocker": "^4.41.1",
     "@ledgerhq/hw-transport-node-hid": "^4.42.0",
     "@ledgerhq/hw-transport-webusb": "^4.41.1",
-    "budo": "^11.4.1"
+    "budo": "^11.6.1"
   },
   "devDependencies": {
-    "flow-bin": "^0.92.1",
+    "flow-bin": "^0.94.0",
     "flow-typed": "^2.5.1"
   },
   "scripts": {

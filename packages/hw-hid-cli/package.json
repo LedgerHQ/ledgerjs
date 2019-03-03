@@ -33,7 +33,7 @@
     "babel-polyfill": "^6.26.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.92.1",
+    "flow-bin": "^0.94.0",
     "flow-typed": "^2.5.1"
   },
   "scripts": {

@@ -31,7 +31,7 @@
     "rxjs": "^6.4.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.92.1",
+    "flow-bin": "^0.94.0",
     "flow-typed": "^2.3.0"
   },
   "scripts": {
