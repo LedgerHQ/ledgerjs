@@ -11,28 +11,40 @@ type DeviceObj = {
   productId: number
 };
 
-const onDeviceConnect = (device: *) => {
+const listLedgerDevices = async () => {
+  const devices = await NativeModules.HID.getDeviceList();
+  return devices.filter(d => d.vendorId === ledgerUSBVendorId);
+};
+
+const liveDeviceEventsSubject: Subject<DescriptorEvent<*>> = new Subject();
+
+DeviceEventEmitter.addListener("onDeviceConnect", (device: *) => {
+  if (device.vendorId !== ledgerUSBVendorId) return;
   const deviceModel = identifyUSBProductId(device.productId);
   liveDeviceEventsSubject.next({
     type: "add",
     descriptor: device,
     deviceModel
   });
-};
+});
 
-const onDeviceDisconnect = (device: *) => {
+DeviceEventEmitter.addListener("onDeviceDisconnect", (device: *) => {
+  if (device.vendorId !== ledgerUSBVendorId) return;
   const deviceModel = identifyUSBProductId(device.productId);
   liveDeviceEventsSubject.next({
     type: "remove",
     descriptor: device,
     deviceModel
   });
-};
+});
 
-const liveDeviceEventsSubject: Subject<DescriptorEvent<*>> = new Subject();
-DeviceEventEmitter.addListener("onDeviceConnect", onDeviceConnect);
-DeviceEventEmitter.addListener("onDeviceDisconnect", onDeviceDisconnect);
-
+/**
+ * Ledger's React Native HID Transport implementation
+ * @example
+ * import TransportHID from "@ledgerhq/react-native-hid";
+ * ...
+ * TransportHID.create().then(transport => ...)
+ */
 export default class HIDTransport extends Transport<DeviceObj> {
   id: number;
 
@@ -41,45 +53,69 @@ export default class HIDTransport extends Transport<DeviceObj> {
     this.id = id;
   }
 
+  /**
+   * Check if the transport is supported (basically true on Android)
+   */
   static isSupported = (): Promise<boolean> =>
     Promise.resolve(!!NativeModules.HID);
 
-  static async list(): * {
+  /**
+   * List currently connected devices.
+   * @returns Promise of devices
+   */
+  static async list() {
     if (!NativeModules.HID) return Promise.resolve([]);
-    let rawList = await NativeModules.HID.getDeviceList();
-
-    return rawList.reduce((filteredList, candidate) => {
-      if (candidate.vendorId === ledgerUSBVendorId) {
-        const deviceModel = identifyUSBProductId(candidate.productId);
-        filteredList.push({ type: "add", descriptor: candidate, deviceModel });
-      }
-      return filteredList;
-    }, []);
+    let list = await listLedgerDevices();
+    return list;
   }
 
+  /**
+   * Listen to ledger devices events
+   */
   static listen(observer: *) {
     if (!NativeModules.HID) return { unsubscribe: () => {} };
     return concat(
-      from(HIDTransport.list()).pipe(mergeMap(a => from(a))),
+      from(listLedgerDevices()).pipe(
+        mergeMap(devices =>
+          from(
+            devices.map(device => ({
+              type: "add",
+              descriptor: device,
+              deviceModel: identifyUSBProductId(device.productId)
+            }))
+          )
+        )
+      ),
       liveDeviceEventsSubject
     ).subscribe(observer);
   }
 
+  /**
+   * Open a the transport with a Ledger device
+   */
   static async open(deviceObj: DeviceObj) {
     const nativeObj = await NativeModules.HID.openDevice(deviceObj);
     return new HIDTransport(nativeObj.id);
   }
 
-  async exchange(value: Buffer) {
+  /**
+   * @param {*} apdu input value
+   * @returns Promise of apdu response
+   */
+  async exchange(apdu: Buffer) {
     return this.exchangeAtomicImpl(async () => {
       const resultHex = await NativeModules.HID.exchange(
         this.id,
-        value.toString("hex")
+        apdu.toString("hex")
       );
       return Buffer.from(resultHex, "hex");
     });
   }
 
+  /**
+   * Close the transport
+   * @returns Promise
+   */
   async close() {
     await this.exchangeBusyPromise;
     return NativeModules.HID.closeDevice(this.id);
