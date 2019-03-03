@@ -18,8 +18,14 @@ Allows to communicate with Ledger Hardware Wallets.
 
 -   [TransportU2F](#transportu2f)
     -   [Examples](#examples)
-    -   [open](#open)
+    -   [exchange](#exchange)
         -   [Parameters](#parameters)
+    -   [setScrambleKey](#setscramblekey)
+        -   [Parameters](#parameters-1)
+    -   [setUnwrap](#setunwrap)
+        -   [Parameters](#parameters-2)
+    -   [open](#open)
+        -   [Parameters](#parameters-3)
 
 ### TransportU2F
 
@@ -34,6 +40,28 @@ import TransportU2F from "@ledgerhq/hw-transport-u2f";
 ...
 TransportU2F.create().then(transport => ...)
 ```
+
+#### exchange
+
+Exchange with the device using APDU protocol.
+
+##### Parameters
+
+-   `apdu` **[Buffer](https://nodejs.org/api/buffer.html)** 
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Buffer](https://nodejs.org/api/buffer.html)>** a promise of apdu response
+
+#### setScrambleKey
+
+##### Parameters
+
+-   `scrambleKey` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+
+#### setUnwrap
+
+##### Parameters
+
+-   `unwrap` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** 
 
 #### open
 

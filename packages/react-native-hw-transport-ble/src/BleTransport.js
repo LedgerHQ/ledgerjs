@@ -277,9 +277,15 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
  * import BluetoothTransport from "@ledgerhq/react-native-hw-transport-ble";
  */
 export default class BluetoothTransport extends Transport<Device | string> {
+  /**
+   *
+   */
   static isSupported = (): Promise<boolean> =>
     Promise.resolve(typeof BleManager === "function");
 
+  /**
+   *
+   */
   static setLogLevel = (level: string) => {
     bleManager.setLogLevel(level);
   };
@@ -303,6 +309,9 @@ export default class BluetoothTransport extends Transport<Device | string> {
     throw new Error("not implemented");
   };
 
+  /**
+   * Scan for bluetooth Ledger devices
+   */
   static listen(observer: *) {
     logSubject.next({
       type: "verbose",
@@ -352,10 +361,17 @@ export default class BluetoothTransport extends Transport<Device | string> {
     return { unsubscribe };
   }
 
+  /**
+   * Open a BLE transport
+   * @param {*} deviceOrId
+   */
   static async open(deviceOrId: Device | string) {
     return open(deviceOrId, true);
   }
 
+  /**
+   * Globally disconnect a BLE device by its ID
+   */
   static disconnect = async (id: *) => {
     logSubject.next({
       type: "verbose",
@@ -396,6 +412,9 @@ export default class BluetoothTransport extends Transport<Device | string> {
     });
   }
 
+  /**
+   * communicate with a BLE transport
+   */
   exchange = (apdu: Buffer): Promise<Buffer> =>
     this.exchangeAtomicImpl(async () => {
       try {

@@ -107,8 +107,21 @@ const transport = await TransportBLE.open(deviceId); // deviceId can come from p
 -   [BluetoothTransport](#bluetoothtransport)
     -   [Parameters](#parameters)
     -   [Examples](#examples)
-    -   [observeState](#observestate)
+    -   [exchange](#exchange)
         -   [Parameters](#parameters-1)
+    -   [isSupported](#issupported)
+    -   [setLogLevel](#setloglevel)
+        -   [Parameters](#parameters-2)
+    -   [observeState](#observestate)
+        -   [Parameters](#parameters-3)
+    -   [listen](#listen)
+        -   [Parameters](#parameters-4)
+    -   [open](#open)
+        -   [Parameters](#parameters-5)
+    -   [disconnect](#disconnect)
+        -   [Parameters](#parameters-6)
+-   [logsObservable](#logsobservable)
+    -   [Examples](#examples-1)
 
 ### BluetoothTransport
 
@@ -129,6 +142,26 @@ react-native bluetooth BLE implementation
 import BluetoothTransport from "@ledgerhq/react-native-hw-transport-ble";
 ```
 
+#### exchange
+
+communicate with a BLE transport
+
+##### Parameters
+
+-   `apdu` **[Buffer](https://nodejs.org/api/buffer.html)** 
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Buffer](https://nodejs.org/api/buffer.html)>** 
+
+#### isSupported
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** 
+
+#### setLogLevel
+
+##### Parameters
+
+-   `level` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+
 #### observeState
 
 TODO could add this concept in all transports
@@ -138,3 +171,39 @@ an event is emit once and then listened
 ##### Parameters
 
 -   `observer` **any** 
+
+#### listen
+
+Scan for bluetooth Ledger devices
+
+##### Parameters
+
+-   `observer` **any** 
+
+#### open
+
+Open a BLE transport
+
+##### Parameters
+
+-   `deviceOrId` **any** 
+
+#### disconnect
+
+Globally disconnect a BLE device by its ID
+
+##### Parameters
+
+-   `id` **any** 
+
+### logsObservable
+
+Type: Observable&lt;Log>
+
+#### Examples
+
+```javascript
+import { logsObservable } from "@ledgerhq/react-native-hw-transport-ble/lib/debug";
+
+logsObservable.subscribe(e => console.log(e));
+```
