@@ -29,11 +29,11 @@
     "@ledgerhq/errors": "^4.41.1",
     "@ledgerhq/hw-transport": "^4.41.1",
     "lodash": "^4.17.11",
-    "node-hid": "^0.7.6",
+    "node-hid": "^0.7.7",
     "usb": "^1.5.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.92.1",
+    "flow-bin": "^0.94.0",
     "flow-typed": "^2.5.1"
   },
   "scripts": {
