@@ -7,24 +7,53 @@ import EthereumTx from "ethereumjs-tx";
 
 const allowedHdPaths = ["44'/0'", "44'/1'", "44'/60'", "44'/61'"];
 
+const PATH_TYPE = {
+  legacy: 0,
+  bip32: 1,
+};
+
 function makeError(msg, id) {
   const err = new Error(msg);
   // $FlowFixMe
   err.id = id;
   return err;
-}
+};
 
 function obtainPathComponentsFromDerivationPath(derivationPath) {
-  // check if derivation path follows 44'/60'/x'/n or 44'/60'/x'/y/n pattern
-  const regExp = /^(44'\/(?:0|1|60|61)'\/\d+'?\/(?:\d+\/)?)(\d+)$/;
+  // check if derivation path follows 44'/60'/d'/x or 44'/60'/x'/d/d pattern
+  const regExp = /^(44'\/(?:0|1|60|61)'\/)(\d+)'?\/(\d+)\/?(\d+)?$/;
+
   const matchResult = regExp.exec(derivationPath);
-  if (matchResult === null) {
+  const capturingGroups = matchResult ? matchResult.filter(_ => _) : [];
+
+  if (matchResult === null || !capturingGroups.length || capturingGroups.length < 4 || capturingGroups.length > 5) {
     throw makeError(
-      "To get multiple accounts your derivation path must follow pattern 44'/60|61'/x'/n or 44'/60'/x'/y/n ",
-      "InvalidDerivationPath"
+        "To get multiple accounts your derivation path must follow pattern 44'/60|61'/d'/x or 44'/60'/x'/d/d. " +
+        "d is any digit, x is also a digit used as address index and will be iterated on during address lookup.",
+        "InvalidDerivationPath"
     );
   }
-  return { basePath: matchResult[1], index: parseInt(matchResult[2], 10) };
+
+  switch (capturingGroups.length) {
+    case 4: {
+      //return components for path legacy path schema basePath/address_index
+      return {
+        type: PATH_TYPE.legacy,
+        basePath: capturingGroups[1] + capturingGroups[2] + '\'/',
+        address_index: parseInt(capturingGroups[3], 10),
+      }
+    }
+    case 5: {
+      // return components for BIP32 path schema in from of basePath/account/change/address_index
+      return {
+        type: PATH_TYPE.bip32,
+        basePath: capturingGroups[1],
+        account: parseInt(capturingGroups[2], 10),
+        change: parseInt(capturingGroups[3], 10),
+        address_index: parseInt(capturingGroups[4], 10),
+      };
+    }
+  }
 }
 
 /**
@@ -97,13 +126,28 @@ export default function createLedgerSubprovider(
     try {
       const eth = new AppEth(transport);
       const addresses = {};
+
       for (let i = accountsOffset; i < accountsOffset + accountsLength; i++) {
-        const path =
-          pathComponents.basePath + (pathComponents.index + i).toString();
+        let path;
+        switch (pathComponents.type) {
+          case PATH_TYPE.legacy: {
+            path = pathComponents.basePath + (pathComponents.address_index + i);
+            break;
+          }
+          case PATH_TYPE.bip32: {
+            path = pathComponents.basePath
+                + (pathComponents.account + i) + '\'/'
+                + pathComponents.change + '/'
+                + pathComponents.address_index;
+            break;
+          }
+        }
+
         const address = await eth.getAddress(path, askConfirm, false);
         addresses[path] = address.address;
         addressToPathMap[address.address.toLowerCase()] = path;
       }
+
       return addresses;
     } finally {
       transport.close();
