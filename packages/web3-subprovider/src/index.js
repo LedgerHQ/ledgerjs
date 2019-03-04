@@ -9,7 +9,7 @@ const allowedHdPaths = ["44'/0'", "44'/1'", "44'/60'", "44'/61'"];
 
 const PATH_TYPE = {
   legacy: 0,
-  bip32: 1,
+  bip32: 1
 };
 
 function makeError(msg, id) {
@@ -17,7 +17,7 @@ function makeError(msg, id) {
   // $FlowFixMe
   err.id = id;
   return err;
-};
+}
 
 function obtainPathComponentsFromDerivationPath(derivationPath) {
   // check if derivation path follows 44'/60'/d'/x or 44'/60'/x'/d/d pattern
@@ -26,11 +26,16 @@ function obtainPathComponentsFromDerivationPath(derivationPath) {
   const matchResult = regExp.exec(derivationPath);
   const capturingGroups = matchResult ? matchResult.filter(_ => _) : [];
 
-  if (matchResult === null || !capturingGroups.length || capturingGroups.length < 4 || capturingGroups.length > 5) {
+  if (
+    matchResult === null ||
+    !capturingGroups.length ||
+    capturingGroups.length < 4 ||
+    capturingGroups.length > 5
+  ) {
     throw makeError(
-        "To get multiple accounts your derivation path must follow pattern 44'/60|61'/d'/x or 44'/60'/x'/d/d. " +
+      "To get multiple accounts your derivation path must follow pattern 44'/60|61'/d'/x or 44'/60'/x'/d/d. " +
         "d is any digit, x is also a digit used as address index and will be iterated on during address lookup.",
-        "InvalidDerivationPath"
+      "InvalidDerivationPath"
     );
   }
 
@@ -39,9 +44,9 @@ function obtainPathComponentsFromDerivationPath(derivationPath) {
       //return components for path legacy path schema basePath/address_index
       return {
         type: PATH_TYPE.legacy,
-        basePath: capturingGroups[1] + capturingGroups[2] + '\'/',
-        address_index: parseInt(capturingGroups[3], 10),
-      }
+        basePath: capturingGroups[1] + capturingGroups[2] + "'/",
+        address_index: parseInt(capturingGroups[3], 10)
+      };
     }
     case 5: {
       // return components for BIP32 path schema in from of basePath/account/change/address_index
@@ -50,7 +55,7 @@ function obtainPathComponentsFromDerivationPath(derivationPath) {
         basePath: capturingGroups[1],
         account: parseInt(capturingGroups[2], 10),
         change: parseInt(capturingGroups[3], 10),
-        address_index: parseInt(capturingGroups[4], 10),
+        address_index: parseInt(capturingGroups[4], 10)
       };
     }
   }
@@ -135,10 +140,13 @@ export default function createLedgerSubprovider(
             break;
           }
           case PATH_TYPE.bip32: {
-            path = pathComponents.basePath
-                + (pathComponents.account + i) + '\'/'
-                + pathComponents.change + '/'
-                + pathComponents.address_index;
+            path =
+              pathComponents.basePath +
+              (pathComponents.account + i) +
+              "'/" +
+              pathComponents.change +
+              "/" +
+              pathComponents.address_index;
             break;
           }
         }
