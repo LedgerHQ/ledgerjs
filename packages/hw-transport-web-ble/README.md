@@ -16,11 +16,33 @@ Allows to communicate with Ledger Hardware Wallets.
 
 #### Table of Contents
 
+-   [logsObservable](#logsobservable)
+    -   [Examples](#examples)
 -   [BluetoothTransport](#bluetoothtransport)
     -   [Parameters](#parameters)
-    -   [Examples](#examples)
-    -   [observeAvailability](#observeavailability)
+    -   [Examples](#examples-1)
+    -   [exchange](#exchange)
         -   [Parameters](#parameters-1)
+    -   [observeAvailability](#observeavailability)
+        -   [Parameters](#parameters-2)
+    -   [listen](#listen)
+        -   [Parameters](#parameters-3)
+    -   [open](#open)
+        -   [Parameters](#parameters-4)
+    -   [disconnect](#disconnect)
+        -   [Parameters](#parameters-5)
+
+### logsObservable
+
+Type: Observable&lt;Log>
+
+#### Examples
+
+```javascript
+import { logsObservable } from "@ledgerhq/hw-transport-web-ble/lib/debug";
+
+logsObservable.subscribe(e => console.log(e));
+```
 
 ### BluetoothTransport
 
@@ -41,12 +63,47 @@ react-native bluetooth BLE implementation
 import BluetoothTransport from "@ledgerhq/hw-transport-web-ble";
 ```
 
+#### exchange
+
+Exchange with the device using APDU protocol.
+
+##### Parameters
+
+-   `apdu` **[Buffer](https://nodejs.org/api/buffer.html)** 
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Buffer](https://nodejs.org/api/buffer.html)>** a promise of apdu response
+
 #### observeAvailability
 
-TODO could add this concept in all transports
-observe event with { available: bool, type: string } // available is generic, type is specific
+observe event with { available: bool, type: string }
+(available is generic, type is specific)
 an event is emit once and then each time it changes
 
 ##### Parameters
 
 -   `observer` **any** 
+
+#### listen
+
+Scan for Ledger Bluetooth devices.
+On this web implementation, it only emits ONE device, the one that was selected in the UI (if any).
+
+##### Parameters
+
+-   `observer` **any** 
+
+#### open
+
+open a bluetooth device.
+
+##### Parameters
+
+-   `deviceOrId` **(Device | [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String))** 
+
+#### disconnect
+
+globally disconnect a bluetooth device by its id.
+
+##### Parameters
+
+-   `id` **any** 

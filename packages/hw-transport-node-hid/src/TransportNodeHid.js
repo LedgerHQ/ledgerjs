@@ -29,20 +29,35 @@ const isDisconnectedError = e =>
  * TransportNodeHid.create().then(transport => ...)
  */
 export default class TransportNodeHid extends Transport<string> {
+  /**
+   *
+   */
   static isSupported = (): Promise<boolean> =>
     Promise.resolve(typeof HID.HID === "function");
 
+  /**
+   *
+   */
   static list = (): Promise<string[]> =>
     Promise.resolve(getDevices().map(d => d.path));
 
+  /**
+   *
+   */
   static setListenDevicesDebounce = (delay: number) => {
     listenDevicesDebounce = delay;
   };
 
+  /**
+   *
+   */
   static setListenDevicesPollingSkip = (conditionToSkip: () => boolean) => {
     listenDevicesPollingSkip = conditionToSkip;
   };
 
+  /**
+   *
+   */
   static setListenDevicesDebug = (debug: boolean | ((log: string) => void)) => {
     listenDevicesDebug =
       typeof debug === "function"
@@ -178,6 +193,11 @@ export default class TransportNodeHid extends Transport<string> {
       })
     );
 
+  /**
+   * Exchange with the device using APDU protocol.
+   * @param apdu
+   * @returns a promise of apdu response
+   */
   exchange = (apdu: Buffer): Promise<Buffer> =>
     this.exchangeAtomicImpl(async () => {
       const { debug, channel, packetSize } = this;
@@ -209,6 +229,9 @@ export default class TransportNodeHid extends Transport<string> {
 
   setScrambleKey() {}
 
+  /**
+   * release the USB device.
+   */
   async close(): Promise<void> {
     await this.exchangeBusyPromise;
     this.device.close();

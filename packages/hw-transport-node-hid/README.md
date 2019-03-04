@@ -19,10 +19,21 @@ Allows to communicate with Ledger Hardware Wallets.
 -   [TransportNodeHid](#transportnodehid)
     -   [Parameters](#parameters)
     -   [Examples](#examples)
-    -   [listen](#listen)
+    -   [exchange](#exchange)
         -   [Parameters](#parameters-1)
-    -   [open](#open)
+    -   [close](#close)
+    -   [isSupported](#issupported)
+    -   [list](#list)
+    -   [setListenDevicesDebounce](#setlistendevicesdebounce)
         -   [Parameters](#parameters-2)
+    -   [setListenDevicesPollingSkip](#setlistendevicespollingskip)
+        -   [Parameters](#parameters-3)
+    -   [setListenDevicesDebug](#setlistendevicesdebug)
+        -   [Parameters](#parameters-4)
+    -   [listen](#listen)
+        -   [Parameters](#parameters-5)
+    -   [open](#open)
+        -   [Parameters](#parameters-6)
 
 ### TransportNodeHid
 
@@ -41,6 +52,48 @@ import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
 ...
 TransportNodeHid.create().then(transport => ...)
 ```
+
+#### exchange
+
+Exchange with the device using APDU protocol.
+
+##### Parameters
+
+-   `apdu` **[Buffer](https://nodejs.org/api/buffer.html)** 
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Buffer](https://nodejs.org/api/buffer.html)>** a promise of apdu response
+
+#### close
+
+release the USB device.
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;void>** 
+
+#### isSupported
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** 
+
+#### list
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>>** 
+
+#### setListenDevicesDebounce
+
+##### Parameters
+
+-   `delay` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+
+#### setListenDevicesPollingSkip
+
+##### Parameters
+
+-   `conditionToSkip` **function (): [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** 
+
+#### setListenDevicesDebug
+
+##### Parameters
+
+-   `debug` **([boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | function (log: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)): void)** 
 
 #### listen
 

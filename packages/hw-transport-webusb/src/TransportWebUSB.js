@@ -30,10 +30,21 @@ export default class TransportWebUSB extends Transport<USBDevice> {
     this.device = device;
   }
 
+  /**
+   * Check if WebUSB transport is supported.
+   */
   static isSupported = isSupported;
 
+  /**
+   * List the WebUSB devices that was previously authorized.
+   */
   static list = getLedgerDevices;
 
+  /**
+   * Actively listen to WebUSB devices and emit ONE device that was selected by the native permission UI.
+   *
+   * Important: it must be called in the context of a UI click!
+   */
   static listen = (
     observer: Observer<DescriptorEvent<USBDevice>>
   ): Subscription => {
@@ -51,6 +62,9 @@ export default class TransportWebUSB extends Transport<USBDevice> {
     return { unsubscribe };
   };
 
+  /**
+   * Create a Ledger transport with a USBDevice
+   */
   static async open(device: USBDevice) {
     await device.open();
     if (device.configuration === null) {
@@ -61,6 +75,9 @@ export default class TransportWebUSB extends Transport<USBDevice> {
     return new TransportWebUSB(device);
   }
 
+  /**
+   * Release the transport device
+   */
   async close(): Promise<void> {
     await this.exchangeBusyPromise;
     await this.device.releaseInterface(interfaceNumber);
@@ -68,6 +85,11 @@ export default class TransportWebUSB extends Transport<USBDevice> {
     await this.device.close();
   }
 
+  /**
+   * Exchange with the device using APDU protocol.
+   * @param apdu
+   * @returns a promise of apdu response
+   */
   exchange = (apdu: Buffer): Promise<Buffer> =>
     this.exchangeAtomicImpl(async () => {
       const { debug, channel, packetSize } = this;

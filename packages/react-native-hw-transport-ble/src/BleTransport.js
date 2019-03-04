@@ -46,13 +46,11 @@ const retrieveInfos = device => {
 
 type ReconnectionConfig = {
   pairingThreshold: number,
-  delayBeforeDisconnect: number,
-  delayAfterDisconnect: number
+  delayAfterFirstPairing: number
 };
 let reconnectionConfig: ?ReconnectionConfig = {
   pairingThreshold: 1000,
-  delayBeforeDisconnect: 500,
-  delayAfterDisconnect: 500
+  delayAfterFirstPairing: 4000
 };
 export function setReconnectionConfig(config: ?ReconnectionConfig) {
   reconnectionConfig = config;
@@ -258,9 +256,8 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
 
       if (needsReconnect) {
         // necessary time for the bonding workaround
-        await delay(reconnectionConfig.delayBeforeDisconnect);
         await BluetoothTransport.disconnect(transport.id).catch(() => {});
-        await delay(reconnectionConfig.delayAfterDisconnect);
+        await delay(reconnectionConfig.delayAfterFirstPairing);
       }
     } else {
       needsReconnect = false;
@@ -280,9 +277,15 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
  * import BluetoothTransport from "@ledgerhq/react-native-hw-transport-ble";
  */
 export default class BluetoothTransport extends Transport<Device | string> {
+  /**
+   *
+   */
   static isSupported = (): Promise<boolean> =>
     Promise.resolve(typeof BleManager === "function");
 
+  /**
+   *
+   */
   static setLogLevel = (level: string) => {
     bleManager.setLogLevel(level);
   };
@@ -306,6 +309,9 @@ export default class BluetoothTransport extends Transport<Device | string> {
     throw new Error("not implemented");
   };
 
+  /**
+   * Scan for bluetooth Ledger devices
+   */
   static listen(observer: *) {
     logSubject.next({
       type: "verbose",
@@ -355,10 +361,17 @@ export default class BluetoothTransport extends Transport<Device | string> {
     return { unsubscribe };
   }
 
+  /**
+   * Open a BLE transport
+   * @param {*} deviceOrId
+   */
   static async open(deviceOrId: Device | string) {
     return open(deviceOrId, true);
   }
 
+  /**
+   * Globally disconnect a BLE device by its ID
+   */
   static disconnect = async (id: *) => {
     logSubject.next({
       type: "verbose",
@@ -399,6 +412,9 @@ export default class BluetoothTransport extends Transport<Device | string> {
     });
   }
 
+  /**
+   * communicate with a BLE transport
+   */
   exchange = (apdu: Buffer): Promise<Buffer> =>
     this.exchangeAtomicImpl(async () => {
       try {

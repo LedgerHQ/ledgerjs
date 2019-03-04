@@ -152,7 +152,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
     if (needsReconnect) {
       await device.gatt.disconnect();
       // necessary time for the bonding workaround
-      await new Promise(s => setTimeout(s, 500));
+      await new Promise(s => setTimeout(s, 1000));
     }
   }
 
@@ -175,8 +175,8 @@ export default class BluetoothTransport extends Transport<Device | string> {
       .then(() => true, () => false);
 
   /**
-   * TODO could add this concept in all transports
-   * observe event with { available: bool, type: string } // available is generic, type is specific
+   * observe event with { available: bool, type: string }
+   * (available is generic, type is specific)
    * an event is emit once and then each time it changes
    */
   static observeAvailability = (observer: *) =>
@@ -184,6 +184,10 @@ export default class BluetoothTransport extends Transport<Device | string> {
 
   static list = (): * => Promise.resolve([]);
 
+  /**
+   * Scan for Ledger Bluetooth devices.
+   * On this web implementation, it only emits ONE device, the one that was selected in the UI (if any).
+   */
   static listen(observer: *) {
     logSubject.next({
       type: "verbose",
@@ -209,10 +213,16 @@ export default class BluetoothTransport extends Transport<Device | string> {
     return { unsubscribe };
   }
 
+  /**
+   * open a bluetooth device.
+   */
   static async open(deviceOrId: Device | string) {
     return open(deviceOrId, true);
   }
 
+  /**
+   * globally disconnect a bluetooth device by its id.
+   */
   static disconnect = async (id: *) => {
     logSubject.next({
       type: "verbose",
@@ -296,6 +306,11 @@ export default class BluetoothTransport extends Transport<Device | string> {
     return this.mtuSize;
   }
 
+  /**
+   * Exchange with the device using APDU protocol.
+   * @param apdu
+   * @returns a promise of apdu response
+   */
   exchange = (apdu: Buffer): Promise<Buffer> =>
     this.exchangeAtomicImpl(async () => {
       try {

@@ -28,10 +28,11 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/devices": "^4.41.1",
-    "@ledgerhq/hw-transport": "^4.41.1"
+    "@ledgerhq/hw-transport": "^4.41.1",
+    "rxjs": "^6.4.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.92.1",
+    "flow-bin": "^0.94.0",
     "flow-typed": "^2.5.1"
   },
   "scripts": {
