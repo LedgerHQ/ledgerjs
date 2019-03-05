@@ -83,6 +83,9 @@ export const UserRefusedAddress = createCustomErrorClass("UserRefusedAddress");
 export const UserRefusedFirmwareUpdate = createCustomErrorClass(
   "UserRefusedFirmwareUpdate"
 );
+export const UserRefusedAllowManager = createCustomErrorClass(
+  "UserRefusedAllowManager"
+);
 export const UserRefusedOnDevice = createCustomErrorClass(
   "UserRefusedOnDevice"
 ); // TODO rename because it's just for transaction refusal
