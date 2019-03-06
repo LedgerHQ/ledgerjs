@@ -89,6 +89,12 @@ export const UserRefusedAllowManager = createCustomErrorClass(
 export const UserRefusedOnDevice = createCustomErrorClass(
   "UserRefusedOnDevice"
 ); // TODO rename because it's just for transaction refusal
+export const WebUSBUserCancelled = createCustomErrorClass(
+  "WebUSBUserCancelled"
+);
+export const WebUSBInterfaceNotAvailable = createCustomErrorClass(
+  "WebUSBInterfaceNotAvailable"
+);
 export const WebsocketConnectionError = createCustomErrorClass(
   "WebsocketConnectionError"
 );
