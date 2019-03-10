@@ -10,7 +10,7 @@ import { identifyUSBProductId } from "@ledgerhq/devices";
 import {
   WebUSBUserCancelled,
   WebUSBInterfaceNotAvailable
-} from "@ledgerhq/devices";
+} from "@ledgerhq/errors";
 import { getLedgerDevices, requestLedgerDevice, isSupported } from "./webusb";
 
 const configurationValue = 1;
