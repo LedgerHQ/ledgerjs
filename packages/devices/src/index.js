@@ -3,17 +3,17 @@
 const devices: { [id: string]: DeviceModel } = {
   blue: {
     id: "blue",
-    productName: "Ledger Blue",
+    productName: "Ledger Blue",
     usbProductId: 0x0000
   },
   nanoS: {
     id: "nanoS",
-    productName: "Ledger Nano S",
+    productName: "Ledger Nano S",
     usbProductId: 0x0001
   },
   nanoX: {
     id: "nanoX",
-    productName: "Ledger Nano X",
+    productName: "Ledger Nano X",
     usbProductId: 0x0004,
     bluetoothSpec: [
       {
