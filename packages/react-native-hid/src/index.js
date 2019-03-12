@@ -1,15 +1,18 @@
 //@flow
 import { NativeModules, DeviceEventEmitter } from "react-native";
 import { ledgerUSBVendorId, identifyUSBProductId } from "@ledgerhq/devices";
+import { DisconnectedDeviceDuringOperation } from "@ledgerhq/errors";
 import Transport from "@ledgerhq/hw-transport";
 import type { DescriptorEvent } from "@ledgerhq/hw-transport";
-import { Subject, from, concat } from "rxjs";
-import { mergeMap } from "rxjs/operators";
+import { Subject, from, concat, Observable, empty, of } from "rxjs";
+import { mergeMap, bufferTime, concatMap } from "rxjs/operators";
 
 type DeviceObj = {
   vendorId: number,
   productId: number
 };
+
+const disconnectedErrors = ["I/O error"];
 
 const listLedgerDevices = async () => {
   const devices = await NativeModules.HID.getDeviceList();
@@ -37,6 +40,28 @@ DeviceEventEmitter.addListener("onDeviceDisconnect", (device: *) => {
     deviceModel
   });
 });
+
+const liveDeviceEvents = liveDeviceEventsSubject.pipe(
+  bufferTime(500),
+  concatMap(
+    (events: Array<DescriptorEvent<*>>): Observable<DescriptorEvent<*>> => {
+      let count = 0;
+      let prev;
+      for (const event of events) {
+        if (prev && event.type === prev.type) continue;
+        if (event.type === "add") {
+          count++;
+        } else if (event.type === "remove") {
+          count--;
+        }
+        prev = event;
+      }
+      if (count === 0) return empty();
+      const last = events[events.length - 1];
+      return of(last);
+    }
+  )
+);
 
 /**
  * Ledger's React Native HID Transport implementation
@@ -86,7 +111,7 @@ export default class HIDTransport extends Transport<DeviceObj> {
           )
         )
       ),
-      liveDeviceEventsSubject
+      liveDeviceEvents
     ).subscribe(observer);
   }
 
@@ -104,11 +129,19 @@ export default class HIDTransport extends Transport<DeviceObj> {
    */
   async exchange(apdu: Buffer) {
     return this.exchangeAtomicImpl(async () => {
-      const resultHex = await NativeModules.HID.exchange(
-        this.id,
-        apdu.toString("hex")
-      );
-      return Buffer.from(resultHex, "hex");
+      try {
+        const resultHex = await NativeModules.HID.exchange(
+          this.id,
+          apdu.toString("hex")
+        );
+        return Buffer.from(resultHex, "hex");
+      } catch (error) {
+        if (disconnectedErrors.includes(error.message)) {
+          this.emit("disconnect", error);
+          throw new DisconnectedDeviceDuringOperation(error.message);
+        }
+        throw error;
+      }
     });
   }
 
