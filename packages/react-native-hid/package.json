@@ -27,6 +27,7 @@
   "main": "lib/index.js",
   "license": "Apache-2.0",
   "dependencies": {
+    "@ledgerhq/errors": "^4.45.0",
     "@ledgerhq/devices": "^4.45.0",
     "@ledgerhq/hw-transport": "^4.45.0",
     "rxjs": "^6.4.0"

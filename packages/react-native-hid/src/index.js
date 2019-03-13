@@ -4,8 +4,8 @@ import { ledgerUSBVendorId, identifyUSBProductId } from "@ledgerhq/devices";
 import { DisconnectedDeviceDuringOperation } from "@ledgerhq/errors";
 import Transport from "@ledgerhq/hw-transport";
 import type { DescriptorEvent } from "@ledgerhq/hw-transport";
-import { Subject, from, concat, Observable, empty, of } from "rxjs";
-import { mergeMap, bufferTime, concatMap } from "rxjs/operators";
+import { Subject, from, concat } from "rxjs";
+import { mergeMap } from "rxjs/operators";
 
 type DeviceObj = {
   vendorId: number,
@@ -41,27 +41,7 @@ DeviceEventEmitter.addListener("onDeviceDisconnect", (device: *) => {
   });
 });
 
-const liveDeviceEvents = liveDeviceEventsSubject.pipe(
-  bufferTime(500),
-  concatMap(
-    (events: Array<DescriptorEvent<*>>): Observable<DescriptorEvent<*>> => {
-      let count = 0;
-      let prev;
-      for (const event of events) {
-        if (prev && event.type === prev.type) continue;
-        if (event.type === "add") {
-          count++;
-        } else if (event.type === "remove") {
-          count--;
-        }
-        prev = event;
-      }
-      if (count === 0) return empty();
-      const last = events[events.length - 1];
-      return of(last);
-    }
-  )
-);
+const liveDeviceEvents = liveDeviceEventsSubject;
 
 /**
  * Ledger's React Native HID Transport implementation
