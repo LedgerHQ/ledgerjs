@@ -64,13 +64,14 @@ Returns **[BluetoothInfos](#bluetoothinfos)?**
 
 ### DeviceModel
 
-Type: {id: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), productName: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), usbProductId: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), bluetoothSpec: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;{serviceUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), writeUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), notifyUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>?}
+Type: {id: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), productName: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), usbProductId: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), usbOnly: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean), bluetoothSpec: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;{serviceUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), writeUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), notifyUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>?}
 
 #### Properties
 
 -   `id` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 -   `productName` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 -   `usbProductId` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+-   `usbOnly` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** 
 -   `bluetoothSpec` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;{serviceUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), writeUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), notifyUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>?** 
 
 ### BluetoothInfos

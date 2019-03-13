@@ -4,17 +4,20 @@ const devices: { [id: string]: DeviceModel } = {
   blue: {
     id: "blue",
     productName: "Ledger Blue",
-    usbProductId: 0x0000
+    usbProductId: 0x0000,
+    usbOnly: true
   },
   nanoS: {
     id: "nanoS",
     productName: "Ledger Nano S",
-    usbProductId: 0x0001
+    usbProductId: 0x0001,
+    usbOnly: true
   },
   nanoX: {
     id: "nanoX",
     productName: "Ledger Nano X",
     usbProductId: 0x0004,
+    usbOnly: false,
     bluetoothSpec: [
       {
         // this is the legacy one (prototype version). we will eventually drop it.
@@ -89,6 +92,7 @@ export type DeviceModel = {
   id: string,
   productName: string,
   usbProductId: number,
+  usbOnly: boolean,
   bluetoothSpec?: Array<{
     serviceUuid: string,
     writeUuid: string,
