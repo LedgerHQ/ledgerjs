@@ -79,7 +79,9 @@ export const UnexpectedBootloader = createCustomErrorClass(
   "UnexpectedBootloader"
 );
 export const UpdateYourApp = createCustomErrorClass("UpdateYourApp");
-export const UserRefusedDeviceNameChange = createCustomErrorClass("UserRefusedDeviceNameChange");
+export const UserRefusedDeviceNameChange = createCustomErrorClass(
+  "UserRefusedDeviceNameChange"
+);
 export const UserRefusedAddress = createCustomErrorClass("UserRefusedAddress");
 export const UserRefusedFirmwareUpdate = createCustomErrorClass(
   "UserRefusedFirmwareUpdate"
