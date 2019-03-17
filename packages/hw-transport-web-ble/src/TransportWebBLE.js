@@ -2,7 +2,10 @@
 /* eslint-disable prefer-template */
 
 import Transport from "@ledgerhq/hw-transport";
-import { DisconnectedDevice } from "@ledgerhq/errors";
+import {
+  DisconnectedDevice,
+  TransportOpenUserCancelled
+} from "@ledgerhq/errors";
 import {
   getBluetoothServiceUuids,
   getInfosForServiceUuid
@@ -198,15 +201,20 @@ export default class BluetoothTransport extends Transport<Device | string> {
 
     const bluetooth = requiresBluetooth();
 
-    bluetooth.requestDevice(requestDeviceParam()).then(async device => {
-      if (!unsubscribed) {
-        observer.next({
-          type: "add",
-          descriptor: device
-        });
-        observer.complete();
+    bluetooth.requestDevice(requestDeviceParam()).then(
+      async device => {
+        if (!unsubscribed) {
+          observer.next({
+            type: "add",
+            descriptor: device
+          });
+          observer.complete();
+        }
+      },
+      error => {
+        observer.error(new TransportOpenUserCancelled(error.message));
       }
-    });
+    );
     function unsubscribe() {
       unsubscribed = true;
     }

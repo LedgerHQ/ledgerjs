@@ -8,8 +8,8 @@ import type {
 import hidFraming from "@ledgerhq/devices/lib/hid-framing";
 import { identifyUSBProductId } from "@ledgerhq/devices";
 import {
-  WebUSBUserCancelled,
-  WebUSBInterfaceNotAvailable
+  TransportOpenUserCancelled,
+  TransportInterfaceNotAvailable
 } from "@ledgerhq/errors";
 import { getLedgerDevices, requestLedgerDevice, isSupported } from "./webusb";
 
@@ -62,7 +62,7 @@ export default class TransportWebUSB extends Transport<USBDevice> {
         }
       },
       error => {
-        observer.error(new WebUSBUserCancelled(error.message));
+        observer.error(new TransportOpenUserCancelled(error.message));
       }
     );
     function unsubscribe() {
@@ -84,7 +84,7 @@ export default class TransportWebUSB extends Transport<USBDevice> {
       await device.claimInterface(interfaceNumber);
     } catch (e) {
       await device.close();
-      throw new WebUSBInterfaceNotAvailable(e.message);
+      throw new TransportInterfaceNotAvailable(e.message);
     }
     return new TransportWebUSB(device);
   }
