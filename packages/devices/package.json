@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/devices",
-  "version": "4.45.0",
+  "version": "4.46.0",
   "description": "Ledger devices",
   "keywords": [
     "Ledger"
@@ -23,7 +23,7 @@
     "flow-typed": "^2.5.1"
   },
   "dependencies": {
-    "@ledgerhq/errors": "^4.45.0"
+    "@ledgerhq/errors": "^4.46.0"
   },
   "scripts": {
     "flow": "flow",
