@@ -79,6 +79,9 @@ export const UnexpectedBootloader = createCustomErrorClass(
   "UnexpectedBootloader"
 );
 export const UpdateYourApp = createCustomErrorClass("UpdateYourApp");
+export const UserRefusedDeviceNameChange = createCustomErrorClass(
+  "UserRefusedDeviceNameChange"
+);
 export const UserRefusedAddress = createCustomErrorClass("UserRefusedAddress");
 export const UserRefusedFirmwareUpdate = createCustomErrorClass(
   "UserRefusedFirmwareUpdate"
@@ -89,6 +92,12 @@ export const UserRefusedAllowManager = createCustomErrorClass(
 export const UserRefusedOnDevice = createCustomErrorClass(
   "UserRefusedOnDevice"
 ); // TODO rename because it's just for transaction refusal
+export const TransportOpenUserCancelled = createCustomErrorClass(
+  "TransportOpenUserCancelled"
+);
+export const TransportInterfaceNotAvailable = createCustomErrorClass(
+  "TransportInterfaceNotAvailable"
+);
 export const WebsocketConnectionError = createCustomErrorClass(
   "WebsocketConnectionError"
 );

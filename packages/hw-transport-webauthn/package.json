@@ -1,12 +1,11 @@
 {
-  "name": "@ledgerhq/react-native-hid",
+  "name": "@ledgerhq/hw-transport-webauthn",
   "version": "4.46.0",
-  "nativePackage": true,
-  "description": "Ledger Hardware Wallet Web implementation of the communication layer, using U2F api",
+  "description": "Ledger Hardware Wallet Web implementation of the communication layer, using WebAuthN api",
   "keywords": [
     "Ledger",
     "LedgerWallet",
-    "U2F",
+    "WebAuthn",
     "browser",
     "web",
     "NanoS",
@@ -24,13 +23,12 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "lib/index.js",
+  "main": "lib/TransportWebAuthn.js",
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/devices": "^4.46.0",
     "@ledgerhq/errors": "^4.46.0",
-    "@ledgerhq/hw-transport": "^4.46.0",
-    "rxjs": "^6.4.0"
+    "@ledgerhq/hw-transport": "^4.46.0"
   },
   "devDependencies": {
     "flow-bin": "^0.94.0",

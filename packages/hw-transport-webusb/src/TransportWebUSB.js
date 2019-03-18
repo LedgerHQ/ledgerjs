@@ -7,6 +7,10 @@ import type {
 } from "@ledgerhq/hw-transport";
 import hidFraming from "@ledgerhq/devices/lib/hid-framing";
 import { identifyUSBProductId } from "@ledgerhq/devices";
+import {
+  TransportOpenUserCancelled,
+  TransportInterfaceNotAvailable
+} from "@ledgerhq/errors";
 import { getLedgerDevices, requestLedgerDevice, isSupported } from "./webusb";
 
 const configurationValue = 1;
@@ -49,13 +53,18 @@ export default class TransportWebUSB extends Transport<USBDevice> {
     observer: Observer<DescriptorEvent<USBDevice>>
   ): Subscription => {
     let unsubscribed = false;
-    requestLedgerDevice().then(device => {
-      if (!unsubscribed) {
-        const deviceModel = identifyUSBProductId(device.productId);
-        observer.next({ type: "add", descriptor: device, deviceModel });
-        observer.complete();
+    requestLedgerDevice().then(
+      device => {
+        if (!unsubscribed) {
+          const deviceModel = identifyUSBProductId(device.productId);
+          observer.next({ type: "add", descriptor: device, deviceModel });
+          observer.complete();
+        }
+      },
+      error => {
+        observer.error(new TransportOpenUserCancelled(error.message));
       }
-    });
+    );
     function unsubscribe() {
       unsubscribed = true;
     }
@@ -71,7 +80,12 @@ export default class TransportWebUSB extends Transport<USBDevice> {
       await device.selectConfiguration(configurationValue);
     }
     await device.reset();
-    await device.claimInterface(interfaceNumber);
+    try {
+      await device.claimInterface(interfaceNumber);
+    } catch (e) {
+      await device.close();
+      throw new TransportInterfaceNotAvailable(e.message);
+    }
     return new TransportWebUSB(device);
   }
 

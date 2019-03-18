@@ -1,6 +1,7 @@
 //@flow
 import { NativeModules, DeviceEventEmitter } from "react-native";
 import { ledgerUSBVendorId, identifyUSBProductId } from "@ledgerhq/devices";
+import { DisconnectedDeviceDuringOperation } from "@ledgerhq/errors";
 import Transport from "@ledgerhq/hw-transport";
 import type { DescriptorEvent } from "@ledgerhq/hw-transport";
 import { Subject, from, concat } from "rxjs";
@@ -10,6 +11,8 @@ type DeviceObj = {
   vendorId: number,
   productId: number
 };
+
+const disconnectedErrors = ["I/O error"];
 
 const listLedgerDevices = async () => {
   const devices = await NativeModules.HID.getDeviceList();
@@ -37,6 +40,8 @@ DeviceEventEmitter.addListener("onDeviceDisconnect", (device: *) => {
     deviceModel
   });
 });
+
+const liveDeviceEvents = liveDeviceEventsSubject;
 
 /**
  * Ledger's React Native HID Transport implementation
@@ -86,7 +91,7 @@ export default class HIDTransport extends Transport<DeviceObj> {
           )
         )
       ),
-      liveDeviceEventsSubject
+      liveDeviceEvents
     ).subscribe(observer);
   }
 
@@ -104,11 +109,19 @@ export default class HIDTransport extends Transport<DeviceObj> {
    */
   async exchange(apdu: Buffer) {
     return this.exchangeAtomicImpl(async () => {
-      const resultHex = await NativeModules.HID.exchange(
-        this.id,
-        apdu.toString("hex")
-      );
-      return Buffer.from(resultHex, "hex");
+      try {
+        const resultHex = await NativeModules.HID.exchange(
+          this.id,
+          apdu.toString("hex")
+        );
+        return Buffer.from(resultHex, "hex");
+      } catch (error) {
+        if (disconnectedErrors.includes(error.message)) {
+          this.emit("disconnect", error);
+          throw new DisconnectedDeviceDuringOperation(error.message);
+        }
+        throw error;
+      }
     });
   }
 
