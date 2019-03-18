@@ -36,6 +36,7 @@ export default class Eth {
       this,
       [
         "getAddress",
+        "provideERC20TokenInformation",
         "signTransaction",
         "signPersonalMessage",
         "getAppConfiguration"
