@@ -1,6 +1,6 @@
 // @flow
 
-const devices: { [id: string]: DeviceModel } = {
+const devices = {
   blue: {
     id: "blue",
     productName: "Ledger Blue",
@@ -45,7 +45,7 @@ export const ledgerUSBVendorId = 0x2c97;
 /**
  *
  */
-export const getDeviceModel = (id: string): DeviceModel => {
+export const getDeviceModel = (id: DeviceModelId): DeviceModel => {
   const info = devices[id];
   if (!info) throw new Error("device '" + id + "' does not exist");
   return info;
@@ -88,8 +88,13 @@ export const getInfosForServiceUuid = (uuid: string): ?BluetoothInfos =>
 /**
  *
  */
+export type DeviceModelId = $Keys<typeof devices>;
+
+/**
+ *
+ */
 export type DeviceModel = {
-  id: string,
+  id: DeviceModelId,
   productName: string,
   usbProductId: number,
   usbOnly: boolean,

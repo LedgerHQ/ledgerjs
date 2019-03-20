@@ -20,6 +20,7 @@ Logic for all Ledger devices.
 -   [getBluetoothServiceUuids](#getbluetoothserviceuuids)
 -   [getInfosForServiceUuid](#getinfosforserviceuuid)
     -   [Parameters](#parameters-3)
+-   [DeviceModelId](#devicemodelid)
 -   [DeviceModel](#devicemodel)
     -   [Properties](#properties)
 -   [BluetoothInfos](#bluetoothinfos)
@@ -40,7 +41,7 @@ Type: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Globa
 
 #### Parameters
 
--   `id` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `id` **[DeviceModelId](#devicemodelid)** 
 
 Returns **[DeviceModel](#devicemodel)** 
 
@@ -62,13 +63,42 @@ Returns **[DeviceModel](#devicemodel)?**
 
 Returns **[BluetoothInfos](#bluetoothinfos)?** 
 
+### DeviceModelId
+
+Type: $Keys&lt;any>
+
 ### DeviceModel
 
-Type: {id: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), productName: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), usbProductId: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), usbOnly: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean), bluetoothSpec: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;{serviceUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), writeUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), notifyUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>?}
+Type: {id: [DeviceModelId](#devicemodelid), productName: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), usbProductId: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), usbOnly: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean), bluetoothSpec: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;{serviceUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), writeUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), notifyUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>?}
 
 #### Properties
 
--   `id` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `id` **[DeviceModelId](#devicemodelid)** 
+-   `productName` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `usbProductId` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+-   `usbOnly` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** 
+-   `bluetoothSpec` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;{serviceUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), writeUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), notifyUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>?** 
+
+### BluetoothInfos
+
+Type: {deviceModel: [DeviceModel](#devicemodel), serviceUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), writeUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), notifyUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}
+
+#### Properties
+
+-   `deviceModel` **[DeviceModel](#devicemodel)** 
+-   `serviceUuid` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `writeUuid` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `notifyUuid` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+
+# Type: {id: [DeviceModelId](#devicemodelid), productName: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), usbProductId: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), bluetoothSpec: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;{serviceUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), writeUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), notifyUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>?}
+
+Type: {id: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), productName: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), usbProductId: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), usbOnly: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean), bluetoothSpec: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;{serviceUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), writeUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), notifyUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>?}
+
+> > > > > > > master
+
+#### Properties
+
+-   `id` **[DeviceModelId](#devicemodelid)** 
 -   `productName` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 -   `usbProductId` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 -   `usbOnly` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** 
