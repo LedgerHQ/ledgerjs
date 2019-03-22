@@ -98,6 +98,9 @@ export const TransportOpenUserCancelled = createCustomErrorClass(
 export const TransportInterfaceNotAvailable = createCustomErrorClass(
   "TransportInterfaceNotAvailable"
 );
+export const DeviceShouldStayInApp = createCustomErrorClass(
+  "DeviceShouldStayInApp"
+);
 export const WebsocketConnectionError = createCustomErrorClass(
   "WebsocketConnectionError"
 );
@@ -114,6 +117,8 @@ export const FeeRequired = createCustomErrorClass("FeeRequired");
 export const SyncError = createCustomErrorClass("SyncError");
 export const PairingFailed = createCustomErrorClass("PairingFailed");
 export const GenuineCheckFailed = createCustomErrorClass("GenuineCheckFailed");
+export const LedgerAPI4xx = createCustomErrorClass("LedgerAPI4xx");
+export const LedgerAPI5xx = createCustomErrorClass("LedgerAPI5xx");
 
 // db stuff, no need to translate
 export const NoDBPathGiven = createCustomErrorClass("NoDBPathGiven");
