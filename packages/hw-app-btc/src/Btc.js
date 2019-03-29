@@ -749,7 +749,7 @@ btc.createPaymentTransactionNew(
         doIf(!resuming, () =>
           // Collect public keys
           foreach(inputs, (input, i) =>
-            this.getWalletPublicKey_private(associatedKeysets[i], false, false)
+            this.getWalletPublicKey_private(associatedKeysets[i])
           ).then(result => {
             for (let index = 0; index < result.length; index++) {
               publicKeys.push(
