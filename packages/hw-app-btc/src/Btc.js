@@ -8,6 +8,17 @@ import { foreach, doIf, asyncWhile, splitPath, eachSeries } from "./utils";
 import type Transport from "@ledgerhq/hw-transport";
 import createHash from "create-hash";
 
+/**
+ * address format is one of legacy | p2sh | bech32
+ */
+export type AddressFormat = "legacy" | "p2sh" | "bech32";
+
+const addressFormatMap = {
+  legacy: 0,
+  p2sh: 1,
+  bech32: 2
+};
+
 const MAX_SCRIPT_BLOCK = 50;
 const DEFAULT_VERSION = 1;
 const DEFAULT_LOCKTIME = 0;
@@ -54,22 +65,26 @@ export default class Btc {
 
   getWalletPublicKey_private(
     path: string,
-    verify: boolean,
-    segwit: boolean
+    options: {
+      verify?: boolean,
+      format?: AddressFormat
+    } = {}
   ): Promise<{
     publicKey: string,
     bitcoinAddress: string,
     chainCode: string
   }> {
+    const { verify, format } = {
+      verify: false,
+      format: "legacy",
+      ...options
+    };
+    if (!(format in addressFormatMap)) {
+      throw new Error("btc.getWalletPublicKey invalid format=" + format);
+    }
     const paths = splitPath(path);
-    var p1 = 0x00;
-    var p2 = 0x00;
-    if (verify === true) {
-      p1 = 0x01;
-    }
-    if (segwit == true) {
-      p2 = 0x01;
-    }
+    var p1 = verify ? 1 : 0;
+    var p2 = addressFormatMap[format];
     const buffer = Buffer.alloc(1 + paths.length * 4);
     buffer[0] = paths.length;
     paths.forEach((element, index) => {
@@ -94,20 +109,47 @@ export default class Btc {
 
   /**
    * @param path a BIP 32 path
-   * @param segwit use segwit
+   * @param options an object with optional these fields:
+   *
+   * - verify (boolean) will ask user to confirm the address on the device
+   *
+   * - format ("legacy" | "p2sh" | "bech32") to use different bitcoin address formatter.
+   *
+   * NB The normal usage is to use:
+   *
+   * - legacy format with 44' paths
+   *
+   * - p2sh format with 49' paths
+   *
+   * - bech32 format with 173' paths
+   *
    * @example
-   * btc.getWalletPublicKey("44'/0'/0'/0").then(o => o.bitcoinAddress)
+   * btc.getWalletPublicKey("44'/0'/0'/0/0").then(o => o.bitcoinAddress)
+   * btc.getWalletPublicKey("49'/0'/0'/0/0", { format: "p2sh" }).then(o => o.bitcoinAddress)
    */
   getWalletPublicKey(
     path: string,
-    verify?: boolean = false,
-    segwit?: boolean = false
+    opts?: any
   ): Promise<{
     publicKey: string,
     bitcoinAddress: string,
     chainCode: string
   }> {
-    return this.getWalletPublicKey_private(path, verify, segwit);
+    const deprecatedSignature =
+      arguments.length > 2 || typeof opts === "boolean";
+    let options;
+    if (deprecatedSignature) {
+      console.warn(
+        "btc.getWalletPublicKey deprecated signature used. Please switch to getWalletPublicKey(path, { format, verify })"
+      );
+      options = {
+        verify: !!opts,
+        format: arguments[2] ? "p2sh" : "legacy"
+      };
+    } else {
+      options = opts || {};
+    }
+    return this.getWalletPublicKey_private(path, options);
   }
 
   getTrustedInputRaw(

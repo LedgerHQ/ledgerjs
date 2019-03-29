@@ -14,6 +14,7 @@ Ledger Hardware Wallet BTC JavaScript bindings. Also supports many altcoins.
 
 #### Table of Contents
 
+-   [AddressFormat](#addressformat)
 -   [Btc](#btc)
     -   [Parameters](#parameters)
     -   [Examples](#examples)
@@ -46,6 +47,12 @@ Ledger Hardware Wallet BTC JavaScript bindings. Also supports many altcoins.
 -   [Transaction](#transaction)
     -   [Properties](#properties-2)
 
+### AddressFormat
+
+address format is one of legacy | p2sh | bech32
+
+Type: (`"legacy"` \| `"p2sh"` \| `"bech32"`)
+
 ### Btc
 
 Bitcoin API.
@@ -67,13 +74,20 @@ const btc = new Btc(transport)
 ##### Parameters
 
 -   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a BIP 32 path
--   `verify` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)**  (optional, default `false`)
--   `segwit` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** use segwit
+-   `opts` **any** 
+-   `options`  an object with optional these fields:-   verify (boolean) will ask user to confirm the address on the device
+
+    -   format ("legacy" | "p2sh" | "bech32") to use different bitcoin address formatter.NB The normal usage is to use:-   legacy format with 44' paths
+
+    -   p2sh format with 49' paths
+
+    -   bech32 format with 173' paths
 
 ##### Examples
 
 ```javascript
-btc.getWalletPublicKey("44'/0'/0'/0").then(o => o.bitcoinAddress)
+btc.getWalletPublicKey("44'/0'/0'/0/0").then(o => o.bitcoinAddress)
+btc.getWalletPublicKey("49'/0'/0'/0/0", { format: "p2sh" }).then(o => o.bitcoinAddress)
 ```
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{publicKey: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), bitcoinAddress: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), chainCode: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** 
