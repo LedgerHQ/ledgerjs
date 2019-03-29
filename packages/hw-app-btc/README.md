@@ -74,7 +74,7 @@ const btc = new Btc(transport)
 ##### Parameters
 
 -   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a BIP 32 path
--   `opts` **any** 
+-   `opts` **([boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | {verify: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, format: [AddressFormat](#addressformat)?})** 
 -   `options`  an object with optional these fields:-   verify (boolean) will ask user to confirm the address on the device
 
     -   format ("legacy" | "p2sh" | "bech32") to use different bitcoin address formatter.NB The normal usage is to use:-   legacy format with 44' paths

@@ -129,16 +129,19 @@ export default class Btc {
    */
   getWalletPublicKey(
     path: string,
-    opts?: any
+    opts?:
+      | boolean
+      | {
+          verify?: boolean,
+          format?: AddressFormat
+        }
   ): Promise<{
     publicKey: string,
     bitcoinAddress: string,
     chainCode: string
   }> {
-    const deprecatedSignature =
-      arguments.length > 2 || typeof opts === "boolean";
     let options;
-    if (deprecatedSignature) {
+    if (arguments.length > 2 || typeof opts === "boolean") {
       console.warn(
         "btc.getWalletPublicKey deprecated signature used. Please switch to getWalletPublicKey(path, { format, verify })"
       );
