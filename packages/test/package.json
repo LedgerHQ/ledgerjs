@@ -5,7 +5,6 @@
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-app-ada": "^4.48.0",
     "@ledgerhq/hw-app-btc": "^4.49.2",
     "@ledgerhq/hw-app-eth": "^4.48.0",
     "@ledgerhq/hw-app-str": "^4.48.0",
