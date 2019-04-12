@@ -1,7 +1,10 @@
 //@flow
 import { NativeModules, DeviceEventEmitter } from "react-native";
 import { ledgerUSBVendorId, identifyUSBProductId } from "@ledgerhq/devices";
-import { DisconnectedDeviceDuringOperation } from "@ledgerhq/errors";
+import {
+  DisconnectedDeviceDuringOperation,
+  DisconnectedDevice
+} from "@ledgerhq/errors";
 import Transport from "@ledgerhq/hw-transport";
 import type { DescriptorEvent } from "@ledgerhq/hw-transport";
 import { Subject, from, concat } from "rxjs";
@@ -12,7 +15,10 @@ type DeviceObj = {
   productId: number
 };
 
-const disconnectedErrors = ["I/O error"];
+const disconnectedErrors = [
+  "I/O error",
+  "Attempt to invoke virtual method 'int android.hardware.usb.UsbDevice.getDeviceClass()' on a null object reference"
+];
 
 const listLedgerDevices = async () => {
   const devices = await NativeModules.HID.getDeviceList();
@@ -99,8 +105,15 @@ export default class HIDTransport extends Transport<DeviceObj> {
    * Open a the transport with a Ledger device
    */
   static async open(deviceObj: DeviceObj) {
-    const nativeObj = await NativeModules.HID.openDevice(deviceObj);
-    return new HIDTransport(nativeObj.id);
+    try {
+      const nativeObj = await NativeModules.HID.openDevice(deviceObj);
+      return new HIDTransport(nativeObj.id);
+    } catch (error) {
+      if (disconnectedErrors.includes(error.message)) {
+        throw new DisconnectedDevice(error.message);
+      }
+      throw error;
+    }
   }
 
   /**
