@@ -1,4 +1,4 @@
-import RecordStore from "./RecordStore";
+export * from "./RecordStore";
 import createTransportReplayer from "./createTransportReplayer";
 import createTransportRecorder from "./createTransportRecorder";
-export { RecordStore, createTransportRecorder, createTransportReplayer };
+export { createTransportRecorder, createTransportReplayer };

@@ -1,10 +1,58 @@
 import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
+import {
+  RecordStore,
+  createTransportRecorder,
+  createTransportReplayer
+} from "@ledgerhq/hw-transport-mocker";
+import commandLineArgs from "command-line-args";
+import fs from "fs";
 import http from "http";
 import express from "express";
 import cors from "cors";
 import WebSocket from "ws";
 import bodyParser from "body-parser";
 import os from "os";
+
+const mainOptions = commandLineArgs([
+  {
+    name: "file",
+    alias: "f",
+    type: String
+  }
+]);
+
+let Transport;
+let saveToFile = null;
+let recordStore;
+
+// --mock <file>
+// There are two ways to use the mock, either you record or you replay
+// - record means that it's a decoration in node-hid that will just save to a file
+// - replay means that it's going to re-use a recorded file and mock a transport instead of using an actual device
+// replay mode is the default unless environment RECORD_APDU_TO_FILE is defined, this allow to easily replay tests in record mode.
+if (mainOptions.file) {
+  if (process.env.RECORD_APDU_TO_FILE) {
+    console.log(`the APDUs will be recorded in ${mainOptions.file}`);
+    saveToFile = mainOptions.file;
+    recordStore = new RecordStore([]);
+    Transport = createTransportRecorder(TransportNodeHid, recordStore);
+  } else {
+    recordStore = RecordStore.fromString(
+      fs.readFileSync(mainOptions.file, "utf8")
+    );
+    if (recordStore.isEmpty()) {
+      process.exit(0);
+    }
+    console.log(
+      `${recordStore.queue.length} mocked APDUs will be replayed from ${
+        mainOptions.file
+      }`
+    );
+    Transport = createTransportReplayer(recordStore);
+  }
+} else {
+  Transport = TransportNodeHid;
+}
 
 const ifaces = os.networkInterfaces();
 export const ips = Object.keys(ifaces)
@@ -35,6 +83,20 @@ app.get("/", (req, res) => {
   res.sendStatus(200);
 });
 
+if (recordStore) {
+  app.post("/end", () => {
+    try {
+      if (!saveToFile) {
+        recordStore.ensureQueueEmpty();
+      }
+      process.exit(0);
+    } catch (e) {
+      console.error(e.message);
+      process.exit(1);
+    }
+  });
+}
+
 let pending = false;
 app.post("/", bodyParser.json(), async (req, res) => {
   if (!req.body) return res.sendStatus(400);
@@ -47,11 +109,18 @@ app.post("/", bodyParser.json(), async (req, res) => {
   }
   pending = true;
   try {
-    const transport = await TransportNodeHid.create(5000);
+    const transport = await Transport.create(5000);
     try {
       data = await transport.exchange(Buffer.from(req.body.apduHex, "hex"));
     } finally {
       transport.close();
+      if (saveToFile) {
+        fs.writeFileSync(saveToFile, recordStore.toString());
+      } else if (recordStore) {
+        if (recordStore.isEmpty()) {
+          process.exit(0);
+        }
+      }
     }
   } catch (e) {
     error = e.toString();
@@ -64,6 +133,10 @@ app.post("/", bodyParser.json(), async (req, res) => {
     console.log("HTTP:", req.body.apduHex, "=>", error);
   }
   res.json(result);
+  if (error && error.name === "RecordStoreWrongAPDU") {
+    console.error(error.message);
+    process.exit(1);
+  }
 });
 
 let wsIndex = 0;
@@ -83,6 +156,13 @@ wss.on("connection", ws => {
         await transportP.then(transport => transport.close(), () => {});
         wsBusyIndex = 0;
       }
+      if (saveToFile) {
+        fs.writeFileSync(saveToFile, recordStore.toString());
+      } else if (recordStore) {
+        if (recordStore.isEmpty()) {
+          process.exit(0);
+        }
+      }
     };
 
     ws.on("close", onClose);
@@ -101,7 +181,7 @@ wss.on("connection", ws => {
           destroyed = true;
           return;
         }
-        transportP = TransportNodeHid.create(5000);
+        transportP = Transport.create(5000);
         wsBusyIndex = index;
 
         console.log(`WS(${index}): opening...`);
@@ -142,6 +222,10 @@ wss.on("connection", ws => {
         console.log(`WS(${index}): ${apduHex} =>`, e);
         if (destroyed) return;
         ws.send(JSON.stringify({ type: "error", error: e.message }));
+        if (e.name === "RecordStoreWrongAPDU") {
+          console.error(e.message);
+          process.exit(1);
+        }
       }
     });
   } catch (e) {

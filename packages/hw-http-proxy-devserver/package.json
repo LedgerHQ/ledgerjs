@@ -30,8 +30,10 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/hw-transport-node-hid": "^4.50.0",
+    "@ledgerhq/hw-transport-mocker": "^4.50.0",
     "babel-polyfill": "^6.26.0",
     "body-parser": "^1.18.3",
+    "command-line-args": "^5.1.1",
     "cors": "^2.8.5",
     "express": "^4.16.4",
     "ws": "^6.1.4"

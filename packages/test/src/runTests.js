@@ -62,11 +62,13 @@ const defaultWaitForAppSwitch = step =>
     }, 1000);
   });
 
-export default async (
-  getTransportClass,
-  timeout = 5000,
-  waitForAppSwitch = defaultWaitForAppSwitch
-) => {
+export default async opts => {
+  const { getTransportClass, timeout, waitForAppSwitch, afterTest } = {
+    timeout: 5000,
+    waitForAppSwitch: defaultWaitForAppSwitch,
+    afterTest: (_s, _t) => {},
+    ...opts
+  };
   async function createTransportViaList(Transport) {
     const descriptors = await Transport.list();
     if (descriptors.length === 0) throw "No device found";
@@ -131,11 +133,12 @@ export default async (
       if (result) {
         console.log(result);
       }
+      await transport.close();
+      afterTest(step, Transport);
     } catch (err) {
+      await transport.close();
       console.error("Failed test " + step.name + ":", err);
       throw err;
-    } finally {
-      transport.close();
     }
   }, Promise.resolve());
 };
