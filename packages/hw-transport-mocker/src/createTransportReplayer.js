@@ -1,6 +1,6 @@
 //@flow
 import Transport from "@ledgerhq/hw-transport";
-import type RecordStore from "./RecordStore";
+import type { RecordStore } from "./RecordStore";
 
 export default (recordStore: RecordStore): Class<Transport<*>> => {
   class TransportReplayer extends Transport<*> {
@@ -32,7 +32,7 @@ export default (recordStore: RecordStore): Class<Transport<*>> => {
         console.log("=> " + apdu.toString("hex"));
       }
       try {
-        const buffer = recordStore.reverseExchange(apdu);
+        const buffer = recordStore.replayExchange(apdu);
         if (this.debug) console.error("<= " + buffer.toString("hex"));
         return Promise.resolve(buffer);
       } catch (e) {

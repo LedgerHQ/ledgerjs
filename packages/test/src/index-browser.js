@@ -36,15 +36,15 @@ document.body.appendChild(pre);
 
 btn.onclick = () => {
   errorEl.textContent = "";
-  runTests(
-    () => transports[transportSelect.selectedIndex].clazz,
-    5000,
-    step =>
+  runTests({
+    getTransportClass: () => transports[transportSelect.selectedIndex].clazz,
+    timeout: 5000,
+    waitForAppSwitch: step =>
       new Promise(resolve => {
         alert("Please switch to " + step.appName + " app ...");
         resolve();
       })
-  ).then(
+  }).then(
     () => {
       console.log("ALL PASS");
     },
