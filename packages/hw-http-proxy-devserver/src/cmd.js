@@ -18,12 +18,19 @@ const mainOptions = commandLineArgs([
     name: "file",
     alias: "f",
     type: String
+  },
+  {
+    name: "silent",
+    alias: "s",
+    type: Boolean
   }
 ]);
 
 let Transport;
 let saveToFile = null;
 let recordStore;
+
+const log = mainOptions.silent ? () => {} : (...args) => console.log(...args);
 
 // --mock <file>
 // There are two ways to use the mock, either you record or you replay
@@ -32,7 +39,7 @@ let recordStore;
 // replay mode is the default unless environment RECORD_APDU_TO_FILE is defined, this allow to easily replay tests in record mode.
 if (mainOptions.file) {
   if (process.env.RECORD_APDU_TO_FILE) {
-    console.log(`the APDUs will be recorded in ${mainOptions.file}`);
+    log(`the APDUs will be recorded in ${mainOptions.file}`);
     saveToFile = mainOptions.file;
     recordStore = new RecordStore([]);
     Transport = createTransportRecorder(TransportNodeHid, recordStore);
@@ -43,7 +50,7 @@ if (mainOptions.file) {
     if (recordStore.isEmpty()) {
       process.exit(0);
     }
-    console.log(
+    log(
       `${recordStore.queue.length} mocked APDUs will be replayed from ${
         mainOptions.file
       }`
@@ -84,13 +91,15 @@ app.get("/", (req, res) => {
 });
 
 if (recordStore) {
-  app.post("/end", () => {
+  app.post("/end", (req, res) => {
     try {
       if (!saveToFile) {
         recordStore.ensureQueueEmpty();
       }
+      res.sendStatus(200);
       process.exit(0);
     } catch (e) {
+      res.sendStatus(400);
       console.error(e.message);
       process.exit(1);
     }
@@ -128,9 +137,9 @@ app.post("/", bodyParser.json(), async (req, res) => {
   pending = false;
   const result = { data, error };
   if (data) {
-    console.log("HTTP:", req.body.apduHex, "=>", data.toString("hex"));
+    log("HTTP:", req.body.apduHex, "=>", data.toString("hex"));
   } else {
-    console.log("HTTP:", req.body.apduHex, "=>", error);
+    log("HTTP:", req.body.apduHex, "=>", error);
   }
   res.json(result);
   if (error && error.name === "RecordStoreWrongAPDU") {
@@ -152,7 +161,7 @@ wss.on("connection", ws => {
       if (destroyed) return;
       destroyed = true;
       if (wsBusyIndex === index) {
-        console.log(`WS(${index}): close`);
+        log(`WS(${index}): close`);
         await transportP.then(transport => transport.close(), () => {});
         wsBusyIndex = 0;
       }
@@ -184,14 +193,14 @@ wss.on("connection", ws => {
         transportP = Transport.create(5000);
         wsBusyIndex = index;
 
-        console.log(`WS(${index}): opening...`);
+        log(`WS(${index}): opening...`);
         try {
           transport = await transportP;
           transport.on("disconnect", () => ws.close());
-          console.log(`WS(${index}): opened!`);
+          log(`WS(${index}): opened!`);
           ws.send(JSON.stringify({ type: "opened" }));
         } catch (e) {
-          console.log(`WS(${index}): open failed! ${e}`);
+          log(`WS(${index}): open failed! ${e}`);
           ws.send(
             JSON.stringify({
               error: e.message
@@ -213,13 +222,13 @@ wss.on("connection", ws => {
       }
       try {
         const res = await transport.exchange(Buffer.from(apduHex, "hex"));
-        console.log(`WS(${index}): ${apduHex} => ${res.toString("hex")}`);
+        log(`WS(${index}): ${apduHex} => ${res.toString("hex")}`);
         if (destroyed) return;
         ws.send(
           JSON.stringify({ type: "response", data: res.toString("hex") })
         );
       } catch (e) {
-        console.log(`WS(${index}): ${apduHex} =>`, e);
+        log(`WS(${index}): ${apduHex} =>`, e);
         if (destroyed) return;
         ws.send(JSON.stringify({ type: "error", error: e.message }));
         if (e.name === "RecordStoreWrongAPDU") {
@@ -233,11 +242,11 @@ wss.on("connection", ws => {
   }
 });
 
-console.log(
+log(
   "DEBUG_COMM_HTTP_PROXY=" +
     ["localhost", ...ips].map(ip => `ws://${ip}:${PORT}`).join("|")
 );
 
 server.listen(PORT, () => {
-  console.log(`\nNano S proxy started on ${ips[0]}\n`);
+  log(`\nNano S proxy started on ${ips[0]}\n`);
 });
