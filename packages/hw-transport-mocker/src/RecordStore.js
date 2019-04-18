@@ -86,13 +86,13 @@ export class RecordStore {
       .filter(o => o)
       .forEach(line => {
         if (value.length === 0) {
-          const m = line.match(/^=> ([0-9a-fA-F]+)$/);
+          const m = line.match(/^=>([0-9a-fA-F]+)$/);
           if (!m) {
             throw new RecordStoreInvalidSynthax("expected an apdu input");
           }
           value.push(m[1]);
         } else {
-          const m = line.match(/^<= ([0-9a-fA-F]+)$/);
+          const m = line.match(/^<=([0-9a-fA-F]+)$/);
           if (!m) {
             throw new RecordStoreInvalidSynthax("expected an apdu output");
           }
