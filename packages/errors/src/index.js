@@ -21,6 +21,7 @@ export const DeviceOnDashboardExpected = createCustomErrorClass(
 export const DeviceInOSUExpected = createCustomErrorClass(
   "DeviceInOSUExpected"
 );
+export const DeviceHalted = createCustomErrorClass("DeviceHalted");
 export const DeviceNameInvalid = createCustomErrorClass("DeviceNameInvalid");
 export const DeviceSocketFail = createCustomErrorClass("DeviceSocketFail");
 export const DeviceSocketNoBulkStatus = createCustomErrorClass(
