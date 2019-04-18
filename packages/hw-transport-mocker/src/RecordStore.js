@@ -82,7 +82,7 @@ export class RecordStore {
     let value = [];
     str
       .split("\n")
-      .map(line => line.trim())
+      .map(line => line.replace(/ /g, ""))
       .filter(o => o)
       .forEach(line => {
         if (value.length === 0) {
