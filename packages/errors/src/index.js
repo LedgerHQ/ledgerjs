@@ -32,6 +32,9 @@ export const DisconnectedDeviceDuringOperation = createCustomErrorClass(
   "DisconnectedDeviceDuringOperation"
 );
 export const EnpointConfigError = createCustomErrorClass("EnpointConfig");
+export const EthAppPleaseEnableContractData = createCustomErrorClass(
+  "EthAppPleaseEnableContractData"
+);
 export const FeeEstimationFailed = createCustomErrorClass(
   "FeeEstimationFailed"
 );

@@ -18,7 +18,17 @@
 
 // FIXME drop:
 import { splitPath, foreach } from "./utils";
+import { EthAppPleaseEnableContractData } from "@ledgerhq/errors";
 import type Transport from "@ledgerhq/hw-transport";
+
+const remapTransactionRelatedErrors = e => {
+  if (e && e.statusCode === 0x6a80) {
+    return new EthAppPleaseEnableContractData(
+      "Please enable Contract data on the Ethereum app Settings"
+    );
+  }
+  return e;
+};
 
 /**
  * Ethereum API
@@ -178,12 +188,17 @@ export default class Eth {
         .then(apduResponse => {
           response = apduResponse;
         })
-    ).then(() => {
-      const v = response.slice(0, 1).toString("hex");
-      const r = response.slice(1, 1 + 32).toString("hex");
-      const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
-      return { v, r, s };
-    });
+    ).then(
+      () => {
+        const v = response.slice(0, 1).toString("hex");
+        const r = response.slice(1, 1 + 32).toString("hex");
+        const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
+        return { v, r, s };
+      },
+      e => {
+        throw remapTransactionRelatedErrors(e);
+      }
+    );
   }
 
   /**

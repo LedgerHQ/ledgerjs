@@ -25,7 +25,8 @@
   "main": "lib/Eth.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^4.52.0"
+    "@ledgerhq/hw-transport": "^4.52.0",
+    "@ledgerhq/errors": "^4.52.0"
   },
   "devDependencies": {
     "flow-bin": "^0.94.0",
