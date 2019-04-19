@@ -1,6 +1,12 @@
 // @flow
 
-import { createCustomErrorClass } from "./helpers";
+import {
+  serializeError,
+  deserializeError,
+  createCustomErrorClass
+} from "./helpers";
+
+export { serializeError, deserializeError, createCustomErrorClass };
 
 export const AccountNameRequiredError = createCustomErrorClass(
   "AccountNameRequired"
