@@ -3,10 +3,16 @@
 import {
   serializeError,
   deserializeError,
-  createCustomErrorClass
+  createCustomErrorClass,
+  addCustomErrorDeserializer
 } from "./helpers";
 
-export { serializeError, deserializeError, createCustomErrorClass };
+export {
+  serializeError,
+  deserializeError,
+  createCustomErrorClass,
+  addCustomErrorDeserializer
+};
 
 export const AccountNameRequiredError = createCustomErrorClass(
   "AccountNameRequired"
@@ -154,6 +160,11 @@ export function TransportError(message: string, id: string) {
 //$FlowFixMe
 TransportError.prototype = new Error();
 
+addCustomErrorDeserializer(
+  "TransportError",
+  e => new TransportError(e.message, e.id)
+);
+
 export const StatusCodes = {
   PIN_REMAINING_ATTEMPTS: 0x63c0,
   INCORRECT_LENGTH: 0x6700,
@@ -224,3 +235,8 @@ export function TransportStatusError(statusCode: number) {
 }
 //$FlowFixMe
 TransportStatusError.prototype = new Error();
+
+addCustomErrorDeserializer(
+  "TransportStatusError",
+  e => new TransportStatusError(e.statusCode)
+);

@@ -1,4 +1,3 @@
-import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
 import {
   RecordStore,
   createTransportRecorder,
@@ -42,7 +41,10 @@ if (mainOptions.file) {
     log(`the APDUs will be recorded in ${mainOptions.file}`);
     saveToFile = mainOptions.file;
     recordStore = new RecordStore([]);
-    Transport = createTransportRecorder(TransportNodeHid, recordStore);
+    Transport = createTransportRecorder(
+      require("@ledgerhq/hw-transport-node-hid").default,
+      recordStore
+    );
   } else {
     recordStore = RecordStore.fromString(
       fs.readFileSync(mainOptions.file, "utf8")
@@ -58,7 +60,7 @@ if (mainOptions.file) {
     Transport = createTransportReplayer(recordStore);
   }
 } else {
-  Transport = TransportNodeHid;
+  Transport = require("@ledgerhq/hw-transport-node-hid").default;
 }
 
 const ifaces = os.networkInterfaces();
