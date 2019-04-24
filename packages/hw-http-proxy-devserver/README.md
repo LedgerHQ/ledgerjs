@@ -52,5 +52,4 @@ getBtcAddress().then(a => console.log(a));
 ## More information
 
 [Github](https://github.com/LedgerHQ/ledgerjs/),
-[API Doc](http://ledgerhq.github.io/ledgerjs/),
 [Ledger Devs Slack](https://ledger-dev.slack.com/)
