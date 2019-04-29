@@ -4,6 +4,14 @@
 /* eslint-disable no-prototype-builtins */
 
 const errorClasses = {};
+const deserializers = {};
+
+export const addCustomErrorDeserializer = (
+  name: string,
+  deserializer: Object => *
+) => {
+  deserializers[name] = deserializer;
+};
 
 export const createCustomErrorClass = (name: string): Class<any> => {
   const C = function CustomError(message?: string, fields?: Object) {
@@ -32,19 +40,36 @@ export const deserializeError = (object: mixed): Error => {
     } catch (e) {
       // nothing
     }
-    const constructor =
-      object.name === "Error"
-        ? Error
-        : typeof object.name === "string"
-        ? errorClasses[object.name] || createCustomErrorClass(object.name)
-        : Error;
 
-    const error = Object.create(constructor.prototype);
-    for (const prop in object) {
-      if (object.hasOwnProperty(prop)) {
-        error[prop] = object[prop];
+    let error;
+    if (typeof object.name === "string") {
+      const { name } = object;
+      const des = deserializers[name];
+      if (des) {
+        error = des(object);
+      } else {
+        let constructor = name === "Error" ? Error : errorClasses[name];
+
+        if (!constructor) {
+          console.warn("deserializing an unknown class '" + name + "'");
+          constructor = createCustomErrorClass(name);
+        }
+
+        error = Object.create(constructor.prototype);
+        try {
+          for (const prop in object) {
+            if (object.hasOwnProperty(prop)) {
+              error[prop] = object[prop];
+            }
+          }
+        } catch (e) {
+          // sometimes setting a property can fail (e.g. .name)
+        }
       }
+    } else {
+      error = new Error(object.message);
     }
+
     if (!error.stack && Error.captureStackTrace) {
       Error.captureStackTrace(error, deserializeError);
     }

@@ -10,10 +10,10 @@ Hodl all possible errors of Ledger (live, ledgerjs) so we can deal with them in 
 
 #### Table of Contents
 
-- [TransportError](#transporterror)
-  - [Parameters](#parameters)
-- [TransportStatusError](#transportstatuserror)
-  - [Parameters](#parameters-1)
+-   [TransportError](#transporterror)
+    -   [Parameters](#parameters)
+-   [TransportStatusError](#transportstatuserror)
+    -   [Parameters](#parameters-1)
 
 ### TransportError
 
@@ -22,8 +22,8 @@ e.g. Error thrown when data received by exchanges are incorrect or if exchanged 
 
 #### Parameters
 
-- `message` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)**
-- `id` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)**
+-   `message` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `id` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
 ### TransportStatusError
 
@@ -32,4 +32,4 @@ the error.statusCode is one of the `StatusCodes` exported by this library.
 
 #### Parameters
 
-- `statusCode` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)**
+-   `statusCode` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
