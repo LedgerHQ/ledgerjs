@@ -30,7 +30,6 @@
     "@babel/preset-env": "^7.1.6",
     "@babel/preset-flow": "^7.0.0",
     "@babel/preset-react": "^7.0.0",
-    "@babel/preset-stage-0": "^7.0.0",
     "@babel/runtime": "^7.1.5",
     "babel-eslint": "^8.0.2",
     "browserify": "^16.2.3",
