@@ -7,11 +7,19 @@ import type {
 } from "@ledgerhq/hw-transport";
 import hidFraming from "@ledgerhq/devices/lib/hid-framing";
 import { identifyUSBProductId } from "@ledgerhq/devices";
+import type { DeviceModel } from "@ledgerhq/devices";
 import {
   TransportOpenUserCancelled,
-  TransportInterfaceNotAvailable
+  TransportInterfaceNotAvailable,
+  DisconnectedDeviceDuringOperation,
+  DisconnectedDevice
 } from "@ledgerhq/errors";
-import { getLedgerDevices, requestLedgerDevice, isSupported } from "./webusb";
+import {
+  getLedgerDevices,
+  getFirstLedgerDevice,
+  requestLedgerDevice,
+  isSupported
+} from "./webusb";
 
 const configurationValue = 1;
 const interfaceNumber = 2;
@@ -26,12 +34,14 @@ const endpointNumber = 3;
  */
 export default class TransportWebUSB extends Transport<USBDevice> {
   device: USBDevice;
+  deviceModel: ?DeviceModel;
   channel = Math.floor(Math.random() * 0xffff);
   packetSize = 64;
 
   constructor(device: USBDevice) {
     super();
     this.device = device;
+    this.deviceModel = identifyUSBProductId(device.productId);
   }
 
   /**
@@ -40,12 +50,13 @@ export default class TransportWebUSB extends Transport<USBDevice> {
   static isSupported = isSupported;
 
   /**
-   * List the WebUSB devices that was previously authorized.
+   * List the WebUSB devices that was previously authorized by the user.
    */
   static list = getLedgerDevices;
 
   /**
-   * Actively listen to WebUSB devices and emit ONE device that was selected by the native permission UI.
+   * Actively listen to WebUSB devices and emit ONE device
+   * that was either accepted before, if not it will trigger the native permission UI.
    *
    * Important: it must be called in the context of a UI click!
    */
@@ -53,7 +64,7 @@ export default class TransportWebUSB extends Transport<USBDevice> {
     observer: Observer<DescriptorEvent<USBDevice>>
   ): Subscription => {
     let unsubscribed = false;
-    requestLedgerDevice().then(
+    getFirstLedgerDevice().then(
       device => {
         if (!unsubscribed) {
           const deviceModel = identifyUSBProductId(device.productId);
@@ -72,6 +83,23 @@ export default class TransportWebUSB extends Transport<USBDevice> {
   };
 
   /**
+   * Similar to create() except it will always display the device permission (even if some devices are already accepted).
+   */
+  static async request() {
+    const device = await requestLedgerDevice();
+    return TransportWebUSB.open(device);
+  }
+
+  /**
+   * Similar to create() except it will never display the device permission (it returns a Promise<?Transport>, null if it fails to find a device).
+   */
+  static async openConnected() {
+    const devices = await getLedgerDevices();
+    if (devices.length === 0) return null;
+    return TransportWebUSB.open(devices[0]);
+  }
+
+  /**
    * Create a Ledger transport with a USBDevice
    */
   static async open(device: USBDevice) {
@@ -86,8 +114,25 @@ export default class TransportWebUSB extends Transport<USBDevice> {
       await device.close();
       throw new TransportInterfaceNotAvailable(e.message);
     }
-    return new TransportWebUSB(device);
+    const transport = new TransportWebUSB(device);
+    const onDisconnect = e => {
+      if (device === e.device) {
+        // $FlowFixMe
+        navigator.usb.removeEventListener("disconnect", onDisconnect);
+        transport._emitDisconnect(new DisconnectedDevice());
+      }
+    };
+    // $FlowFixMe
+    navigator.usb.addEventListener("disconnect", onDisconnect);
+    return transport;
   }
+
+  _disconnectEmitted = false;
+  _emitDisconnect = (e: Error) => {
+    if (this._disconnectEmitted) return;
+    this._disconnectEmitted = true;
+    this.emit("disconnect", e);
+  };
 
   /**
    * Release the transport device
@@ -131,6 +176,12 @@ export default class TransportWebUSB extends Transport<USBDevice> {
         debug("<=" + result.toString("hex"));
       }
       return result;
+    }).catch(e => {
+      if (e && e.message && e.message.includes("disconnected")) {
+        this._emitDisconnect(e);
+        throw new DisconnectedDeviceDuringOperation(e.message);
+      }
+      throw e;
     });
 
   setScrambleKey() {}
