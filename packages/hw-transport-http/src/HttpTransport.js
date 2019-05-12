@@ -42,6 +42,9 @@ export default class HttpTransport extends Transport<string> {
   }
 
   async exchange(apdu: Buffer): Promise<Buffer> {
+    const { debug } = this;
+    const apduHex = apdu.toString("hex");
+    if (debug) debug("=> " + apduHex);
     const response = await axios({
       method: "POST",
       url: this.url,
@@ -49,7 +52,7 @@ export default class HttpTransport extends Transport<string> {
         Accept: "application/json",
         "Content-Type": "application/json"
       },
-      data: JSON.stringify({ apduHex: apdu.toString("hex") })
+      data: JSON.stringify({ apduHex })
     });
     if (response.status !== 200) {
       throw new TransportError(
@@ -59,6 +62,7 @@ export default class HttpTransport extends Transport<string> {
     }
     const body = await response.data;
     if (body.error) throw body.error;
+    if (debug) debug("<= " + body.data);
     return Buffer.from(body.data, "hex");
   }
 

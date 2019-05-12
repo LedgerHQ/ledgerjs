@@ -108,12 +108,17 @@ export default class WebSocketTransport extends Transport<string> {
     };
   }
 
-  exchange(apdu: Buffer): Promise<Buffer> {
-    return new Promise((resolve, reject) => {
+  async exchange(apdu: Buffer): Promise<Buffer> {
+    const { debug } = this;
+    const hex = apdu.toString("hex");
+    if (debug) debug("=> " + hex);
+    const res = await new Promise((resolve, reject) => {
       this.hook.rejectExchange = (e: *) => reject(e);
       this.hook.resolveExchange = (b: Buffer) => resolve(b);
-      this.hook.send(apdu.toString("hex"));
+      this.hook.send(hex);
     });
+    if (debug) debug("<= " + res.toString("hex"));
+    return res;
   }
 
   setScrambleKey() {}
