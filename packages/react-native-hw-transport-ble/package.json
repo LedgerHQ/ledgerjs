@@ -30,11 +30,11 @@
     "@ledgerhq/errors": "^4.55.0",
     "@ledgerhq/hw-transport": "^4.55.0",
     "invariant": "^2.2.4",
-    "rxjs": "^6.4.0",
+    "rxjs": "^6.5.2",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
-    "flow-bin": "^0.94.0",
+    "flow-bin": "^0.98.1",
     "flow-typed": "^2.5.1"
   },
   "scripts": {

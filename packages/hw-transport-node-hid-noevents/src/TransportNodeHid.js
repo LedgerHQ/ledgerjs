@@ -89,6 +89,7 @@ export default class TransportNodeHidNoEvents extends Transport<?string> {
   constructor(device: HID.HID) {
     super();
     this.device = device;
+    // $FlowFixMe
     const info = device.getDeviceInfo();
     this.deviceModel =
       info && info.serialNumber

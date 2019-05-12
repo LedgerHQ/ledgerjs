@@ -166,8 +166,8 @@ wrapper on top of exchange to simplify work of the implementation.
 -   `ins` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 -   `p1` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 -   `p2` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
--   `data` **[Buffer](https://nodejs.org/api/buffer.html)** 
--   `statusList` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** is a list of accepted status code (shorts). [0x9000] by default
+-   `data` **[Buffer](https://nodejs.org/api/buffer.html)**  (optional, default `Buffer.alloc(0)`)
+-   `statusList` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** is a list of accepted status code (shorts). [0x9000] by default (optional, default `[StatusCodes.OK]`)
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Buffer](https://nodejs.org/api/buffer.html)>** a Promise of response buffer
 
@@ -250,7 +250,7 @@ This is a light helper, alternative to using listen() and open() (that you may n
 ##### Parameters
 
 -   `openTimeout` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)**  (optional, default `3000`)
--   `listenTimeout` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+-   `listenTimeout` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
 
 ##### Examples
 

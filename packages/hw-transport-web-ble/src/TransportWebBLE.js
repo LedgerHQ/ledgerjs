@@ -126,6 +126,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
 
   transportsCache[transport.id] = transport;
   const onDisconnect = e => {
+    console.log("onDisconnect!", e);
     delete transportsCache[transport.id];
     transport.notYetDisconnected = false;
     notif.unsubscribe();

@@ -28,10 +28,10 @@
     "@ledgerhq/devices": "^4.55.0",
     "@ledgerhq/errors": "^4.55.0",
     "@ledgerhq/hw-transport": "^4.55.0",
-    "rxjs": "^6.4.0"
+    "rxjs": "^6.5.2"
   },
   "devDependencies": {
-    "flow-bin": "^0.94.0",
+    "flow-bin": "^0.98.1",
     "flow-typed": "^2.3.0"
   },
   "scripts": {

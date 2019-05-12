@@ -48,9 +48,9 @@ get Ripple address for a given BIP 32 path.
 ##### Parameters
 
 -   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
--   `display` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** optionally enable or not the display
--   `chainCode` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** optionally enable or not the chainCode request
--   `ed25519` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** optionally enable or not the ed25519 curve (secp256k1 is default)
+-   `display` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** optionally enable or not the display
+-   `chainCode` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** optionally enable or not the chainCode request
+-   `ed25519` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** optionally enable or not the ed25519 curve (secp256k1 is default)
 
 ##### Examples
 
@@ -69,7 +69,7 @@ sign a Ripple transaction with a given BIP 32 path
 
 -   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
 -   `rawTxHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a raw transaction hex string
--   `ed25519` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** optionally enable or not the ed25519 curve (secp256k1 is default)
+-   `ed25519` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** optionally enable or not the ed25519 curve (secp256k1 is default)
 
 ##### Examples
 

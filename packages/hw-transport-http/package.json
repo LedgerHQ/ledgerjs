@@ -28,10 +28,10 @@
     "@ledgerhq/errors": "^4.55.0",
     "@ledgerhq/hw-transport": "^4.55.0",
     "axios": "^0.18.0",
-    "ws": "^6.1.4"
+    "ws": "^7.0.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.94.0",
+    "flow-bin": "^0.98.1",
     "flow-typed": "^2.5.1"
   },
   "scripts": {

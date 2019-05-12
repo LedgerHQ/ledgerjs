@@ -38,7 +38,7 @@ Create a HookedWalletSubprovider for Ledger devices.
 #### Parameters
 
 -   `getTransport` **function (): Transport&lt;any>** gets lazily called each time the device is needed. It is a function that returns a Transport instance. You can typically give `()=>TransportU2F.create()`
--   `options` **[SubproviderOptions](#subprovideroptions)** 
+-   `options` **[SubproviderOptions](#subprovideroptions)?** 
 
 #### Examples
 

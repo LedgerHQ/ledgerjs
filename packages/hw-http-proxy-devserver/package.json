@@ -32,14 +32,14 @@
     "@ledgerhq/hw-transport-mocker": "^4.55.0",
     "@ledgerhq/hw-transport-node-hid": "^4.55.0",
     "babel-polyfill": "^6.26.0",
-    "body-parser": "^1.18.3",
+    "body-parser": "^1.19.0",
     "command-line-args": "^5.1.1",
     "cors": "^2.8.5",
     "express": "^4.16.4",
-    "ws": "^6.1.4"
+    "ws": "^7.0.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.94.0",
+    "flow-bin": "^0.98.1",
     "flow-typed": "^2.5.1"
   },
   "scripts": {
