@@ -27,6 +27,8 @@ Important: The transport functions `create()` and `listen()` must be in the cont
     -   [list](#list)
     -   [listen](#listen)
         -   [Parameters](#parameters-2)
+    -   [request](#request)
+    -   [openConnected](#openconnected)
     -   [open](#open)
         -   [Parameters](#parameters-3)
 
@@ -70,11 +72,12 @@ Check if WebUSB transport is supported.
 
 #### list
 
-List the WebUSB devices that was previously authorized.
+List the WebUSB devices that was previously authorized by the user.
 
 #### listen
 
-Actively listen to WebUSB devices and emit ONE device that was selected by the native permission UI.
+Actively listen to WebUSB devices and emit ONE device
+that was either accepted before, if not it will trigger the native permission UI.
 
 Important: it must be called in the context of a UI click!
 
@@ -83,6 +86,14 @@ Important: it must be called in the context of a UI click!
 -   `observer` **Observer&lt;DescriptorEvent&lt;USBDevice>>** 
 
 Returns **Subscription** 
+
+#### request
+
+Similar to create() except it will always display the device permission (even if some devices are already accepted).
+
+#### openConnected
+
+Similar to create() except it will never display the device permission (it returns a Promise&lt;?Transport>, null if it fails to find a device).
 
 #### open
 

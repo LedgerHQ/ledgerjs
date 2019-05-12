@@ -3,11 +3,22 @@ import { ledgerUSBVendorId } from "@ledgerhq/devices";
 
 const ledgerDevices = [{ vendorId: ledgerUSBVendorId }];
 
-export function requestLedgerDevice(): Promise<USBDevice> {
-  return Promise.resolve().then(() =>
-    // $FlowFixMe
-    navigator.usb.requestDevice({ filters: ledgerDevices })
-  );
+export async function requestLedgerDevice(): Promise<USBDevice> {
+  // $FlowFixMe
+  const device = await navigator.usb.requestDevice({ filters: ledgerDevices });
+  return device;
+}
+
+export async function getLedgerDevices(): Promise<USBDevice[]> {
+  // $FlowFixMe
+  const devices = await navigator.usb.getDevices();
+  return devices.filter(d => d.vendorId === ledgerUSBVendorId);
+}
+
+export async function getFirstLedgerDevice(): Promise<USBDevice> {
+  const existingDevices = await getLedgerDevices();
+  if (existingDevices.length > 0) return existingDevices[0];
+  return requestLedgerDevice();
 }
 
 export const isSupported = (): Promise<boolean> =>
@@ -16,11 +27,3 @@ export const isSupported = (): Promise<boolean> =>
       // $FlowFixMe
       typeof navigator.usb === "object"
   );
-
-export const getLedgerDevices = (): Promise<USBDevice[]> =>
-  Promise.resolve()
-    .then(() =>
-      // $FlowFixMe
-      navigator.usb.getDevices()
-    )
-    .then(devices => devices.filter(d => d.vendorId === ledgerUSBVendorId));
