@@ -149,14 +149,14 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
     // to make sure we do a disconnect() after the first pairing time
     // because of a firmware bug
 
-    if (afterMTUTime - beforeMTUTime < 500) {
+    if (afterMTUTime - beforeMTUTime < 1000) {
       needsReconnect = false; // (optim) there is likely no new pairing done because mtu answer was fast.
     }
 
     if (needsReconnect) {
       await device.gatt.disconnect();
       // necessary time for the bonding workaround
-      await new Promise(s => setTimeout(s, 1000));
+      await new Promise(s => setTimeout(s, 4000));
     }
   }
 
