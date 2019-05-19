@@ -119,8 +119,6 @@ const transport = await TransportBLE.open(deviceId); // deviceId can come from p
         -   [Parameters](#parameters-5)
     -   [disconnect](#disconnect)
         -   [Parameters](#parameters-6)
--   [logsObservable](#logsobservable)
-    -   [Examples](#examples-1)
 
 ### BluetoothTransport
 
@@ -164,7 +162,7 @@ Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 #### observeState
 
 TODO could add this concept in all transports
-observe event with { available: bool, type: string } // available is generic, type is specific
+observe event with { available: bool, string } // available is generic, type is specific
 an event is emit once and then listened
 
 ##### Parameters
@@ -194,15 +192,3 @@ Globally disconnect a BLE device by its ID
 ##### Parameters
 
 -   `id` **any** 
-
-### logsObservable
-
-Type: Observable&lt;Log>
-
-#### Examples
-
-```javascript
-import { logsObservable } from "@ledgerhq/react-native-hw-transport-ble/lib/debug";
-
-logsObservable.subscribe(e => console.log(e));
-```

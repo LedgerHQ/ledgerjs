@@ -388,8 +388,6 @@ export default class BluetoothTransport extends Transport<Device | string> {
   exchange = (apdu: Buffer): Promise<Buffer> =>
     this.exchangeAtomicImpl(async () => {
       try {
-        const { debug } = this;
-
         const msgIn = apdu.toString("hex");
         log("apdu", `=> ${msgIn}`);
 

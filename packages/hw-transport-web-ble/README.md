@@ -15,11 +15,9 @@ Allows to communicate with Ledger Hardware Wallets.
 
 #### Table of Contents
 
--   [logsObservable](#logsobservable)
-    -   [Examples](#examples)
 -   [BluetoothTransport](#bluetoothtransport)
     -   [Parameters](#parameters)
-    -   [Examples](#examples-1)
+    -   [Examples](#examples)
     -   [exchange](#exchange)
         -   [Parameters](#parameters-1)
     -   [observeAvailability](#observeavailability)
@@ -30,18 +28,6 @@ Allows to communicate with Ledger Hardware Wallets.
         -   [Parameters](#parameters-4)
     -   [disconnect](#disconnect)
         -   [Parameters](#parameters-5)
-
-### logsObservable
-
-Type: Observable&lt;Log>
-
-#### Examples
-
-```javascript
-import { logsObservable } from "@ledgerhq/hw-transport-web-ble/lib/debug";
-
-logsObservable.subscribe(e => console.log(e));
-```
 
 ### BluetoothTransport
 
