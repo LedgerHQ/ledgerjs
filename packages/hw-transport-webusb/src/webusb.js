@@ -26,5 +26,5 @@ export const isSupported = (): Promise<boolean> =>
     // $FlowFixMe
     !!navigator &&
       !!navigator.usb &&
-        typeof navigator.usb.getDevices === 'function'
+      typeof navigator.usb.getDevices === "function"
   );
