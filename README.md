@@ -196,3 +196,9 @@ deploy a canary release (beta, etc)
 ```
 
 > NB: if there is a new package, AFAIK you need to manually `npm publish` it once on NPM.
+
+### Keeping flow-typed in sync
+
+```
+yarn flow-typed
+```

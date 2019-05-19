@@ -3,7 +3,6 @@ node_modules
 *.pem
 browser/
 packages/**/lib/
-flow-typed/
 lerna-debug.log
 lerna-error.log
 yarn-error.log
