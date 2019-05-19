@@ -1,5 +1,6 @@
 //@flow
 import Transport from "@ledgerhq/hw-transport";
+import { log } from "@ledgerhq/logs";
 import type { RecordStore } from "./RecordStore";
 
 export default (recordStore: RecordStore): Class<Transport<*>> => {
@@ -28,15 +29,13 @@ export default (recordStore: RecordStore): Class<Transport<*>> => {
     }
 
     exchange(apdu: Buffer): Promise<Buffer> {
-      if (this.debug) {
-        console.log("=> " + apdu.toString("hex"));
-      }
+      log("apdu", apdu.toString("hex"));
       try {
         const buffer = recordStore.replayExchange(apdu);
-        if (this.debug) console.error("<= " + buffer.toString("hex"));
+        log("apdu", buffer.toString("hex"));
         return Promise.resolve(buffer);
       } catch (e) {
-        if (this.debug) console.error("<= " + e);
+        log("apdu-error", String(e));
         return Promise.reject(e);
       }
     }

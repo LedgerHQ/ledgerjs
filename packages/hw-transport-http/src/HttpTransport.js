@@ -2,6 +2,7 @@
 import Transport from "@ledgerhq/hw-transport";
 import { TransportError } from "@ledgerhq/errors";
 import axios from "axios";
+import { log } from "@ledgerhq/logs";
 
 /**
  * HTTP transport implementation
@@ -42,9 +43,8 @@ export default class HttpTransport extends Transport<string> {
   }
 
   async exchange(apdu: Buffer): Promise<Buffer> {
-    const { debug } = this;
     const apduHex = apdu.toString("hex");
-    if (debug) debug("=> " + apduHex);
+    log("apdu", "=> " + apduHex);
     const response = await axios({
       method: "POST",
       url: this.url,
@@ -62,7 +62,7 @@ export default class HttpTransport extends Transport<string> {
     }
     const body = await response.data;
     if (body.error) throw body.error;
-    if (debug) debug("<= " + body.data);
+    log("apdu", "<= " + body.data);
     return Buffer.from(body.data, "hex");
   }
 
