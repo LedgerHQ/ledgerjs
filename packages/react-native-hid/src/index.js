@@ -5,6 +5,7 @@ import {
   DisconnectedDeviceDuringOperation,
   DisconnectedDevice
 } from "@ledgerhq/errors";
+import { log } from "@ledgerhq/logs";
 import Transport from "@ledgerhq/hw-transport";
 import type { DescriptorEvent } from "@ledgerhq/hw-transport";
 import { Subject, from, concat } from "rxjs";
@@ -123,11 +124,12 @@ export default class HIDTransport extends Transport<DeviceObj> {
   async exchange(apdu: Buffer) {
     return this.exchangeAtomicImpl(async () => {
       try {
-        const resultHex = await NativeModules.HID.exchange(
-          this.id,
-          apdu.toString("hex")
-        );
-        return Buffer.from(resultHex, "hex");
+        const apduHex = apdu.toString("hex");
+        log("apdu", "=> " + apduHex);
+        const resultHex = await NativeModules.HID.exchange(this.id, apduHex);
+        const res = Buffer.from(resultHex, "hex");
+        log("apdu", "<= " + resultHex);
+        return res;
       } catch (error) {
         if (disconnectedErrors.includes(error.message)) {
           this.emit("disconnect", error);

@@ -1,7 +1,7 @@
 // @flow
 
 import { BluetoothRequired } from "@ledgerhq/errors";
-import { logSubject } from "./debug";
+import { log } from "@ledgerhq/logs";
 import timer from "./timer";
 import type { BleManager } from "./types";
 
@@ -15,7 +15,7 @@ export const awaitsBleOn = (
 
     const stateSub = bleManager.onStateChange(state => {
       lastState = state;
-      logSubject.next({ type: "verbose", message: `ble state -> ${state}` });
+      log("ble-verbose", `ble state -> ${state}`);
       if (state === "PoweredOn") {
         if (done) return;
         removeTimeout();

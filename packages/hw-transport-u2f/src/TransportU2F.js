@@ -2,6 +2,7 @@
 
 import { sign, isSupported } from "u2f-api";
 import Transport from "@ledgerhq/hw-transport";
+import { log } from "@ledgerhq/logs";
 import { TransportError } from "@ledgerhq/errors";
 
 function wrapU2FTransportError(originalError, message, id) {
@@ -34,7 +35,6 @@ const normal64 = (base64: string) =>
 function attemptExchange(
   apdu: Buffer,
   timeoutMillis: number,
-  debug: *,
   scrambleKey: Buffer,
   unwrap: boolean
 ): Promise<Buffer> {
@@ -49,9 +49,7 @@ function attemptExchange(
     challenge: webSafe64(challenge.toString("base64")),
     appId: location.origin
   };
-  if (debug) {
-    debug("=> " + apdu.toString("hex"));
-  }
+  log("apdu", "=> " + apdu.toString("hex"));
   return sign(signRequest, timeoutMillis / 1000).then(response => {
     const { signatureData } = response;
     if (typeof signatureData === "string") {
@@ -62,9 +60,7 @@ function attemptExchange(
       } else {
         result = data.slice(5);
       }
-      if (debug) {
-        debug("<= " + result.toString("hex"));
-      }
+      log("apdu", "<= " + result.toString("hex"));
       return result;
     } else {
       throw response;
@@ -134,36 +130,6 @@ export default class TransportU2F extends Transport<null> {
    * static function to create a new Transport from a connected Ledger device discoverable via U2F (browser support)
    */
   static async open(_: *, _openTimeout?: number = 5000): Promise<TransportU2F> {
-    /*try {
-      // This is not a valid exchange at all, but this allows to have a way to know if there is a device.
-      // in case it reaches the timeout, we will throw timeout error, in other case, we will return the U2FTransport.
-      await attemptExchange(
-        Buffer.alloc(0),
-        openTimeout,
-        false,
-        Buffer.alloc(1)
-      );
-    } catch (e) {
-      const isU2FError = typeof e.metaData === "object";
-      if (isU2FError) {
-        if (isTimeoutU2FError(e)) {
-          emitDisconnect();
-          throw wrapU2FTransportError(
-            e,
-            "Ledger device unreachable.\n" +
-              "Make sure the device is plugged, unlocked and with the correct application opened." +
-              (location && location.protocol !== "https:"
-                ? "\nYou are not running on HTTPS. U2F is likely to not work in unsecure protocol."
-                : ""),
-            "Timeout"
-          );
-        } else {
-          // we don't throw if it's another u2f error
-        }
-      } else {
-        throw e;
-      }
-    }*/
     return new TransportU2F();
   }
 
@@ -182,7 +148,6 @@ export default class TransportU2F extends Transport<null> {
       return await attemptExchange(
         apdu,
         this.exchangeTimeout,
-        this.debug,
         this.scrambleKey,
         this.unwrap
       );

@@ -2,6 +2,7 @@
 
 import HID from "node-hid";
 import Transport from "@ledgerhq/hw-transport";
+import { log } from "@ledgerhq/logs";
 import type {
   Observer,
   DescriptorEvent,
@@ -16,7 +17,6 @@ import listenDevices from "./listenDevices";
 
 let listenDevicesDebounce = 500;
 let listenDevicesPollingSkip = () => false;
-let listenDevicesDebug = () => {};
 
 const isDisconnectedError = e =>
   e && e.message && e.message.indexOf("HID") >= 0;
@@ -58,13 +58,10 @@ export default class TransportNodeHid extends Transport<string> {
   /**
    *
    */
-  static setListenDevicesDebug = (debug: boolean | ((log: string) => void)) => {
-    listenDevicesDebug =
-      typeof debug === "function"
-        ? debug
-        : debug
-        ? (...log) => console.log("[listenDevices]", ...log)
-        : () => {};
+  static setListenDevicesDebug = () => {
+    console.warn(
+      "setListenDevicesDebug is deprecated. Use @ledgerhq/logs instead. No logs will get emitted there anymore."
+    );
   };
 
   /**
@@ -85,8 +82,7 @@ export default class TransportNodeHid extends Transport<string> {
     });
     const { events, stop } = listenDevices(
       listenDevicesDebounce,
-      listenDevicesPollingSkip,
-      listenDevicesDebug
+      listenDevicesPollingSkip
     );
 
     const onAdd = device => {
@@ -200,16 +196,15 @@ export default class TransportNodeHid extends Transport<string> {
    */
   exchange = (apdu: Buffer): Promise<Buffer> =>
     this.exchangeAtomicImpl(async () => {
-      const { debug, channel, packetSize } = this;
-      if (debug) {
-        debug("=>" + apdu.toString("hex"));
-      }
+      const { channel, packetSize } = this;
+      log("apdu", "=> " + apdu.toString("hex"));
 
       const framing = hidFraming(channel, packetSize);
 
       // Write...
       const blocks = framing.makeBlocks(apdu);
       for (let i = 0; i < blocks.length; i++) {
+        log("hid-frame", "=> " + blocks[i].toString("hex"));
         await this.writeHID(blocks[i]);
       }
 
@@ -218,12 +213,11 @@ export default class TransportNodeHid extends Transport<string> {
       let acc;
       while (!(result = framing.getReducedResult(acc))) {
         const buffer = await this.readHID();
+        log("hid-frame", "<= " + buffer.toString("hex"));
         acc = framing.reduceResponse(acc, buffer);
       }
 
-      if (debug) {
-        debug("<=" + result.toString("hex"));
-      }
+      log("apdu", "<= " + result.toString("hex"));
       return result;
     });
 

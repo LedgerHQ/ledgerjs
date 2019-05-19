@@ -27,6 +27,7 @@
   },
   "dependencies": {
     "@ledgerhq/devices": "^4.57.0",
+    "@ledgerhq/logs": "^4.56.0",
     "@ledgerhq/errors": "^4.56.0",
     "@ledgerhq/hw-transport": "^4.57.0",
     "invariant": "^2.2.4",
@@ -34,8 +35,7 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
-    "flow-bin": "^0.98.1",
-    "flow-typed": "^2.5.2"
+    "flow-bin": "^0.98.1"
   },
   "scripts": {
     "flow": "flow",

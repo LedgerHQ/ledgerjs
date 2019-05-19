@@ -50,7 +50,6 @@ export type Observer<Ev> = $ReadOnly<{
  * it can be for instance an ID, an file path, a URL,...
  */
 export default class Transport<Descriptor> {
-  debug: ?(log: string) => void = global.__ledgerDebug || null;
   exchangeTimeout: number = 30000;
 
   /**
@@ -150,13 +149,10 @@ TransportFoo.open(descriptor).then(transport => ...)
   /**
    * Enable or not logs of the binary exchange
    */
-  setDebugMode(debug: boolean | ((log: string) => void)) {
-    this.debug =
-      typeof debug === "function"
-        ? debug
-        : debug
-        ? log => console.log(log)
-        : null;
+  setDebugMode() {
+    console.warn(
+      "setDebugMode is deprecated. use @ledgerhq/logs instead. No logs are emitted in this anymore."
+    );
   }
 
   /**

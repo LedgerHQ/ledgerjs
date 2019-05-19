@@ -1,9 +1,8 @@
 // @flow
 
-import { TransportError } from "@ledgerhq/errors";
+import { TransportError, DisconnectedDevice } from "@ledgerhq/errors";
 import { Observable } from "rxjs";
-import { DisconnectedDevice } from "@ledgerhq/errors";
-import { logSubject } from "./debug";
+import { log } from "@ledgerhq/logs";
 
 const TagId = 0x05;
 
@@ -22,10 +21,7 @@ export const receiveAPDU = (
         sub.unsubscribe();
       },
       error: e => {
-        logSubject.next({
-          type: "ble-error",
-          message: "in receiveAPDU " + String(e)
-        });
+        log("ble-error", "in receiveAPDU " + String(e));
         o.error(e);
         sub.unsubscribe();
       },

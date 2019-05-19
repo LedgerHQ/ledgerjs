@@ -11,12 +11,12 @@ import {
   getInfosForServiceUuid
 } from "@ledgerhq/devices";
 import type { DeviceModel } from "@ledgerhq/devices";
+import { sendAPDU } from "@ledgerhq/devices/lib/ble/sendAPDU";
+import { receiveAPDU } from "@ledgerhq/devices/lib/ble/receiveAPDU";
+import { log } from "@ledgerhq/logs";
 import { Observable, defer, merge, from } from "rxjs";
 import { share, ignoreElements, first, map, tap } from "rxjs/operators";
-import { logSubject } from "./debug";
 import type { Device, Characteristic } from "./types";
-import { sendAPDU } from "./sendAPDU";
-import { receiveAPDU } from "./receiveAPDU";
 import { monitorCharacteristic } from "./monitorCharacteristic";
 
 const requiresBluetooth = () => {
@@ -71,10 +71,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
   let device;
   if (typeof deviceOrId === "string") {
     if (transportsCache[deviceOrId]) {
-      logSubject.next({
-        type: "verbose",
-        message: "Transport in cache, using that."
-      });
+      log("ble-verbose", "Transport in cache, using that.");
       return transportsCache[deviceOrId];
     }
 
@@ -87,10 +84,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
   }
 
   if (!device.gatt.connected) {
-    logSubject.next({
-      type: "verbose",
-      message: "not connected. connecting..."
-    });
+    log("ble-verbose", "not connected. connecting...");
     await device.gatt.connect();
   }
 
@@ -103,10 +97,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
 
   const notifyObservable = monitorCharacteristic(notifyC).pipe(
     tap(value => {
-      logSubject.next({
-        type: "ble-frame-read",
-        message: value.toString("hex")
-      });
+      log("ble-frame", "<= " + value.toString("hex"));
     }),
     share()
   );
@@ -131,10 +122,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
     transport.notYetDisconnected = false;
     notif.unsubscribe();
     device.removeEventListener("gattserverdisconnected", onDisconnect);
-    logSubject.next({
-      type: "verbose",
-      message: `BleTransport(${transport.id}) disconnected`
-    });
+    log("ble-verbose", `BleTransport(${transport.id}) disconnected`);
     transport.emit("disconnect", e);
   };
   device.addEventListener("gattserverdisconnected", onDisconnect);
@@ -193,11 +181,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
    * On this web implementation, it only emits ONE device, the one that was selected in the UI (if any).
    */
   static listen(observer: *) {
-    logSubject.next({
-      type: "verbose",
-      message: "listen..."
-    });
-
+    log("ble-verbose", "listen...");
     let unsubscribed;
 
     const bluetooth = requiresBluetooth();
@@ -233,10 +217,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
    * globally disconnect a bluetooth device by its id.
    */
   static disconnect = async (id: *) => {
-    logSubject.next({
-      type: "verbose",
-      message: `user disconnect(${id})`
-    });
+    log("ble-verbose", `user disconnect(${id})`);
     const transport = transportsCache[id];
     if (transport) {
       transport.device.gatt.disconnect();
@@ -270,10 +251,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
     this.notifyObservable = notifyObservable;
     this.deviceModel = deviceModel;
 
-    logSubject.next({
-      type: "verbose",
-      message: `BleTransport(${String(this.id)}) new instance`
-    });
+    log("ble-verbose", `BleTransport(${String(this.id)}) new instance`);
   }
 
   async inferMTU() {
@@ -292,10 +270,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
             )
           ).toPromise()) + 3;
       } catch (e) {
-        logSubject.next({
-          type: "ble-error",
-          message: "inferMTU got " + String(e)
-        });
+        log("ble-error", "inferMTU got " + String(e));
         this.device.gatt.disconnect();
         throw e;
       }
@@ -303,12 +278,10 @@ export default class BluetoothTransport extends Transport<Device | string> {
 
     if (mtu > 23) {
       const mtuSize = mtu - 3;
-      logSubject.next({
-        type: "verbose",
-        message: `BleTransport(${String(this.id)}) mtu set to ${String(
-          mtuSize
-        )}`
-      });
+      log(
+        "ble-verbose",
+        `BleTransport(${String(this.id)}) mtu set to ${String(mtuSize)}`
+      );
       this.mtuSize = mtuSize;
     }
 
@@ -323,11 +296,8 @@ export default class BluetoothTransport extends Transport<Device | string> {
   exchange = (apdu: Buffer): Promise<Buffer> =>
     this.exchangeAtomicImpl(async () => {
       try {
-        const { debug } = this;
-
         const msgIn = apdu.toString("hex");
-        if (debug) debug(`=> ${msgIn}`); // eslint-disable-line no-console
-        logSubject.next({ type: "ble-apdu-write", message: msgIn });
+        log("apdu", `=> ${msgIn}`);
 
         const data = await merge(
           this.notifyObservable.pipe(receiveAPDU),
@@ -335,15 +305,11 @@ export default class BluetoothTransport extends Transport<Device | string> {
         ).toPromise();
 
         const msgOut = data.toString("hex");
-        logSubject.next({ type: "ble-apdu-read", message: msgOut });
-        if (debug) debug(`<= ${msgOut}`); // eslint-disable-line no-console
+        log("apdu", `<= ${msgOut}`);
 
         return data;
       } catch (e) {
-        logSubject.next({
-          type: "ble-error",
-          message: "exchange got " + String(e)
-        });
+        log("ble-error", "exchange got " + String(e));
         if (this.notYetDisconnected) {
           // in such case we will always disconnect because something is bad.
           this.device.gatt.disconnect();
@@ -355,10 +321,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
   setScrambleKey() {}
 
   write = async (buffer: Buffer) => {
-    logSubject.next({
-      type: "ble-frame-write",
-      message: buffer.toString("hex")
-    });
+    log("ble-frame", "=> " + buffer.toString("hex"));
     await this.writeCharacteristic.writeValue(buffer);
   };
 

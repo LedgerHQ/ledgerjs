@@ -1,3 +1,4 @@
+import { listen } from "@ledgerhq/logs";
 import testBtc from "./testBtc";
 import testBtc2 from "./testBtc2";
 import testBtc3 from "./testBtc3";
@@ -14,6 +15,10 @@ import testXrp3 from "./testXrp3";
 import testStr from "./testStr";
 import testStr2 from "./testStr2";
 import testStr3 from "./testStr3";
+
+listen(e => {
+  console.log(`${e.type}: ${e.message}`);
+});
 
 function expectAppContext(appName) {
   // TODO improve this by waiting user to do an action?
@@ -123,7 +128,6 @@ export default async opts => {
       createTransportViaListen
     ][i % 3];
     let transport = await createTransport(Transport);
-    transport.setDebugMode(true);
 
     if (step.name) {
       console.info("Running test " + step.name);

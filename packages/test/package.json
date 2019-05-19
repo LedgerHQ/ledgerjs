@@ -5,6 +5,7 @@
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {
+    "@ledgerhq/logs": "^4.56.0",
     "@ledgerhq/hw-app-btc": "^4.57.0",
     "@ledgerhq/hw-app-eth": "^4.57.0",
     "@ledgerhq/hw-app-str": "^4.57.0",
@@ -15,8 +16,7 @@
     "budo": "^11.6.2"
   },
   "devDependencies": {
-    "flow-bin": "^0.98.1",
-    "flow-typed": "^2.5.2"
+    "flow-bin": "^0.98.1"
   },
   "scripts": {
     "test-browser": "budo --ssl lib/index-browser.js",

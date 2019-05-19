@@ -8,6 +8,7 @@ import type {
 import hidFraming from "@ledgerhq/devices/lib/hid-framing";
 import { identifyUSBProductId } from "@ledgerhq/devices";
 import type { DeviceModel } from "@ledgerhq/devices";
+import { log } from "@ledgerhq/logs";
 import {
   TransportOpenUserCancelled,
   TransportInterfaceNotAvailable,
@@ -151,16 +152,15 @@ export default class TransportWebUSB extends Transport<USBDevice> {
    */
   exchange = (apdu: Buffer): Promise<Buffer> =>
     this.exchangeAtomicImpl(async () => {
-      const { debug, channel, packetSize } = this;
-      if (debug) {
-        debug("=>" + apdu.toString("hex"));
-      }
+      const { channel, packetSize } = this;
+      log("apdu", "=> " + apdu.toString("hex"));
 
       const framing = hidFraming(channel, packetSize);
 
       // Write...
       const blocks = framing.makeBlocks(apdu);
       for (let i = 0; i < blocks.length; i++) {
+        log("hid-frame", "=> " + blocks[i].toString("hex"));
         await this.device.transferOut(endpointNumber, blocks[i]);
       }
 
@@ -169,12 +169,12 @@ export default class TransportWebUSB extends Transport<USBDevice> {
       let acc;
       while (!(result = framing.getReducedResult(acc))) {
         const r = await this.device.transferIn(endpointNumber, packetSize);
-        acc = framing.reduceResponse(acc, Buffer.from(r.data.buffer));
+        const buffer = Buffer.from(r.data.buffer);
+        log("hid-frame", "<= " + buffer.toString("hex"));
+        acc = framing.reduceResponse(acc, buffer);
       }
 
-      if (debug) {
-        debug("<=" + result.toString("hex"));
-      }
+      log("apdu", "<= " + result.toString("hex"));
       return result;
     }).catch(e => {
       if (e && e.message && e.message.includes("disconnected")) {

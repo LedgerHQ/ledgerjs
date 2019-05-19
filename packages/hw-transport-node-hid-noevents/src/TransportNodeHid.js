@@ -2,6 +2,7 @@
 
 import HID from "node-hid";
 import Transport from "@ledgerhq/hw-transport";
+import { log } from "@ledgerhq/logs";
 import type {
   Observer,
   DescriptorEvent,
@@ -147,16 +148,15 @@ export default class TransportNodeHidNoEvents extends Transport<?string> {
    */
   exchange = (apdu: Buffer): Promise<Buffer> =>
     this.exchangeAtomicImpl(async () => {
-      const { debug, channel, packetSize } = this;
-      if (debug) {
-        debug("=>" + apdu.toString("hex"));
-      }
+      const { channel, packetSize } = this;
+      log("apdu", "=> " + apdu.toString("hex"));
 
       const framing = hidFraming(channel, packetSize);
 
       // Write...
       const blocks = framing.makeBlocks(apdu);
       for (let i = 0; i < blocks.length; i++) {
+        log("hid-frame", "=> " + blocks[i].toString("hex"));
         await this.writeHID(blocks[i]);
       }
 
@@ -165,12 +165,11 @@ export default class TransportNodeHidNoEvents extends Transport<?string> {
       let acc;
       while (!(result = framing.getReducedResult(acc))) {
         const buffer = await this.readHID();
+        log("hid-frame", "<= " + buffer.toString("hex"));
         acc = framing.reduceResponse(acc, buffer);
       }
 
-      if (debug) {
-        debug("<=" + result.toString("hex"));
-      }
+      log("apdu", "<= " + result.toString("hex"));
       return result;
     });
 

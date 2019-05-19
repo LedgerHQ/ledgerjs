@@ -3,11 +3,11 @@
 import Transport from "@ledgerhq/hw-transport";
 import { TransportError } from "@ledgerhq/errors";
 import { wrapApdu } from "@ledgerhq/devices/lib/scrambling";
+import { log } from "@ledgerhq/logs";
 
 const attemptExchange = (
   apdu: Buffer,
   timeout: number,
-  debug: *,
   scrambleKey: ?Buffer
 ): Promise<Buffer> => {
   if (!scrambleKey) {
@@ -81,12 +81,14 @@ export default class TransportWebAuthn extends Transport<null> {
    * @returns a promise of apdu response
    */
   async exchange(apdu: Buffer): Promise<Buffer> {
-    return await attemptExchange(
+    log("apdu", "=> " + apdu.toString("hex"));
+    const res = await attemptExchange(
       apdu,
       this.exchangeTimeout,
-      this.debug,
       this.scrambleKey
     );
+    log("apdu", "<= " + res.toString("hex"));
+    return res;
   }
 
   /**

@@ -1,8 +1,7 @@
 // @flow
 
 import { Observable } from "rxjs";
-import type { BleManager } from "./types";
-import { logSubject } from "./debug";
+import { log } from "@ledgerhq/logs";
 
 const TagId = 0x05;
 
@@ -22,8 +21,7 @@ function chunkBuffer(
 }
 
 export const sendAPDU = (
-  bleManager: BleManager,
-  write: (Buffer, ?string) => Promise<void>,
+  write: Buffer => Promise<void>,
   apdu: Buffer,
   mtuSize: number
 ): Observable<void> => {
@@ -56,20 +54,14 @@ export const sendAPDU = (
       },
       e => {
         terminated = true;
-        logSubject.next({
-          type: "ble-error",
-          message: "sendAPDU failure " + String(e)
-        });
+        log("ble-error", "sendAPDU failure " + String(e));
         o.error(e);
       }
     );
 
     const unsubscribe = () => {
       if (!terminated) {
-        logSubject.next({
-          type: "verbose",
-          message: "sendAPDU interruption"
-        });
+        log("ble-verbose", "sendAPDU interruption");
         terminated = true;
       }
     };
