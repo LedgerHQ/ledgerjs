@@ -245,7 +245,7 @@ wss.on("connection", ws => {
 });
 
 log(
-  "DEBUG_COMM_HTTP_PROXY=" +
+  "DEVICE_PROXY_URL=" +
     ["localhost", ...ips].map(ip => `ws://${ip}:${PORT}`).join("|")
 );
 
