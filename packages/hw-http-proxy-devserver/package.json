@@ -35,12 +35,12 @@
     "body-parser": "^1.19.0",
     "command-line-args": "^5.1.1",
     "cors": "^2.8.5",
-    "express": "^4.16.4",
+    "express": "^4.17.0",
     "ws": "^7.0.0"
   },
   "devDependencies": {
     "flow-bin": "^0.98.1",
-    "flow-typed": "^2.5.1"
+    "flow-typed": "^2.5.2"
   },
   "scripts": {
     "flow": "flow",

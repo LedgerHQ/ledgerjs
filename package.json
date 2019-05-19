@@ -34,15 +34,15 @@
     "create-hash": "^1.1.3",
     "documentation": "^11.0.0",
     "eslint": "^5.16.0",
-    "eslint-config-prettier": "^4.2.0",
-    "eslint-plugin-flowtype": "^3.8.2",
+    "eslint-config-prettier": "^4.3.0",
+    "eslint-plugin-flowtype": "^3.9.0",
     "eslint-plugin-react": "^7.13.0",
     "flow-bin": "^0.98.1",
-    "flow-copy-source": "^2.0.4",
+    "flow-copy-source": "^2.0.6",
     "flow-mono-cli": "^1.5.0",
-    "flow-typed": "^2.5.1",
-    "lerna": "3.13.4",
-    "prettier": "^1.17.0",
-    "uglify-js": "^3.5.12"
+    "flow-typed": "^2.5.2",
+    "lerna": "3.14.1",
+    "prettier": "^1.17.1",
+    "uglify-js": "^3.5.13"
   }
 }
