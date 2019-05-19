@@ -7,6 +7,7 @@ Welcome to Ledger's JavaScript libraries.
 
 **See also:**
 
+- [Changelog](https://github.com/LedgerHQ/ledgerjs/releases)
 - [**LedgerJS examples**](https://github.com/LedgerHQ/ledgerjs-examples)
 - [Ledger Live Desktop](https://github.com/ledgerhq/ledger-live-desktop)
 - [Ledger Live Mobile](https://github.com/ledgerhq/ledger-live-mobile)
