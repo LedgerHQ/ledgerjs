@@ -30,22 +30,21 @@
     -   [off](#off)
         -   [Parameters](#parameters-3)
     -   [setDebugMode](#setdebugmode)
-        -   [Parameters](#parameters-4)
     -   [setExchangeTimeout](#setexchangetimeout)
-        -   [Parameters](#parameters-5)
+        -   [Parameters](#parameters-4)
     -   [send](#send)
-        -   [Parameters](#parameters-6)
+        -   [Parameters](#parameters-5)
     -   [isSupported](#issupported)
     -   [list](#list)
         -   [Examples](#examples)
     -   [listen](#listen)
-        -   [Parameters](#parameters-7)
+        -   [Parameters](#parameters-6)
         -   [Examples](#examples-1)
     -   [open](#open)
-        -   [Parameters](#parameters-8)
+        -   [Parameters](#parameters-7)
         -   [Examples](#examples-2)
     -   [create](#create)
-        -   [Parameters](#parameters-9)
+        -   [Parameters](#parameters-8)
         -   [Examples](#examples-3)
 
 ### Subscription
@@ -143,10 +142,6 @@ Stop listening to an event on an instance of transport.
 #### setDebugMode
 
 Enable or not logs of the binary exchange
-
-##### Parameters
-
--   `debug` **([boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | function (log: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)): void)** 
 
 #### setExchangeTimeout
 

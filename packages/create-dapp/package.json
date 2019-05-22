@@ -14,5 +14,8 @@
   "homepage": "https://github.com/ledgerhq/ledgerjs",
   "bugs": "https://github.com/ledgerhq/ledgerjs/issues",
   "license": "Apache-2.0",
-  "bin": "scripts/create-dapp"
+  "bin": "scripts/create-dapp",
+  "devDependencies": {
+    "flow-bin": "^0.98.1"
+  }
 }

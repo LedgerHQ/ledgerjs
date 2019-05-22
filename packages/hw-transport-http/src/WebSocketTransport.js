@@ -1,6 +1,7 @@
 //@flow
 import Transport from "@ledgerhq/hw-transport";
 import { TransportError } from "@ledgerhq/errors";
+import { log } from "@ledgerhq/logs";
 
 const WebSocket = global.WebSocket || require("ws");
 
@@ -109,15 +110,14 @@ export default class WebSocketTransport extends Transport<string> {
   }
 
   async exchange(apdu: Buffer): Promise<Buffer> {
-    const { debug } = this;
     const hex = apdu.toString("hex");
-    if (debug) debug("=> " + hex);
+    log("apdu", "=> " + hex);
     const res = await new Promise((resolve, reject) => {
       this.hook.rejectExchange = (e: *) => reject(e);
       this.hook.resolveExchange = (b: Buffer) => resolve(b);
       this.hook.send(hex);
     });
-    if (debug) debug("<= " + res.toString("hex"));
+    log("apdu", "<= " + res.toString("hex"));
     return res;
   }
 

@@ -28,11 +28,10 @@ Allows to communicate with Ledger Hardware Wallets.
     -   [setListenDevicesPollingSkip](#setlistendevicespollingskip)
         -   [Parameters](#parameters-3)
     -   [setListenDevicesDebug](#setlistendevicesdebug)
-        -   [Parameters](#parameters-4)
     -   [listen](#listen)
-        -   [Parameters](#parameters-5)
+        -   [Parameters](#parameters-4)
     -   [open](#open)
-        -   [Parameters](#parameters-6)
+        -   [Parameters](#parameters-5)
 
 ### TransportNodeHid
 
@@ -89,10 +88,6 @@ Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 -   `conditionToSkip` **function (): [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** 
 
 #### setListenDevicesDebug
-
-##### Parameters
-
--   `debug` **([boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | function (log: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)): void)** 
 
 #### listen
 

@@ -3,22 +3,19 @@
 import { Observable } from "rxjs";
 import { TransportError } from "@ledgerhq/errors";
 import type { Characteristic } from "./types";
-import { logSubject } from "./debug";
+import { log } from "@ledgerhq/logs";
 
 export const monitorCharacteristic = (
   characteristic: Characteristic
 ): Observable<Buffer> =>
   Observable.create(o => {
-    logSubject.next({
-      type: "verbose",
-      message: "start monitor " + characteristic.uuid
-    });
+    log("ble-verbose", "start monitor " + characteristic.uuid);
     const subscription = characteristic.monitor((error, c) => {
       if (error) {
-        logSubject.next({
-          type: "verbose",
-          message: "error monitor " + characteristic.uuid + ": " + error
-        });
+        log(
+          "ble-verbose",
+          "error monitor " + characteristic.uuid + ": " + error
+        );
         o.error(error);
       } else if (!c) {
         o.error(
@@ -38,10 +35,7 @@ export const monitorCharacteristic = (
     });
 
     return () => {
-      logSubject.next({
-        type: "verbose",
-        message: "end monitor " + characteristic.uuid
-      });
+      log("ble-verbose", "end monitor " + characteristic.uuid);
       subscription.remove();
     };
   });
