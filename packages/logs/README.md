@@ -21,12 +21,13 @@ Utility library that is used by all Ledger libraries to dispatch logs so we can 
 
 A Log object
 
-Type: {type: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), message: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?, id: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), date: [Date](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Date)}
+Type: {type: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), message: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?, data: any?, id: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), date: [Date](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Date)}
 
 #### Properties
 
 -   `type` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 -   `message` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** 
+-   `data` **any?** 
 -   `id` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 -   `date` **[Date](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Date)** 
 
@@ -38,6 +39,7 @@ log something
 
 -   `type` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a namespaced identifier of the log (it is not a level like "debug", "error" but more like "apdu-in", "apdu-out", etc...)
 -   `message` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** a clear message of the log associated to the type
+-   `data` **any?** 
 
 ### listen
 
