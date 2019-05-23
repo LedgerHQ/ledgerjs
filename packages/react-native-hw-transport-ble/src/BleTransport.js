@@ -393,7 +393,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
 
         const data = await merge(
           this.notifyObservable.pipe(receiveAPDU),
-          sendAPDU(bleManager, this.write, apdu, this.mtuSize)
+          sendAPDU(this.write, apdu, this.mtuSize)
         ).toPromise();
 
         const msgOut = data.toString("hex");
