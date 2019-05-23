@@ -6,6 +6,7 @@
 export type Log = {
   type: string,
   message?: string,
+  data?: any,
   id: string, // unique amount all logs
   date: Date // date of the log
 };
@@ -20,9 +21,10 @@ const subscribers = [];
  * @param type a namespaced identifier of the log (it is not a level like "debug", "error" but more like "apdu-in", "apdu-out", etc...)
  * @param message a clear message of the log associated to the type
  */
-export const log = (type: string, message?: string) => {
+export const log = (type: string, message?: string, data?: any) => {
   const obj: Log = { type, id: String(++id), date: new Date() };
   if (message) obj.message = message;
+  if (data) obj.data = data;
   dispatch(obj);
 };
 
