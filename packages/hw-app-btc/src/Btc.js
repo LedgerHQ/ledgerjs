@@ -1290,24 +1290,26 @@ const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
     additionals: Array<string> = []
   ) {
     const isDecred = additionals.includes("decred");
+    const isBech32 = additionals.includes("bech32");
     let inputBuffer = Buffer.alloc(0);
     let useWitness =
       typeof transaction["witness"] != "undefined" && !skipWitness;
     transaction.inputs.forEach(input => {
-      inputBuffer = isDecred
-        ? Buffer.concat([
-            inputBuffer,
-            input.prevout,
-            Buffer.from([0x00]), //tree
-            input.sequence
-          ])
-        : Buffer.concat([
-            inputBuffer,
-            input.prevout,
-            this.createVarint(input.script.length),
-            input.script,
-            input.sequence
-          ]);
+      inputBuffer =
+        isDecred || isBech32
+          ? Buffer.concat([
+              inputBuffer,
+              input.prevout,
+              Buffer.from([0x00]), //tree
+              input.sequence
+            ])
+          : Buffer.concat([
+              inputBuffer,
+              input.prevout,
+              this.createVarint(input.script.length),
+              input.script,
+              input.sequence
+            ]);
     });
 
     let outputBuffer = this.serializeTransactionOutputs(transaction);
