@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-http-proxy-devserver",
-  "version": "4.60.2",
+  "version": "4.60.3",
   "description": "Ledger Hardware Wallet debug communication layer http proxy (for development only)",
   "keywords": [
     "Ledger",
@@ -29,8 +29,8 @@
   },
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport-mocker": "^4.60.2",
-    "@ledgerhq/hw-transport-node-hid": "^4.60.2",
+    "@ledgerhq/hw-transport-mocker": "^4.60.3",
+    "@ledgerhq/hw-transport-node-hid": "^4.60.3",
     "babel-polyfill": "^6.26.0",
     "body-parser": "^1.19.0",
     "command-line-args": "^5.1.1",
