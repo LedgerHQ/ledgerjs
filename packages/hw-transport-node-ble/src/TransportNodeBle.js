@@ -12,7 +12,6 @@ import {
   CantOpenDevice,
   DisconnectedDeviceDuringOperation
 } from "@ledgerhq/errors";
-import { remapError } from "./remapErrors";
 import {
   monitorCharacteristic,
   availability,
@@ -70,8 +69,6 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
     writeC,
     deviceModel
   } = await retrieveServiceAndCharacteristics(device);
-
-  log("ble-verbose", `device.mtu=${device.mtu}`);
 
   const [observable, monitoringReady] = monitorCharacteristic(notifyC);
 
@@ -238,7 +235,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
           // in such case we will always disconnect because something is bad.
           await disconnectDevice(this.device).catch(() => {}); // but we ignore if disconnect worked.
         }
-        throw remapError(e);
+        throw e;
       }
     });
 
@@ -260,7 +257,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
       } catch (e) {
         log("ble-error", "inferMTU got " + String(e));
         await disconnectDevice(this.device).catch(() => {}); // but we ignore if disconnect worked.
-        throw remapError(e);
+        throw e;
       }
     });
 

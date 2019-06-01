@@ -33,7 +33,7 @@
 
 **Extends Transport**
 
-react-native bluetooth BLE implementation
+TransportNodeBle bluetooth BLE implementation
 
 #### Parameters
 
@@ -45,7 +45,7 @@ react-native bluetooth BLE implementation
 #### Examples
 
 ```javascript
-import BluetoothTransport from "@ledgerhq/react-native-hw-transport-ble";
+import BluetoothTransport from "@ledgerhq/hw-transport-node-ble";
 ```
 
 #### exchange

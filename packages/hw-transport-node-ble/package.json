@@ -26,16 +26,16 @@
   "main": "lib/TransportNodeBle.js",
   "license": "Apache-2.0",
   "dependencies": {
+    "@abandonware/noble": "1.9.2-2",
     "@ledgerhq/devices": "^4.60.3",
     "@ledgerhq/errors": "^4.60.0",
     "@ledgerhq/hw-transport": "^4.60.3",
     "@ledgerhq/logs": "^4.60.3",
-    "noble-mac": "https://github.com/LedgerHQ/noble-mac.git",
     "invariant": "^2.2.4",
     "rxjs": "^6.5.2"
   },
   "devDependencies": {
-    "flow-bin": "^0.98.1"
+    "flow-bin": "^0.100.0"
   },
   "scripts": {
     "flow": "flow",

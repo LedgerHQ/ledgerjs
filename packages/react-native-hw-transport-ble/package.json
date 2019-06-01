@@ -35,7 +35,7 @@
     "uuid": "^3.3.2"
   },
   "devDependencies": {
-    "flow-bin": "^0.98.1"
+    "flow-bin": "^0.100.0"
   },
   "scripts": {
     "flow": "flow",

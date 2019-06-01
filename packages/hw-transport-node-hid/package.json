@@ -30,11 +30,11 @@
     "@ledgerhq/hw-transport": "^4.60.3",
     "@ledgerhq/logs": "^4.60.3",
     "lodash": "^4.17.11",
-    "node-hid": "^0.7.8",
+    "node-hid": "^0.7.9",
     "usb": "^1.6.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.98.1"
+    "flow-bin": "^0.100.0"
   },
   "scripts": {
     "flow": "flow",

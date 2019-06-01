@@ -1,7 +1,7 @@
 // @flow
 /* eslint-disable prefer-template */
 
-import noble from "noble-mac";
+import noble from "@abandonware/noble";
 import { Observable } from "rxjs";
 import { log } from "@ledgerhq/logs";
 import {
@@ -9,6 +9,10 @@ import {
   getBluetoothServiceUuids
 } from "@ledgerhq/devices";
 import { TransportError } from "@ledgerhq/errors";
+
+noble.on("warning", message => {
+  log("ble-warning", message);
+});
 
 const POWERED_ON = "poweredOn";
 
@@ -79,11 +83,8 @@ export const listen = (): Observable<*> =>
       const { uuid: id } = peripheral;
       const { localName } = peripheral.advertisement;
       const name =
-        localName && localName !== "unknown"
-          ? localName
-          : discoveredDevices[id]
-          ? discoveredDevices[id].name
-          : null;
+        localName ||
+        (discoveredDevices[id] ? discoveredDevices[id].name : null);
       discoveredDevices[id] = { peripheral, name };
       log("ble-advertisement", id + " (" + String(name) + ")");
       observer.next({
