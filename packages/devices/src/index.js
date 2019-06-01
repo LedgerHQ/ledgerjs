@@ -99,7 +99,9 @@ for (let id in devices) {
     for (let i = 0; i < bluetoothSpec.length; i++) {
       const spec = bluetoothSpec[i];
       bluetoothServices.push(spec.serviceUuid);
-      serviceUuidToInfos[spec.serviceUuid] = { deviceModel, ...spec };
+      serviceUuidToInfos[spec.serviceUuid] = serviceUuidToInfos[
+        spec.serviceUuid.replace(/-/g, "")
+      ] = { deviceModel, ...spec };
     }
   }
 }
