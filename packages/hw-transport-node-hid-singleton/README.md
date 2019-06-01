@@ -21,6 +21,7 @@ Allows to communicate with Ledger Hardware Wallets.
     -   [list](#list)
     -   [listen](#listen)
         -   [Parameters](#parameters)
+    -   [disconnect](#disconnect)
     -   [open](#open)
 
 ### TransportNodeHidSingleton
@@ -48,6 +49,10 @@ TransportNodeHid.create().then(transport => ...)
 -   `observer` **Observer&lt;DescriptorEvent&lt;any>>** 
 
 Returns **Subscription** 
+
+#### disconnect
+
+globally disconnect the transport singleton
 
 #### open
 

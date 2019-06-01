@@ -83,6 +83,17 @@ export default class TransportNodeHidSingleton extends TransportNodeHidNoEvents 
   };
 
   /**
+   * globally disconnect the transport singleton
+   */
+  static async disconnect() {
+    if (transportInstance) {
+      transportInstance.device.close();
+      transportInstance.emit("disconnect");
+      transportInstance = null;
+    }
+  }
+
+  /**
    * if path="" is not provided, the library will take the first device
    */
   static async open(): Promise<TransportNodeHidSingleton> {
