@@ -7,7 +7,8 @@
 
 **Ledger Hardware Wallet Bluetooth BLE transport for Node.js (noble)**
 
-### IMPORTANT: not yet ready. currently falling into a bug. no notification are received from the device.
+> yarn add @ledgerhq/hw-transport-node-ble
+
 
 ## API
 
