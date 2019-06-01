@@ -25,6 +25,7 @@
   "main": "lib/TransportNodeHid.js",
   "license": "Apache-2.0",
   "dependencies": {
+    "@ledgerhq/hw-transport-node-hid-noevents": "^4.60.3",
     "@ledgerhq/devices": "^4.60.3",
     "@ledgerhq/errors": "^4.60.0",
     "@ledgerhq/hw-transport": "^4.60.3",

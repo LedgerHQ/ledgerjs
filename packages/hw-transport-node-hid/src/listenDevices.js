@@ -1,10 +1,10 @@
 // @flow
 
 import EventEmitter from "events";
+import { getDevices } from "@ledgerhq/hw-transport-node-hid-noevents";
 import { log } from "@ledgerhq/logs";
 import usb from "usb";
 import debounce from "lodash/debounce";
-import getDevices from "./getDevices";
 
 export default (
   delay: number,

@@ -20,7 +20,7 @@ const filterInterface = device =>
       device.usagePage === 0xffa0
     : device.interface === 0;
 
-function getDevices(): Array<*> {
+export function getDevices(): Array<*> {
   // $FlowFixMe
   return HID.devices(ledgerUSBVendorId, 0x0).filter(filterInterface);
 }
