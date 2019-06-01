@@ -16,32 +16,24 @@ Allows to communicate with Ledger Hardware Wallets.
 #### Table of Contents
 
 -   [TransportNodeHid](#transportnodehid)
-    -   [Parameters](#parameters)
     -   [Examples](#examples)
-    -   [exchange](#exchange)
-        -   [Parameters](#parameters-1)
-    -   [close](#close)
     -   [isSupported](#issupported)
     -   [list](#list)
     -   [setListenDevicesDebounce](#setlistendevicesdebounce)
-        -   [Parameters](#parameters-2)
+        -   [Parameters](#parameters)
     -   [setListenDevicesPollingSkip](#setlistendevicespollingskip)
-        -   [Parameters](#parameters-3)
+        -   [Parameters](#parameters-1)
     -   [setListenDevicesDebug](#setlistendevicesdebug)
     -   [listen](#listen)
-        -   [Parameters](#parameters-4)
+        -   [Parameters](#parameters-2)
     -   [open](#open)
-        -   [Parameters](#parameters-5)
+        -   [Parameters](#parameters-3)
 
 ### TransportNodeHid
 
-**Extends Transport**
+**Extends TransportNodeHidNoEvents**
 
 node-hid Transport implementation
-
-#### Parameters
-
--   `device` **HID.HID** 
 
 #### Examples
 
@@ -51,29 +43,9 @@ import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
 TransportNodeHid.create().then(transport => ...)
 ```
 
-#### exchange
-
-Exchange with the device using APDU protocol.
-
-##### Parameters
-
--   `apdu` **[Buffer](https://nodejs.org/api/buffer.html)** 
-
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Buffer](https://nodejs.org/api/buffer.html)>** a promise of apdu response
-
-#### close
-
-release the USB device.
-
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;void>** 
-
 #### isSupported
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** 
-
 #### list
-
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>>** 
 
 #### setListenDevicesDebounce
 

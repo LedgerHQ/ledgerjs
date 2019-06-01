@@ -1,0 +1,47 @@
+{
+  "name": "@ledgerhq/hw-transport-node-hid-singleton",
+  "version": "4.60.3",
+  "description": "Ledger Hardware Wallet Node implementation of the communication layer, using node-hid and usb-detection",
+  "keywords": [
+    "Ledger",
+    "LedgerWallet",
+    "hid",
+    "node-hid",
+    "NanoS",
+    "Blue",
+    "Hardware Wallet"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LedgerHQ/ledgerjs"
+  },
+  "bugs": {
+    "url": "https://github.com/LedgerHQ/ledgerjs/issues"
+  },
+  "homepage": "https://github.com/LedgerHQ/ledgerjs",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "lib/TransportNodeHid.js",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@ledgerhq/hw-transport-node-hid-noevents": "^4.60.3",
+    "@ledgerhq/devices": "^4.60.3",
+    "@ledgerhq/errors": "^4.60.0",
+    "@ledgerhq/hw-transport": "^4.60.3",
+    "@ledgerhq/logs": "^4.60.3",
+    "lodash": "^4.17.11",
+    "node-hid": "^0.7.9",
+    "usb-detection": "^4.3.0"
+  },
+  "devDependencies": {
+    "flow-bin": "^0.100.0"
+  },
+  "scripts": {
+    "flow": "flow",
+    "clean": "bash ../../script/clean.sh",
+    "build": "bash ../../script/build.sh",
+    "watch": "bash ../../script/watch.sh",
+    "doc": "bash ../../script/doc.sh"
+  }
+}
