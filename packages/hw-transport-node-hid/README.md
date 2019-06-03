@@ -65,7 +65,7 @@ TransportNodeHid.create().then(transport => ...)
 
 ##### Parameters
 
--   `observer` **Observer&lt;DescriptorEvent&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>>** 
+-   `observer` **Observer&lt;DescriptorEvent&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?>>** 
 
 Returns **Subscription** 
 
@@ -75,4 +75,4 @@ if path="" is not provided, the library will take the first device
 
 ##### Parameters
 
--   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** 

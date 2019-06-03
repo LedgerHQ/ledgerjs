@@ -60,7 +60,7 @@ export default class TransportNodeHid extends TransportNodeHidNoEvents {
   /**
    */
   static listen = (
-    observer: Observer<DescriptorEvent<string>>
+    observer: Observer<DescriptorEvent<?string>>
   ): Subscription => {
     let unsubscribed = false;
     Promise.resolve(getDevices()).then(devices => {
@@ -112,7 +112,7 @@ export default class TransportNodeHid extends TransportNodeHidNoEvents {
   /**
    * if path="" is not provided, the library will take the first device
    */
-  static async open(path: string) {
+  static open(path: ?string) {
     if (path) {
       return Promise.resolve(new TransportNodeHid(new HID.HID(path)));
     }

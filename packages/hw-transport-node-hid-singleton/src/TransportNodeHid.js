@@ -96,7 +96,7 @@ export default class TransportNodeHidSingleton extends TransportNodeHidNoEvents 
   /**
    * if path="" is not provided, the library will take the first device
    */
-  static async open(): Promise<TransportNodeHidSingleton> {
+  static open(): Promise<TransportNodeHidSingleton> {
     if (transportInstance) {
       log("hid-verbose", "reusing opened transport instance");
       return Promise.resolve(transportInstance);
