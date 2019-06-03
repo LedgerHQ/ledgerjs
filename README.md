@@ -33,7 +33,7 @@ Summary of implementations available per platform
 | Web              | @ledgerhq/hw-transport-u2f (Chrome, Opera) | NO                                | @ledgerhq/hw-transport-webusb (Chrome) | @ledgerhq/hw-transport-web-ble (Chrome)          |
 | Electron/Node.js | NO               | @ledgerhq/hw-transport-node-hid<sup>1</sup> | NO                  | @ledgerhq/hw-transport-node-ble         |
 | iOS              | NO               | NO                                | NO                  | @ledgerhq/react-native-hw-transport-ble |
-| Android          | @ledgerhq/hw-transport-u2f<sup>2</sup> | react-native-hid                  | @ledgerhq/hw-transport-webusb<sup>2</sup>    | @ledgerhq/react-native-hw-transport-ble |
+| Android          | @ledgerhq/hw-transport-u2f<sup>2</sup> | @ledgerhq/react-native-hid                  | @ledgerhq/hw-transport-webusb<sup>2</sup>    | @ledgerhq/react-native-hw-transport-ble |
 
 1. 3 implementations available
 2. via Android Chrome
