@@ -9,7 +9,31 @@ Allows to communicate with Ledger Hardware Wallets.
 
 **[Web]** **(WebUSB)** – WebUSB [check browser support](https://caniuse.com/webusb).
 
-Important: The transport functions `create()` and `listen()` must be in the context of an user interaction (like a **"click"** event), otherwise it will fails with DOM Exception.
+### FAQ: "DOM Exception" is triggered when creating the transport
+
+The transport functions `create()` and `listen()` must be called in the context of an user interaction (like a **"click"** event), otherwise it fails with DOM Exception. This is by WebUSB design. You also must run on HTTPS.
+
+### How to use this transport regarding WebUSB paradigm?
+
+In WebUSB, we have a "permission native" modal that appears when we need to "request" a device. This is required at-least-once for the user to accept, and then we can open the transport without triggering this modal. However, in both cases, it must happen in context of a click like explain above. Our current implementation tradeoff is to abstract this out and only trigger the permission modal if no device are listed. This might change in the future.
+
+In term of UX, there are two classical usecases:
+
+1. you only need the device at key times, like once to get the address. once to sign a transaction,...
+2. your app lifecycle requires that you need to access the device at the beginning and/or at any time (like you want to ping with getAddress to get the wallet address)
+
+in (1) case, you can just do your logic in each button (Get Address / Sign Transaction) time (create it, do the logic, close it).
+in (2) case, you will need to have a Connect button that appear when you don’t have the connection yet. and you need to hook to the “disconnect” event to potentially make the UI reflect that and require user to click again on that Connect button, because you can’t automatically `create()`/`open()` again.
+
+### Support status
+
+WebUSB is currently only supported on Google Chrome / Chromium.
+
+- In Linux, user need to install the [specific udev rules](https://raw.githubusercontent.com/LedgerHQ/udev-rules/master/add_udev_rules.sh)
+- In Mac, it should work.
+- In Windows, [WebUSB does not work out of the box](https://github.com/WICG/webusb/issues/143) but you can fix it with [Zadig](https://zadig.akeo.ie/).
+- In Android Chrome it works.
+
 
 ## API
 
