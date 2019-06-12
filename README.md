@@ -88,6 +88,8 @@ We also provide libraries that help implementing the low level exchanges. These 
 
 - [![npm](https://img.shields.io/npm/v/@cardano-foundation/ledgerjs-hw-app-cardano.svg)](https://www.npmjs.com/package/@cardano-foundation/ledgerjs-hw-app-cardano) [@cardano-foundation/ledgerjs-hw-app-cardano](https://github.com/cardano-foundation/ledgerjs-hw-app-cardano): Cardano ADA Application API
 
+- [![npm](https://img.shields.io/npm/v/ledger-cosmos-js.svg)](https://www.npmjs.com/package/ledger-cosmos-js) [ledger-cosmos-js](https://github.com/cosmos/ledger-cosmos-js): Cosmos/Tendermint Application API
+
 > We invite all third party app developers to not send PR to this repository to provide more implementations but instead to maintain your own version in your own repository and we would be happy to reference them here ♥.
 
 ## Other packages
