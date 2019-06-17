@@ -28,11 +28,11 @@
     "@ledgerhq/errors": "^4.61.0",
     "@ledgerhq/hw-transport": "^4.61.0",
     "@ledgerhq/logs": "^4.61.0",
-    "axios": "^0.18.0",
+    "axios": "^0.19.0",
     "ws": "6"
   },
   "devDependencies": {
-    "flow-bin": "^0.100.0"
+    "flow-bin": "^0.101.0"
   },
   "scripts": {
     "flow": "flow",

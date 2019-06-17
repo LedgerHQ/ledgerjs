@@ -19,8 +19,8 @@ In WebUSB, we have a "permission native" modal that appears when we need to "req
 
 In term of UX, there are two classical usecases:
 
-1. you only need the device at key times, like once to get the address. once to sign a transaction,...
-2. your app lifecycle requires that you need to access the device at the beginning and/or at any time (like you want to ping with getAddress to get the wallet address)
+1.  you only need the device at key times, like once to get the address. once to sign a transaction,...
+2.  your app lifecycle requires that you need to access the device at the beginning and/or at any time (like you want to ping with getAddress to get the wallet address)
 
 in (1) case, you can just do your logic in each button (Get Address / Sign Transaction) time (create it, do the logic, close it).
 in (2) case, you will need to have a Connect button that appear when you don’t have the connection yet. and you need to hook to the “disconnect” event to potentially make the UI reflect that and require user to click again on that Connect button, because you can’t automatically `create()`/`open()` again.
@@ -29,11 +29,10 @@ in (2) case, you will need to have a Connect button that appear when you don’t
 
 WebUSB is currently only supported on Google Chrome / Chromium.
 
-- In Linux, user need to install the [specific udev rules](https://raw.githubusercontent.com/LedgerHQ/udev-rules/master/add_udev_rules.sh)
-- In Mac, it should work.
-- In Windows, [WebUSB does not work out of the box](https://github.com/WICG/webusb/issues/143) but you can fix it with [Zadig](https://zadig.akeo.ie/).
-- In Android Chrome it works.
-
+-   In Linux, user need to install the [specific udev rules](https://raw.githubusercontent.com/LedgerHQ/udev-rules/master/add_udev_rules.sh)
+-   In Mac, it should work.
+-   In Windows, [WebUSB does not work out of the box](https://github.com/WICG/webusb/issues/143) but you can fix it with [Zadig](https://zadig.akeo.ie/).
+-   In Android Chrome it works.
 
 ## API
 

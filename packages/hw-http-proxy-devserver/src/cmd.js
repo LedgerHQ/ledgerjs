@@ -53,9 +53,7 @@ if (mainOptions.file) {
       process.exit(0);
     }
     log(
-      `${recordStore.queue.length} mocked APDUs will be replayed from ${
-        mainOptions.file
-      }`
+      `${recordStore.queue.length} mocked APDUs will be replayed from ${mainOptions.file}`
     );
     Transport = createTransportReplayer(recordStore);
   }
