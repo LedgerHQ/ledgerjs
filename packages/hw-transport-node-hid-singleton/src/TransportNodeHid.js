@@ -127,8 +127,8 @@ export default class TransportNodeHidSingleton extends TransportNodeHidNoEvents 
     return Promise.resolve(transportInstance);
   }
 
-  static async close() {
+  close() {
     // intentionally, a close will not effectively close the hid connection
-    return Promise.resolve(true);
+    return Promise.resolve();
   }
 }
