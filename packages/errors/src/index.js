@@ -20,6 +20,9 @@ export const AccountNameRequiredError = createCustomErrorClass(
 export const BluetoothRequired = createCustomErrorClass("BluetoothRequired");
 export const BtcUnmatchedApp = createCustomErrorClass("BtcUnmatchedApp");
 export const CantOpenDevice = createCustomErrorClass("CantOpenDevice");
+export const CashAddrNotSupported = createCustomErrorClass(
+  "CashAddrNotSupported"
+);
 export const CurrencyNotSupported = createCustomErrorClass(
   "CurrencyNotSupported"
 );
