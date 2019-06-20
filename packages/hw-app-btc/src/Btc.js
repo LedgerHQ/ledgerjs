@@ -189,6 +189,7 @@ export default class Btc {
       throw new Error("getTrustedInput: locktime & outputs is expected");
     }
     const isDecred = additionals.includes("decred");
+    const isXST = additionals.includes("stealthcoin");
     const processScriptBlocks = (script, sequence) => {
       const scriptBlocks = [];
       let offset = 0;
@@ -218,8 +219,7 @@ export default class Btc {
       );
     };
 
-    const processWholeScriptBlock = (script, sequence) =>
-      this.getTrustedInputRaw(Buffer.concat([script, sequence]));
+    const processWholeScriptBlock = block => this.getTrustedInputRaw(block);
 
     const processInputs = () => {
       return eachSeries(inputs, input => {
@@ -229,14 +229,19 @@ export default class Btc {
         const data = Buffer.concat([
           input.prevout,
           treeField,
-          this.createVarint(input.script.length)
+          isXST ? Buffer.from([0x00]) : this.createVarint(input.script.length)
         ]);
         return this.getTrustedInputRaw(data).then(() => {
           // iteration (eachSeries) ended
           // TODO notify progress
           // deferred.notify("input");
+          // Reference: https://github.com/StealthSend/Stealth/commit/5be35d6c2c500b32ed82e5d6913d66d18a4b0a7f#diff-e8db9b851adc2422aadfffca88f14c91R566
           return isDecred
-            ? processWholeScriptBlock(input.script, input.sequence)
+            ? processWholeScriptBlock(
+                Buffer.concat([input.script, input.sequence])
+              )
+            : isXST
+            ? processWholeScriptBlock(input.sequence)
             : processScriptBlocks(input.script, input.sequence);
         });
       }).then(() => {
