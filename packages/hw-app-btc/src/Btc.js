@@ -184,7 +184,7 @@ export default class Btc {
     transaction: Transaction,
     additionals: Array<string> = []
   ): Promise<string> {
-    const { inputs, outputs, locktime } = transaction;
+    const { version, inputs, outputs, locktime } = transaction;
     if (!outputs || !locktime) {
       throw new Error("getTrustedInput: locktime & outputs is expected");
     }
@@ -223,13 +223,16 @@ export default class Btc {
 
     const processInputs = () => {
       return eachSeries(inputs, input => {
+        const isXSTV2 =
+          isXST &&
+          Buffer.compare(version, Buffer.from([0x02, 0x00, 0x00, 0x00])) === 0;
         const treeField = isDecred
           ? input.tree || Buffer.from([0x00])
           : Buffer.alloc(0);
         const data = Buffer.concat([
           input.prevout,
           treeField,
-          isXST ? Buffer.from([0x00]) : this.createVarint(input.script.length)
+          isXSTV2 ? Buffer.from([0x00]) : this.createVarint(input.script.length)
         ]);
         return this.getTrustedInputRaw(data).then(() => {
           // iteration (eachSeries) ended
@@ -240,7 +243,7 @@ export default class Btc {
             ? processWholeScriptBlock(
                 Buffer.concat([input.script, input.sequence])
               )
-            : isXST
+            : isXSTV2
             ? processWholeScriptBlock(input.sequence)
             : processScriptBlocks(input.script, input.sequence);
         });
