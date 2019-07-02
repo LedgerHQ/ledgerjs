@@ -47,7 +47,8 @@ export default class Btc {
         "getWalletPublicKey",
         "signP2SHTransaction",
         "signMessageNew",
-        "createPaymentTransactionNew"
+        "createPaymentTransactionNew",
+        "signUtxo"
       ],
       scrambleKey
     );
@@ -602,6 +603,86 @@ export default class Btc {
           return { v, r, s };
         });
     });
+  }
+
+  /**
+   * You can sign an Utxo according to the Bitcoin Signature format and retrieve v, r, s given the message and the BIP 32 path of the account to sign.
+   * @example
+   btc.signUtxo_async("44'/60'/0'/0'/0", Buffer.from("080bab3514f140bc38520878b0bfe2ee827240d9df572dcfe9381f0056b4f114:0").then(function(result) {
+     var v = result['v'] + 27 + 4;
+     var signature = Buffer.from(v.toString(16) + result['r'] + result['s'], 'hex').toString('hex');
+     console.log("Signature : " + signature);
+   }).catch(function(ex) {console.log(ex);});
+   */
+  signUtxo(
+    path: string,
+    utxoHex: string
+  ): Promise<{ v: number, r: string, s: string }> {
+    const paths = splitPath(path);
+    const utxoSerialized = this.serializeUtxo(utxoHex);
+    const utxo = new Buffer(utxoSerialized);
+    let offset = 0;
+    const toSend = [];
+    while (offset !== utxo.length) {
+      let maxChunkSize =
+        offset === 0
+          ? MAX_SCRIPT_BLOCK - 1 - paths.length * 4 - 4
+          : MAX_SCRIPT_BLOCK;
+      let chunkSize =
+        offset + maxChunkSize > utxo.length
+          ? utxo.length - offset
+          : maxChunkSize;
+      const buffer = new Buffer(
+        offset === 0 ? 1 + paths.length * 4 + 2 + chunkSize : chunkSize
+      );
+      if (offset === 0) {
+        buffer[0] = paths.length;
+        paths.forEach((element, index) => {
+          buffer.writeUInt32BE(element, 1 + 4 * index);
+        });
+        buffer.writeUInt16BE(utxo.length, 1 + 4 * paths.length);
+        utxo.copy(buffer, 1 + 4 * paths.length + 2, offset, offset + chunkSize);
+      } else {
+        utxo.copy(buffer, 0, offset, offset + chunkSize);
+      }
+      toSend.push(buffer);
+      offset += chunkSize;
+    }
+    return foreach(toSend, (data, i) =>
+      this.transport.send(0xe0, 0x4f, 0x00, i === 0 ? 0x01 : 0x80, data)
+    ).then(() => {
+      return this.transport
+        .send(0xe0, 0x4f, 0x80, 0x00, Buffer.from([0x00]))
+        .then(response => {
+          const v = response[0] - 0x30;
+          let r = response.slice(4, 4 + response[3]);
+          if (r[0] === 0) {
+            r = r.slice(1);
+          }
+          r = r.toString("hex");
+          let offset = 4 + response[3] + 2;
+          let s = response.slice(offset, offset + response[offset - 1]);
+          if (s[0] === 0) {
+            s = s.slice(1);
+          }
+          s = s.toString("hex");
+          return { v, r, s };
+        });
+    });
+  }
+
+  serializeUtxo(utxo: string): Array<number> {
+    const serialized: Array<number> = [];
+    const [txid, vout] = utxo.split(":");
+    for (let i = txid.length - 2; i >= 0; i -= 2) {
+      serialized.push(parseInt(txid.substr(i, 2), 16));
+    }
+    const n_vout = parseInt(vout, 10);
+    for (let i = 0; i < 4; i++) {
+      serialized.push(n_vout & (255 << (8 * i)));
+    }
+
+    return serialized;
   }
 
   /**

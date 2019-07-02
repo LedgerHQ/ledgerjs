@@ -23,22 +23,25 @@ Ledger Hardware Wallet BTC JavaScript bindings. Also supports many altcoins.
     -   [signMessageNew](#signmessagenew)
         -   [Parameters](#parameters-2)
         -   [Examples](#examples-2)
-    -   [createPaymentTransactionNew](#createpaymenttransactionnew)
+    -   [signUtxo](#signutxo)
         -   [Parameters](#parameters-3)
         -   [Examples](#examples-3)
-    -   [signP2SHTransaction](#signp2shtransaction)
+    -   [createPaymentTransactionNew](#createpaymenttransactionnew)
         -   [Parameters](#parameters-4)
         -   [Examples](#examples-4)
-    -   [splitTransaction](#splittransaction)
+    -   [signP2SHTransaction](#signp2shtransaction)
         -   [Parameters](#parameters-5)
         -   [Examples](#examples-5)
-    -   [serializeTransactionOutputs](#serializetransactionoutputs)
+    -   [splitTransaction](#splittransaction)
         -   [Parameters](#parameters-6)
         -   [Examples](#examples-6)
-    -   [serializeTransaction](#serializetransaction)
+    -   [serializeTransactionOutputs](#serializetransactionoutputs)
         -   [Parameters](#parameters-7)
-    -   [displayTransactionDebug](#displaytransactiondebug)
+        -   [Examples](#examples-7)
+    -   [serializeTransaction](#serializetransaction)
         -   [Parameters](#parameters-8)
+    -   [displayTransactionDebug](#displaytransactiondebug)
+        -   [Parameters](#parameters-9)
 -   [TransactionInput](#transactioninput)
     -   [Properties](#properties)
 -   [TransactionOutput](#transactionoutput)
@@ -106,6 +109,27 @@ You can sign a message according to the Bitcoin Signature format and retrieve v,
 btc.signMessageNew_async("44'/60'/0'/0'/0", Buffer.from("test").toString("hex")).then(function(result) {
 var v = result['v'] + 27 + 4;
 var signature = Buffer.from(v.toString(16) + result['r'] + result['s'], 'hex').toString('base64');
+console.log("Signature : " + signature);
+}).catch(function(ex) {console.log(ex);});
+```
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{v: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), r: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), s: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** 
+
+#### signUtxo
+
+You can sign an Utxo according to the Bitcoin Signature format and retrieve v, r, s given the message and the BIP 32 path of the account to sign.
+
+##### Parameters
+
+-   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `utxoHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+
+##### Examples
+
+```javascript
+btc.signUtxo_async("44'/60'/0'/0'/0", Buffer.from("080bab3514f140bc38520878b0bfe2ee827240d9df572dcfe9381f0056b4f114:0").then(function(result) {
+var v = result['v'] + 27 + 4;
+var signature = Buffer.from(v.toString(16) + result['r'] + result['s'], 'hex').toString('hex');
 console.log("Signature : " + signature);
 }).catch(function(ex) {console.log(ex);});
 ```
