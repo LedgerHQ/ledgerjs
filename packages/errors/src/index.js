@@ -93,6 +93,7 @@ export const NotEnoughBalance = createCustomErrorClass("NotEnoughBalance");
 export const NotEnoughBalanceBecauseDestinationNotCreated = createCustomErrorClass(
   "NotEnoughBalanceBecauseDestinationNotCreated"
 );
+export const NoAccessToCamera = createCustomErrorClass("NoAccessToCamera");
 export const NotEnoughGas = createCustomErrorClass("NotEnoughGas");
 export const PasswordsDontMatchError = createCustomErrorClass(
   "PasswordsDontMatch"
