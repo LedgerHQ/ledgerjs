@@ -97,6 +97,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
     transport.emit("disconnect", e);
   };
 
+  // eslint-disable-next-line require-atomic-updates
   transportsCache[transport.id] = transport;
   const disconnectedSub = listenDeviceDisconnect(device, e => {
     if (!transport.notYetDisconnected) return;

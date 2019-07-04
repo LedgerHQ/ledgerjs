@@ -97,6 +97,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
         device = await bleManager.connectToDevice(deviceOrId, connectOptions);
       } catch (e) {
         if (e.errorCode === BleErrorCode.DeviceMTUChangeFailed) {
+          // eslint-disable-next-line require-atomic-updates
           connectOptions = {};
           device = await bleManager.connectToDevice(deviceOrId);
         } else {
@@ -118,6 +119,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
       await device.connect(connectOptions);
     } catch (e) {
       if (e.errorCode === BleErrorCode.DeviceMTUChangeFailed) {
+        // eslint-disable-next-line require-atomic-updates
         connectOptions = {};
         await device.connect();
       } else {
@@ -215,6 +217,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
     transport.emit("disconnect", e);
   };
 
+  // eslint-disable-next-line require-atomic-updates
   transportsCache[transport.id] = transport;
   const disconnectedSub = device.onDisconnected(e => {
     if (!transport.notYetDisconnected) return;

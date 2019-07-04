@@ -115,6 +115,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
     throw new DisconnectedDevice();
   }
 
+  // eslint-disable-next-line require-atomic-updates
   transportsCache[transport.id] = transport;
   const onDisconnect = e => {
     console.log("onDisconnect!", e);

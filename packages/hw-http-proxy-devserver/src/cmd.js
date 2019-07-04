@@ -134,6 +134,7 @@ app.post("/", bodyParser.json(), async (req, res) => {
   } catch (e) {
     error = e.toString();
   }
+  // eslint-disable-next-line require-atomic-updates
   pending = false;
   const result = { data, error };
   if (data) {
@@ -163,6 +164,7 @@ wss.on("connection", ws => {
       if (wsBusyIndex === index) {
         log(`WS(${index}): close`);
         await transportP.then(transport => transport.close(), () => {});
+        // eslint-disable-next-line require-atomic-updates
         wsBusyIndex = 0;
       }
       if (saveToFile) {
