@@ -81,6 +81,9 @@ export const ManagerAppRelyOnBTCError = createCustomErrorClass(
 export const ManagerDeviceLockedError = createCustomErrorClass(
   "ManagerDeviceLocked"
 );
+export const ManagerFirmwareNotEnoughSpaceError = createCustomErrorClass(
+  "ManagerFirmwareNotEnoughSpaceError"
+);
 export const ManagerNotEnoughSpaceError = createCustomErrorClass(
   "ManagerNotEnoughSpace"
 );
