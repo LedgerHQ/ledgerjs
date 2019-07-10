@@ -10,7 +10,7 @@ import type {
 } from "@ledgerhq/hw-transport";
 import { ledgerUSBVendorId } from "@ledgerhq/devices";
 import hidFraming from "@ledgerhq/devices/lib/hid-framing";
-import { identifyUSBProductId } from "@ledgerhq/devices";
+import { identifyUSBProductId, identifyProductName } from "@ledgerhq/devices";
 import type { DeviceModel } from "@ledgerhq/devices";
 import { TransportError, DisconnectedDevice } from "@ledgerhq/errors";
 
@@ -93,9 +93,7 @@ export default class TransportNodeHidNoEvents extends Transport<?string> {
     // $FlowFixMe
     const info = device.getDeviceInfo();
     this.deviceModel =
-      info && info.serialNumber
-        ? identifyUSBProductId(parseInt(info.serialNumber, 16))
-        : null;
+      info && info.product ? identifyProductName(info.product) : null;
   }
 
   setDisconnected = () => {
