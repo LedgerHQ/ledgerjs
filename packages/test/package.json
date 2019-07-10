@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@ledgerhq/test",
-  "version": "4.65.0",
+  "version": "4.65.1",
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {
@@ -10,7 +10,7 @@
     "@ledgerhq/hw-app-str": "^4.64.1",
     "@ledgerhq/hw-app-xrp": "^4.64.1",
     "@ledgerhq/hw-transport-mocker": "^4.64.1",
-    "@ledgerhq/hw-transport-node-hid": "^4.65.0",
+    "@ledgerhq/hw-transport-node-hid": "^4.65.1",
     "@ledgerhq/hw-transport-webusb": "^4.64.1",
     "@ledgerhq/logs": "^4.64.0",
     "budo": "^11.6.2"
