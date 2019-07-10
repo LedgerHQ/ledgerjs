@@ -97,34 +97,38 @@ export default class TransportNodeHidSingleton extends TransportNodeHidNoEvents 
    * if path="" is not provided, the library will take the first device
    */
   static open(): Promise<TransportNodeHidSingleton> {
-    if (transportInstance) {
-      log("hid-verbose", "reusing opened transport instance");
-      return Promise.resolve(transportInstance);
-    }
-
-    const device = getDevices()[0];
-    if (!device) throw new CantOpenDevice("no device found");
-    log("hid-verbose", "new HID transport");
-    transportInstance = new TransportNodeHidSingleton(new HID.HID(device.path));
-    const unlisten = listenDevices(
-      () => {},
-      () => {
-        // assume any ledger disconnection concerns current transport
-        if (transportInstance) {
-          transportInstance.emit("disconnect");
-        }
+    return Promise.resolve().then(() => {
+      if (transportInstance) {
+        log("hid-verbose", "reusing opened transport instance");
+        return transportInstance;
       }
-    );
-    const onDisconnect = () => {
-      if (!transportInstance) return;
-      log("hid-verbose", "transport instance was disconnected");
-      transportInstance.off("disconnect", onDisconnect);
-      transportInstance = null;
-      unlisten();
-    };
-    transportInstance.on("disconnect", onDisconnect);
 
-    return Promise.resolve(transportInstance);
+      const device = getDevices()[0];
+      if (!device) throw new CantOpenDevice("no device found");
+      log("hid-verbose", "new HID transport");
+      transportInstance = new TransportNodeHidSingleton(
+        new HID.HID(device.path)
+      );
+      const unlisten = listenDevices(
+        () => {},
+        () => {
+          // assume any ledger disconnection concerns current transport
+          if (transportInstance) {
+            transportInstance.emit("disconnect");
+          }
+        }
+      );
+      const onDisconnect = () => {
+        if (!transportInstance) return;
+        log("hid-verbose", "transport instance was disconnected");
+        transportInstance.off("disconnect", onDisconnect);
+        transportInstance = null;
+        unlisten();
+      };
+      transportInstance.on("disconnect", onDisconnect);
+
+      return transportInstance;
+    });
   }
 
   close() {

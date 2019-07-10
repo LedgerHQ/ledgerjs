@@ -113,11 +113,13 @@ export default class TransportNodeHid extends TransportNodeHidNoEvents {
    * if path="" is not provided, the library will take the first device
    */
   static open(path: ?string) {
-    if (path) {
-      return Promise.resolve(new TransportNodeHid(new HID.HID(path)));
-    }
-    const device = getDevices()[0];
-    if (!device) throw new TransportError("NoDevice", "NoDevice");
-    return Promise.resolve(new TransportNodeHid(new HID.HID(device.path)));
+    return Promise.resolve().then(() => {
+      if (path) {
+        return new TransportNodeHid(new HID.HID(path));
+      }
+      const device = getDevices()[0];
+      if (!device) throw new TransportError("NoDevice", "NoDevice");
+      return new TransportNodeHid(new HID.HID(device.path));
+    });
   }
 }
