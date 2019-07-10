@@ -59,6 +59,12 @@ const devices = {
   }
 };
 
+const productMap = {
+  Blue: "blue",
+  "Nano S": "nanoS",
+  "Nano X": "nanoX"
+};
+
 // $FlowFixMe
 const devicesList: DeviceModel[] = Object.values(devices);
 
@@ -82,8 +88,16 @@ export const getDeviceModel = (id: DeviceModelId): DeviceModel => {
 export const identifyUSBProductId = (usbProductId: number): ?DeviceModel => {
   const legacy = devicesList.find(d => d.legacyUsbProductId === usbProductId);
   if (legacy) return legacy;
+
   const mm = usbProductId >> 8;
   const deviceModel = devicesList.find(d => d.productIdMM === mm);
+  return deviceModel;
+};
+
+export const identifyProductName = (productName: string): ?DeviceModel => {
+  const productId = productMap[productName];
+  const deviceModel = devicesList.find(d => d.id === productId);
+
   return deviceModel;
 };
 
