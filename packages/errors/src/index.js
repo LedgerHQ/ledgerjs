@@ -82,7 +82,7 @@ export const ManagerDeviceLockedError = createCustomErrorClass(
   "ManagerDeviceLocked"
 );
 export const ManagerFirmwareNotEnoughSpaceError = createCustomErrorClass(
-  "ManagerFirmwareNotEnoughSpaceError"
+  "ManagerFirmwareNotEnoughSpace"
 );
 export const ManagerNotEnoughSpaceError = createCustomErrorClass(
   "ManagerNotEnoughSpace"
