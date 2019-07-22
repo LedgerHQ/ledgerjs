@@ -39,6 +39,9 @@ export const DeviceNotGenuineError = createCustomErrorClass("DeviceNotGenuine");
 export const DeviceOnDashboardExpected = createCustomErrorClass(
   "DeviceOnDashboardExpected"
 );
+export const DeviceOnDashboardUnexpected = createCustomErrorClass(
+  "DeviceOnDashboardUnexpected"
+);
 export const DeviceInOSUExpected = createCustomErrorClass(
   "DeviceInOSUExpected"
 );
