@@ -1,18 +1,18 @@
 {
   "private": true,
   "name": "@ledgerhq/test",
-  "version": "4.68.1",
+  "version": "4.68.2",
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-app-btc": "^4.68.0",
-    "@ledgerhq/hw-app-eth": "^4.68.1",
-    "@ledgerhq/hw-app-str": "^4.68.0",
-    "@ledgerhq/hw-app-xrp": "^4.68.0",
-    "@ledgerhq/hw-transport-mocker": "^4.68.0",
-    "@ledgerhq/hw-transport-node-hid": "^4.68.0",
-    "@ledgerhq/hw-transport-webusb": "^4.68.0",
-    "@ledgerhq/logs": "^4.64.0",
+    "@ledgerhq/hw-app-btc": "^4.68.2",
+    "@ledgerhq/hw-app-eth": "^4.68.2",
+    "@ledgerhq/hw-app-str": "^4.68.2",
+    "@ledgerhq/hw-app-xrp": "^4.68.2",
+    "@ledgerhq/hw-transport-mocker": "^4.68.2",
+    "@ledgerhq/hw-transport-node-hid": "^4.68.2",
+    "@ledgerhq/hw-transport-webusb": "^4.68.2",
+    "@ledgerhq/logs": "^4.68.2",
     "budo": "^11.6.2"
   },
   "devDependencies": {
