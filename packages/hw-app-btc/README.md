@@ -129,8 +129,7 @@ To sign a transaction involving standard (P2PKH) inputs, call createPaymentTrans
 -   `sigHashType` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** is the hash type of the transaction to sign, or default (all) (optional, default `SIGHASH_ALL`)
 -   `segwit` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** is an optional boolean indicating wether to use segwit or not (optional, default `false`)
 -   `initialTimestamp` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** is an optional timestamp of the function call to use for coins that necessitate timestamps only, (not the one that the tx will include)
--   `additionals` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** list of additionnal options:
-    -   "bech32" for spending native segwit outputs
+-   `additionals` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** list of additionnal options-   "bech32" for spending native segwit outputs
     -   "abc" for bch
     -   "gold" for btg
     -   "bipxxx" for using BIPxxx
