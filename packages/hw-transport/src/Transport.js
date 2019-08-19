@@ -50,7 +50,7 @@ export type Observer<Ev> = $ReadOnly<{
  * it can be for instance an ID, an file path, a URL,...
  */
 export default class Transport<Descriptor> {
-  exchangeTimeout: number = 30000;
+  exchangeTimeout: number = 60000;
 
   /**
    * Statically check if a transport is supported on the user's platform/browser.
@@ -208,7 +208,7 @@ TransportFoo.open(descriptor).then(transport => ...)
 TransportFoo.create().then(transport => ...)
    */
   static create(
-    openTimeout?: number = 3000,
+    openTimeout?: number = 30000,
     listenTimeout?: number
   ): Promise<Transport<Descriptor>> {
     return new Promise((resolve, reject) => {
