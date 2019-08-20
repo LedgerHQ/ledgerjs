@@ -114,6 +114,9 @@ export const TimeoutTagged = createCustomErrorClass("TimeoutTagged");
 export const UnexpectedBootloader = createCustomErrorClass(
   "UnexpectedBootloader"
 );
+export const MCUNotGenuineToDashboard = createCustomErrorClass(
+  "MCUNotGenuineToDashboard"
+);
 export const UpdateYourApp = createCustomErrorClass("UpdateYourApp");
 export const UserRefusedDeviceNameChange = createCustomErrorClass(
   "UserRefusedDeviceNameChange"
