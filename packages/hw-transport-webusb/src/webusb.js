@@ -23,8 +23,8 @@ export async function getFirstLedgerDevice(): Promise<USBDevice> {
 
 export const isSupported = (): Promise<boolean> =>
   Promise.resolve(
-    // $FlowFixMe
     !!navigator &&
+      // $FlowFixMe
       !!navigator.usb &&
       typeof navigator.usb.getDevices === "function"
   );

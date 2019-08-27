@@ -1,0 +1,42 @@
+{
+  "name": "@ledgerhq/hw-transport-webhid",
+  "version": "4.68.4",
+  "description": "Ledger Hardware Wallet WebHID implementation of the communication layer",
+  "keywords": [
+    "Ledger",
+    "LedgerWallet",
+    "WebHID",
+    "NanoS",
+    "Blue",
+    "Hardware Wallet"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LedgerHQ/ledgerjs"
+  },
+  "bugs": {
+    "url": "https://github.com/LedgerHQ/ledgerjs/issues"
+  },
+  "homepage": "https://github.com/LedgerHQ/ledgerjs",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "lib/TransportWebHID.js",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@ledgerhq/devices": "^4.68.4",
+    "@ledgerhq/errors": "^4.68.4",
+    "@ledgerhq/hw-transport": "^4.68.4",
+    "@ledgerhq/logs": "^4.68.2"
+  },
+  "devDependencies": {
+    "flow-bin": "^0.103.0"
+  },
+  "scripts": {
+    "flow": "flow",
+    "clean": "bash ../../script/clean.sh",
+    "build": "bash ../../script/build.sh",
+    "watch": "bash ../../script/watch.sh",
+    "doc": "bash ../../script/doc.sh"
+  }
+}
