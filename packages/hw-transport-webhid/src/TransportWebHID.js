@@ -12,7 +12,8 @@ import { log } from "@ledgerhq/logs";
 import {
   TransportOpenUserCancelled,
   DisconnectedDeviceDuringOperation,
-  DisconnectedDevice
+  DisconnectedDevice,
+  TransportError
 } from "@ledgerhq/errors";
 
 const ledgerDevices = [{ vendorId: ledgerUSBVendorId }];
@@ -20,15 +21,24 @@ const ledgerDevices = [{ vendorId: ledgerUSBVendorId }];
 const isSupported = () =>
   Promise.resolve(!!(global.navigator && global.navigator.hid));
 
-async function requestLedgerDevice(): Promise<HIDDevice> {
+const getHID = (): HID => {
   // $FlowFixMe
-  const device = await navigator.hid.requestDevice({ filters: ledgerDevices });
+  const { hid } = navigator;
+  if (!hid)
+    throw new TransportError(
+      "navigator.hid is not supported",
+      "HIDNotSupported"
+    );
+  return hid;
+};
+
+async function requestLedgerDevice(): Promise<HIDDevice> {
+  const device = await getHID().requestDevice({ filters: ledgerDevices });
   return device;
 }
 
 async function getLedgerDevices(): Promise<HIDDevice[]> {
-  // $FlowFixMe
-  const devices = await navigator.hid.getDevices();
+  const devices = await getHID().getDevices();
   return devices.filter(d => d.vendorId === ledgerUSBVendorId);
 }
 
@@ -38,20 +48,6 @@ async function getFirstLedgerDevice(): Promise<HIDDevice> {
   return requestLedgerDevice();
 }
 
-export interface HIDDevice {
-  oninputreport: EventHandler;
-  opened: boolean;
-  vendorId: number;
-  productId: number;
-  productName: string;
-  open(): Promise<void>;
-  close(): Promise<void>;
-  sendReport(reportId: number, data: BufferSource): Promise<void>;
-  sendFeatureReport(reportId: number, data: BufferSource): Promise<void>;
-  receiveFeatureReport(reportId: number): Promise<DataView>;
-  addEventListener(string, EventHandler): void;
-  removeEventListener(string, EventHandler): void;
-}
 /**
  * WebHID Transport implementation
  * @example
@@ -84,8 +80,7 @@ export default class TransportWebHID extends Transport<HIDDevice> {
     });
   };
 
-  onInputReport = (e: Event) => {
-    // $FlowFixMe
+  onInputReport = (e: InputReportEvent) => {
     const buffer = new Buffer(e.data.buffer);
     if (this.inputCallback) {
       this.inputCallback(buffer);
@@ -157,16 +152,12 @@ export default class TransportWebHID extends Transport<HIDDevice> {
     await device.open();
     const transport = new TransportWebHID(device);
     const onDisconnect = e => {
-      console.log(e);
-      console.log(e.device);
       if (device === e.device) {
-        // $FlowFixMe
-        navigator.hid.removeEventListener("disconnect", onDisconnect);
+        getHID().removeEventListener("disconnect", onDisconnect);
         transport._emitDisconnect(new DisconnectedDevice());
       }
     };
-    // $FlowFixMe
-    navigator.hid.addEventListener("disconnect", onDisconnect);
+    getHID().addEventListener("disconnect", onDisconnect);
     return transport;
   }
 
