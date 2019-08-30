@@ -30,7 +30,7 @@ Summary of implementations available per platform
 
 |    Platforms     |  U2F/WebAuthn    |                HID                |       WebUSB        |           Bluetooth           |
 |------------------|------------------|-----------------------------------|---------------------|-------------------------------|
-| Web              | @ledgerhq/hw-transport-u2f (Chrome, Opera) | NO                                | @ledgerhq/hw-transport-webusb (Chrome) | @ledgerhq/hw-transport-web-ble (Chrome)          |
+| Web              | @ledgerhq/hw-transport-u2f (Chrome, Opera) | @ledgerhq/hw-transport-webhid _(Chrome DEV under experimental flags)_ | @ledgerhq/hw-transport-webusb (Chrome) | @ledgerhq/hw-transport-web-ble (Chrome)          |
 | Electron/Node.js | NO               | @ledgerhq/hw-transport-node-hid<sup>1</sup> | NO                  | @ledgerhq/hw-transport-node-ble         |
 | iOS              | NO               | NO                                | NO                  | @ledgerhq/react-native-hw-transport-ble |
 | Android          | @ledgerhq/hw-transport-u2f<sup>2</sup> | @ledgerhq/react-native-hid                  | @ledgerhq/hw-transport-webusb<sup>2</sup>    | @ledgerhq/react-native-hw-transport-ble |
@@ -43,7 +43,8 @@ Summary of implementations available per platform
 
 - [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-u2f.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-u2f) [@ledgerhq/hw-transport-u2f](./packages/hw-transport-u2f) **[Web]** **(U2F)** (legacy but reliable) – FIDO U2F api. [check browser support](https://caniuse.com/u2f).
 - [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-webauthn.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-webauthn) [@ledgerhq/hw-transport-webauthn](./packages/hw-transport-webauthn) **[Web]** **(WebAuthn)** (experimental) – WebAuthn api. [check browser support](https://caniuse.com/webauthn).
-- [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-webusb.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-webusb) [@ledgerhq/hw-transport-webusb](./packages/hw-transport-webusb) **[Web]** **(WebUSB)** (experimental) – WebUSB [check browser support](https://caniuse.com/webusb).
+- [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-webusb.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-webusb) [@ledgerhq/hw-transport-webusb](./packages/hw-transport-webusb) **[Web]** **(WebUSB)** – WebUSB [check browser support](https://caniuse.com/webusb).
+- [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-webhid.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-webhid) [@ledgerhq/hw-transport-webhid](./packages/hw-transport-webhid) **[Web]** **(WebHID)** (experimental) – WebHID [check browser support](https://caniuse.com/webhid).
 - [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-web-ble.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-web-ble) [@ledgerhq/hw-transport-web-ble](./packages/hw-transport-web-ble) **[Web]** **(Bluetooth)** – [check browser support](https://caniuse.com/web-bluetooth).
 - [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-node-hid.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-node-hid) [@ledgerhq/hw-transport-node-hid](./packages/hw-transport-node-hid) **[Node]**/Electron **(HID)** – uses `node-hid` and `usb`.
 - [![npm](https://img.shields.io/npm/v/@ledgerhq/hw-transport-node-hid-noevents.svg)](https://www.npmjs.com/package/@ledgerhq/hw-transport-node-hid-noevents) [@ledgerhq/hw-transport-node-hid-noevents](./packages/hw-transport-node-hid-noevents) **[Node]**/Electron **(HID)** – uses **only** `node-hid`. Does not provide USB events.
