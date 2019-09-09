@@ -12,6 +12,7 @@ import { log } from "@ledgerhq/logs";
 import {
   TransportOpenUserCancelled,
   TransportInterfaceNotAvailable,
+  TransportWebUSBGestureRequired,
   DisconnectedDeviceDuringOperation,
   DisconnectedDevice
 } from "@ledgerhq/errors";
@@ -74,7 +75,15 @@ export default class TransportWebUSB extends Transport<USBDevice> {
         }
       },
       error => {
-        observer.error(new TransportOpenUserCancelled(error.message));
+        if (
+          window.DOMException &&
+          error instanceof window.DOMException &&
+          error.code === 18
+        ) {
+          observer.error(new TransportWebUSBGestureRequired(error.message));
+        } else {
+          observer.error(new TransportOpenUserCancelled(error.message));
+        }
       }
     );
     function unsubscribe() {
