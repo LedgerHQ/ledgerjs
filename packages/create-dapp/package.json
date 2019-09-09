@@ -1,6 +1,6 @@
 {
   "name": "create-dapp",
-  "version": "4.68.2",
+  "version": "4.70.0",
   "description": "Create React Ethereum apps, ready to use with Ledger and MetaMask",
   "keywords": [
     "dapp",
