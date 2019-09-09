@@ -35,7 +35,7 @@
     "usb": "^1.6.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.103.0"
+    "flow-bin": "^0.107.0"
   },
   "scripts": {
     "flow": "flow",

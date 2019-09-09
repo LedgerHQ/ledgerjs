@@ -16,6 +16,6 @@
   "license": "Apache-2.0",
   "bin": "scripts/create-dapp",
   "devDependencies": {
-    "flow-bin": "^0.103.0"
+    "flow-bin": "^0.107.0"
   }
 }
