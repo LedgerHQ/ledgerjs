@@ -64,6 +64,7 @@ WebUSB Transport implementation
 #### Parameters
 
 -   `device` **USBDevice** 
+-   `interfaceNumber` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 
 #### Examples
 
