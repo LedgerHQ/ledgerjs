@@ -24,7 +24,6 @@ import {
 } from "./webusb";
 
 const configurationValue = 1;
-const interfaceNumber = 2;
 const endpointNumber = 3;
 
 /**
@@ -39,10 +38,12 @@ export default class TransportWebUSB extends Transport<USBDevice> {
   deviceModel: ?DeviceModel;
   channel = Math.floor(Math.random() * 0xffff);
   packetSize = 64;
+  interfaceNumber: number;
 
-  constructor(device: USBDevice) {
+  constructor(device: USBDevice, interfaceNumber: number) {
     super();
     this.device = device;
+    this.interfaceNumber = interfaceNumber;
     this.deviceModel = identifyUSBProductId(device.productId);
   }
 
@@ -118,13 +119,22 @@ export default class TransportWebUSB extends Transport<USBDevice> {
       await device.selectConfiguration(configurationValue);
     }
     await device.reset();
+    const iface = device.configurations[0].interfaces.find(({ alternates }) =>
+      alternates.some(a => a.interfaceClass === 255)
+    );
+    if (!iface) {
+      throw new TransportInterfaceNotAvailable(
+        "No WebUSB interface found for your Ledger device. Please upgrade firmware or contact techsupport."
+      );
+    }
+    const interfaceNumber = iface.interfaceNumber;
     try {
       await device.claimInterface(interfaceNumber);
     } catch (e) {
       await device.close();
       throw new TransportInterfaceNotAvailable(e.message);
     }
-    const transport = new TransportWebUSB(device);
+    const transport = new TransportWebUSB(device, interfaceNumber);
     const onDisconnect = e => {
       if (device === e.device) {
         // $FlowFixMe
@@ -149,7 +159,7 @@ export default class TransportWebUSB extends Transport<USBDevice> {
    */
   async close(): Promise<void> {
     await this.exchangeBusyPromise;
-    await this.device.releaseInterface(interfaceNumber);
+    await this.device.releaseInterface(this.interfaceNumber);
     await this.device.reset();
     await this.device.close();
   }
