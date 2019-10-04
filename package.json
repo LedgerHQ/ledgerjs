@@ -6,7 +6,6 @@
     "packages/*"
   ],
   "scripts": {
-    "preinstall": "node -e \"if (process.env.npm_execpath.indexOf('yarn') === -1) { console.log('\u001b[31mPlease use yarn\u001b[0m'); process.exit(1); }\"",
     "postinstall": "flow-mono create-symlinks packages/hw-transport/.flowconfig && flow-mono install-types --overwrite --ignoreDeps=peer && rm packages/*/flow-typed/npm/react-redux_v5.x.x.js || echo 'failed to setup flow-typed'",
     "test": "yarn run build && lerna run test && yarn run lint && yarn run flow && yarn run prettier-diff",
     "test-node": "cd packages/test && yarn run test-node",
