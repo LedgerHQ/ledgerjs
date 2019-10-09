@@ -84,8 +84,11 @@ export const ManagerAppAlreadyInstalledError = createCustomErrorClass(
 export const ManagerAppRelyOnBTCError = createCustomErrorClass(
   "ManagerAppRelyOnBTC"
 );
-export const ManagerAppDependencyRequired = createCustomErrorClass(
-  "ManagerAppDependencyRequired"
+export const ManagerAppDepInstallRequired = createCustomErrorClass(
+  "ManagerAppDepInstallRequired"
+);
+export const ManagerAppDepUninstallRequired = createCustomErrorClass(
+  "ManagerAppDepUninstallRequired"
 );
 export const ManagerDeviceLockedError = createCustomErrorClass(
   "ManagerDeviceLocked"
