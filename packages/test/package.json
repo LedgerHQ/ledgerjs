@@ -16,7 +16,7 @@
     "budo": "^11.6.3"
   },
   "devDependencies": {
-    "flow-bin": "^0.107.0"
+    "flow-bin": "^0.109.0"
   },
   "scripts": {
     "test-browser": "budo --ssl lib/index-browser.js",

@@ -26,7 +26,7 @@
   "main": "lib/TransportNodeBle.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@abandonware/noble": "1.9.2-3",
+    "@abandonware/noble": "1.9.2-5",
     "@ledgerhq/devices": "^4.71.0",
     "@ledgerhq/errors": "^4.71.0",
     "@ledgerhq/hw-transport": "^4.71.0",
@@ -35,7 +35,7 @@
     "rxjs": "^6.5.3"
   },
   "devDependencies": {
-    "flow-bin": "^0.107.0"
+    "flow-bin": "^0.109.0"
   },
   "scripts": {
     "flow": "flow",

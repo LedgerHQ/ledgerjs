@@ -32,7 +32,7 @@
     "u2f-api": "0.2.7"
   },
   "devDependencies": {
-    "flow-bin": "^0.107.0"
+    "flow-bin": "^0.109.0"
   },
   "scripts": {
     "flow": "flow",
