@@ -126,6 +126,7 @@ export const UnexpectedBootloader = createCustomErrorClass(
 export const MCUNotGenuineToDashboard = createCustomErrorClass(
   "MCUNotGenuineToDashboard"
 );
+export const RecipientRequired = createCustomErrorClass("RecipientRequired");
 export const UpdateYourApp = createCustomErrorClass("UpdateYourApp");
 export const UserRefusedDeviceNameChange = createCustomErrorClass(
   "UserRefusedDeviceNameChange"
