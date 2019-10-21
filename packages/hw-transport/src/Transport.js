@@ -1,6 +1,20 @@
 //@flow
 
 import EventEmitter from "events";
+import type { DeviceModel } from "@ledgerhq/devices";
+import {
+  TransportError,
+  StatusCodes,
+  getAltStatusMessage,
+  TransportStatusError
+} from "@ledgerhq/errors";
+
+export {
+  TransportError,
+  TransportStatusError,
+  StatusCodes,
+  getAltStatusMessage
+};
 
 /**
  */
@@ -11,10 +25,15 @@ export type Subscription = { unsubscribe: () => void };
 export type Device = Object;
 
 /**
+ * type: add or remove event
+ * descriptor: a parameter that can be passed to open(descriptor)
+ * deviceModel: device info on the model (is it a nano s, nano x, ...)
+ * device: transport specific device info
  */
 export type DescriptorEvent<Descriptor> = {
   type: "add" | "remove",
   descriptor: Descriptor,
+  deviceModel?: ?DeviceModel,
   device?: Device
 };
 /**
@@ -26,102 +45,11 @@ export type Observer<Ev> = $ReadOnly<{
 }>;
 
 /**
- * all possible status codes.
- * @see https://github.com/LedgerHQ/blue-app-btc/blob/d8a03d10f77ca5ef8b22a5d062678eef788b824a/include/btchip_apdu_constants.h#L85-L115
- * @example
- * import { StatusCodes } from "@ledgerhq/hw-transport";
- */
-export const StatusCodes = {
-  PIN_REMAINING_ATTEMPTS: 0x63c0,
-  INCORRECT_LENGTH: 0x6700,
-  COMMAND_INCOMPATIBLE_FILE_STRUCTURE: 0x6981,
-  SECURITY_STATUS_NOT_SATISFIED: 0x6982,
-  CONDITIONS_OF_USE_NOT_SATISFIED: 0x6985,
-  INCORRECT_DATA: 0x6a80,
-  NOT_ENOUGH_MEMORY_SPACE: 0x6a84,
-  REFERENCED_DATA_NOT_FOUND: 0x6a88,
-  FILE_ALREADY_EXISTS: 0x6a89,
-  INCORRECT_P1_P2: 0x6b00,
-  INS_NOT_SUPPORTED: 0x6d00,
-  CLA_NOT_SUPPORTED: 0x6e00,
-  TECHNICAL_PROBLEM: 0x6f00,
-  OK: 0x9000,
-  MEMORY_PROBLEM: 0x9240,
-  NO_EF_SELECTED: 0x9400,
-  INVALID_OFFSET: 0x9402,
-  FILE_NOT_FOUND: 0x9404,
-  INCONSISTENT_FILE: 0x9408,
-  ALGORITHM_NOT_SUPPORTED: 0x9484,
-  INVALID_KCV: 0x9485,
-  CODE_NOT_INITIALIZED: 0x9802,
-  ACCESS_CONDITION_NOT_FULFILLED: 0x9804,
-  CONTRADICTION_SECRET_CODE_STATUS: 0x9808,
-  CONTRADICTION_INVALIDATION: 0x9810,
-  CODE_BLOCKED: 0x9840,
-  MAX_VALUE_REACHED: 0x9850,
-  GP_AUTH_FAILED: 0x6300,
-  LICENSING: 0x6f42,
-  HALTED: 0x6faa
-};
-
-export function getAltStatusMessage(code: number): ?string {
-  switch (code) {
-    // improve text of most common errors
-    case 0x6700:
-      return "Incorrect length";
-    case 0x6982:
-      return "Security not satisfied (dongle locked or have invalid access rights)";
-    case 0x6985:
-      return "Condition of use not satisfied (denied by the user?)";
-    case 0x6a80:
-      return "Invalid data received";
-    case 0x6b00:
-      return "Invalid parameter received";
-  }
-  if (0x6f00 <= code && code <= 0x6fff) {
-    return "Internal error, please report";
-  }
-}
-
-/**
- * TransportError is used for any generic transport errors.
- * e.g. Error thrown when data received by exchanges are incorrect or if exchanged failed to communicate with the device for various reason.
- */
-export function TransportError(message: string, id: string) {
-  this.name = "TransportError";
-  this.message = message;
-  this.stack = new Error().stack;
-  this.id = id;
-}
-//$FlowFixMe
-TransportError.prototype = new Error();
-
-/**
- * Error thrown when a device returned a non success status.
- * the error.statusCode is one of the `StatusCodes` exported by this library.
- */
-export function TransportStatusError(statusCode: number) {
-  this.name = "TransportStatusError";
-  const statusText =
-    Object.keys(StatusCodes).find(k => StatusCodes[k] === statusCode) ||
-    "UNKNOWN_ERROR";
-  const smsg = getAltStatusMessage(statusCode) || statusText;
-  const statusCodeStr = statusCode.toString(16);
-  this.message = `Ledger device: ${smsg} (0x${statusCodeStr})`;
-  this.stack = new Error().stack;
-  this.statusCode = statusCode;
-  this.statusText = statusText;
-}
-//$FlowFixMe
-TransportStatusError.prototype = new Error();
-
-/**
  * Transport defines the generic interface to share between node/u2f impl
  * A **Descriptor** is a parametric type that is up to be determined for the implementation.
  * it can be for instance an ID, an file path, a URL,...
  */
 export default class Transport<Descriptor> {
-  debug: ?(log: string) => void = null;
   exchangeTimeout: number = 30000;
 
   /**
@@ -221,13 +149,10 @@ TransportFoo.open(descriptor).then(transport => ...)
   /**
    * Enable or not logs of the binary exchange
    */
-  setDebugMode(debug: boolean | ((log: string) => void)) {
-    this.debug =
-      typeof debug === "function"
-        ? debug
-        : debug
-          ? log => console.log(log)
-          : null;
+  setDebugMode() {
+    console.warn(
+      "setDebugMode is deprecated. use @ledgerhq/logs instead. No logs are emitted in this anymore."
+    );
   }
 
   /**
@@ -284,7 +209,7 @@ TransportFoo.create().then(transport => ...)
    */
   static create(
     openTimeout?: number = 3000,
-    listenTimeout?: number = 10000
+    listenTimeout?: number
   ): Promise<Transport<Descriptor>> {
     return new Promise((resolve, reject) => {
       let found = false;
@@ -292,15 +217,15 @@ TransportFoo.create().then(transport => ...)
         next: e => {
           found = true;
           if (sub) sub.unsubscribe();
-          clearTimeout(listenTimeoutId);
+          if (listenTimeoutId) clearTimeout(listenTimeoutId);
           this.open(e.descriptor, openTimeout).then(resolve, reject);
         },
         error: e => {
-          clearTimeout(listenTimeoutId);
+          if (listenTimeoutId) clearTimeout(listenTimeoutId);
           reject(e);
         },
         complete: () => {
-          clearTimeout(listenTimeoutId);
+          if (listenTimeoutId) clearTimeout(listenTimeoutId);
           if (!found) {
             reject(
               new TransportError(
@@ -311,14 +236,40 @@ TransportFoo.create().then(transport => ...)
           }
         }
       });
-      const listenTimeoutId = setTimeout(() => {
-        sub.unsubscribe();
-        reject(
-          new TransportError(this.ErrorMessage_ListenTimeout, "ListenTimeout")
-        );
-      }, listenTimeout);
+      const listenTimeoutId = listenTimeout
+        ? setTimeout(() => {
+            sub.unsubscribe();
+            reject(
+              new TransportError(
+                this.ErrorMessage_ListenTimeout,
+                "ListenTimeout"
+              )
+            );
+          }, listenTimeout)
+        : null;
     });
   }
+
+  exchangeBusyPromise: ?Promise<void>;
+
+  // $FlowFixMe
+  exchangeAtomicImpl = async f => {
+    if (this.exchangeBusyPromise) {
+      throw new TransportError("Transport race condition", "RaceCondition");
+    }
+    let resolveBusy;
+    const busyPromise = new Promise(r => {
+      resolveBusy = r;
+    });
+    this.exchangeBusyPromise = busyPromise;
+    try {
+      const res = await f();
+      return res;
+    } finally {
+      if (resolveBusy) resolveBusy();
+      this.exchangeBusyPromise = null;
+    }
+  };
 
   decorateAppAPIMethods(
     self: Object,
@@ -345,15 +296,12 @@ TransportFoo.create().then(transport => ...)
     return async (...args) => {
       const { _appAPIlock } = this;
       if (_appAPIlock) {
-        const e = new TransportError(
-          "Ledger Device is busy (lock " + _appAPIlock + ")",
-          "TransportLocked"
+        return Promise.reject(
+          new TransportError(
+            "Ledger Device is busy (lock " + _appAPIlock + ")",
+            "TransportLocked"
+          )
         );
-        Object.assign(e, {
-          currentLock: _appAPIlock,
-          methodName
-        });
-        return Promise.reject(e);
       }
       try {
         this._appAPIlock = methodName;

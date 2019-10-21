@@ -1,7 +1,7 @@
 {
   "name": "@ledgerhq/react-native-hw-transport-ble",
-  "version": "4.21.0",
-  "description": "Ledger Hardware Wallet bluetooth BLE implementation of the transport layer",
+  "version": "4.72.2",
+  "description": "Ledger Hardware Wallet Bluetooth BLE transport for React Native",
   "keywords": [
     "Ledger",
     "LedgerWallet",
@@ -20,23 +20,28 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "lib/index.js",
+  "main": "lib/BleTransport.js",
   "license": "Apache-2.0",
   "peerDependencies": {
-    "react-native-ble-plx": "^0.8.0"
+    "react-native-ble-plx": "^1.0.1"
   },
   "dependencies": {
-    "@ledgerhq/hw-transport": "^4.21.0",
-    "invariant": "^2.2.4"
+    "@ledgerhq/devices": "^4.72.2",
+    "@ledgerhq/errors": "^4.72.2",
+    "@ledgerhq/hw-transport": "^4.72.2",
+    "@ledgerhq/logs": "^4.72.0",
+    "invariant": "^2.2.4",
+    "rxjs": "^6.5.3",
+    "uuid": "^3.3.3"
   },
   "devDependencies": {
-    "flow-bin": "^0.68.0",
-    "flow-typed": "^2.4.0"
+    "flow-bin": "^0.109.0"
   },
   "scripts": {
     "flow": "flow",
     "clean": "bash ../../script/clean.sh",
     "build": "bash ../../script/build.sh",
-    "watch": "bash ../../script/watch.sh"
+    "watch": "bash ../../script/watch.sh",
+    "doc": "bash ../../script/doc.sh"
   }
 }

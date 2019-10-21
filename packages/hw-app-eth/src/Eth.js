@@ -18,7 +18,17 @@
 
 // FIXME drop:
 import { splitPath, foreach } from "./utils";
+import { EthAppPleaseEnableContractData } from "@ledgerhq/errors";
 import type Transport from "@ledgerhq/hw-transport";
+
+const remapTransactionRelatedErrors = e => {
+  if (e && e.statusCode === 0x6a80) {
+    return new EthAppPleaseEnableContractData(
+      "Please enable Contract data on the Ethereum app Settings"
+    );
+  }
+  return e;
+};
 
 /**
  * Ethereum API
@@ -30,17 +40,18 @@ import type Transport from "@ledgerhq/hw-transport";
 export default class Eth {
   transport: Transport<*>;
 
-  constructor(transport: Transport<*>) {
+  constructor(transport: Transport<*>, scrambleKey: string = "w0w") {
     this.transport = transport;
     transport.decorateAppAPIMethods(
       this,
       [
         "getAddress",
+        "provideERC20TokenInformation",
         "signTransaction",
         "signPersonalMessage",
         "getAppConfiguration"
       ],
-      "w0w"
+      scrambleKey
     );
   }
 
@@ -51,7 +62,7 @@ export default class Eth {
    * @option boolChaincode optionally enable or not the chaincode request
    * @return an object with a publicKey, address and (optionally) chainCode
    * @example
-   * eth.getAddress("44'/60'/0'/0'/0").then(o => o.address)
+   * eth.getAddress("44'/60'/0'/0/0").then(o => o.address)
    */
   getAddress(
     path: string,
@@ -104,9 +115,38 @@ export default class Eth {
   }
 
   /**
+   * This commands provides a trusted description of an ERC 20 token
+   * to associate a contract address with a ticker and number of decimals.
+   *
+   * It shall be run immediately before performing a transaction involving a contract
+   * calling this contract address to display the proper token information to the user if necessary.
+   *
+   * @param {*} info: a blob from "erc20.js" utilities that contains all token information.
+   *
+   * @example
+   * import { byContractAddress } from "@ledgerhq/hw-app-eth/erc20"
+   * const zrxInfo = byContractAddress("0xe41d2489571d322189246dafa5ebde1f4699f498")
+   * if (zrxInfo) await appEth.provideERC20TokenInformation(zrxInfo)
+   * const signed = await appEth.signTransaction(path, rawTxHex)
+   */
+  provideERC20TokenInformation({ data }: { data: Buffer }): Promise<boolean> {
+    return this.transport.send(0xe0, 0x0a, 0x00, 0x00, data).then(
+      () => true,
+      e => {
+        if (e && e.statusCode === 0x6d00) {
+          // this case happen for older version of ETH app, since older app version had the ERC20 data hardcoded, it's fine to assume it worked.
+          // we return a flag to know if the call was effective or not
+          return false;
+        }
+        throw e;
+      }
+    );
+  }
+
+  /**
    * You can sign a transaction and retrieve v, r, s given the raw transaction and the BIP 32 path of the account to sign
    * @example
-   eth.signTransaction("44'/60'/0'/0'/0", "e8018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a2487400080").then(result => ...)
+   eth.signTransaction("44'/60'/0'/0/0", "e8018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a2487400080").then(result => ...)
    */
   signTransaction(
     path: string,
@@ -148,12 +188,17 @@ export default class Eth {
         .then(apduResponse => {
           response = apduResponse;
         })
-    ).then(() => {
-      const v = response.slice(0, 1).toString("hex");
-      const r = response.slice(1, 1 + 32).toString("hex");
-      const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
-      return { v, r, s };
-    });
+    ).then(
+      () => {
+        const v = response.slice(0, 1).toString("hex");
+        const r = response.slice(1, 1 + 32).toString("hex");
+        const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
+        return { v, r, s };
+      },
+      e => {
+        throw remapTransactionRelatedErrors(e);
+      }
+    );
   }
 
   /**
@@ -173,7 +218,7 @@ export default class Eth {
   /**
   * You can sign a message according to eth_sign RPC call and retrieve v, r, s given the message and the BIP 32 path of the account to sign.
   * @example
-eth.signPersonalMessage("44'/60'/0'/0'/0", Buffer.from("test").toString("hex")).then(result => {
+eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).then(result => {
   var v = result['v'] - 27;
   v = v.toString(16);
   if (v.length < 2) {

@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/web3-subprovider",
-  "version": "4.21.0",
+  "version": "4.73.0",
   "description": "Ledger Hardware Wallet Ethereum Web3 subprovider",
   "keywords": [
     "Ledger",
@@ -28,21 +28,21 @@
   "main": "lib/index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-app-eth": "^4.21.0",
-    "@ledgerhq/hw-transport": "^4.21.0",
-    "@ledgerhq/hw-transport-u2f": "^4.21.0",
-    "ethereumjs-tx": "^1.3.3",
+    "@ledgerhq/hw-app-eth": "^4.73.0",
+    "@ledgerhq/hw-transport": "^4.72.2",
+    "@ledgerhq/hw-transport-u2f": "^4.72.2",
+    "ethereumjs-tx": "^1.3.7",
     "strip-hex-prefix": "^1.0.0",
-    "web3-provider-engine": "^14.0.2"
+    "web3-provider-engine": "^14.1.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.68.0",
-    "flow-typed": "^2.4.0"
+    "flow-bin": "^0.109.0"
   },
   "scripts": {
     "flow": "flow",
     "clean": "bash ../../script/clean.sh",
     "build": "bash ../../script/build.sh",
-    "watch": "bash ../../script/watch.sh"
+    "watch": "bash ../../script/watch.sh",
+    "doc": "bash ../../script/doc.sh"
   }
 }

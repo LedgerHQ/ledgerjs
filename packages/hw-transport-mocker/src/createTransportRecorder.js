@@ -1,11 +1,13 @@
 //@flow
 import Transport from "@ledgerhq/hw-transport";
-import type RecordStore from "./RecordStore";
+import type { RecordStore } from "./RecordStore";
+
 export default (
   DecoratedTransport: Class<Transport<*>>,
   recordStore: RecordStore
 ): Class<Transport<*>> => {
   class TransportRecorder extends Transport<*> {
+    static recordStore = recordStore;
     static isSupported = DecoratedTransport.isSupported;
     static list = DecoratedTransport.list;
     static listen = DecoratedTransport.listen;
