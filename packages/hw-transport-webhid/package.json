@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-transport-webhid",
-  "version": "4.72.2",
+  "version": "4.73.1",
   "description": "Ledger Hardware Wallet WebHID implementation of the communication layer",
   "keywords": [
     "Ledger",
@@ -24,9 +24,9 @@
   "main": "lib/TransportWebHID.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/devices": "^4.72.2",
+    "@ledgerhq/devices": "^4.73.1",
     "@ledgerhq/errors": "^4.72.2",
-    "@ledgerhq/hw-transport": "^4.72.2",
+    "@ledgerhq/hw-transport": "^4.73.1",
     "@ledgerhq/logs": "^4.72.0"
   },
   "devDependencies": {
