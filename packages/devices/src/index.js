@@ -28,14 +28,16 @@ const devices = {
     productName: "Ledger Blue",
     productIdMM: 0,
     legacyUsbProductId: 0x0000,
-    usbOnly: true
+    usbOnly: true,
+    memorySize: 480 * 1024
   },
   nanoS: {
     id: "nanoS",
     productName: "Ledger Nano S",
     productIdMM: 1,
     legacyUsbProductId: 0x0001,
-    usbOnly: true
+    usbOnly: true,
+    memorySize: 320 * 1024
   },
   nanoX: {
     id: "nanoX",
@@ -43,6 +45,7 @@ const devices = {
     productIdMM: 4,
     legacyUsbProductId: 0x0004,
     usbOnly: false,
+    memorySize: 2 * 1024 * 1024,
     bluetoothSpec: [
       {
         // this is the legacy one (prototype version). we will eventually drop it.
@@ -145,6 +148,7 @@ export type DeviceModel = {
   productIdMM: number,
   legacyUsbProductId: number,
   usbOnly: boolean,
+  memorySize: number,
   bluetoothSpec?: Array<{
     serviceUuid: string,
     writeUuid: string,
