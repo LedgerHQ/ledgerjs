@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/devices",
-  "version": "4.73.1",
+  "version": "4.73.2",
   "description": "Ledger devices",
   "keywords": [
     "Ledger"
@@ -22,7 +22,7 @@
     "flow-bin": "^0.109.0"
   },
   "dependencies": {
-    "@ledgerhq/errors": "^4.72.2",
+    "@ledgerhq/errors": "^4.73.2",
     "@ledgerhq/logs": "^4.72.0",
     "rxjs": "^6.5.3"
   },
