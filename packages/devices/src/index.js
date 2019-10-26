@@ -29,7 +29,8 @@ const devices = {
     productIdMM: 0,
     legacyUsbProductId: 0x0000,
     usbOnly: true,
-    memorySize: 480 * 1024
+    memorySize: 480 * 1024,
+    blockSize: 4 * 1024
   },
   nanoS: {
     id: "nanoS",
@@ -37,7 +38,8 @@ const devices = {
     productIdMM: 1,
     legacyUsbProductId: 0x0001,
     usbOnly: true,
-    memorySize: 320 * 1024
+    memorySize: 320 * 1024,
+    blockSize: 4 * 1024
   },
   nanoX: {
     id: "nanoX",
@@ -46,6 +48,7 @@ const devices = {
     legacyUsbProductId: 0x0004,
     usbOnly: false,
     memorySize: 2 * 1024 * 1024,
+    blockSize: 4 * 1024,
     bluetoothSpec: [
       {
         // this is the legacy one (prototype version). we will eventually drop it.
@@ -149,6 +152,7 @@ export type DeviceModel = {
   legacyUsbProductId: number,
   usbOnly: boolean,
   memorySize: number,
+  blockSize: number,
   bluetoothSpec?: Array<{
     serviceUuid: string,
     writeUuid: string,
