@@ -9,10 +9,53 @@
 , yarn2nix ? import (reflex-platform.hackGet ./deps/yarn2nix) { inherit pkgs; }
 }:
 
-yarn2nix.mkYarnPackage {
-  name = "ledgerjs";
-  src = ./.;
-  packageJSON = ./package.json;
-  yarnLock = ./yarn.lock;
-  yarnNix = ./yarn.nix;
+rec {
+
+  # everything
+  ledgerjs = yarn2nix.mkYarnPackage {
+    name = "ledgerjs";
+    src = pkgs.lib.cleanSource ./.;
+    yarnNix = ./yarn.nix;
+  };
+
+  # sub-packages
+
+  logs = yarn2nix.mkYarnPackage {
+    name = "logs";
+    src = pkgs.lib.cleanSource ./packages/logs;
+    yarnLock = ./yarn.lock;
+    yarnNix = ./yarn.nix;
+  };
+
+  errors = yarn2nix.mkYarnPackage {
+    name = "errors";
+    src = pkgs.lib.cleanSource ./packages/errors;
+    yarnLock = ./yarn.lock;
+    yarnNix = ./yarn.nix;
+  };
+
+  devices = yarn2nix.mkYarnPackage {
+    name = "devices";
+    src = pkgs.lib.cleanSource ./packages/devices;
+    yarnLock = ./yarn.lock;
+    yarnNix = ./yarn.nix;
+    workspaceDependencies = [ errors logs ];
+  };
+
+  hw-transport = yarn2nix.mkYarnPackage {
+    name = "hw-transport";
+    src = pkgs.lib.cleanSource ./packages/hw-transport;
+    yarnLock = ./yarn.lock;
+    yarnNix = ./yarn.nix;
+    workspaceDependencies = [ errors devices ];
+  };
+
+  hw-app-xtz = yarn2nix.mkYarnPackage {
+    name = "hw-app-xtz";
+    src = pkgs.lib.cleanSource ./packages/hw-app-xtz;
+    yarnLock = ./yarn.lock;
+    yarnNix = ./yarn.nix;
+    workspaceDependencies = [ hw-transport ];
+  };
+
 }
