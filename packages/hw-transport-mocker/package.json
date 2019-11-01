@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-transport-mocker",
-  "version": "4.21.0",
+  "version": "4.73.4",
   "description": "Ledger Hardware Wallet mocker utilities used for tests",
   "keywords": [
     "Ledger",
@@ -23,16 +23,17 @@
   "main": "lib/index.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^4.21.0"
+    "@ledgerhq/hw-transport": "^4.73.4",
+    "@ledgerhq/logs": "^4.72.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.68.0",
-    "flow-typed": "^2.4.0"
+    "flow-bin": "^0.109.0"
   },
   "scripts": {
     "flow": "flow",
     "clean": "bash ../../script/clean.sh",
     "build": "bash ../../script/build.sh",
-    "watch": "bash ../../script/watch.sh"
+    "watch": "bash ../../script/watch.sh",
+    "doc": "bash ../../script/doc.sh"
   }
 }

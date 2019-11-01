@@ -1,0 +1,42 @@
+{
+  "name": "@ledgerhq/hw-transport-webusb",
+  "version": "4.73.4",
+  "description": "Ledger Hardware Wallet WebUSB implementation of the communication layer",
+  "keywords": [
+    "Ledger",
+    "LedgerWallet",
+    "webusb",
+    "NanoS",
+    "Blue",
+    "Hardware Wallet"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LedgerHQ/ledgerjs"
+  },
+  "bugs": {
+    "url": "https://github.com/LedgerHQ/ledgerjs/issues"
+  },
+  "homepage": "https://github.com/LedgerHQ/ledgerjs",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "lib/TransportWebUSB.js",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@ledgerhq/devices": "^4.73.4",
+    "@ledgerhq/errors": "^4.73.4",
+    "@ledgerhq/hw-transport": "^4.73.4",
+    "@ledgerhq/logs": "^4.72.0"
+  },
+  "devDependencies": {
+    "flow-bin": "^0.109.0"
+  },
+  "scripts": {
+    "flow": "flow",
+    "clean": "bash ../../script/clean.sh",
+    "build": "bash ../../script/build.sh",
+    "watch": "bash ../../script/watch.sh",
+    "doc": "bash ../../script/doc.sh"
+  }
+}
