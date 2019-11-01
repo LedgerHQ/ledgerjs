@@ -25,11 +25,10 @@
   "main": "lib/Tezos.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^4.21.0"
+    "@ledgerhq/hw-transport": "^4.73.4"
   },
   "devDependencies": {
-    "flow-bin": "^0.68.0",
-    "flow-typed": "^2.4.0"
+    "flow-bin": "^0.109.0"
   },
   "scripts": {
     "flow": "flow",
