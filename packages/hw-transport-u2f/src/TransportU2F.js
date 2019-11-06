@@ -1,7 +1,9 @@
 //@flow
 
 import { sign, isSupported } from "u2f-api";
-import Transport, { TransportError } from "@ledgerhq/hw-transport";
+import Transport from "@ledgerhq/hw-transport";
+import { log } from "@ledgerhq/logs";
+import { TransportError } from "@ledgerhq/errors";
 
 function wrapU2FTransportError(originalError, message, id) {
   const err = new TransportError(message, id);
@@ -33,8 +35,8 @@ const normal64 = (base64: string) =>
 function attemptExchange(
   apdu: Buffer,
   timeoutMillis: number,
-  debug: *,
-  scrambleKey: Buffer
+  scrambleKey: Buffer,
+  unwrap: boolean
 ): Promise<Buffer> {
   const keyHandle = wrapApdu(apdu, scrambleKey);
   const challenge = Buffer.from(
@@ -47,17 +49,18 @@ function attemptExchange(
     challenge: webSafe64(challenge.toString("base64")),
     appId: location.origin
   };
-  if (debug) {
-    debug("=> " + apdu.toString("hex"));
-  }
+  log("apdu", "=> " + apdu.toString("hex"));
   return sign(signRequest, timeoutMillis / 1000).then(response => {
     const { signatureData } = response;
     if (typeof signatureData === "string") {
       const data = Buffer.from(normal64(signatureData), "base64");
-      const result = data.slice(5);
-      if (debug) {
-        debug("<= " + result.toString("hex"));
+      let result;
+      if (!unwrap) {
+        result = data;
+      } else {
+        result = data.slice(5);
       }
+      log("apdu", "<= " + result.toString("hex"));
       return result;
     } else {
       throw response;
@@ -86,10 +89,14 @@ function isTimeoutU2FError(u2fError) {
 export default class TransportU2F extends Transport<null> {
   static isSupported = isSupported;
 
-  // this transport is not discoverable but we are going to guess if it is here with isSupported()
+  /*
+   */
   static list = (): * =>
+    // this transport is not discoverable but we are going to guess if it is here with isSupported()
     isSupported().then(supported => (supported ? [null] : []));
 
+  /*
+   */
   static listen = (observer: *) => {
     let unsubscribed = false;
     isSupported().then(supported => {
@@ -117,40 +124,12 @@ export default class TransportU2F extends Transport<null> {
 
   scrambleKey: Buffer;
 
+  unwrap: boolean = true;
+
   /**
    * static function to create a new Transport from a connected Ledger device discoverable via U2F (browser support)
    */
   static async open(_: *, _openTimeout?: number = 5000): Promise<TransportU2F> {
-    /*try {
-      // This is not a valid exchange at all, but this allows to have a way to know if there is a device.
-      // in case it reaches the timeout, we will throw timeout error, in other case, we will return the U2FTransport.
-      await attemptExchange(
-        Buffer.alloc(0),
-        openTimeout,
-        false,
-        Buffer.alloc(1)
-      );
-    } catch (e) {
-      const isU2FError = typeof e.metaData === "object";
-      if (isU2FError) {
-        if (isTimeoutU2FError(e)) {
-          emitDisconnect();
-          throw wrapU2FTransportError(
-            e,
-            "Ledger device unreachable.\n" +
-              "Make sure the device is plugged, unlocked and with the correct application opened." +
-              (location && location.protocol !== "https:"
-                ? "\nYou are not running on HTTPS. U2F is likely to not work in unsecure protocol."
-                : ""),
-            "Timeout"
-          );
-        } else {
-          // we don't throw if it's another u2f error
-        }
-      } else {
-        throw e;
-      }
-    }*/
     return new TransportU2F();
   }
 
@@ -159,13 +138,18 @@ export default class TransportU2F extends Transport<null> {
     transportInstances.push(this);
   }
 
+  /**
+   * Exchange with the device using APDU protocol.
+   * @param apdu
+   * @returns a promise of apdu response
+   */
   async exchange(apdu: Buffer): Promise<Buffer> {
     try {
       return await attemptExchange(
         apdu,
         this.exchangeTimeout,
-        this.debug,
-        this.scrambleKey
+        this.scrambleKey,
+        this.unwrap
       );
     } catch (e) {
       const isU2FError = typeof e.metaData === "object";
@@ -185,16 +169,20 @@ export default class TransportU2F extends Transport<null> {
     }
   }
 
+  /**
+   */
   setScrambleKey(scrambleKey: string) {
     this.scrambleKey = Buffer.from(scrambleKey, "ascii");
   }
 
+  /**
+   */
+  setUnwrap(unwrap: boolean) {
+    this.unwrap = unwrap;
+  }
+
   close(): Promise<void> {
-    const i = transportInstances.indexOf(this);
-    if (i === -1) {
-      throw new Error("invalid transport instance");
-    }
-    transportInstances.splice(i, 1);
+    // u2f have no way to clean things up
     return Promise.resolve();
   }
 }

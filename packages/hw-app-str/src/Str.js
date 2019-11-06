@@ -59,12 +59,12 @@ const TX_MAX_SIZE = 1540;
 export default class Str {
   transport: Transport<*>;
 
-  constructor(transport: Transport<*>) {
+  constructor(transport: Transport<*>, scrambleKey: string = "l0v") {
     this.transport = transport;
     transport.decorateAppAPIMethods(
       this,
       ["getAppConfiguration", "getPublicKey", "signTransaction", "signHash"],
-      "l0v"
+      scrambleKey
     );
   }
 
@@ -86,7 +86,8 @@ export default class Str {
    * @param path a path in BIP 32 format
    * @option boolValidate optionally enable key pair validation
    * @option boolDisplay optionally enable or not the display
-   * @return an object with the publicKey
+   * @return an object with the publicKey (using XLM public key format) and
+   * the raw ed25519 public key.
    * @example
    * str.getPublicKey("44'/148'/0'").then(o => o.publicKey)
    */
@@ -94,7 +95,7 @@ export default class Str {
     path: string,
     boolValidate?: boolean,
     boolDisplay?: boolean
-  ): Promise<{ publicKey: string }> {
+  ): Promise<{ publicKey: string, raw: Buffer }> {
     checkStellarBip32Path(path);
 
     let apdus = [];
@@ -144,7 +145,8 @@ export default class Str {
         }
       }
       return {
-        publicKey: publicKey
+        publicKey: publicKey,
+        raw: rawPublicKey
       };
     });
   }

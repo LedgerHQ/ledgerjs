@@ -1,3 +1,4 @@
+import { listen } from "@ledgerhq/logs";
 import testBtc from "./testBtc";
 import testBtc2 from "./testBtc2";
 import testBtc3 from "./testBtc3";
@@ -14,6 +15,10 @@ import testXrp3 from "./testXrp3";
 import testStr from "./testStr";
 import testStr2 from "./testStr2";
 import testStr3 from "./testStr3";
+
+listen(e => {
+  console.log(`${e.type}: ${e.message}`);
+});
 
 function expectAppContext(appName) {
   // TODO improve this by waiting user to do an action?
@@ -62,11 +67,13 @@ const defaultWaitForAppSwitch = step =>
     }, 1000);
   });
 
-export default async (
-  getTransportClass,
-  timeout = 5000,
-  waitForAppSwitch = defaultWaitForAppSwitch
-) => {
+export default async opts => {
+  const { getTransportClass, timeout, waitForAppSwitch, afterTest } = {
+    timeout: 5000,
+    waitForAppSwitch: defaultWaitForAppSwitch,
+    afterTest: (_s, _t) => {},
+    ...opts
+  };
   async function createTransportViaList(Transport) {
     const descriptors = await Transport.list();
     if (descriptors.length === 0) throw "No device found";
@@ -121,7 +128,6 @@ export default async (
       createTransportViaListen
     ][i % 3];
     let transport = await createTransport(Transport);
-    transport.setDebugMode(true);
 
     if (step.name) {
       console.info("Running test " + step.name);
@@ -131,11 +137,12 @@ export default async (
       if (result) {
         console.log(result);
       }
+      await transport.close();
+      afterTest(step, Transport);
     } catch (err) {
+      await transport.close();
       console.error("Failed test " + step.name + ":", err);
       throw err;
-    } finally {
-      transport.close();
     }
   }, Promise.resolve());
 };
