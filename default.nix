@@ -9,53 +9,105 @@
 , yarn2nix ? import (reflex-platform.hackGet ./deps/yarn2nix) { inherit pkgs; }
 }:
 
-rec {
-
-  # everything
-  ledgerjs = yarn2nix.mkYarnPackage {
-    name = "ledgerjs";
-    src = pkgs.lib.cleanSource ./.;
+let
+  # dependencies of top-level
+  deps = yarn2nix.mkYarnPackage {
+    name = "ledgerjs-deps";
+    src = builtins.filterSource (path: _: builtins.elem (builtins.baseNameOf path) ["package.json" "yarn.lock"]) ./.;
     yarnNix = ./yarn.nix;
   };
 
+  mkLedgerJSPackage = { name, src, workspaceDependencies ? [], postInstall ? "" }:
+    yarn2nix.mkYarnPackage {
+      inherit name workspaceDependencies;
+      src = pkgs.lib.cleanSource src;
+      yarnLock = ./yarn.lock;
+      yarnNix = ./yarn.nix;
+      extraBuildInputs = [ pkgs.systemd pkgs.v8_5_x pkgs.nodejs pkgs.libusb1 ];
+      NIX_CFLAGS_COMPILE = "-I${pkgs.nodejs}/include/node -I${pkgs.lib.getDev pkgs.libusb1}/include/libusb-1.0";
+      buildPhase = ''
+        PATH=${deps}/libexec/ledger-libs/node_modules/.bin:$PATH
+        export NODE_PATH=${deps}/libexec/ledger-libs/node_modules
+        pushd deps/$pname
+        babel --presets env,flow,react,stage-0 --source-maps -d lib src
+        flow-copy-source -v src lib
+        popd
+
+        PATH=${pkgs.python2}/bin:$PATH
+        if [ -d node_modules/usb/ ]; then
+          (cd node_modules/usb/ && node-gyp rebuild --nodedir=${pkgs.lib.getDev pkgs.nodejs}/include/node)
+        fi
+
+        if [ -d node_modules/node-hid/ ]; then
+          (cd node_modules/node-hid/ && node-gyp rebuild --nodedir=${pkgs.lib.getDev pkgs.nodejs}/include/node)
+        fi
+      '';
+      inherit postInstall;
+    };
+in rec {
   # sub-packages
 
-  logs = yarn2nix.mkYarnPackage {
+  logs = mkLedgerJSPackage {
     name = "logs";
-    src = pkgs.lib.cleanSource ./packages/logs;
-    yarnLock = ./yarn.lock;
-    yarnNix = ./yarn.nix;
+    src = ./packages/logs;
   };
 
-  errors = yarn2nix.mkYarnPackage {
+  errors = mkLedgerJSPackage {
     name = "errors";
-    src = pkgs.lib.cleanSource ./packages/errors;
-    yarnLock = ./yarn.lock;
-    yarnNix = ./yarn.nix;
+    src = ./packages/errors;
   };
 
-  devices = yarn2nix.mkYarnPackage {
+  devices = mkLedgerJSPackage {
     name = "devices";
-    src = pkgs.lib.cleanSource ./packages/devices;
-    yarnLock = ./yarn.lock;
-    yarnNix = ./yarn.nix;
+    src = ./packages/devices;
     workspaceDependencies = [ errors logs ];
   };
 
-  hw-transport = yarn2nix.mkYarnPackage {
+  hw-transport = mkLedgerJSPackage {
     name = "hw-transport";
-    src = pkgs.lib.cleanSource ./packages/hw-transport;
-    yarnLock = ./yarn.lock;
-    yarnNix = ./yarn.nix;
+    src = ./packages/hw-transport;
     workspaceDependencies = [ errors devices ];
   };
 
-  hw-app-xtz = yarn2nix.mkYarnPackage {
+  hw-transport-node-hid-noevents = mkLedgerJSPackage {
+    name = "hw-transport-node-hid-noevents";
+    src = ./packages/hw-transport-node-hid-noevents;
+    workspaceDependencies = [ errors devices hw-transport logs ];
+  };
+
+  hw-transport-node-hid = mkLedgerJSPackage {
+    name = "hw-transport-node-hid";
+    src = ./packages/hw-transport-node-hid;
+    workspaceDependencies = [ errors devices hw-transport hw-transport-node-hid-noevents logs ];
+  };
+
+  hw-app-xtz = mkLedgerJSPackage {
     name = "hw-app-xtz";
-    src = pkgs.lib.cleanSource ./packages/hw-app-xtz;
-    yarnLock = ./yarn.lock;
-    yarnNix = ./yarn.nix;
+    src = ./packages/hw-app-xtz;
     workspaceDependencies = [ hw-transport ];
+  };
+
+  hw-transport-mocker = mkLedgerJSPackage {
+    name = "hw-transport-mocker";
+    src = ./packages/hw-transport-mocker;
+    workspaceDependencies = [ hw-transport logs ];
+  };
+
+  hw-app-xtz-test = let
+    runTests = pkgs.writeText "run-tests.sh" ''
+      #!/usr/bin/env sh
+      PATH=${pkgs.nodejs}/bin:${deps}/libexec/ledger-libs/node_modules/.bin:$PATH
+      DIR=$(cd "$(dirname ''${BASH_SOURCE[0]})" >/dev/null 2>&1 && pwd)
+      cd $DIR/../libexec/@ledgerhq/hw-app-xtz-test/deps/@ledgerhq/hw-app-xtz-test
+      node lib/node-index.js
+    '';
+  in mkLedgerJSPackage {
+    name = "hw-app-xtz-test";
+    src = ./packages/hw-app-xtz-test;
+    workspaceDependencies = [ hw-app-xtz hw-transport-node-hid hw-transport-mocker ];
+    postInstall = ''
+      install -m 755 ${runTests} $out/bin/run-tests
+    '';
   };
 
 }

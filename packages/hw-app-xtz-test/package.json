@@ -1,0 +1,26 @@
+{
+  "name": "@ledgerhq/hw-app-xtz-test",
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LedgerHQ/ledgerjs"
+  },
+  "bugs": {
+    "url": "https://github.com/LedgerHQ/ledgerjs/issues"
+  },
+  "homepage": "https://github.com/LedgerHQ/ledgerjs",
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@ledgerhq/hw-transport": "^4.73.4",
+    "@ledgerhq/hw-transport-mocker": "^4.73.4",
+    "@ledgerhq/hw-transport-node-hid": "^4.73.4"
+  },
+  "devDependencies": {
+    "flow-bin": "^0.109.0",
+    "babel-polyfill": "^6.26.0"
+  },
+  "main": "lib/runTests.js"
+}
