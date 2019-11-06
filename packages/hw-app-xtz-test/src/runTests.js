@@ -8,6 +8,7 @@ import { listen } from "@ledgerhq/logs";
 import testXtz from "./testXtz";
 import testXtz2 from "./testXtz2";
 import testXtz3 from "./testXtz3";
+import testXtz4 from "./testXtz4";
 
 listen(e => {
   console.log(`${e.type}: ${e.message}`);
@@ -25,7 +26,8 @@ var tests = [
   expectAppContext("Tezos"),
   { name: "testXtz", run: testXtz },
   { name: "testXtz2", run: testXtz2 },
-  { name: "testXtz3", run: testXtz3 }
+  { name: "testXtz3", run: testXtz3 },
+  { name: "testXtz4", run: testXtz4 }
 ];
 
 export default async opts => {
