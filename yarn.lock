@@ -5260,9 +5260,9 @@ ethereum-common@^0.0.18:
   resolved "https://registry.yarnpkg.com/ethereum-common/-/ethereum-common-0.0.18.tgz#2fdc3576f232903358976eb39da783213ff9523f"
   integrity sha1-L9w1dvIykDNYl26znaeDIT/5Uj8=
 
-"ethereumjs-abi@https://github.com/ethereumjs/ethereumjs-abi.git":
+"ethereumjs-abi@^0.6.5":
   version "0.6.5"
-  resolved "https://github.com/ethereumjs/ethereumjs-abi.git#f6e71883a108f3e1b26fb28da9eb95108b7f4499"
+  resolved "https://registry.npmjs.org/ethereumjs-abi/-/ethereumjs-abi-0.6.5.tgz#5a637ef16ab43473fa72a29ad90871405b3f5241"
   dependencies:
     bn.js "^4.10.0"
     ethereumjs-util "^5.0.0"

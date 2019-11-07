@@ -4954,11 +4954,11 @@
       };
     }
     {
-      name = "https___github.com_ethereumjs_ethereumjs_abi.git";
+      name = "https___registry.npmjs.org_ethereumjs_abi___ethereumjs_abi_0.6.5.tgz";
       path = fetchurl {
-        name = "https___github.com_ethereumjs_ethereumjs_abi.git";
-        url  = "https://github.com/ethereumjs/ethereumjs-abi.git";
-        sha1 = "f6e71883a108f3e1b26fb28da9eb95108b7f4499";
+        name = "https___registry.npmjs.org_ethereumjs_abi___ethereumjs_abi_0.6.5.tgz";
+        url  = "https://registry.npmjs.org/ethereumjs-abi/-/ethereumjs-abi-0.6.5.tgz";
+        sha1 = "5a637ef16ab43473fa72a29ad90871405b3f5241";
       };
     }
     {
