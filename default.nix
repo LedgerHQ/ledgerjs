@@ -87,11 +87,20 @@ in rec {
     workspaceDependencies = [ hw-transport ];
   };
 
+  hw-transport-u2f = mkLedgerJSPackage {
+    name = "hw-transport-u2f";
+    src = ./packages/hw-transport-u2f;
+    workspaceDependencies = [ hw-transport errors logs ];
+  };
+
   hw-transport-mocker = mkLedgerJSPackage {
     name = "hw-transport-mocker";
     src = ./packages/hw-transport-mocker;
     workspaceDependencies = [ hw-transport logs ];
   };
+
+  # Some quick tests for hw-app-xtz
+  # Run using the ${hw-app-xtz-test}/bin/run-tests binary
 
   hw-app-xtz-test = let
     runTests = pkgs.writeText "run-tests.sh" ''
@@ -109,5 +118,37 @@ in rec {
       install -m 755 ${runTests} $out/bin/run-tests
     '';
   };
+
+  # Single file version of hw-app-xtz
+
+  hw-app-xtz-packed = let
+    index = pkgs.writeText "index.js" ''
+      require("babel-polyfill");
+      const Transport = require("@ledgerhq/hw-transport-u2f").default;
+      const App = require("@ledgerhq/hw-app-xtz").default;
+      module.exports = { app: App, transport: Transport };
+    '';
+    webpack-config = pkgs.writeText "webpack.config.js" ''
+module.exports = {
+  resolve: {
+    modules: [
+      "${hw-app-xtz}/libexec/@ledgerhq/hw-app-xtz/node_modules",
+      "${hw-transport-u2f}/libexec/@ledgerhq/hw-transport-u2f/node_modules",
+      "node_modules",
+
+      // TODO: remove!
+      "${hw-app-xtz-test}/libexec/@ledgerhq/hw-app-xtz-test/node_modules"
+    ]
+  }
+};
+    '';
+  in pkgs.runCommand "hw-app-xtz.js" {
+    buildInputs = [ pkgs.nodePackages.webpack-cli pkgs.nodePackages.webpack pkgs.nodejs ];
+  } ''
+    cp ${index} index.js
+    cp ${webpack-config} webpack.config.js
+
+    webpack-cli --output-library "ledger" --mode development index.js -o $out
+  '';
 
 }
