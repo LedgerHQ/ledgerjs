@@ -127,6 +127,7 @@ in rec {
       const Transport = require("@ledgerhq/hw-transport-u2f").default;
       const App = require("@ledgerhq/hw-app-xtz").default;
       module.exports = { app: App, transport: Transport };
+      globals = undefined;
     '';
     webpack-config = pkgs.writeText "webpack.config.js" ''
 module.exports = {
