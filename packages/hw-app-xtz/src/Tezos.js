@@ -37,6 +37,7 @@ export default class Tezos {
       [
         "getAddress",
         "signHash",
+        "signOperation",
         "getVersion"
       ],
       "XTZ"
@@ -95,10 +96,11 @@ export default class Tezos {
       });
   }
 
-  signHash(
+  sign(
     path: string,
     rawTxHex: string,
-    curve?: number
+    curve: number,
+    apdu: number
   ): Promise<{
       signature: string
   }> {
@@ -107,7 +109,6 @@ export default class Tezos {
     let rawTx = new Buffer(rawTxHex, "hex");
     let toSend = [];
     let response;
-    curve = curve ? curve : 0x00;
 
     // Initial key setting
     {
@@ -141,7 +142,7 @@ export default class Tezos {
         code = 0x81;
       }
       return this.transport
-        .send(0x80, 0x05, code, curve, data)
+        .send(0x80, apdu, code, curve, data)
         .then(apduResponse => {
           response = apduResponse;
         })
@@ -150,6 +151,28 @@ export default class Tezos {
       let signature = response.slice(0, response.length - 2).toString("hex");
       return { signature };
     });
+  }
+
+  signOperation(
+    path: string,
+    rawTxHex: string,
+    curve?: number
+  ): Promise<{
+      signature: string
+  }> {
+    curve = curve ? curve : 0x00;
+    return this.sign(path, rawTxHex, curve, 0x04);
+  }
+
+  signHash(
+    path: string,
+    rawTxHex: string,
+    curve?: number
+  ): Promise<{
+      signature: string
+  }> {
+    curve = curve ? curve : 0x00;
+    return this.sign(path, rawTxHex, curve, 0x05);
   }
 
   getVersion(): Promise<{
