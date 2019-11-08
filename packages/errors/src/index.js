@@ -63,6 +63,7 @@ export const FeeEstimationFailed = createCustomErrorClass(
   "FeeEstimationFailed"
 );
 export const HardResetFail = createCustomErrorClass("HardResetFail");
+export const InvalidXRPTag = createCustomErrorClass("InvalidXRPTag");
 export const InvalidAddress = createCustomErrorClass("InvalidAddress");
 export const InvalidAddressBecauseDestinationIsAlsoSource = createCustomErrorClass(
   "InvalidAddressBecauseDestinationIsAlsoSource"
