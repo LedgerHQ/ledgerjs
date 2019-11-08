@@ -36,7 +36,7 @@ export default class Tezos {
       this,
       [
         "getAddress",
-        "signOperation",
+        "signHash",
         "getVersion"
       ],
       "XTZ"
@@ -95,7 +95,7 @@ export default class Tezos {
       });
   }
 
-  signOperation(
+  signHash(
     path: string,
     rawTxHex: string,
     curve?: number
@@ -141,7 +141,7 @@ export default class Tezos {
         code = 0x81;
       }
       return this.transport
-        .send(0x80, 0x04, code, curve, data)
+        .send(0x80, 0x05, code, curve, data)
         .then(apduResponse => {
           response = apduResponse;
         })
