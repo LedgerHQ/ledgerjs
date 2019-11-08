@@ -30,8 +30,8 @@ import java.util.UUID;
 public class ReactHIDModule extends ReactContextBaseJavaModule {
 
     private final HashMap<String, HIDDevice> hidDevices = new HashMap<>();
-    private static final String ACTION_USB_ATTACHED  = "android.hardware.usb.action.USB_DEVICE_ATTACHED";
-    private static final String ACTION_USB_DETACHED  = "android.hardware.usb.action.USB_DEVICE_DETACHED";
+    private static final String ACTION_USB_ATTACHED = "android.hardware.usb.action.USB_DEVICE_ATTACHED";
+    private static final String ACTION_USB_DETACHED = "android.hardware.usb.action.USB_DEVICE_DETACHED";
     private static final String ACTION_USB_PERMISSION = "com.ledgerwallet.hid.USB_PERMISSION";
 
     private BroadcastReceiver receiver;
@@ -46,25 +46,25 @@ public class ReactHIDModule extends ReactContextBaseJavaModule {
         return "HID";
     }
 
-    private void setDeviceConnectionReceiver(){
+    private void setDeviceConnectionReceiver() {
         IntentFilter filter = new IntentFilter();
         filter.addAction(ACTION_USB_ATTACHED);
         filter.addAction(ACTION_USB_DETACHED);
 
         receiver = new BroadcastReceiver() {
             @Override
-            public void onReceive(Context  context, Intent intent) {
-                String event = intent.getAction().equals(ACTION_USB_ATTACHED)?"onDeviceConnect":"onDeviceDisconnect";
+            public void onReceive(Context context, Intent intent) {
+                String event = intent.getAction().equals(ACTION_USB_ATTACHED) ? "onDeviceConnect"
+                        : "onDeviceDisconnect";
                 UsbDevice device = (UsbDevice) intent.getExtras().get(UsbManager.EXTRA_DEVICE);
-                getReactApplicationContext()
-                        .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                getReactApplicationContext().getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                         .emit(event, buildMapFromDevice(device));
             }
         };
         getReactApplicationContext().registerReceiver(receiver, filter);
     }
 
-    private WritableMap buildMapFromDevice(UsbDevice device){
+    private WritableMap buildMapFromDevice(UsbDevice device) {
         WritableMap map = Arguments.createMap();
         map.putString("name", device.getDeviceName());
         map.putInt("deviceId", device.getDeviceId());
@@ -86,10 +86,10 @@ public class ReactHIDModule extends ReactContextBaseJavaModule {
         p.resolve(deviceArray);
     }
 
-    private static UsbDevice getDevice(int prodId, UsbManager manager) {
+    private static UsbDevice getDevice(int vendorId, UsbManager manager) {
         HashMap<String, UsbDevice> deviceList = manager.getDeviceList();
         for (UsbDevice device : deviceList.values()) {
-            if (device.getProductId() == prodId) {
+            if (device.getVendorId() == vendorId) {
                 return device;
             }
         }
@@ -99,9 +99,9 @@ public class ReactHIDModule extends ReactContextBaseJavaModule {
     @ReactMethod
     public void openDevice(ReadableMap deviceObject, Promise p) {
         try {
-            int prodId = deviceObject.getInt("productId");
+            int vendorId = deviceObject.getInt("vendorId");
             UsbManager manager = getUsbManager();
-            UsbDevice device = getDevice(prodId, manager);
+            UsbDevice device = getDevice(vendorId, manager);
             if (manager.hasPermission(device)) {
                 WritableMap usd = createHIDDevice(manager, device);
                 p.resolve(usd);
@@ -182,7 +182,6 @@ public class ReactHIDModule extends ReactContextBaseJavaModule {
         map.putString("id", id);
         return map;
     }
-
 
     private UsbManager getUsbManager() {
         ReactApplicationContext rAppContext = getReactApplicationContext();
