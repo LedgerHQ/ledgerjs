@@ -130,18 +130,18 @@ in rec {
       global = undefined;
     '';
     webpack-config = pkgs.writeText "webpack.config.js" ''
-module.exports = {
-  resolve: {
-    modules: [
-      "${hw-app-xtz}/libexec/@ledgerhq/hw-app-xtz/node_modules",
-      "${hw-transport-u2f}/libexec/@ledgerhq/hw-transport-u2f/node_modules",
-      "node_modules",
+      module.exports = {
+        resolve: {
+          modules: [
+            "${hw-app-xtz}/libexec/@ledgerhq/hw-app-xtz/node_modules",
+            "${hw-transport-u2f}/libexec/@ledgerhq/hw-transport-u2f/node_modules",
+            "node_modules",
 
-      // TODO: remove!
-      "${hw-app-xtz-test}/libexec/@ledgerhq/hw-app-xtz-test/node_modules"
-    ]
-  }
-};
+            // TODO: remove!
+            "${hw-app-xtz-test}/libexec/@ledgerhq/hw-app-xtz-test/node_modules"
+          ]
+        }
+      };
     '';
   in pkgs.runCommand "hw-app-xtz.js" {
     buildInputs = [ pkgs.nodePackages.webpack-cli pkgs.nodePackages.webpack pkgs.nodejs ];
