@@ -127,6 +127,12 @@ export const MCUNotGenuineToDashboard = createCustomErrorClass(
   "MCUNotGenuineToDashboard"
 );
 export const RecipientRequired = createCustomErrorClass("RecipientRequired");
+export const UnavailableTezosOriginatedAccountReceive = createCustomErrorClass(
+  "UnavailableTezosOriginatedAccountReceive"
+);
+export const UnavailableTezosOriginatedAccountSend = createCustomErrorClass(
+  "UnavailableTezosOriginatedAccountSend"
+);
 export const UpdateYourApp = createCustomErrorClass("UpdateYourApp");
 export const UserRefusedDeviceNameChange = createCustomErrorClass(
   "UserRefusedDeviceNameChange"

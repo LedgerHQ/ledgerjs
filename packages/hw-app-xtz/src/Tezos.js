@@ -16,9 +16,30 @@
  ********************************************************************************/
 //@flow
 
-// FIXME drop:
-import { splitPath, foreach } from "./utils";
 import type Transport from "@ledgerhq/hw-transport";
+
+export const TezosCurves = {
+  ED25519: 0x00,
+  SECP256K1: 0x01,
+  SECP256R1: 0x02
+};
+
+export type Curve = $Values<typeof TezosCurves>;
+
+export type GetAddressResult = {|
+  publicKey: string
+|};
+
+export type SignOperationResult = {|
+  signature: string
+|};
+
+export type GetVersionResult = {|
+  major: number,
+  minor: number,
+  patch: number,
+  bakingApp: boolean
+|};
 
 /**
  * Tezos API
@@ -34,11 +55,7 @@ export default class Tezos {
     this.transport = transport;
     transport.decorateAppAPIMethods(
       this,
-      [
-        "getAddress",
-        "signOperation",
-        "getVersion"
-      ],
+      ["getAddress", "signOperation", "signHash", "getVersion"],
       "XTZ"
     );
   }
@@ -55,14 +72,13 @@ export default class Tezos {
    * @example
    * tez.getAddress("44'/1729'/0'/0'").then(o => o.address)
    */
-  getAddress(
+  async getAddress(
     path: string,
     boolDisplay?: boolean,
-    curve?: number,
-    apdu?: number
-  ): Promise<{
-    publicKey: string
-  }> {
+    curve?: Curve,
+    apdu?: number // TODO specify
+  ): Promise<GetAddressResult> {
+    const cla = 0x80;
     if (!apdu) {
       if (boolDisplay) {
         apdu = 0x03;
@@ -70,6 +86,8 @@ export default class Tezos {
         apdu = 0x02;
       }
     }
+    const p1 = 0;
+    const p2 = curve || 0;
 
     let paths = splitPath(path);
     let buffer = new Buffer(1 + paths.length * 4);
@@ -77,37 +95,27 @@ export default class Tezos {
     paths.forEach((element, index) => {
       buffer.writeUInt32BE(element, 1 + 4 * index);
     });
-    return this.transport
-      .send(
-        0x80,
-        apdu,
-        0,
-        curve ? curve : 0x00, // Defaults to Secp256k1
-        buffer
-      )
-      .then(response => {
-        let result = {};
-        let publicKeyLength = response[0];
-        result.publicKey = response
-          .slice(1, 1 + publicKeyLength)
-          .toString("hex");
-        return result;
-      });
+
+    const payload = await this.transport.send(cla, apdu, p1, p2, buffer);
+
+    let publicKeyLength = payload[0];
+    let publicKey = payload.slice(1, 1 + publicKeyLength);
+    const res: GetAddressResult = {
+      publicKey: publicKey.toString("hex")
+    };
+    return res;
   }
 
-  signOperation(
+  async sign(
     path: string,
     rawTxHex: string,
-    curve?: number
-  ): Promise<{
-      signature: string
-  }> {
+    curve: Curve,
+    apdu: number
+  ): Promise<SignOperationResult> {
     let paths = splitPath(path);
     let offset = 0;
     let rawTx = new Buffer(rawTxHex, "hex");
     let toSend = [];
-    let response;
-    curve = curve ? curve : 0x00;
 
     // Initial key setting
     {
@@ -133,37 +141,71 @@ export default class Tezos {
       offset += chunkSize;
     }
 
-    return foreach(toSend, (data, i) => {
+    let response;
+    for (let i = 0; i < toSend.length; i++) {
+      const data = toSend[i];
       let code = 0x01;
       if (i === 0) {
         code = 0x00;
       } else if (i === toSend.length - 1) {
         code = 0x81;
       }
-      return this.transport
-        .send(0x80, 0x04, code, curve, data)
-        .then(apduResponse => {
-          response = apduResponse;
-        })
+      response = await this.transport.send(0x80, apdu, code, curve, data);
     }
-    ).then(() => {
-      let signature = response.slice(0, response.length - 2).toString("hex");
-      return { signature };
-    });
+    const signature = response.slice(0, response.length - 2).toString("hex");
+    return { signature };
   }
 
-  getVersion(): Promise<{
-      major: number,
-      minor: number,
-      patch: number,
-      bakingApp: boolean
+  async signOperation(
+    path: string,
+    rawTxHex: string,
+    curve?: number
+  ): Promise<{
+      signature: string
   }> {
-      return this.transport.send(0x80, 0x00, 0x00, 0x00, new Buffer(0)).then(apduResponse => {
-          let bakingApp = apduResponse[0] == 1;
-          let major = apduResponse[1];
-          let minor = apduResponse[2];
-          let patch = apduResponse[3];
-          return { major, minor, patch, bakingApp };
-      });
+    curve = curve ? curve : 0x00;
+    const result = await this.sign(path, rawTxHex, curve, 0x04);
+    return result;
   }
+
+  async signHash(
+    path: string,
+    rawTxHex: string,
+    curve?: number
+  ): Promise<{
+      signature: string
+  }> {
+    curve = curve ? curve : 0x00;
+    const result = await this.sign(path, rawTxHex, curve, 0x05);
+    return result;
+  }
+
+  async getVersion(): Promise<GetVersionResult> {
+    const [appFlag, major, minor, patch] = await this.transport.send(
+      0x80,
+      0x00,
+      0x00,
+      0x00,
+      new Buffer(0)
+    );
+    const bakingApp = appFlag === 1;
+    return { major, minor, patch, bakingApp };
+  }
+}
+
+// TODO use bip32-path library
+function splitPath(path: string): number[] {
+  let result = [];
+  let components = path.split("/");
+  components.forEach(element => {
+    let number = parseInt(element, 10);
+    if (isNaN(number)) {
+      return; // FIXME shouldn't it throws instead?
+    }
+    if (element.length > 1 && element[element.length - 1] === "'") {
+      number += 0x80000000;
+    }
+    result.push(number);
+  });
+  return result;
 }
