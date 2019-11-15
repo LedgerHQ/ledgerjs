@@ -11,7 +11,10 @@ export default async transport => {
     true
   );
   const result = await btc.createPaymentTransactionNew(
-    [[tx1, 0], [tx2, 0]],
+    [
+      [tx1, 0],
+      [tx2, 0]
+    ],
     ["49'/1'/5'/0/0", "49'/1'/5'/0/0"],
     undefined,
     "01ecd3e7020000000017a9142397c9bb7a3b8a08368a72b3e58c7bb85055579287",

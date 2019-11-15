@@ -9,10 +9,10 @@ import debounce from "lodash/debounce";
 export default (
   delay: number,
   listenDevicesPollingSkip: () => boolean
-): {
+): ({
   events: EventEmitter,
   stop: () => void
-} => {
+}) => {
   const events = new EventEmitter();
   events.setMaxListeners(0);
 

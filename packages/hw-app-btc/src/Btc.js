@@ -1160,7 +1160,8 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
     if (
       !hasTimestamp &&
       isSegwitSupported &&
-      (transaction[offset] === 0 && transaction[offset + 1] !== 0)
+      transaction[offset] === 0 &&
+      transaction[offset + 1] !== 0
     ) {
       offset += 2;
       witness = true;

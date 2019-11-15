@@ -163,7 +163,10 @@ wss.on("connection", ws => {
       destroyed = true;
       if (wsBusyIndex === index) {
         log(`WS(${index}): close`);
-        await transportP.then(transport => transport.close(), () => {});
+        await transportP.then(
+          transport => transport.close(),
+          () => {}
+        );
         // eslint-disable-next-line require-atomic-updates
         wsBusyIndex = 0;
       }

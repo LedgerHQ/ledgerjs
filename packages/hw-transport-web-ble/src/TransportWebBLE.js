@@ -165,7 +165,10 @@ export default class BluetoothTransport extends Transport<Device | string> {
   static isSupported = (): Promise<boolean> =>
     Promise.resolve()
       .then(requiresBluetooth)
-      .then(() => true, () => false);
+      .then(
+        () => true,
+        () => false
+      );
 
   /**
    * observe event with { available: bool, type: string }
