@@ -74,7 +74,7 @@ public class HIDDevice {
                     while (offset != command.length) {
                         int blockSize = (command.length - offset > HID_BUFFER_SIZE ? HID_BUFFER_SIZE : command.length - offset);
                         System.arraycopy(command, offset, transferBuffer, 0, blockSize);
-                        if (!request.queue(ByteBuffer.wrap(transferBuffer), HID_BUFFER_SIZE)) {
+                        if (!request.queue(ByteBuffer.wrap(transferBuffer))) {
                             request.close();
                             throw new Exception("I/O error");
                         }
@@ -91,7 +91,7 @@ public class HIDDevice {
                     while ((responseData = LedgerHelper.unwrapResponseAPDU(LEDGER_DEFAULT_CHANNEL, response.toByteArray(),
                             HID_BUFFER_SIZE)) == null) {
                         responseBuffer.clear();
-                        if (!request.queue(responseBuffer, HID_BUFFER_SIZE)) {
+                        if (!request.queue(responseBuffer)) {
                             request.close();
                             throw new Exception("I/O error");
                         }
