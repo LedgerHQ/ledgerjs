@@ -1,12 +1,12 @@
 {
   "private": true,
   "name": "@ledgerhq/test",
-  "version": "4.74.2",
+  "version": "4.76.0",
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/hw-app-btc": "^4.74.2",
-    "@ledgerhq/hw-app-eth": "^4.74.2",
+    "@ledgerhq/hw-app-eth": "^4.76.0",
     "@ledgerhq/hw-app-str": "^4.74.2",
     "@ledgerhq/hw-app-xrp": "^4.74.2",
     "@ledgerhq/hw-transport-mocker": "^4.74.2",
