@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/logs",
-  "version": "4.72.0",
+  "version": "5.0.0-alpha.5+a0ef7b8",
   "description": "Ledger logs central point",
   "keywords": [
     "Ledger"
@@ -27,5 +27,6 @@
     "build": "bash ../../script/build.sh",
     "watch": "bash ../../script/watch.sh",
     "doc": "bash ../../script/doc.sh"
-  }
+  },
+  "gitHead": "a0ef7b85494f7ac7cc0ec98732586926aeb8c9c1"
 }

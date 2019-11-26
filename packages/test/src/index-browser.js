@@ -1,4 +1,4 @@
-import "babel-polyfill";
+
 
 import TransportU2F from "@ledgerhq/hw-transport-u2f";
 import TransportWebUSB from "@ledgerhq/hw-transport-webusb";

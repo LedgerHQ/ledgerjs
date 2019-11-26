@@ -1,4 +1,4 @@
-import "babel-polyfill";
+
 import fs from "fs";
 import getSnapshotJSONFile from "./getSnapshotJSONFile";
 import {
