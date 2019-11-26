@@ -194,7 +194,11 @@ TransportFoo.open(descriptor).then(transport => ...)
       ])
     );
     const sw = response.readUInt16BE(response.length - 2);
-    if (!statusList.some(s => s === sw)) {
+
+    // 61XX is actually a success response according to ISO7816 where XX is the length of the remaining response to retrieve
+    // basically it's a way to paginate the response
+    const is61xxStatus = sw >= 0x6100 && sw <= 0x61ff;
+    if (!is61xxStatus && !statusList.some(s => s === sw)) {
       throw new TransportStatusError(sw);
     }
     return response;
