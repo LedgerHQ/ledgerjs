@@ -15,12 +15,6 @@
 -   [for Android] **a recent version of JavaScriptCore** instead of React Native's default one. The simplest way is to set up [jsc-android](https://www.npmjs.com/package/jsc-android). In future, [we expect](https://github.com/facebook/react-native/issues/19737) React Native to upgrade JSC for Android.
 -   **global.Buffer** available. Typically `global.Buffer = require("buffer").Buffer;` that can be placed in a `polyfill.js` and imported with `import "./polyfill";` at first line of the main JavaScript entry file.
 
-## Full example
-
-[Click here to browse a full example that can be used as starter kit](https://github.com/LedgerHQ/ledgerjs-examples/tree/master/react-native)
-
-<img width=300 src="https://user-images.githubusercontent.com/211411/52532385-90a02e00-2d24-11e9-9b94-f552ca350b65.jpg" />
-
 ## Troubleshootings
 
 ### Bad BLE link between the Phone and the device
