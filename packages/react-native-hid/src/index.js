@@ -84,7 +84,7 @@ export default class HIDTransport extends Transport<DeviceObj> {
   /**
    * Listen to ledger devices events
    */
-  static listen(observer: *) {
+  static listen(observer: any): any {
     if (!NativeModules.HID) return { unsubscribe: () => {} };
     return concat(
       from(listLedgerDevices()).pipe(

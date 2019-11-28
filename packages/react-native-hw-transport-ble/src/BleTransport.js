@@ -271,7 +271,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
   /**
    *
    */
-  static setLogLevel = (level: string) => {
+  static setLogLevel = (level: *) => {
     bleManager.setLogLevel(level);
   };
 
