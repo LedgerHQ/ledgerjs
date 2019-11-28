@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-transport-node-hid",
-  "version": "5.0.0-alpha.5+a0ef7b8",
+  "version": "5.0.0-babel7.1+fca2c7c",
   "description": "Ledger Hardware Wallet Node implementation of the communication layer, using node-hid",
   "keywords": [
     "Ledger",
@@ -25,11 +25,11 @@
   "main": "lib/TransportNodeHid.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/devices": "^5.0.0-alpha.5+a0ef7b8",
-    "@ledgerhq/errors": "^5.0.0-alpha.5+a0ef7b8",
-    "@ledgerhq/hw-transport": "^5.0.0-alpha.5+a0ef7b8",
-    "@ledgerhq/hw-transport-node-hid-noevents": "^5.0.0-alpha.5+a0ef7b8",
-    "@ledgerhq/logs": "^5.0.0-alpha.5+a0ef7b8",
+    "@ledgerhq/devices": "^5.0.0-babel7.1+fca2c7c",
+    "@ledgerhq/errors": "^5.0.0-babel7.1+fca2c7c",
+    "@ledgerhq/hw-transport": "^5.0.0-babel7.1+fca2c7c",
+    "@ledgerhq/hw-transport-node-hid-noevents": "^5.0.0-babel7.1+fca2c7c",
+    "@ledgerhq/logs": "^5.0.0-babel7.1+fca2c7c",
     "lodash": "^4.17.15",
     "node-hid": "^0.7.9",
     "usb": "^1.6.0"
@@ -44,5 +44,5 @@
     "watch": "bash ../../script/watch.sh",
     "doc": "bash ../../script/doc.sh"
   },
-  "gitHead": "a0ef7b85494f7ac7cc0ec98732586926aeb8c9c1"
+  "gitHead": "fca2c7ce74fdb88df4d59dca4cc0e668410d66af"
 }

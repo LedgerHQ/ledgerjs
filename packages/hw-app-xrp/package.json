@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-app-xrp",
-  "version": "5.0.0-alpha.5+a0ef7b8",
+  "version": "5.0.0-babel7.1+fca2c7c",
   "description": "Ledger Hardware Wallet Ripple Application API",
   "keywords": [
     "Ledger",
@@ -25,7 +25,7 @@
   "main": "lib/Xrp.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^5.0.0-alpha.5+a0ef7b8",
+    "@ledgerhq/hw-transport": "^5.0.0-babel7.1+fca2c7c",
     "bip32-path": "0.4.2"
   },
   "devDependencies": {
@@ -38,5 +38,5 @@
     "watch": "bash ../../script/watch.sh",
     "doc": "bash ../../script/doc.sh"
   },
-  "gitHead": "a0ef7b85494f7ac7cc0ec98732586926aeb8c9c1"
+  "gitHead": "fca2c7ce74fdb88df4d59dca4cc0e668410d66af"
 }
