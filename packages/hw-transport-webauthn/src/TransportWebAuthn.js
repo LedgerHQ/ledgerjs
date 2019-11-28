@@ -58,14 +58,16 @@ export default class TransportWebAuthn extends Transport<null> {
   /*
    */
   static listen = (observer: *) => {
-    if (!navigator.credentials) {
-      observer.error(
-        new TransportError("WebAuthn not supported", "NotSupported")
-      );
-      return { unsubscribe: () => {} };
-    }
-    observer.next({ type: "add", descriptor: null });
-    observer.complete();
+    setTimeout(() => {
+      if (!navigator.credentials) {
+        observer.error(
+          new TransportError("WebAuthn not supported", "NotSupported")
+        );
+        return { unsubscribe: () => {} };
+      }
+      observer.next({ type: "add", descriptor: null });
+      observer.complete();
+    }, 0);
     return { unsubscribe: () => {} };
   };
 
