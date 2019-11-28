@@ -1582,20 +1582,6 @@
     unique-filename "^1.1.1"
     which "^1.3.1"
 
-"@ledgerhq/devices@^5.0.0-alpha.7+889a433":
-  version "5.0.0-alpha.7"
-  resolved "https://registry.yarnpkg.com/@ledgerhq/devices/-/devices-5.0.0-alpha.7.tgz#c249c99507f929cd85154bf407ad28c8cb8d48ba"
-  integrity sha512-yDh2Kchv1cXSri7Drdr3kHmTXUAgwH2XIl/GIdP2LXdbSOFdbN/qYO8dD7+bnEVI31n8OR5/r9N2oM2BflRnHQ==
-  dependencies:
-    "@ledgerhq/errors" "^5.0.0-alpha.7+889a433"
-    "@ledgerhq/logs" "^5.0.0-alpha.7+889a433"
-    rxjs "^6.5.3"
-
-"@ledgerhq/errors@^5.0.0-alpha.7+889a433":
-  version "5.0.0-alpha.7"
-  resolved "https://registry.yarnpkg.com/@ledgerhq/errors/-/errors-5.0.0-alpha.7.tgz#b95ae03d1c87adaf57f568e117eb58f8d867b6c5"
-  integrity sha512-SdIDEgJF6AHGmNid/mxklC5Cxg7AUsK4OED/SuPPZVODoo6ggsjJ0DYSfAQbQbX1wSie3+pkK0GydqwC3vnS5Q==
-
 "@ledgerhq/hw-app-btc@5.0.0-alpha.7":
   version "5.0.0-alpha.7"
   resolved "https://registry.yarnpkg.com/@ledgerhq/hw-app-btc/-/hw-app-btc-5.0.0-alpha.7.tgz#aff605932d4902da129f561554d7b83c34f8ac50"
@@ -1638,17 +1624,6 @@
     "@ledgerhq/hw-transport" "^5.0.0-alpha.7+889a433"
     "@ledgerhq/logs" "^5.0.0-alpha.7+889a433"
 
-"@ledgerhq/hw-transport-node-hid-noevents@^5.0.0-alpha.7+889a433":
-  version "5.0.0-alpha.7"
-  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport-node-hid-noevents/-/hw-transport-node-hid-noevents-5.0.0-alpha.7.tgz#8532671ec657b14c7778d6db7471ed461382a781"
-  integrity sha512-4vTzo8u7vGt8gvvVLeAH7sJSwoJMvwjbVrTXxPqg4vCBuIHoatWtYAADNo+Ohz4iQlcObCeeZbbV8MKksBouOQ==
-  dependencies:
-    "@ledgerhq/devices" "^5.0.0-alpha.7+889a433"
-    "@ledgerhq/errors" "^5.0.0-alpha.7+889a433"
-    "@ledgerhq/hw-transport" "^5.0.0-alpha.7+889a433"
-    "@ledgerhq/logs" "^5.0.0-alpha.7+889a433"
-    node-hid "^0.7.9"
-
 "@ledgerhq/hw-transport-node-hid@5.0.0-alpha.7":
   version "5.0.0-alpha.7"
   resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport-node-hid/-/hw-transport-node-hid-5.0.0-alpha.7.tgz#5bdd14c7859a9fc2448c8e0b81152d0ddec2e948"
@@ -1673,24 +1648,10 @@
     "@ledgerhq/hw-transport" "^5.0.0-alpha.7+889a433"
     "@ledgerhq/logs" "^5.0.0-alpha.7+889a433"
 
-"@ledgerhq/hw-transport@^5.0.0-alpha.7+889a433":
-  version "5.0.0-alpha.7"
-  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport/-/hw-transport-5.0.0-alpha.7.tgz#a1b8ecb050c5c2960ef4f6181f9c1d04e3564f03"
-  integrity sha512-KIoH2e4zsIJXNwjhh6A6wjOaVatM+PXKexUJPqXfPnSVzqR8UJWq/ZW0io6C21hViWd6zyYZ0eaP7umECtT0lg==
-  dependencies:
-    "@ledgerhq/devices" "^5.0.0-alpha.7+889a433"
-    "@ledgerhq/errors" "^5.0.0-alpha.7+889a433"
-    events "^3.0.0"
-
 "@ledgerhq/logs@^4.72.0":
   version "4.72.0"
   resolved "https://registry.yarnpkg.com/@ledgerhq/logs/-/logs-4.72.0.tgz#43df23af013ad1135407e5cf33ca6e4c4c7708d5"
   integrity sha512-o+TYF8vBcyySRsb2kqBDv/KMeme8a2nwWoG+lAWzbDmWfb2/MrVWYCVYDYvjXdSoI/Cujqy1i0gIDrkdxa9chA==
-
-"@ledgerhq/logs@^5.0.0-alpha.7+889a433":
-  version "5.0.0-alpha.7"
-  resolved "https://registry.yarnpkg.com/@ledgerhq/logs/-/logs-5.0.0-alpha.7.tgz#113de2f7f2245d4eb0748dd9b179876e6a6c1651"
-  integrity sha512-Xtc351c4KO741Qm5xqUiEOfhjoMC4Zh5CdNbjO3y6XGoSARmBff7dKXVQVoK4T7ix2vA5fWgJTtW9wQnkh7Hfw==
 
 "@lerna/add@3.16.5":
   version "3.16.5"
