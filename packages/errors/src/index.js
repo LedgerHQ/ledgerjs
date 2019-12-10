@@ -121,6 +121,9 @@ export const NotEnoughBalanceBecauseDestinationNotCreated = createCustomErrorCla
 );
 export const NoAccessToCamera = createCustomErrorClass("NoAccessToCamera");
 export const NotEnoughGas = createCustomErrorClass("NotEnoughGas");
+export const NotSupportedLegacyAddress = createCustomErrorClass(
+  "NotSupportedLegacyAddress"
+);
 export const GasLessThanEstimate = createCustomErrorClass(
   "GasLessThanEstimate"
 );
@@ -129,6 +132,12 @@ export const PasswordsDontMatchError = createCustomErrorClass(
 );
 export const PasswordIncorrectError = createCustomErrorClass(
   "PasswordIncorrect"
+);
+export const RecommendSubAccountsToEmpty = createCustomErrorClass(
+  "RecommendSubAccountsToEmpty"
+);
+export const RecommendUndelegation = createCustomErrorClass(
+  "RecommendUndelegation"
 );
 export const TimeoutTagged = createCustomErrorClass("TimeoutTagged");
 export const UnexpectedBootloader = createCustomErrorClass(
