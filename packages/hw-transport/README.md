@@ -91,32 +91,28 @@ low level api to communicate with the device
 This method is for implementations to implement but should not be directly called.
 Instead, the recommanded way is to use send() method
 
-Type: function (apdu: [Buffer](https://nodejs.org/api/buffer.html)): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Buffer](https://nodejs.org/api/buffer.html)>
-
 ##### Parameters
 
+-   `_apdu` **[Buffer](https://nodejs.org/api/buffer.html)** 
 -   `apdu`  the data to send
 
-Returns **any** a Promise of response data
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Buffer](https://nodejs.org/api/buffer.html)>** a Promise of response data
 
 #### setScrambleKey
 
 set the "scramble key" for the next exchanges with the device.
 Each App can have a different scramble key and they internally will set it at instanciation.
 
-Type: function (key: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)): void
-
 ##### Parameters
 
+-   `_key` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 -   `key`  the scramble key
 
 #### close
 
 close the exchange with the device.
 
-Type: function (): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;void>
-
-Returns **any** a Promise that ends when the transport is closed.
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;void>** a Promise that ends when the transport is closed.
 
 #### on
 

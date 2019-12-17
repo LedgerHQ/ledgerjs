@@ -80,6 +80,8 @@ Listen to ledger devices events
 
 -   `observer` **any** 
 
+Returns **any** 
+
 #### open
 
 Open a the transport with a Ledger device
