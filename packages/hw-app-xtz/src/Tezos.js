@@ -152,8 +152,8 @@ export default class Tezos {
       }
       response = await this.transport.send(0x80, apdu, code, curve, data);
     }
-    let signature
-    if(curve == 0) {
+    let signature;
+    if (curve == 0) {
       // tz1 signatures come correctly formatted from the ledger.
       signature = response.slice(0, response.length - 2).toString("hex");
     } else {
@@ -168,6 +168,8 @@ export default class Tezos {
       // Accept either an ASN.1 sequence or ASN.1 set
       if(frameType != 0x31 && frameType != 0x30) parseError();
 
+      // We are two bytes into the signature, and there are two bytes after the
+      // signature in response, so length +4 here.
       if(response.readUInt8(idx++)+4 != response.length) parseError();
       if(response.readUInt8(idx++) != 0x02) parseError();
       var r_length = response.readUInt8(idx++);
@@ -185,6 +187,8 @@ export default class Tezos {
       }
       response.copy(s_val,32-s_length,idx,idx+s_length);
       idx+=s_length;
+
+      // We should have just the two bytes at the end of the ledger response left.
       if(idx != response.length-2) parseError();
 
       signature = signature_buffer.toString("hex");
