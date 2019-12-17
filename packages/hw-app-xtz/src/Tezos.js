@@ -152,7 +152,47 @@ export default class Tezos {
       }
       response = await this.transport.send(0x80, apdu, code, curve, data);
     }
-    const signature = response.slice(0, response.length - 2).toString("hex");
+    let signature;
+    if (curve == 0) {
+      // tz1 signatures come correctly formatted from the ledger.
+      signature = response.slice(0, response.length - 2).toString("hex");
+    } else {
+      // tz2 and tz3 signatures are in DER format from the ledger.
+      const parseError = function() { throw new Error("Cannot parse ledger response."); }
+      var signature_buffer = new Buffer(64);
+      signature_buffer.fill(0);
+      var r_val = signature_buffer.subarray(0, 32);
+      var s_val = signature_buffer.subarray(32,64);
+      var idx=0;
+      const frameType=response.readUInt8(idx++);
+      // Accept either an ASN.1 sequence or ASN.1 set
+      if(frameType != 0x31 && frameType != 0x30) parseError();
+
+      // We are two bytes into the signature, and there are two bytes after the
+      // signature in response, so length +4 here.
+      if(response.readUInt8(idx++)+4 != response.length) parseError();
+      if(response.readUInt8(idx++) != 0x02) parseError();
+      var r_length = response.readUInt8(idx++);
+      if(r_length>32) { // Handle forced 0x00 33rd byte from DER format
+              idx+=(r_length-32);
+              r_length=32;
+      }
+      response.copy(r_val,32-r_length,idx,idx+r_length);
+      idx+=r_length;
+      if(response.readUInt8(idx++) != 0x02) parseError();
+      var s_length = response.readUInt8(idx++);
+      if(s_length>32) { // Handle forced 0x00 33rd byte from DER format
+              idx+=(s_length-32);
+              s_length=32;
+      }
+      response.copy(s_val,32-s_length,idx,idx+s_length);
+      idx+=s_length;
+
+      // We should have just the two bytes at the end of the ledger response left.
+      if(idx != response.length-2) parseError();
+
+      signature = signature_buffer.toString("hex");
+    }
     return { signature };
   }
 
