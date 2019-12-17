@@ -109,20 +109,27 @@ TransportFoo.open(descriptor).then(transport => ...)
    * @param apdu the data to send
    * @return a Promise of response data
    */
-  +exchange: (apdu: Buffer) => Promise<Buffer>;
+  exchange(_apdu: Buffer): Promise<Buffer> {
+    throw new Error("exchange not implemented");
+  }
+
 
   /**
    * set the "scramble key" for the next exchanges with the device.
    * Each App can have a different scramble key and they internally will set it at instanciation.
    * @param key the scramble key
    */
-  +setScrambleKey: (key: string) => void;
+  setScrambleKey(_key: string) {
+
+  }
 
   /**
    * close the exchange with the device.
    * @return a Promise that ends when the transport is closed.
    */
-  +close: () => Promise<void>;
+  close(): Promise<void> {
+    return Promise.resolve();
+  }
 
   _events = new EventEmitter();
 

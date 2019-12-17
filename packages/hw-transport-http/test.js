@@ -1,4 +1,4 @@
-require("babel-polyfill");
+
 const wSU = require(".").default;
 
 wSU(["http://localhost:8435"])

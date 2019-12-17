@@ -1,4 +1,4 @@
-require("babel-polyfill");
+
 const { listen } = require("@ledgerhq/logs");
 const { default: TNodeHID } = require(".");
 

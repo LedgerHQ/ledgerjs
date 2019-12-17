@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-transport",
-  "version": "4.78.0",
+  "version": "5.0.0-babel7.1+fca2c7c",
   "description": "Ledger Hardware Wallet common interface of the communication layer",
   "keywords": [
     "Ledger",
@@ -23,8 +23,8 @@
   "main": "lib/Transport.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/devices": "^4.78.0",
-    "@ledgerhq/errors": "^4.78.0",
+    "@ledgerhq/devices": "^5.0.0-babel7.1+fca2c7c",
+    "@ledgerhq/errors": "^5.0.0-babel7.1+fca2c7c",
     "events": "^3.0.0"
   },
   "devDependencies": {
@@ -36,5 +36,6 @@
     "build": "bash ../../script/build.sh",
     "watch": "bash ../../script/watch.sh",
     "doc": "bash ../../script/doc.sh"
-  }
+  },
+  "gitHead": "fca2c7ce74fdb88df4d59dca4cc0e668410d66af"
 }
