@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@ledgerhq/test",
-  "version": "4.76.0",
+  "version": "5.0.0",
   "main": "index.js",
   "license": "Apache-2.0",
   "dependencies": {

@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-transport-http",
-  "version": "5.0.0-babel7.1+fca2c7c",
+  "version": "5.0.0",
   "description": "Ledger Hardware Wallet communication layer over http",
   "keywords": [
     "Ledger",
@@ -25,9 +25,9 @@
   "main": "lib/withStaticURLs.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/errors": "^5.0.0-babel7.1+fca2c7c",
-    "@ledgerhq/hw-transport": "^5.0.0-babel7.1+fca2c7c",
-    "@ledgerhq/logs": "^5.0.0-babel7.1+fca2c7c",
+    "@ledgerhq/errors": "^5.0.0",
+    "@ledgerhq/hw-transport": "^5.0.0",
+    "@ledgerhq/logs": "^5.0.0",
     "axios": "^0.19.0",
     "ws": "6"
   },
