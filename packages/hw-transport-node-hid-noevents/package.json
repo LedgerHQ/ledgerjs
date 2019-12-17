@@ -29,10 +29,10 @@
     "@ledgerhq/errors": "^5.0.0-babel7.1+fca2c7c",
     "@ledgerhq/hw-transport": "^5.0.0-babel7.1+fca2c7c",
     "@ledgerhq/logs": "^5.0.0-babel7.1+fca2c7c",
-    "node-hid": "^0.7.9"
+    "node-hid": "^1.1.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.109.0"
+    "flow-bin": "^0.114.0"
   },
   "scripts": {
     "flow": "flow",
