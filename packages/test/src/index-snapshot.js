@@ -1,4 +1,3 @@
-
 import fs from "fs";
 import getSnapshotJSONFile from "./getSnapshotJSONFile";
 import {
