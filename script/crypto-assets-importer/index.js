@@ -15,7 +15,12 @@ importers.forEach(imp => {
   const folder = path.join(inputFolder, imp.path);
   const outputJS = path.join(outputFolder, imp.id + ".js");
   const items = fs.readdirSync(folder);
-  Promise.all(items.sort().map(id => imp.loader({ folder, id })))
+  Promise.all(
+    items
+      .sort()
+      .filter(a => !a.endsWith(".json"))
+      .map(id => imp.loader({ folder, id }))
+  )
     .then(all => all.filter(Boolean))
     .then(all => {
       const data = imp.join(all);
