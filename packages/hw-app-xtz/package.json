@@ -1,6 +1,6 @@
 {
   "name": "@obsidiansystems/hw-app-xtz",
-  "version": "4.72.2",
+  "version": "4.72.3",
   "description": "Ledger Hardware Wallet Tezos Application API",
   "keywords": [
     "Ledger",
