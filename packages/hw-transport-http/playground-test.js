@@ -1,5 +1,4 @@
-
-const wSU = require(".").default;
+const wSU = require("./lib/withStaticURLs").default;
 
 wSU(["http://localhost:8435"])
   .create()
