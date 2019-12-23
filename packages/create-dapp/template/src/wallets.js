@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import Web3 from "web3";
 import TransportU2F from "@ledgerhq/hw-transport-u2f";
 import createLedgerSubprovider from "@ledgerhq/web3-subprovider";
@@ -13,6 +14,27 @@ export const getReadOnlyWeb3 = async () => {
   engine.addProvider(new FetchSubprovider({ rpcUrl }));
   engine.start();
   return new Web3(engine);
+};
+
+export const useReadOnlyWeb3 = () => {
+  const [web3, setWeb3] = useState(null);
+
+  useEffect(() => {
+    let unmounted;
+
+    async function main() {
+      const web3 = await getReadOnlyWeb3();
+      if (unmounted) return;
+      setWeb3(web3);
+    }
+    main();
+
+    return () => {
+      unmounted = true;
+    };
+  }, []);
+
+  return web3;
 };
 
 // we define all wallets exposing a way to get a web3 instance. feel free to adapt.
