@@ -1,69 +1,38 @@
-import React, { Component } from "react";
-import PropTypes from "prop-types";
-import SimpleStorageContract from "./SimpleStoreContract";
+import React, { useCallback, useState } from "react";
+import {
+  useSimpleStorageContract,
+  useSimpleStorageValue
+} from "./SimpleStoreContract";
+
 import "./DApp.css";
 
 /**
  * define our actual DApp that works with a web3 instance on a given account.
  */
-export default class DApp extends Component {
-  static propTypes = {
-    web3: PropTypes.object.isRequired,
-    account: PropTypes.string.isRequired,
-    onLogout: PropTypes.func.isRequired
-  };
-  state = {
-    storageValue: 1,
-    localInputValue: 1,
-    gasPriceGWEI: 1,
-    simpleStorage: null,
+
+const DApp = ({ web3, account, onLogout }) => {
+  const simpleStorage = useSimpleStorageContract(web3);
+  const storageValue = useSimpleStorageValue(simpleStorage);
+  const [localInputValue, setLocalInputValue] = useState(null);
+  const [gasPriceGWEI, setGasPriceGWEI] = useState(1);
+  const [{ error, pending, tx }, setStatus] = useState({
     error: null,
     pending: false,
     tx: null
-  };
+  });
+  const value = localInputValue || storageValue;
 
-  async componentDidMount() {
-    // initialize the contract and retrieve the deployed version
-    const { web3 } = this.props;
-    const simpleStorage = await SimpleStorageContract.createWithWeb3(web3);
+  const onChangeInput = useCallback(e => {
+    setLocalInputValue(parseInt(e.target.value, 10));
+  }, []);
 
-    const storageValue = await simpleStorage.get();
-    this.setState({
-      simpleStorage,
-      storageValue,
-      localInputValue: storageValue
-    });
+  const onChangeGasInput = useCallback(e => {
+    setGasPriceGWEI(parseInt(e.target.value, 10));
+  }, []);
 
-    // and plug to the ValueChanged event
-    this.valueChangedSubscription = simpleStorage.listenValueChanged(
-      storageValue => {
-        this.setState({ storageValue });
-      }
-    );
-  }
-
-  componentWillUnmount() {
-    try {
-      this.valueChangedSubscription();
-    } catch (e) {
-      // NB MetaMask currently have an error thrown
-      console.error(e);
-    }
-  }
-
-  onChangeInput = e => {
-    this.setState({ localInputValue: parseInt(e.target.value, 10) });
-  };
-
-  onChangeGasInput = e => {
-    this.setState({ gasPriceGWEI: parseInt(e.target.value, 10) });
-  };
-
-  onSetButton = async () => {
-    const { simpleStorage, localInputValue, gasPriceGWEI } = this.state;
-    const { account } = this.props;
+  const onSetButton = useCallback(async () => {
     if (!simpleStorage) return;
-    this.setState({ error: null, pending: true });
+    setStatus({ error: null, pending: true, tx: null });
     try {
       const res = await simpleStorage.set(
         localInputValue,
@@ -72,83 +41,67 @@ export default class DApp extends Component {
       );
       // NB at this stage we don't have the transaction confirmed yet,
       // but we move on by optimistically setting the new value
-      this.setState({
+      setLocalInputValue(localInputValue);
+      setStatus({
         error: null,
-        storageValue: localInputValue,
         pending: false,
         tx: res.tx
       });
     } catch (error) {
-      this.setState({ error, pending: false });
+      setStatus({ error, pending: false, tx: null });
     }
-  };
+  }, [simpleStorage, gasPriceGWEI, localInputValue, account]);
 
-  render() {
-    const { account, onLogout } = this.props;
-    const {
-      simpleStorage,
-      storageValue,
-      localInputValue,
-      gasPriceGWEI,
-      error,
-      pending,
-      tx
-    } = this.state;
-
-    if (!simpleStorage) {
-      return (
-        <div className="App">
-          <div className="loading">Loading...</div>
-        </div>
-      );
-    }
-
+  if (!simpleStorage || value === null) {
     return (
-      <div className="DApp">
-        <p>
-          Account <code>{account}</code>{" "}
-          <button onClick={onLogout}>Logout</button>
-        </p>
-        <p>
-          <label>
-            <span>Set new Value</span>
-            <input
-              type="number"
-              min={1}
-              step={1}
-              value={localInputValue}
-              onChange={this.onChangeInput}
-            />
-            {pending ? (
-              "..."
-            ) : (
-              <button
-                onClick={this.onSetButton}
-                disabled={localInputValue === storageValue}
-              >
-                SET
-              </button>
-            )}
-          </label>
-        </p>
-        <p>
-          <label>
-            <span>Gas Price (GWEI)</span>
-            <input
-              type="number"
-              min={1}
-              value={gasPriceGWEI}
-              onChange={this.onChangeGasInput}
-            />
-          </label>
-        </p>
-        <p>{tx ? "Transaction: " + tx : null}</p>
-        {error ? (
-          <div className="error">
-            {String((error && error.message) || error)}
-          </div>
-        ) : null}
+      <div className="App">
+        <div className="loading">Loading...</div>
       </div>
     );
   }
-}
+
+  return (
+    <div className="DApp">
+      <p>
+        Account <code>{account}</code>{" "}
+        <button onClick={onLogout}>Logout</button>
+      </p>
+      <p>
+        <label>
+          <span>Set new Value</span>
+          <input
+            type="number"
+            min={1}
+            step={1}
+            value={value}
+            onChange={onChangeInput}
+          />
+          {pending ? (
+            "..."
+          ) : (
+            <button onClick={onSetButton} disabled={value === storageValue}>
+              SET
+            </button>
+          )}
+        </label>
+      </p>
+      <p>
+        <label>
+          <span>Gas Price (GWEI)</span>
+          <input
+            type="number"
+            min={1}
+            value={gasPriceGWEI}
+            onChange={onChangeGasInput}
+          />
+        </label>
+      </p>
+      <p>{tx ? "Transaction: " + tx : null}</p>
+      {error ? (
+        <div className="error">{String((error && error.message) || error)}</div>
+      ) : null}
+    </div>
+  );
+};
+
+export default DApp;

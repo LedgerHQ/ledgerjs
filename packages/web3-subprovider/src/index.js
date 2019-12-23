@@ -1,11 +1,9 @@
 //@flow
 import AppEth from "@ledgerhq/hw-app-eth";
 import type Transport from "@ledgerhq/hw-transport";
-import HookedWalletSubprovider from "web3-provider-engine/dist/es5/subproviders/hooked-wallet";
+import HookedWalletSubprovider from "web3-provider-engine/subproviders/hooked-wallet";
 import stripHexPrefix from "strip-hex-prefix";
 import EthereumTx from "ethereumjs-tx";
-
-const allowedHdPaths = ["44'/0'", "44'/1'", "44'/60'", "44'/61'"];
 
 function makeError(msg, id) {
   const err = new Error(msg);
@@ -14,26 +12,13 @@ function makeError(msg, id) {
   return err;
 }
 
-function obtainPathComponentsFromDerivationPath(derivationPath) {
-  // check if derivation path follows 44'/60'/x'/n or 44'/60'/x'/y/n pattern
-  const regExp = /^(44'\/(?:0|1|60|61)'\/\d+'?\/(?:\d+\/)?)(\d+)$/;
-  const matchResult = regExp.exec(derivationPath);
-  if (matchResult === null) {
-    throw makeError(
-      "To get multiple accounts your derivation path must follow pattern 44'/60|61'/x'/n or 44'/60'/x'/y/n ",
-      "InvalidDerivationPath"
-    );
-  }
-  return { basePath: matchResult[1], index: parseInt(matchResult[2], 10) };
-}
-
 /**
  */
 type SubproviderOptions = {
   // refer to https://github.com/ethereum/EIPs/blob/master/EIPS/eip-155.md
   networkId: number,
-  // derivation path
-  path?: string,
+  // derivation path schemes (with a x in the path)
+  paths?: string[],
   // should use actively validate on the device
   askConfirm?: boolean,
   // number of accounts to derivate
@@ -44,7 +29,7 @@ type SubproviderOptions = {
 
 const defaultOptions = {
   networkId: 1, // mainnet
-  path: "44'/60'/0'/0", // ledger default derivation path
+  paths: ["44'/60'/x'/0/0", "44'/60'/0'/x"], // ledger live derivation path
   askConfirm: false,
   accountsLength: 1,
   accountsOffset: 0
@@ -73,22 +58,19 @@ export default function createLedgerSubprovider(
   getTransport: () => Transport<*>,
   options?: SubproviderOptions
 ): HookedWalletSubprovider {
-  const { networkId, path, askConfirm, accountsLength, accountsOffset } = {
+  if (options && "path" in options) {
+    throw new Error(
+      "@ledgerhq/web3-subprovider: path options was replaced by paths. example: paths: [\"44'/60'/x'/0/0\"]"
+    );
+  }
+  const { networkId, paths, askConfirm, accountsLength, accountsOffset } = {
     ...defaultOptions,
     ...options
   };
-  if (!allowedHdPaths.some(hdPref => path.startsWith(hdPref))) {
-    throw makeError(
-      "Ledger derivation path allowed are " +
-        allowedHdPaths.join(", ") +
-        ". " +
-        path +
-        " is not supported",
-      "InvalidDerivationPath"
-    );
-  }
 
-  const pathComponents = obtainPathComponentsFromDerivationPath(path);
+  if (!paths.length) {
+    throw new Error("paths must not be empty");
+  }
 
   const addressToPathMap = {};
 
@@ -98,8 +80,9 @@ export default function createLedgerSubprovider(
       const eth = new AppEth(transport);
       const addresses = {};
       for (let i = accountsOffset; i < accountsOffset + accountsLength; i++) {
-        const path =
-          pathComponents.basePath + (pathComponents.index + i).toString();
+        const x = Math.floor(i / paths.length);
+        const pathIndex = i - paths.length * x;
+        const path = paths[pathIndex].replace("x", String(x));
         const address = await eth.getAddress(path, askConfirm, false);
         addresses[path] = address.address;
         addressToPathMap[address.address.toLowerCase()] = path;

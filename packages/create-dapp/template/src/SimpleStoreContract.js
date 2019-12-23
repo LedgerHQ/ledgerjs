@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import createContract from "truffle-contract";
 
 // our example includes a simple contract that allows to set and restore a value.
@@ -44,15 +45,50 @@ export default class SimpleStorageContract {
     });
     return res;
   }
-
-  // we can also listen to the ValueChanged event
-  listenValueChanged(fn) {
-    const event = this.contract.ValueChanged();
-    event.watch((error, result) => {
-      if (!error) {
-        fn(result.args.value.toNumber());
-      }
-    });
-    return () => event.stopWatching();
-  }
 }
+
+export const useSimpleStorageContract = web3 => {
+  const [simpleStorage, setSimpleStorage] = useState(null);
+
+  useEffect(() => {
+    if (!web3) return;
+
+    let unmounted;
+
+    async function main() {
+      const simpleStorage = await SimpleStorageContract.createWithWeb3(web3);
+      if (unmounted) return;
+      setSimpleStorage(simpleStorage);
+    }
+    main();
+
+    return () => {
+      unmounted = true;
+    };
+  }, [web3]);
+
+  return simpleStorage;
+};
+
+export const useSimpleStorageValue = simpleStorage => {
+  const [value, setValue] = useState(null);
+
+  useEffect(() => {
+    if (!simpleStorage) return;
+
+    let unmounted;
+
+    async function main() {
+      const value = await simpleStorage.get();
+      if (unmounted) return;
+      setValue(value);
+    }
+    main();
+
+    return () => {
+      unmounted = true;
+    };
+  }, [simpleStorage]);
+
+  return value;
+};
