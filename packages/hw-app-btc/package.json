@@ -23,6 +23,7 @@
     "access": "public"
   },
   "main": "lib/Btc.js",
+  "module": "lib-es/Btc.js",
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/hw-transport": "^5.0.0",

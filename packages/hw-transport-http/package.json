@@ -23,6 +23,7 @@
     "access": "public"
   },
   "main": "lib/withStaticURLs.js",
+  "module": "lib-es/withStaticURLs.js",
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/errors": "^5.0.0",

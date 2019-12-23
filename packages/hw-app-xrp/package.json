@@ -23,6 +23,7 @@
     "access": "public"
   },
   "main": "lib/Xrp.js",
+  "module": "lib-es/Xrp.js",
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/hw-transport": "^5.0.0",

@@ -21,6 +21,7 @@
     "access": "public"
   },
   "main": "lib/Transport.js",
+  "module": "lib-es/Transport.js",
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/devices": "^5.0.0",

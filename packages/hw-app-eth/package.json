@@ -23,6 +23,7 @@
     "access": "public"
   },
   "main": "lib/Eth.js",
+  "module": "lib-es/Eth.js",
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/errors": "^5.0.0",

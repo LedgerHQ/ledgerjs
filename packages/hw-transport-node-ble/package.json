@@ -24,6 +24,7 @@
     "access": "public"
   },
   "main": "lib/TransportNodeBle.js",
+  "module": "lib-es/TransportNodeBle.js",
   "license": "Apache-2.0",
   "dependencies": {
     "@abandonware/noble": "1.9.2-5",

@@ -24,6 +24,7 @@
     "access": "public"
   },
   "main": "lib/TransportWebAuthn.js",
+  "module": "lib-es/TransportWebAuthn.js",
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/devices": "^5.0.0",

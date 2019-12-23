@@ -23,6 +23,7 @@
     "access": "public"
   },
   "main": "lib/TransportNodeHid.js",
+  "module": "lib-es/TransportNodeHid.js",
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/devices": "^5.0.0",
