@@ -24,6 +24,7 @@
     "access": "public"
   },
   "main": "lib/TransportU2F.js",
+  "module": "lib-es/TransportU2F.js",
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/errors": "^5.0.0",

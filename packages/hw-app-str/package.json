@@ -23,6 +23,7 @@
     "access": "public"
   },
   "main": "lib/Str.js",
+  "module": "lib-es/Str.js",
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/hw-transport": "^5.0.0",

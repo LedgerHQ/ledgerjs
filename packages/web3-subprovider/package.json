@@ -26,6 +26,7 @@
     "access": "public"
   },
   "main": "lib/index.js",
+  "module": "lib-es/index.js",
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/hw-app-eth": "^5.1.0",

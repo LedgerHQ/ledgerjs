@@ -17,6 +17,7 @@
     "access": "public"
   },
   "main": "lib/index.js",
+  "module": "lib-es/index.js",
   "license": "Apache-2.0",
   "devDependencies": {
     "flow-bin": "^0.114.0"

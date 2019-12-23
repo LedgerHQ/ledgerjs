@@ -21,6 +21,7 @@
     "access": "public"
   },
   "main": "lib/BleTransport.js",
+  "module": "lib-es/BleTransport.js",
   "license": "Apache-2.0",
   "peerDependencies": {
     "react-native-ble-plx": "^1.0.1"
