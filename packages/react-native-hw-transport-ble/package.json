@@ -32,7 +32,7 @@
     "@ledgerhq/hw-transport": "^5.2.0",
     "@ledgerhq/logs": "^5.2.0",
     "invariant": "^2.2.4",
-    "rxjs": "^6.5.3",
+    "rxjs": "^6.5.4",
     "uuid": "^3.3.3"
   },
   "devDependencies": {
