@@ -22,8 +22,6 @@ export const setUsbDebounce = (n: number) => {
   usbDebounce = n;
 };
 
-/*
-// stopMonitoring is causing trouble so not using that implem for now
 let totalMonitor = 0;
 const monitor = () => {
   if (totalMonitor === 0) {
@@ -38,15 +36,6 @@ const monitor = () => {
       usbDetect.stopMonitoring();
     }
   };
-};
-*/
-let monitoring = false;
-const monitor = () => {
-  if (!monitoring) {
-    monitoring = true;
-    usbDetect.startMonitoring();
-  }
-  return () => {};
 };
 
 export const listenDevices = (
