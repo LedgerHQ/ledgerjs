@@ -1016,10 +1016,10 @@ btc.signP2SHTransaction(
             0
           );
           trustedInputs.push({
-            trustedInput: false,
+            trustedInput: !segwit,
             value: segwit
               ? Buffer.from(trustedInput, "hex")
-              : Buffer.from(trustedInput, "hex").slice(4, 4 + 0x24),
+              : Buffer.from(trustedInput, "hex"),
             sequence
           });
         })
