@@ -274,3 +274,29 @@ test("btc sign p2sh seg", async () => {
     "3045022100932934ee326c19c81b72fb03cec0fb79ff980a8076639f77c7edec35bd59da1e02205e4030e8e0fd2405f6db2fe044c49d3f191adbdc0e05ec7ed4dcc4c6fe7310e501"
   ]);
 });
+
+test("signMessage", async () => {
+  const Transport = createTransportReplayer(
+    RecordStore.fromString(`
+    => e04e00011d058000002c800000008000000000000000000000000006666f6f626172
+    <= 00009000
+    => e04e80000100
+    <= 314402205eac720be544d3959a760d9bfd6a0e7c86d128fd1030038f06d85822608804e20220385d83273c9d03c469596292fb354b07d193034f83c2633a4c1f057838e12a5b9000
+    `)
+  );
+
+  const transport = await Transport.open();
+
+  const btc = new Btc(transport);
+
+  const res = await btc.signMessageNew(
+    "44'/0'/0'/0/0",
+    Buffer.from("foobar").toString("hex")
+  );
+
+  expect(res).toEqual({
+    v: 1,
+    r: "5eac720be544d3959a760d9bfd6a0e7c86d128fd1030038f06d85822608804e2",
+    s: "385d83273c9d03c469596292fb354b07d193034f83c2633a4c1f057838e12a5b"
+  });
+});

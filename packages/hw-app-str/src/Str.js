@@ -102,7 +102,7 @@ export default class Str {
     let response;
 
     let pathElts = splitPath(path);
-    let buffer = new Buffer(1 + pathElts.length * 4);
+    let buffer = Buffer.alloc(1 + pathElts.length * 4);
     buffer[0] = pathElts.length;
     pathElts.forEach((element, index) => {
       buffer.writeUInt32BE(element, 1 + 4 * index);
