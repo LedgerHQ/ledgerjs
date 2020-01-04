@@ -81,7 +81,7 @@ export default class TransportWebHID extends Transport<HIDDevice> {
   };
 
   onInputReport = (e: InputReportEvent) => {
-    const buffer = new Buffer(e.data.buffer);
+    const buffer = Buffer.from(e.data.buffer);
     if (this.inputCallback) {
       this.inputCallback(buffer);
       this.inputCallback = null;

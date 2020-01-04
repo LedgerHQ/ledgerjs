@@ -98,7 +98,7 @@ export default class Xrp {
     ed25519?: boolean
   ): Promise<string> {
     const bipPath = BIPPath.fromString(path).toPathArray();
-    const rawTx = new Buffer(rawTxHex, "hex");
+    const rawTx = Buffer.from(rawTxHex, "hex");
     const curveMask = ed25519 ? 0x80 : 0x40;
 
     const apdus = [];

@@ -74,7 +74,7 @@ export default class Eth {
     chainCode?: string
   }> {
     let paths = splitPath(path);
-    let buffer = new Buffer(1 + paths.length * 4);
+    let buffer = Buffer.alloc(1 + paths.length * 4);
     buffer[0] = paths.length;
     paths.forEach((element, index) => {
       buffer.writeUInt32BE(element, 1 + 4 * index);
@@ -158,7 +158,7 @@ export default class Eth {
   }> {
     let paths = splitPath(path);
     let offset = 0;
-    let rawTx = new Buffer(rawTxHex, "hex");
+    let rawTx = Buffer.from(rawTxHex, "hex");
     let toSend = [];
     let response;
     while (offset !== rawTx.length) {
@@ -167,7 +167,7 @@ export default class Eth {
         offset + maxChunkSize > rawTx.length
           ? rawTx.length - offset
           : maxChunkSize;
-      let buffer = new Buffer(
+      let buffer = Buffer.alloc(
         offset === 0 ? 1 + paths.length * 4 + chunkSize : chunkSize
       );
       if (offset === 0) {
@@ -237,7 +237,7 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
   }> {
     let paths = splitPath(path);
     let offset = 0;
-    let message = new Buffer(messageHex, "hex");
+    let message = Buffer.from(messageHex, "hex");
     let toSend = [];
     let response;
     while (offset !== message.length) {
@@ -246,7 +246,7 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
         offset + maxChunkSize > message.length
           ? message.length - offset
           : maxChunkSize;
-      let buffer = new Buffer(
+      let buffer = Buffer.alloc(
         offset === 0 ? 1 + paths.length * 4 + 4 + chunkSize : chunkSize
       );
       if (offset === 0) {
