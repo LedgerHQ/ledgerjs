@@ -22,24 +22,6 @@ export const setUsbDebounce = (n: number) => {
   usbDebounce = n;
 };
 
-/*
-// stopMonitoring is causing trouble so not using that implem for now
-let totalMonitor = 0;
-const monitor = () => {
-  if (totalMonitor === 0) {
-    log("usb-detection", "startMonitoring");
-    usbDetect.startMonitoring();
-  }
-  totalMonitor++;
-  return () => {
-    totalMonitor--;
-    if (totalMonitor === 0) {
-      log("usb-detection", "stopMonitoring");
-      usbDetect.stopMonitoring();
-    }
-  };
-};
-*/
 let monitoring = false;
 const monitor = () => {
   if (!monitoring) {
@@ -48,6 +30,14 @@ const monitor = () => {
   }
   return () => {};
 };
+
+// No better way for now. see https://github.com/LedgerHQ/ledgerjs/issues/434
+process.on("exit", () => {
+  if (monitoring) {
+    // redeem the monitoring so the process can be terminated.
+    usbDetect.stopMonitoring();
+  }
+});
 
 export const listenDevices = (
   onAdd: Device => void,
