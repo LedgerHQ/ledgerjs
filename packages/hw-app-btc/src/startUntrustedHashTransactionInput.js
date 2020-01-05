@@ -1,5 +1,5 @@
 // @flow
-import type { Transport } from "@ledgerhq/hw-transport";
+import type Transport from "@ledgerhq/hw-transport";
 import type { Transaction } from "./types";
 import { createVarint } from "./varint";
 import { MAX_SCRIPT_BLOCK } from "./constants";
