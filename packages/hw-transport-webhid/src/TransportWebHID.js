@@ -32,9 +32,10 @@ const getHID = (): HID => {
   return hid;
 };
 
-async function requestLedgerDevice(): Promise<HIDDevice> {
+async function requestLedgerDevices(): Promise<HIDDevice[]> {
   const device = await getHID().requestDevice({ filters: ledgerDevices });
-  return device;
+  if (Array.isArray(device)) return device;
+  return [device];
 }
 
 async function getLedgerDevices(): Promise<HIDDevice[]> {
@@ -45,7 +46,8 @@ async function getLedgerDevices(): Promise<HIDDevice[]> {
 async function getFirstLedgerDevice(): Promise<HIDDevice> {
   const existingDevices = await getLedgerDevices();
   if (existingDevices.length > 0) return existingDevices[0];
-  return requestLedgerDevice();
+  const devices = await requestLedgerDevices();
+  return devices[0];
 }
 
 /**
@@ -132,7 +134,7 @@ export default class TransportWebHID extends Transport<HIDDevice> {
    * Similar to create() except it will always display the device permission (even if some devices are already accepted).
    */
   static async request() {
-    const device = await requestLedgerDevice();
+    const [device] = await requestLedgerDevices();
     return TransportWebHID.open(device);
   }
 
