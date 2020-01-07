@@ -1,6 +1,6 @@
 // @flow
 import type Transport from "@ledgerhq/hw-transport";
-import bippath from "bip32-path";
+import { bip32asBuffer } from "./bip32";
 
 export function signTransaction(
   transport: Transport<*>,
@@ -11,25 +11,17 @@ export function signTransaction(
   additionals: Array<string> = []
 ): Promise<Buffer> {
   const isDecred = additionals.includes("decred");
-  const paths = bippath.fromString(path).toPathArray();
-  let offset = 0;
-  const pathsBuffer = Buffer.alloc(paths.length * 4);
-  paths.forEach(element => {
-    pathsBuffer.writeUInt32BE(element, offset);
-    offset += 4;
-  });
+  const pathsBuffer = bip32asBuffer(path);
   const lockTimeBuffer = Buffer.alloc(4);
   lockTimeBuffer.writeUInt32BE(lockTime, 0);
   let buffer = isDecred
     ? Buffer.concat([
-        Buffer.from([paths.length]),
         pathsBuffer,
         lockTimeBuffer,
         expiryHeight || Buffer.from([0x00, 0x00, 0x00, 0x00]),
         Buffer.from([sigHashType])
       ])
     : Buffer.concat([
-        Buffer.from([paths.length]),
         pathsBuffer,
         Buffer.from([0x00]),
         lockTimeBuffer,

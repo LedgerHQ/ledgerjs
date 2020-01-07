@@ -1,6 +1,6 @@
 // @flow
 import type Transport from "@ledgerhq/hw-transport";
-import bippath from "bip32-path";
+import { bip32asBuffer } from "./bip32";
 
 /**
  * address format is one of legacy | p2sh | bech32
@@ -29,14 +29,9 @@ export async function getWalletPublicKey(
   if (!(format in addressFormatMap)) {
     throw new Error("btc.getWalletPublicKey invalid format=" + format);
   }
-  const paths = bippath.fromString(path).toPathArray();
+  const buffer = bip32asBuffer(path);
   var p1 = verify ? 1 : 0;
   var p2 = addressFormatMap[format];
-  const buffer = Buffer.alloc(1 + paths.length * 4);
-  buffer[0] = paths.length;
-  paths.forEach((element, index) => {
-    buffer.writeUInt32BE(element, 1 + 4 * index);
-  });
   const response = await transport.send(0xe0, 0x40, p1, p2, buffer);
 
   const publicKeyLength = response[0];

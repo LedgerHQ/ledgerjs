@@ -1,18 +1,13 @@
 // @flow
 import Transport from "@ledgerhq/hw-transport";
-import bippath from "bip32-path";
+import { bip32asBuffer } from "./bip32";
 import { MAX_SCRIPT_BLOCK } from "./constants";
 
 export function provideOutputFullChangePath(
   transport: Transport<*>,
   path: string
 ): Promise<string> {
-  const paths = bippath.fromString(path).toPathArray();
-  let buffer = Buffer.alloc(1 + paths.length * 4);
-  buffer[0] = paths.length;
-  paths.forEach((element, index) => {
-    buffer.writeUInt32BE(element, 1 + 4 * index);
-  });
+  let buffer = bip32asBuffer(path);
   return transport.send(0xe0, 0x4a, 0xff, 0x00, buffer);
 }
 
