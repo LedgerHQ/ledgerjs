@@ -1,7 +1,7 @@
 //@flow
 
 import Transport from "@ledgerhq/hw-transport";
-import createHash from "create-hash";
+import shajs from "sha.js";
 import type { Transaction } from "./types";
 import { serializeTransaction } from "./serializeTransaction";
 
@@ -18,12 +18,13 @@ export function getTrustedInputBIP143(
   if (isDecred) {
     throw new Error("Decred does not implement BIP143");
   }
-  let sha = createHash("sha256");
-  sha.update(serializeTransaction(transaction, true));
-  let hash = sha.digest();
-  sha = createHash("sha256");
-  sha.update(hash);
-  hash = sha.digest();
+  let hash = shajs("sha256")
+    .update(
+      shajs("sha256")
+        .update(serializeTransaction(transaction, true))
+        .digest()
+    )
+    .digest();
   const data = Buffer.alloc(4);
   data.writeUInt32LE(indexLookup, 0);
   const { outputs, locktime } = transaction;

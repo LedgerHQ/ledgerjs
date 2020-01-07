@@ -1,11 +1,12 @@
 //@flow
 
-import createHash from "create-hash";
+import RIPEMD160 from "ripemd160";
+import sha from "sha.js";
 
 export function hashPublicKey(buffer: Buffer) {
-  return createHash("rmd160")
+  return new RIPEMD160()
     .update(
-      createHash("sha256")
+      sha("sha256")
         .update(buffer)
         .digest()
     )
