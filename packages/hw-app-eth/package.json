@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-app-eth",
-  "version": "5.3.0",
+  "version": "5.4.2",
   "description": "Ledger Hardware Wallet Ethereum Application API",
   "keywords": [
     "Ledger",
