@@ -153,6 +153,13 @@ export const UnavailableTezosOriginatedAccountReceive = createCustomErrorClass(
 export const UnavailableTezosOriginatedAccountSend = createCustomErrorClass(
   "UnavailableTezosOriginatedAccountSend"
 );
+export const UpdateFetchFileFail = createCustomErrorClass(
+  "UpdateFetchFileFail"
+);
+export const UpdateIncorrectHash = createCustomErrorClass(
+  "UpdateIncorrectHash"
+);
+export const UpdateIncorrectSig = createCustomErrorClass("UpdateIncorrectSig");
 export const UpdateYourApp = createCustomErrorClass("UpdateYourApp");
 export const UserRefusedDeviceNameChange = createCustomErrorClass(
   "UserRefusedDeviceNameChange"
