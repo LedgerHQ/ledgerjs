@@ -16,9 +16,13 @@ export function RecordStoreQueueEmpty() {
 //$FlowFixMe
 RecordStoreQueueEmpty.prototype = new Error();
 
-export function RecordStoreWrongAPDU(expected: string, got: string) {
+export function RecordStoreWrongAPDU(
+  expected: string,
+  got: string,
+  line: number
+) {
   this.name = "RecordStoreWrongAPDU";
-  this.message = `wrong apdu to replay. Expected ${expected}, Got ${got}`;
+  this.message = `wrong apdu to replay line ${line}. Expected ${expected}, Got ${got}`;
   this.expectedAPDU = expected;
   this.gotAPDU = got;
   this.stack = new Error().stack;
@@ -36,11 +40,27 @@ RecordStoreRemainingAPDU.prototype = new Error();
 
 export type Queue = [string, string][];
 
-export class RecordStore {
-  queue: Queue;
+export type RecordStoreOptions = {
+  // smart mechanism that would skip an apdu un-recognize to the next one that does
+  // this is meant to be used when you have refactored/dropped some APDUs
+  // it will produces console warnings for you to fix the APDUs queue
+  autoSkipUnknownApdu: boolean,
+  warning: string => void
+};
 
-  constructor(queue?: ?Queue) {
+const defaultOpts: RecordStoreOptions = {
+  autoSkipUnknownApdu: false,
+  warning: log => console.warn(log)
+};
+
+export class RecordStore {
+  passed = 0;
+  queue: Queue;
+  opts: RecordStoreOptions;
+
+  constructor(queue?: ?Queue, opts?: $Shape<RecordStoreOptions>) {
     this.queue = queue || [];
+    this.opts = { ...defaultOpts, ...opts };
   }
 
   isEmpty = () => this.queue.length === 0;
@@ -50,17 +70,32 @@ export class RecordStore {
   }
 
   replayExchange(apdu: Buffer): Buffer {
-    const { queue } = this;
-    if (queue.length === 0) {
-      throw new RecordStoreQueueEmpty();
-    }
-    const [head, ...tail] = queue;
+    const { queue, opts } = this;
     const apduHex = apdu.toString("hex");
-    if (apduHex !== head[0]) {
-      throw new RecordStoreWrongAPDU(head[0], apduHex);
+    for (let i = 0; i < queue.length; i++) {
+      const head = queue[i];
+      const line = 2 * (this.passed + i);
+      if (apduHex === head[0]) {
+        ++this.passed;
+        this.queue = queue.slice(i + 1);
+        return Buffer.from(head[1], "hex");
+      } else {
+        if (opts.autoSkipUnknownApdu) {
+          opts.warning(
+            "skipped unmatched apdu (line " +
+              line +
+              " – expected " +
+              head[0] +
+              ")"
+          );
+          ++this.passed;
+        } else {
+          throw new RecordStoreWrongAPDU(head[0], apduHex, line);
+        }
+      }
     }
-    this.queue = tail;
-    return Buffer.from(head[1], "hex");
+    this.queue = [];
+    throw new RecordStoreQueueEmpty();
   }
 
   ensureQueueEmpty() {
@@ -77,7 +112,10 @@ export class RecordStore {
     );
   }
 
-  static fromString(str: string): RecordStore {
+  static fromString(
+    str: string,
+    opts?: $Shape<RecordStoreOptions>
+  ): RecordStore {
     const queue: Queue = [];
     let value = [];
     str
@@ -104,6 +142,6 @@ export class RecordStore {
     if (value.length !== 0) {
       throw new RecordStoreInvalidSynthax("unexpected end of file");
     }
-    return new RecordStore(queue);
+    return new RecordStore(queue, opts);
   }
 }
