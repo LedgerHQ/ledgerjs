@@ -46,7 +46,11 @@ export type CreateTransactionArg = {
   initialTimestamp?: number,
   additionals: Array<string>,
   expiryHeight?: Buffer,
-  onDeviceStreaming?: number => void,
+  onDeviceStreaming?: ({
+    progress: number,
+    total: number,
+    index: number
+  }) => void,
   onDeviceSignatureRequested?: () => void,
   onDeviceSignatureGranted?: () => void
 };
@@ -113,7 +117,7 @@ export async function createTransaction(
     : getTrustedInput;
   const outputScript = Buffer.from(outputScriptHex, "hex");
 
-  onDeviceStreaming(0);
+  onDeviceStreaming({ progress: 0, index: 0, total: inputs.length });
 
   // first pass on inputs to get trusted inputs
   for (let input of inputs) {
@@ -183,7 +187,11 @@ export async function createTransaction(
       const r = await getWalletPublicKey(transport, {
         path: associatedKeysets[i]
       });
-      onDeviceStreaming((i + 1) / inputs.length);
+      onDeviceStreaming({
+        progress: (i + 1) / inputs.length,
+        index: i + 1,
+        total: inputs.length
+      });
       result.push(r);
     }
     for (let i = 0; i < result.length; i++) {
@@ -266,7 +274,7 @@ export async function createTransaction(
 
     if (firstRun) {
       onDeviceSignatureGranted();
-      onDeviceStreaming(0);
+      onDeviceStreaming({ progress: 0, index: 0, total: inputs.length });
     }
 
     const signature = await signTransaction(
@@ -277,7 +285,11 @@ export async function createTransaction(
       expiryHeight,
       additionals
     );
-    onDeviceStreaming((i + 1) / inputs.length);
+    onDeviceStreaming({
+      progress: (i + 1) / inputs.length,
+      index: 0,
+      total: inputs.length
+    });
 
     signatures.push(signature);
     targetTransaction.inputs[i].script = nullScript;
