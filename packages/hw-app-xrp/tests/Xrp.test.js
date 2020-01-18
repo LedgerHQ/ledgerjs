@@ -2,7 +2,7 @@ import {
   createTransportReplayer,
   RecordStore
 } from "@ledgerhq/hw-transport-mocker";
-import Xrp from "../lib/Xrp";
+import Xrp from "../src/Xrp";
 
 test("getAppConfiguration", async () => {
   const Transport = createTransportReplayer(

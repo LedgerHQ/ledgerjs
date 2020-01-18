@@ -2,7 +2,12 @@
 import Transport from "@ledgerhq/hw-transport";
 import type { RecordStore } from "./RecordStore";
 
-export default (
+/**
+ * decorate a real transport and proxy it to record the APDUs.
+ * @param {Class<Transport<*>>} DecoratedTransport: an actual transport class. Like @ledgerhq/hw-transport-webusb
+ * @param {RecordStore} recordStore: a record store to record the apdu in.
+ */
+const createTransportRecorder = (
   DecoratedTransport: Class<Transport<*>>,
   recordStore: RecordStore
 ): Class<Transport<*>> => {
@@ -32,3 +37,5 @@ export default (
   }
   return TransportRecorder;
 };
+
+export default createTransportRecorder;

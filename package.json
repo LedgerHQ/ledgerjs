@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "preinstall": "node -e \"if (process.env.npm_execpath.indexOf('yarn') === -1) { console.log('\u001b[31mPlease use yarn\u001b[0m'); process.exit(1); }\"",
-    "test": "yarn run build && jest && yarn run lint && yarn run prettier-diff && yarn run doc",
+    "test": "yarn run build && yarn run lint && yarn run prettier-diff && yarn run doc && jest",
     "test-no-git-diff": "git diff --exit-code || exit 1",
     "test-node": "cd packages/test && yarn run test-node",
     "test-browser": "cd packages/test && yarn run test-browser",
@@ -22,6 +22,20 @@
     "clean": "rm -rf node_modules packages/*/node_modules/ packages/*/flow-typed/ packages/*/lib flow-typed",
     "rebuild": "lerna run clean && lerna run build",
     "publish": "yarn && lerna run clean && lerna run build && lerna publish --registry=https://registry.npmjs.org/"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "testPathIgnorePatterns" : [
+      "packages/.*/lib-es",
+      "packages/.*/lib"
+    ],
+    "coveragePathIgnorePatterns" : [
+      "packages/create-dapp"
+    ],
+    "collectCoverageFrom": [
+      "packages/**/src/*.js"
+    ]
+
   },
   "devDependencies": {
     "@babel/cli": "^7.8.3",

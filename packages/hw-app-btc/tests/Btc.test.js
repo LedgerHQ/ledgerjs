@@ -2,7 +2,7 @@ import {
   createTransportReplayer,
   RecordStore
 } from "@ledgerhq/hw-transport-mocker";
-import Btc from "..";
+import Btc from "../src/Btc";
 
 test("btc.getWalletPublicKey", async () => {
   const Transport = createTransportReplayer(

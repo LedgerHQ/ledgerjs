@@ -2,7 +2,7 @@ import {
   createTransportReplayer,
   RecordStore
 } from "@ledgerhq/hw-transport-mocker";
-import Eth from "../lib/Eth";
+import Eth from "../src/Eth";
 
 test("getAppConfiguration", async () => {
   const Transport = createTransportReplayer(

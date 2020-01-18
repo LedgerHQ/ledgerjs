@@ -2,7 +2,7 @@ import {
   createTransportReplayer,
   RecordStore
 } from "@ledgerhq/hw-transport-mocker";
-import Str from "../lib/Str";
+import Str from "../src/Str";
 
 test("getAppConfiguration", async () => {
   const Transport = createTransportReplayer(

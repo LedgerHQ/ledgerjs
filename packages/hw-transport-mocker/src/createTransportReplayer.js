@@ -3,7 +3,13 @@ import Transport from "@ledgerhq/hw-transport";
 import { log } from "@ledgerhq/logs";
 import type { RecordStore } from "./RecordStore";
 
-export default (recordStore: RecordStore): Class<Transport<*>> => {
+/**
+ * create a transport replayer with a record store.
+ * @param recordStore
+ */
+const createTransportReplayer = (
+  recordStore: RecordStore
+): Class<Transport<*>> => {
   class TransportReplayer extends Transport<*> {
     static isSupported = () => Promise.resolve(true);
     static list = () => Promise.resolve([null]);
@@ -42,3 +48,5 @@ export default (recordStore: RecordStore): Class<Transport<*>> => {
   }
   return TransportReplayer;
 };
+
+export default createTransportReplayer;
