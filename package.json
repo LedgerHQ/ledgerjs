@@ -25,17 +25,16 @@
   },
   "jest": {
     "collectCoverage": true,
-    "testPathIgnorePatterns" : [
+    "testPathIgnorePatterns": [
       "packages/.*/lib-es",
       "packages/.*/lib"
     ],
-    "coveragePathIgnorePatterns" : [
+    "coveragePathIgnorePatterns": [
       "packages/create-dapp"
     ],
     "collectCoverageFrom": [
       "packages/**/src/*.js"
     ]
-
   },
   "devDependencies": {
     "@babel/cli": "^7.8.3",
@@ -55,8 +54,8 @@
     "eslint": "^6.8.0",
     "eslint-config-prettier": "^6.9.0",
     "eslint-plugin-flowtype": "^4.6.0",
-    "eslint-plugin-react": "^7.14.3",
-    "flow-bin": "^0.115.0",
+    "eslint-plugin-react": "^7.18.0",
+    "flow-bin": "^0.116.1",
     "flow-copy-source": "^2.0.8",
     "flow-mono-cli": "^1.5.3",
     "flow-typed": "^2.6.1",
