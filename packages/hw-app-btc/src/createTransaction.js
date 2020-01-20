@@ -287,7 +287,7 @@ export async function createTransaction(
     );
     onDeviceStreaming({
       progress: (i + 1) / inputs.length,
-      index: 0,
+      index: i + 1,
       total: inputs.length
     });
 
