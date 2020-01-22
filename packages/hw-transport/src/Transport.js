@@ -3,6 +3,7 @@
 import EventEmitter from "events";
 import type { DeviceModel } from "@ledgerhq/devices";
 import {
+  TransportRaceCondition,
   TransportError,
   StatusCodes,
   getAltStatusMessage,
@@ -259,7 +260,9 @@ TransportFoo.create().then(transport => ...)
   // $FlowFixMe
   exchangeAtomicImpl = async f => {
     if (this.exchangeBusyPromise) {
-      throw new TransportError("Transport race condition", "RaceCondition");
+      throw new TransportRaceCondition(
+        "An action was already pending on the Ledger device. Please deny or reconnect."
+      );
     }
     let resolveBusy;
     const busyPromise = new Promise(r => {

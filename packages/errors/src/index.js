@@ -183,6 +183,9 @@ export const TransportOpenUserCancelled = createCustomErrorClass(
 export const TransportInterfaceNotAvailable = createCustomErrorClass(
   "TransportInterfaceNotAvailable"
 );
+export const TransportRaceCondition = createCustomErrorClass(
+  "TransportRaceCondition"
+);
 export const TransportWebUSBGestureRequired = createCustomErrorClass(
   "TransportWebUSBGestureRequired"
 );
