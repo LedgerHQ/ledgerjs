@@ -30,7 +30,7 @@ const defaultsSignTransaction = {
   sigHashType: SIGHASH_ALL,
   segwit: false,
   additionals: [],
-  onDeviceStreaming: _progress => {},
+  onDeviceStreaming: _e => {},
   onDeviceSignatureGranted: () => {},
   onDeviceSignatureRequested: () => {}
 };
@@ -78,6 +78,19 @@ export async function createTransaction(
     ...arg
   };
 
+  // loop: 0 or 1 (before and after)
+  // i: index of the input being streamed
+  // i goes on 0...n, inluding n. in order for the progress value to go to 1
+  // we normalize the 2 loops to make a global percentage
+  const notify = (loop, i) => {
+    const { length } = inputs;
+    if (length < 3) return; // there is not enough significant event to worth notifying (aka just use a spinner)
+    const index = length * loop + i;
+    const total = 2 * length;
+    const progress = index / total;
+    onDeviceStreaming({ progress, total, index });
+  };
+
   const isDecred = additionals.includes("decred");
   const isXST = additionals.includes("stealthcoin");
   const hasTimestamp = initialTimestamp !== undefined;
@@ -117,7 +130,7 @@ export async function createTransaction(
     : getTrustedInput;
   const outputScript = Buffer.from(outputScriptHex, "hex");
 
-  onDeviceStreaming({ progress: 0, index: 0, total: inputs.length });
+  notify(0, 0);
 
   // first pass on inputs to get trusted inputs
   for (let input of inputs) {
@@ -187,11 +200,7 @@ export async function createTransaction(
       const r = await getWalletPublicKey(transport, {
         path: associatedKeysets[i]
       });
-      onDeviceStreaming({
-        progress: (i + 1) / inputs.length,
-        index: i + 1,
-        total: inputs.length
-      });
+      notify(0, i + 1);
       result.push(r);
     }
     for (let i = 0; i < result.length; i++) {
@@ -274,7 +283,7 @@ export async function createTransaction(
 
     if (firstRun) {
       onDeviceSignatureGranted();
-      onDeviceStreaming({ progress: 0, index: 0, total: inputs.length });
+      notify(1, 0);
     }
 
     const signature = await signTransaction(
@@ -285,11 +294,7 @@ export async function createTransaction(
       expiryHeight,
       additionals
     );
-    onDeviceStreaming({
-      progress: (i + 1) / inputs.length,
-      index: i + 1,
-      total: inputs.length
-    });
+    notify(1, i + 1);
 
     signatures.push(signature);
     targetTransaction.inputs[i].script = nullScript;
