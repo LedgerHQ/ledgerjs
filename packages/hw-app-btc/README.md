@@ -31,16 +31,20 @@ Ledger Hardware Wallet BTC JavaScript bindings. Also supports many altcoins.
     -   [splitTransaction](#splittransaction)
         -   [Parameters](#parameters-5)
         -   [Examples](#examples-5)
+-   [CreateTransactionArg](#createtransactionarg)
+    -   [Properties](#properties)
 -   [AddressFormat](#addressformat)
 -   [serializeTransactionOutputs](#serializetransactionoutputs)
     -   [Parameters](#parameters-6)
     -   [Examples](#examples-6)
--   [TransactionInput](#transactioninput)
-    -   [Properties](#properties)
--   [TransactionOutput](#transactionoutput)
+-   [SignP2SHTransactionArg](#signp2shtransactionarg)
     -   [Properties](#properties-1)
--   [Transaction](#transaction)
+-   [TransactionInput](#transactioninput)
     -   [Properties](#properties-2)
+-   [TransactionOutput](#transactionoutput)
+    -   [Properties](#properties-3)
+-   [Transaction](#transaction)
+    -   [Properties](#properties-4)
 
 ### Btc
 
@@ -108,7 +112,7 @@ To sign a transaction involving standard (P2PKH) inputs, call createTransaction 
 
 ##### Parameters
 
--   `arg` **CreateTransactionArg** 
+-   `arg` **[CreateTransactionArg](#createtransactionarg)** 
 -   `inputs`  is an array of [ transaction, output_index, optional redeem script, optional sequence ] where-   transaction is the previously computed transaction object for this UTXO
     -   output_index is the output in the transaction used as input for this UTXO (counting from 0)
     -   redeem script is the optional redeem script to use when consuming a Segregated Witness input
@@ -145,7 +149,7 @@ To obtain the signature of multisignature (P2SH) inputs, call signP2SHTransactio
 
 ##### Parameters
 
--   `arg` **SignP2SHTransactionArg** 
+-   `arg` **[SignP2SHTransactionArg](#signp2shtransactionarg)** 
 -   `inputs`  is an array of [ transaction, output_index, redeem script, optional sequence ] where-   transaction is the previously computed transaction object for this UTXO
     -   output_index is the output in the transaction used as input for this UTXO (counting from 0)
     -   redeem script is the mandatory redeem script associated to the current P2SH input
@@ -187,6 +191,26 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
 
 Returns **[Transaction](#transaction)** 
 
+### CreateTransactionArg
+
+Type: {inputs: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;\[[Transaction](#transaction), [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?, [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?]>, associatedKeysets: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>, changePath: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?, outputScriptHex: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), lockTime: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, sigHashType: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, segwit: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, initialTimestamp: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, additionals: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>, expiryHeight: [Buffer](https://nodejs.org/api/buffer.html)?, onDeviceStreaming: function ({progress: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), total: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), index: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)}): void?, onDeviceSignatureRequested: function (): void?, onDeviceSignatureGranted: function (): void?}
+
+#### Properties
+
+-   `inputs` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;\[[Transaction](#transaction), [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?, [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?]>** 
+-   `associatedKeysets` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** 
+-   `changePath` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** 
+-   `outputScriptHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `lockTime` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
+-   `sigHashType` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
+-   `segwit` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** 
+-   `initialTimestamp` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
+-   `additionals` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** 
+-   `expiryHeight` **[Buffer](https://nodejs.org/api/buffer.html)?** 
+-   `onDeviceStreaming` **function ({progress: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), total: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), index: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)}): void?** 
+-   `onDeviceSignatureRequested` **function (): void?** 
+-   `onDeviceSignatureGranted` **function (): void?** 
+
 ### AddressFormat
 
 address format is one of legacy | p2sh | bech32
@@ -208,6 +232,20 @@ const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
 ```
 
 Returns **[Buffer](https://nodejs.org/api/buffer.html)** 
+
+### SignP2SHTransactionArg
+
+Type: {inputs: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;\[[Transaction](#transaction), [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?, [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?]>, associatedKeysets: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>, outputScriptHex: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), lockTime: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, sigHashType: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, segwit: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, transactionVersion: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?}
+
+#### Properties
+
+-   `inputs` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;\[[Transaction](#transaction), [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?, [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?]>** 
+-   `associatedKeysets` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** 
+-   `outputScriptHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `lockTime` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
+-   `sigHashType` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
+-   `segwit` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** 
+-   `transactionVersion` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
 
 ### TransactionInput
 

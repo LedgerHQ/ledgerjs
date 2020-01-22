@@ -20,6 +20,9 @@ const defaultArg = {
   transactionVersion: DEFAULT_VERSION
 };
 
+/**
+ *
+ */
 export type SignP2SHTransactionArg = {
   inputs: Array<[Transaction, number, ?string, ?number]>,
   associatedKeysets: string[],

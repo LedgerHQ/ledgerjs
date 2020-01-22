@@ -35,6 +35,9 @@ const defaultsSignTransaction = {
   onDeviceSignatureRequested: () => {}
 };
 
+/**
+ *
+ */
 export type CreateTransactionArg = {
   inputs: Array<[Transaction, number, ?string, ?number]>,
   associatedKeysets: string[],
