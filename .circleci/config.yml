@@ -3,7 +3,7 @@ version: 2
 defaults: &defaults
   working_directory: ~/ledgerjs
   docker:
-    - image: circleci/node:8-stretch-browsers
+    - image: circleci/node:12-stretch-browsers
 
 jobs:
   build:
