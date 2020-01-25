@@ -3,7 +3,7 @@ import AppEth from "@ledgerhq/hw-app-eth";
 import type Transport from "@ledgerhq/hw-transport";
 import HookedWalletSubprovider from "web3-provider-engine/subproviders/hooked-wallet";
 import stripHexPrefix from "strip-hex-prefix";
-import EthereumTx from "ethereumjs-tx";
+import { Transaction as EthereumTx } from "ethereumjs-tx";
 
 function makeError(msg, id) {
   const err = new Error(msg);
@@ -120,7 +120,7 @@ export default function createLedgerSubprovider(
     const transport = await getTransport();
     try {
       const eth = new AppEth(transport);
-      const tx = new EthereumTx(txData);
+      const tx = new EthereumTx(txData, { chain: networkId });
 
       // Set the EIP155 bits
       tx.raw[6] = Buffer.from([networkId]); // v
