@@ -32,19 +32,21 @@
     -   [setDebugMode](#setdebugmode)
     -   [setExchangeTimeout](#setexchangetimeout)
         -   [Parameters](#parameters-4)
-    -   [send](#send)
+    -   [setExchangeUnresponsiveTimeout](#setexchangeunresponsivetimeout)
         -   [Parameters](#parameters-5)
+    -   [send](#send)
+        -   [Parameters](#parameters-6)
     -   [isSupported](#issupported)
     -   [list](#list)
         -   [Examples](#examples)
     -   [listen](#listen)
-        -   [Parameters](#parameters-6)
+        -   [Parameters](#parameters-7)
         -   [Examples](#examples-1)
     -   [open](#open)
-        -   [Parameters](#parameters-7)
+        -   [Parameters](#parameters-8)
         -   [Examples](#examples-2)
     -   [create](#create)
-        -   [Parameters](#parameters-8)
+        -   [Parameters](#parameters-9)
         -   [Examples](#examples-3)
 
 ### Subscription
@@ -146,6 +148,14 @@ Set a timeout (in milliseconds) for the exchange call. Only some transport might
 ##### Parameters
 
 -   `exchangeTimeout` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+
+#### setExchangeUnresponsiveTimeout
+
+Define the delay before emitting "unresponsive" on an exchange that does not respond
+
+##### Parameters
+
+-   `unresponsiveTimeout` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 
 #### send
 

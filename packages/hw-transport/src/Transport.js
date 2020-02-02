@@ -52,6 +52,7 @@ export type Observer<Ev> = $ReadOnly<{
  */
 export default class Transport<Descriptor> {
   exchangeTimeout: number = 30000;
+  unresponsiveTimeout: number = 3000;
 
   /**
    * Statically check if a transport is supported on the user's platform/browser.
@@ -168,6 +169,13 @@ TransportFoo.open(descriptor).then(transport => ...)
   }
 
   /**
+   * Define the delay before emitting "unresponsive" on an exchange that does not respond
+   */
+  setExchangeUnresponsiveTimeout(unresponsiveTimeout: number) {
+    this.unresponsiveTimeout = unresponsiveTimeout;
+  }
+
+  /**
    * wrapper on top of exchange to simplify work of the implementation.
    * @param cla
    * @param ins
@@ -269,10 +277,14 @@ TransportFoo.create().then(transport => ...)
       resolveBusy = r;
     });
     this.exchangeBusyPromise = busyPromise;
+    const timeout = setTimeout(() => {
+      this.emit("unresponsive");
+    }, this.unresponsiveTimeout);
     try {
       const res = await f();
       return res;
     } finally {
+      clearTimeout(timeout);
       if (resolveBusy) resolveBusy();
       this.exchangeBusyPromise = null;
     }
