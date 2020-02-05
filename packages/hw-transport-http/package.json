@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-transport-http",
-  "version": "5.7.0",
+  "version": "5.8.0",
   "description": "Ledger Hardware Wallet communication layer over http",
   "keywords": [
     "Ledger",
@@ -27,7 +27,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/errors": "^5.7.0",
-    "@ledgerhq/hw-transport": "^5.7.0",
+    "@ledgerhq/hw-transport": "^5.8.0",
     "@ledgerhq/logs": "^5.6.0",
     "axios": "^0.19.0",
     "ws": "6"
