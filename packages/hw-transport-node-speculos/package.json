@@ -1,0 +1,44 @@
+{
+  "name": "@ledgerhq/hw-transport-node-speculos",
+  "version": "5.8.0",
+  "description": "Ledger Hardware Wallet communication layer with speculos Nano simulator",
+  "keywords": [
+    "Ledger",
+    "LedgerWallet",
+    "proxy",
+    "http",
+    "NanoS",
+    "Blue",
+    "Hardware Wallet",
+    "Speculos"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LedgerHQ/ledgerjs"
+  },
+  "bugs": {
+    "url": "https://github.com/LedgerHQ/ledgerjs/issues"
+  },
+  "homepage": "https://github.com/LedgerHQ/ledgerjs",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "lib/SpeculosTransport.js",
+  "module": "lib-es/SpeculosTransport.js",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@ledgerhq/errors": "^5.7.0",
+    "@ledgerhq/hw-transport": "^5.8.0",
+    "@ledgerhq/logs": "^5.6.0"
+  },
+  "devDependencies": {
+    "flow-bin": "^0.116.1"
+  },
+  "scripts": {
+    "flow": "flow",
+    "clean": "bash ../../script/clean.sh",
+    "build": "bash ../../script/build.sh",
+    "watch": "bash ../../script/watch.sh",
+    "doc": "bash ../../script/doc.sh"
+  }
+}
