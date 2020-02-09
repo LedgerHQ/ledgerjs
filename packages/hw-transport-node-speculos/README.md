@@ -39,6 +39,9 @@ It's working with SPECULOS_APDU_PORT and SPECULOS_HOST envs.
 
 ```sh
 SPECULOS_APDU_PORT=40000 ledger-live sync -c btc
+
+# starts an http proxy with speculos (http proxy that works with LLD and LLM)
+SPECULOS_APDU_PORT=40000 ledger-live proxy
 ```
 
 To make it work with Docker, I had to expose some port and do this:
