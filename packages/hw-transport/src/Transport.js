@@ -277,11 +277,16 @@ TransportFoo.create().then(transport => ...)
       resolveBusy = r;
     });
     this.exchangeBusyPromise = busyPromise;
+    let unresponsiveReached = false;
     const timeout = setTimeout(() => {
+      unresponsiveReached = true;
       this.emit("unresponsive");
     }, this.unresponsiveTimeout);
     try {
       const res = await f();
+      if (unresponsiveReached) {
+        this.emit("responsive");
+      }
       return res;
     } finally {
       clearTimeout(timeout);
