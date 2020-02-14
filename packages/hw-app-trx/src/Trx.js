@@ -17,7 +17,7 @@
 //@flow
 
 // FIXME drop:
-import { splitPath, foreach, leb128 } from "./utils";
+import { splitPath, foreach, decodeVarint } from "./utils";
 import { StatusCodes, TransportStatusError } from "@ledgerhq/errors";
 import type Transport from "@ledgerhq/hw-transport";
 
@@ -36,7 +36,7 @@ const SIGN = 0x04;
 const SIGN_MESSAGE = 0x08;
 const ECDH_SECRET = 0x0a;
 const VERSION = 0x06;
-const CHUNK_SIZE = 240;
+const CHUNK_SIZE = 255;
 
 /**
  * Tron API
@@ -110,6 +110,14 @@ export default class Trx {
       });
   }
 
+  getNextLength(tx: Buffer){
+    const field = decodeVarint(tx, 0);
+    const data = decodeVarint(tx, field.pos);
+    if ((field.value&0x07) === 0)
+      return field.pos;
+    return data.value + data.pos;
+  }
+
   /**
    * sign a Tron transaction with a given BIP 32 path and Token Names
    *
@@ -126,14 +134,38 @@ export default class Trx {
     path: string,
     rawTxHex: string,
     tokenSignatures: string[],
-    version: number = 105,
-    smartContract: boolean = false
   ): Promise<string> {
 
-    const toSend = this.buildPacks(path, rawTxHex, version, smartContract);
+    const paths = splitPath(path);
+    let rawTx = Buffer.from(rawTxHex, "hex");
+    const toSend = [];
+    
+    let offset = 0;
+
+    let data = Buffer.alloc(PATHS_LENGTH_SIZE+paths.length * PATH_SIZE);
+    // write path for first chuck only
+    data[0] = paths.length;
+    paths.forEach((element, index) => {
+      data.writeUInt32BE(element, 1 + 4 * index);
+    });
+    
+    while (offset !== rawTx.length) {
+      // get next message field
+      const newpos = this.getNextLength(rawTx);
+      if (newpos > CHUNK_SIZE) throw new Error("Too many bytes to encode.");
+      if (rawTx.length+newpos > CHUNK_SIZE) {
+        toSend.push(data);
+        data = Buffer.alloc(0);
+        continue;
+      }
+      // append data
+      data = Buffer.concat([data, rawTx.slice(0,newpos)]);
+      rawTx = rawTx.slice(newpos,rawTx.length);
+    }
+    toSend.push(data);
+
     const startBytes = [];
     let response;
-    
 
     const tokenPos = toSend.length;
     if (tokenSignatures !== undefined) {
@@ -163,12 +195,6 @@ export default class Trx {
     }
 
     return foreach(toSend, (data, i) => {
-      if (version>=105)
-        return this.send(CLA, SIGN, startBytes[i], 0x00, leb128(data))
-          .then(apduResponse => {
-            response = apduResponse;
-          });
-      // Old message format
       return this.transport
           .send(CLA, SIGN, startBytes[i], 0x00, data)
           .then(apduResponse => {
@@ -184,64 +210,6 @@ export default class Trx {
     );
   }
 
-  buildPacks(
-    path: string,
-    rawTxHex: string,
-    version: number,
-    smartContract: boolean = false
-  ) {
-    const paths = splitPath(path);
-    const rawTx = Buffer.from(rawTxHex, "hex");
-    const toSend = [];
-    
-
-    if (version>=105){
-      const buffer = Buffer.alloc(1 + paths.length * 4 + rawTx.length);
-      buffer[0] = paths.length;
-      paths.forEach((element, index) => {
-        buffer.writeUInt32BE(element, 1 + 4 * index);
-      });
-      rawTx.copy(buffer, 1 + 4 * paths.length, 0, rawTx.length);
-      toSend.push(buffer);
-    }else {
-      let offset = 0;
-      const LIMIT_BUFFER = smartContract ? 185 : CHUNK_SIZE;
-
-      while (offset !== rawTx.length) {
-        const maxChunkSize =
-          offset === 0
-            ? LIMIT_BUFFER - PATHS_LENGTH_SIZE - paths.length * PATH_SIZE
-            : LIMIT_BUFFER;
-        const chunkSize =
-          offset + maxChunkSize > rawTx.length
-            ? rawTx.length - offset
-            : maxChunkSize;
-
-        const buffer = Buffer.alloc(
-          offset === 0 ? 1 + paths.length * PATH_SIZE + chunkSize : chunkSize
-        );
-
-        if (offset === 0) {
-          buffer[0] = paths.length;
-          paths.forEach((element, index) => {
-            buffer.writeUInt32BE(element, 1 + 4 * index);
-          });
-          rawTx.copy(
-            buffer,
-            PATHS_LENGTH_SIZE + PATH_SIZE * paths.length,
-            offset,
-            offset + chunkSize
-          );
-        } else {
-          rawTx.copy(buffer, 0, offset, offset + chunkSize);
-        }
-
-        toSend.push(buffer);
-        offset += chunkSize;
-      }
-    }
-    return toSend;
-  }
 
   /**
    * get the version of the Tron app installed on the hardware device
@@ -387,25 +355,4 @@ export default class Trx {
         response.toString("hex")
       );
   }
-
-  send = async (
-    cla: number,
-    ins: number,
-    p1: number,
-    p2: number,
-    data: Buffer = Buffer.alloc(0),
-    statusList: Array<number> = [StatusCodes.OK]
-  ): Promise<Buffer> => {
-    const response = await this.transport.exchange(
-      Buffer.concat([
-        Buffer.from([cla, ins, p1, p2]),
-        data
-      ])
-    );
-    const sw = response.readUInt16BE(response.length - 2);
-    if (!statusList.some(s => s === sw)) {
-      throw new TransportStatusError(sw);
-    }
-    return response;
-  };
 }

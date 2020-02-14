@@ -99,19 +99,31 @@ export function asyncWhile<T>(
   return Promise.resolve([]).then(iterate);
 }
 
-export function leb128(stream: Buffer): Buffer {
-  let number = stream.length;
-  let buf = Buffer.from([]);
+
+interface DecodeResult {
+  value: number;
+  pos: number;
+} 
+
+export function decodeVarint(stream: Buffer, index: number): DecodeResult {
+  let result = 0;
+  let shift = 0;
+  let pos = index;
   // eslint-disable-next-line no-constant-condition
   while (true) {
-    const i = number & 0x7F;
-    number = number >> 7;
-    if (number>0) {
-      buf = Buffer.concat([buf, Buffer.from([i | 0x80])]);
-    } else {
-      buf = Buffer.concat([buf, Buffer.from([i])]);
-      break;
+    const b = stream[pos];
+    result |= ((b & 0x7f) << shift);
+    pos += 1;
+    if (!(b & 0x80)) {
+      result &= 0xFFFFFFFF;
+      return {
+        value: result,
+        pos
+      };
+    }
+    shift += 7;
+    if (shift >= 64) {
+      throw new Error("Too many bytes when decoding varint.");
     }
   }
-  return Buffer.concat([buf, stream]);
 }
