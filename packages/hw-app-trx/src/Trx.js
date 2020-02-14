@@ -153,7 +153,7 @@ export default class Trx {
       // get next message field
       const newpos = this.getNextLength(rawTx);
       if (newpos > CHUNK_SIZE) throw new Error("Too many bytes to encode.");
-      if (rawTx.length+newpos > CHUNK_SIZE) {
+      if (data.length + newpos > CHUNK_SIZE) {
         toSend.push(data);
         data = Buffer.alloc(0);
         continue;
