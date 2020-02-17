@@ -18,7 +18,7 @@
 
 // FIXME drop:
 import { splitPath, foreach, decodeVarint } from "./utils";
-import { StatusCodes, TransportStatusError } from "@ledgerhq/errors";
+//import { StatusCodes, TransportStatusError } from "@ledgerhq/errors";
 import type Transport from "@ledgerhq/hw-transport";
 
 const remapTransactionRelatedErrors = e => {
@@ -114,7 +114,7 @@ export default class Trx {
     const field = decodeVarint(tx, 0);
     const data = decodeVarint(tx, field.pos);
     if ((field.value&0x07) === 0)
-      return field.pos;
+      return data.pos;
     return data.value + data.pos;
   }
 
