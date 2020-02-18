@@ -32,7 +32,7 @@
     "@ledgerhq/hw-transport-node-hid-noevents": "^5.9.0",
     "@ledgerhq/logs": "^5.9.0",
     "lodash": "^4.17.15",
-    "node-hid": "^1.1.0",
+    "node-hid": "^1.2.0",
     "usb-detection": "^4.5.0"
   },
   "devDependencies": {

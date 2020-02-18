@@ -62,7 +62,7 @@
     "jest": "^25.1.0",
     "lerna": "3.20.2",
     "prettier": "^1.18.2",
-    "uglify-js": "^3.7.5"
+    "uglify-js": "^3.8.0"
   },
   "dependencies": {
     "js-levenshtein": "^1.1.6"
