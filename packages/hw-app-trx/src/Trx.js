@@ -85,13 +85,7 @@ export default class Trx {
       buffer.writeUInt32BE(element, 1 + 4 * index);
     });
     return this.transport
-      .send(
-        CLA,
-        ADDRESS,
-        boolDisplay ? 0x01 : 0x00,
-        0x00,
-        buffer
-      )
+      .send(CLA, ADDRESS, boolDisplay ? 0x01 : 0x00, 0x00, buffer)
       .then(response => {
         let result = {};
         let publicKeyLength = response[0];
@@ -99,22 +93,20 @@ export default class Trx {
         result.publicKey = response
           .slice(1, 1 + publicKeyLength)
           .toString("hex");
-        result.address =
-          response
-            .slice(
-              1 + publicKeyLength + 1,
-              1 + publicKeyLength + 1 + addressLength
-            )
-            .toString("ascii");
+        result.address = response
+          .slice(
+            1 + publicKeyLength + 1,
+            1 + publicKeyLength + 1 + addressLength
+          )
+          .toString("ascii");
         return result;
       });
   }
 
-  getNextLength(tx: Buffer){
+  getNextLength(tx: Buffer) {
     const field = decodeVarint(tx, 0);
     const data = decodeVarint(tx, field.pos);
-    if ((field.value&0x07) === 0)
-      return data.pos;
+    if ((field.value & 0x07) === 0) return data.pos;
     return data.value + data.pos;
   }
 
@@ -133,22 +125,21 @@ export default class Trx {
   signTransaction(
     path: string,
     rawTxHex: string,
-    tokenSignatures: string[],
+    tokenSignatures: string[]
   ): Promise<string> {
-
     const paths = splitPath(path);
     let rawTx = Buffer.from(rawTxHex, "hex");
     const toSend = [];
-    
+
     let offset = 0;
 
-    let data = Buffer.alloc(PATHS_LENGTH_SIZE+paths.length * PATH_SIZE);
+    let data = Buffer.alloc(PATHS_LENGTH_SIZE + paths.length * PATH_SIZE);
     // write path for first chuck only
     data[0] = paths.length;
     paths.forEach((element, index) => {
       data.writeUInt32BE(element, 1 + 4 * index);
     });
-    
+
     while (offset !== rawTx.length) {
       // get next message field
       const newpos = this.getNextLength(rawTx);
@@ -159,8 +150,8 @@ export default class Trx {
         continue;
       }
       // append data
-      data = Buffer.concat([data, rawTx.slice(0,newpos)]);
-      rawTx = rawTx.slice(newpos,rawTx.length);
+      data = Buffer.concat([data, rawTx.slice(0, newpos)]);
+      rawTx = rawTx.slice(newpos, rawTx.length);
     }
     toSend.push(data);
 
@@ -176,30 +167,30 @@ export default class Trx {
     }
 
     // get startBytes
-    if (toSend.length===1) {
+    if (toSend.length === 1) {
       startBytes.push(0x10);
     } else {
       startBytes.push(0x00);
       for (let i = 1; i < toSend.length - 1; i += 1) {
-        if (i>=tokenPos){
-          startBytes.push(0xA0 | 0X00 | i-tokenPos );// eslint-disable-line no-bitwise
+        if (i >= tokenPos) {
+          startBytes.push(0xa0 | 0x00 | (i - tokenPos)); // eslint-disable-line no-bitwise
         } else {
           startBytes.push(0x80);
         }
       }
       if (tokenSignatures !== undefined && tokenSignatures.length) {
-        startBytes.push(0xa0 | 0x08 | tokenSignatures.length - 1); // eslint-disable-line no-bitwise
-      }else{
+        startBytes.push(0xa0 | 0x08 | (tokenSignatures.length - 1)); // eslint-disable-line no-bitwise
+      } else {
         startBytes.push(0x90);
       }
     }
 
     return foreach(toSend, (data, i) => {
       return this.transport
-          .send(CLA, SIGN, startBytes[i], 0x00, data)
-          .then(apduResponse => {
-            response = apduResponse;
-          });
+        .send(CLA, SIGN, startBytes[i], 0x00, data)
+        .then(apduResponse => {
+          response = apduResponse;
+        });
     }).then(
       () => {
         return response.slice(0, 65).toString("hex");
@@ -209,7 +200,6 @@ export default class Trx {
       }
     );
   }
-
 
   /**
    * get the version of the Tron app installed on the hardware device
@@ -248,7 +238,7 @@ export default class Trx {
       }
       const result = {
         version: `${response[1]}.${response[2]}.${response[3]}`,
-        versionN: response[1]*10000+response[2]*100+response[3],
+        versionN: response[1] * 10000 + response[2] * 100 + response[3],
         allowData,
         allowContract,
         truncateAddress
@@ -266,19 +256,16 @@ export default class Trx {
    * @example
    * const signature = await tron.signPersonalMessage("44'/195'/0'/0/0", "43727970746f436861696e2d54726f6e5352204c6564676572205472616e73616374696f6e73205465737473");
    */
-  signPersonalMessage(
-    path: string,
-    messageHex: string
-  ): Promise<string> {
+  signPersonalMessage(path: string, messageHex: string): Promise<string> {
     let paths = splitPath(path);
     const message = Buffer.from(messageHex, "hex");
     let offset = 0;
     let toSend = [];
-    
+
     const size = message.length.toString(16);
     const sizePack = "00000000".substr(size.length) + size;
     const packed = Buffer.concat([Buffer.from(sizePack, "hex"), message]);
-    
+
     while (offset !== packed.length) {
       // Use small buffer to be compatible with old and new protocol
       let maxChunkSize = offset === 0 ? 127 - 1 - paths.length * 4 - 4 : 127;
@@ -314,22 +301,22 @@ export default class Trx {
         .then(apduResponse => {
           response = apduResponse;
         });
-      }).then(() => {
-      return response.slice(0, 65).toString("hex");;
+    }).then(() => {
+      return response.slice(0, 65).toString("hex");
     });
   }
 
   /**
    * get Tron address for a given BIP 32 path.
    * @param path a path in BIP 32 format
-   * @param publicKey address public key to generate pair key 
+   * @param publicKey address public key to generate pair key
    * @return shared key hex string,
    * @example
    * const signature = await tron.getECDHPairKey("44'/195'/0'/0/0", "04ff21f8e64d3a3c0198edfbb7afdc79be959432e92e2f8a1984bb436a414b8edcec0345aad0c1bf7da04fd036dd7f9f617e30669224283d950fab9dd84831dc83");
    */
   getECDHPairKey(
     path: string,
-    publicKey: string,
+    publicKey: string
   ): Promise<{
     publicKey: string,
     address: string
@@ -344,15 +331,7 @@ export default class Trx {
     data.copy(buffer, 1 + 4 * paths.length, 0, data.length);
 
     return this.transport
-      .send(
-        CLA,
-        ECDH_SECRET,
-        0x00,
-        0x01,
-        buffer
-      )
-      .then(response => 
-        response.toString("hex")
-      );
+      .send(CLA, ECDH_SECRET, 0x00, 0x01, buffer)
+      .then(response => response.toString("hex"));
   }
 }

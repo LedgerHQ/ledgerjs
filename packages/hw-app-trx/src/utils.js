@@ -99,11 +99,10 @@ export function asyncWhile<T>(
   return Promise.resolve([]).then(iterate);
 }
 
-
 interface DecodeResult {
   value: number;
   pos: number;
-} 
+}
 
 export function decodeVarint(stream: Buffer, index: number): DecodeResult {
   let result = 0;
@@ -112,10 +111,10 @@ export function decodeVarint(stream: Buffer, index: number): DecodeResult {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const b = stream[pos];
-    result |= ((b & 0x7f) << shift);
+    result |= (b & 0x7f) << shift;
     pos += 1;
     if (!(b & 0x80)) {
-      result &= 0xFFFFFFFF;
+      result &= 0xffffffff;
       return {
         value: result,
         pos
