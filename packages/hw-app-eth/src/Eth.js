@@ -53,7 +53,8 @@ export default class Eth {
         "getAppConfiguration",
         "starkGetPublicKey",
         "starkSignOrder",
-        "starkSignTransfer"
+        "starkSignTransfer",
+        "starkProvideQuantum"
       ],
       scrambleKey
     );
