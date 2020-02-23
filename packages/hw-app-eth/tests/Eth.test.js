@@ -15,7 +15,7 @@ test("getAppConfiguration", async () => {
   const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.getAppConfiguration();
-  expect(result).toEqual({ arbitraryDataEnabled: 1, version: "1.1.6" });
+  expect(result).toEqual({ arbitraryDataEnabled: 1, erc20ProvisioningNecessary: 0, starkEnabled: 0, version: "1.1.6" });
 });
 
 test("getAddress", async () => {
@@ -125,4 +125,17 @@ test("starkSignTransfer1", async () => {
   const eth = new Eth(transport);
   const result = await eth.starkSignTransfer("21323'/0", null, new BigNumber(1), "f1f789e47bb134082b2e901f779a0d188af7fbd7d97d10a9e121f22adadb5b05", 1, 1, new BigNumber(100000), 3434, 5656);
   expect(result).toEqual(Buffer.from("30440220028c0e3b4d2e7b0c1055c7d40e8df12676bc90cf19d0006225d500baecd5e11c02200305fe1782f050839619c3e9627121bacd3a8dc87859e1ba5376fbd1b3bee4d4", "hex"));
+});
+
+test("starkProvideQuantum", async () => {
+  const Transport = createTransportReplayer(
+    RecordStore.fromString(`
+    => f0080000200000000000000000000000000000000000000000000000000000000000000001
+    <= 9000
+    `)
+  );
+  const transport = await Transport.open();
+  const eth = new Eth(transport);
+  const result = await eth.starkProvideQuantum(new BigNumber(1));
+  expect(result).toEqual(true);
 });

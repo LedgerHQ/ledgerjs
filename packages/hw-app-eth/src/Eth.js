@@ -209,11 +209,15 @@ export default class Eth {
    */
   getAppConfiguration(): Promise<{
     arbitraryDataEnabled: number,
+    erc20ProvisioningNecessary: number,
+    starkEnabled: number,
     version: string
   }> {
     return this.transport.send(0xe0, 0x06, 0x00, 0x00).then(response => {
       let result = {};
       result.arbitraryDataEnabled = response[0] & 0x01;
+      result.erc20ProvisioningNecessary = response[0] & 0x02;
+      result.starkEnabled = response[0] & 0x04;
       result.version = "" + response[1] + "." + response[2] + "." + response[3];
       return result;
     });
@@ -350,10 +354,10 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
       nullAddress.copy(buffer, offset);
     }
     offset += 20;
-    Buffer.from(
-      sourceQuantization.toString(16).padStart(64, "0"),
-      "hex"
-    ).copy(buffer, offset);
+    Buffer.from(sourceQuantization.toString(16).padStart(64, "0"), "hex").copy(
+      buffer,
+      offset
+    );
     offset += 32;
     if (destinationTokenAddress) {
       Buffer.from(destinationTokenAddress, "hex").copy(buffer, offset);
@@ -455,5 +459,27 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
       .then(response => {
         return response.slice(0, response.length - 2);
       });
+  }
+
+  /**
+   * provide quantization information before singing a deposit or withdrawal Stark powered contract call
+   * @param operationQuantization quantization used for the token to be transferred
+   */
+  starkProvideQuantum(operationQuantization: BigNumber): Promise<boolean> {
+    let buffer = Buffer.alloc(32);
+    Buffer.from(
+      operationQuantization.toString(16).padStart(64, "0"),
+      "hex"
+    ).copy(buffer, 0);
+    return this.transport.send(0xf0, 0x08, 0x00, 0x00, buffer).then(
+      () => true,
+      e => {
+        if (e && e.statusCode === 0x6d00) {
+          // this case happen for ETH application versions not supporting Stark extensions
+          return false;
+        }
+        throw e;
+      }
+    );
   }
 }
