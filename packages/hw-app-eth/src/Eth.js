@@ -464,14 +464,19 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
 
   /**
    * provide quantization information before singing a deposit or withdrawal Stark powered contract call
+   * @param operationContract contract address of the token to be transferred
    * @param operationQuantization quantization used for the token to be transferred
    */
-  starkProvideQuantum(operationQuantization: BigNumber): Promise<boolean> {
-    let buffer = Buffer.alloc(32);
+  starkProvideQuantum(
+    operationContract: string,
+    operationQuantization: BigNumber
+  ): Promise<boolean> {
+    let buffer = Buffer.alloc(20 + 32);
+    Buffer.from(operationContract, "hex").copy(buffer, 0);
     Buffer.from(
       operationQuantization.toString(16).padStart(64, "0"),
       "hex"
-    ).copy(buffer, 0);
+    ).copy(buffer, 20);
     return this.transport.send(0xf0, 0x08, 0x00, 0x00, buffer).then(
       () => true,
       e => {

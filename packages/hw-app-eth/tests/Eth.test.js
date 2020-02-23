@@ -130,12 +130,12 @@ test("starkSignTransfer1", async () => {
 test("starkProvideQuantum", async () => {
   const Transport = createTransportReplayer(
     RecordStore.fromString(`
-    => f0080000200000000000000000000000000000000000000000000000000000000000000001
+    => f008000034e41d2489571d322189246dafa5ebde1f4699f4980000000000000000000000000000000000000000000000000000000000000001
     <= 9000
     `)
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
-  const result = await eth.starkProvideQuantum(new BigNumber(1));
+  const result = await eth.starkProvideQuantum("e41d2489571d322189246dafa5ebde1f4699f498", new BigNumber(1));
   expect(result).toEqual(true);
 });

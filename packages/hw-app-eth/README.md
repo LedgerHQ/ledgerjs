@@ -215,6 +215,7 @@ provide quantization information before singing a deposit or withdrawal Stark po
 
 ##### Parameters
 
+-   `operationContract` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** contract address of the token to be transferred
 -   `operationQuantization` **BigNumber** quantization used for the token to be transferred
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** 
