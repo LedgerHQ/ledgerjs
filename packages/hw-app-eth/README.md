@@ -32,6 +32,12 @@ Ledger Hardware Wallet ETH JavaScript bindings.
     -   [signPersonalMessage](#signpersonalmessage)
         -   [Parameters](#parameters-5)
         -   [Examples](#examples-4)
+    -   [starkGetPublicKey](#starkgetpublickey)
+        -   [Parameters](#parameters-6)
+    -   [starkSignOrder](#starksignorder)
+        -   [Parameters](#parameters-7)
+    -   [starkSignTransfer](#starksigntransfer)
+        -   [Parameters](#parameters-8)
 
 ### byContractAddress
 
@@ -151,3 +157,52 @@ console.log("Signature 0x" + result['r'] + result['s'] + v);
 ```
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{v: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), s: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), r: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** 
+
+#### starkGetPublicKey
+
+get Stark public key for a given BIP 32 path.
+
+##### Parameters
+
+-   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
+-   `boolDisplay` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** 
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Buffer](https://nodejs.org/api/buffer.html)>** the Stark public key
+
+#### starkSignOrder
+
+sign a Stark order
+
+##### Parameters
+
+-   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
+-   `sourceTokenAddress` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** 
+-   `sourceQuantization` **BigNumber** quantization used for the source token
+-   `destinationTokenAddress` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** 
+-   `destinationQuantization` **BigNumber** quantization used for the destination token
+-   `sourceVault` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** ID of the source vault
+-   `destinationVault` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** ID of the destination vault
+-   `amountSell` **BigNumber** amount to sell
+-   `amountBuy` **BigNumber** amount to buy
+-   `nonce` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** transaction nonce
+-   `timestamp` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** transaction validity timestamp
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Buffer](https://nodejs.org/api/buffer.html)>** the signature
+
+#### starkSignTransfer
+
+sign a Stark transfer
+
+##### Parameters
+
+-   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
+-   `transferTokenAddress` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** 
+-   `transferQuantization` **BigNumber** quantization used for the token to be transferred
+-   `targetPublicKey` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** target Stark public key
+-   `sourceVault` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** ID of the source vault
+-   `destinationVault` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** ID of the destination vault
+-   `amountTransfer` **BigNumber** amount to transfer
+-   `nonce` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** transaction nonce
+-   `timestamp` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** transaction validity timestamp
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Buffer](https://nodejs.org/api/buffer.html)>** the signature

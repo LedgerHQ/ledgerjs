@@ -3,6 +3,7 @@ import {
   RecordStore
 } from "@ledgerhq/hw-transport-mocker";
 import Eth from "../src/Eth";
+import { BigNumber } from "bignumber.js";
 
 test("getAppConfiguration", async () => {
   const Transport = createTransportReplayer(
@@ -72,4 +73,56 @@ test("signPersonalMessage", async () => {
     s: "3a407b9125f1bfc015df6983ae8b87a34d54be367b4275834c3039622a73ee00",
     v: 27
   });
+});
+
+test("starkGetPublicKey", async () => {
+  const Transport = createTransportReplayer(
+    RecordStore.fromString(`
+    => f002000009028000534b00000000
+    <= 05e8330615774c27af37530e34aa17e279eb1ac8ac91709932e0a1929bba54ac9000      
+    `)
+  );
+  const transport = await Transport.open();
+  const eth = new Eth(transport);
+  const result = await eth.starkGetPublicKey("21323'/0");
+  expect(result).toEqual(Buffer.from("05e8330615774c27af37530e34aa17e279eb1ac8ac91709932e0a1929bba54ac", "hex"));
+});
+
+test("starkSignOrder1", async () => {
+  const Transport = createTransportReplayer(
+    RecordStore.fromString(`
+    => f004010091028000534b000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000010000000100000000000186a00000000000030d4000000d6a00001618
+    <= 30440220029526c310368e835a2a0ee412a3bf084e0f94d91b8265f88a0bee32488223c40220012c34bef05a7b80ba22b0d58a18acd1a8198ee8fc9b525f85d2f4f843c5510f9000
+    `)
+  );
+  const transport = await Transport.open();
+  const eth = new Eth(transport);
+  const result = await eth.starkSignOrder("21323'/0", null, new BigNumber(1), null, new BigNumber(1), 1, 1, new BigNumber(100000), new BigNumber(200000), 3434, 5656);
+  expect(result).toEqual(Buffer.from("30440220029526c310368e835a2a0ee412a3bf084e0f94d91b8265f88a0bee32488223c40220012c34bef05a7b80ba22b0d58a18acd1a8198ee8fc9b525f85d2f4f843c5510f", "hex"));
+});
+
+test("starkSignOrder2", async () => {
+  const Transport = createTransportReplayer(
+    RecordStore.fromString(`
+    => f004010091028000534b00000000e41d2489571d322189246dafa5ebde1f4699f4980000000000000000000000000000000000000000000000000000000000000001dac17f958d2ee523a2206206994597c13d831ec70000000000000000000000000000000000000000000000000000000000000001000000010000000100000000000186a00000000000030d4000000d6a00001618
+    <= 3044022003c4a1aef46539c90eaad9a71eee8319586e2b749793335060a2431c42d0d489022001faac9386aaaf9d8d2cc3229aecf9e202f4b83f63e3fff7426ca07725d10fb29000
+    `)
+  );
+  const transport = await Transport.open();
+  const eth = new Eth(transport);
+  const result = await eth.starkSignOrder("21323'/0", "e41d2489571d322189246dafa5ebde1f4699f498", new BigNumber(1), "dac17f958d2ee523a2206206994597c13d831ec7", new BigNumber(1), 1, 1, new BigNumber(100000), new BigNumber(200000), 3434, 5656);
+  expect(result).toEqual(Buffer.from("3044022003c4a1aef46539c90eaad9a71eee8319586e2b749793335060a2431c42d0d489022001faac9386aaaf9d8d2cc3229aecf9e202f4b83f63e3fff7426ca07725d10fb2", "hex"));
+});
+
+test("starkSignTransfer1", async () => {
+  const Transport = createTransportReplayer(
+    RecordStore.fromString(`
+    => f004020075028000534b0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001f1f789e47bb134082b2e901f779a0d188af7fbd7d97d10a9e121f22adadb5b05000000010000000100000000000186a000000d6a00001618
+    <= 30440220028c0e3b4d2e7b0c1055c7d40e8df12676bc90cf19d0006225d500baecd5e11c02200305fe1782f050839619c3e9627121bacd3a8dc87859e1ba5376fbd1b3bee4d49000
+    `)
+  );
+  const transport = await Transport.open();
+  const eth = new Eth(transport);
+  const result = await eth.starkSignTransfer("21323'/0", null, new BigNumber(1), "f1f789e47bb134082b2e901f779a0d188af7fbd7d97d10a9e121f22adadb5b05", 1, 1, new BigNumber(100000), 3434, 5656);
+  expect(result).toEqual(Buffer.from("30440220028c0e3b4d2e7b0c1055c7d40e8df12676bc90cf19d0006225d500baecd5e11c02200305fe1782f050839619c3e9627121bacd3a8dc87859e1ba5376fbd1b3bee4d4", "hex"));
 });

@@ -20,6 +20,7 @@
 import { splitPath, foreach } from "./utils";
 import { EthAppPleaseEnableContractData } from "@ledgerhq/errors";
 import type Transport from "@ledgerhq/hw-transport";
+import { BigNumber } from "bignumber.js";
 
 const remapTransactionRelatedErrors = e => {
   if (e && e.statusCode === 0x6a80) {
@@ -49,7 +50,10 @@ export default class Eth {
         "provideERC20TokenInformation",
         "signTransaction",
         "signPersonalMessage",
-        "getAppConfiguration"
+        "getAppConfiguration",
+        "starkGetPublicKey",
+        "starkSignOrder",
+        "starkSignTransfer"
       ],
       scrambleKey
     );
@@ -279,5 +283,177 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
       const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
       return { v, r, s };
     });
+  }
+
+  /**
+   * get Stark public key for a given BIP 32 path.
+   * @param path a path in BIP 32 format
+   * @option boolDisplay optionally enable or not the display
+   * @return the Stark public key
+   */
+  starkGetPublicKey(path: string, boolDisplay?: boolean): Promise<Buffer> {
+    let paths = splitPath(path);
+    let buffer = Buffer.alloc(1 + paths.length * 4);
+    buffer[0] = paths.length;
+    paths.forEach((element, index) => {
+      buffer.writeUInt32BE(element, 1 + 4 * index);
+    });
+    return this.transport
+      .send(0xf0, 0x02, boolDisplay ? 0x01 : 0x00, 0x00, buffer)
+      .then(response => {
+        return response.slice(0, response.length - 2);
+      });
+  }
+
+  /**
+   * sign a Stark order
+   * @param path a path in BIP 32 format
+   * @option sourceTokenAddress contract address of the source token (not present for ETH)
+   * @param sourceQuantization quantization used for the source token
+   * @option destinationTokenAddress contract address of the destination token (not present for ETH)
+   * @param destinationQuantization quantization used for the destination token
+   * @param sourceVault ID of the source vault
+   * @param destinationVault ID of the destination vault
+   * @param amountSell amount to sell
+   * @param amountBuy amount to buy
+   * @param nonce transaction nonce
+   * @param timestamp transaction validity timestamp
+   * @return the signature
+   */
+  starkSignOrder(
+    path: string,
+    sourceTokenAddress?: string,
+    sourceQuantization: BigNumber,
+    destinationTokenAddress?: string,
+    destinationQuantization: BigNumber,
+    sourceVault: number,
+    destinationVault: number,
+    amountSell: BigNumber,
+    amountBuy: BigNumber,
+    nonce: number,
+    timestamp: number
+  ): Promise<Buffer> {
+    let paths = splitPath(path);
+    let nullAddress = Buffer.alloc(20, 0);
+    let buffer = Buffer.alloc(
+      1 + paths.length * 4 + 20 + 32 + 20 + 32 + 4 + 4 + 8 + 8 + 4 + 4
+    );
+    let offset = 0;
+    buffer[0] = paths.length;
+    paths.forEach((element, index) => {
+      buffer.writeUInt32BE(element, 1 + 4 * index);
+    });
+    offset = 1 + 4 * paths.length;
+    if (sourceTokenAddress) {
+      Buffer.from(sourceTokenAddress, "hex").copy(buffer, offset);
+    } else {
+      nullAddress.copy(buffer, offset);
+    }
+    offset += 20;
+    Buffer.from(
+      sourceQuantization.toString(16).padStart(64, "0"),
+      "hex"
+    ).copy(buffer, offset);
+    offset += 32;
+    if (destinationTokenAddress) {
+      Buffer.from(destinationTokenAddress, "hex").copy(buffer, offset);
+    } else {
+      nullAddress.copy(buffer, offset);
+    }
+    offset += 20;
+    Buffer.from(
+      destinationQuantization.toString(16).padStart(64, "0"),
+      "hex"
+    ).copy(buffer, offset);
+    offset += 32;
+    buffer.writeUInt32BE(sourceVault, offset);
+    offset += 4;
+    buffer.writeUInt32BE(destinationVault, offset);
+    offset += 4;
+    Buffer.from(amountSell.toString(16).padStart(16, "0"), "hex").copy(
+      buffer,
+      offset
+    );
+    offset += 8;
+    Buffer.from(amountBuy.toString(16).padStart(16, "0"), "hex").copy(
+      buffer,
+      offset
+    );
+    offset += 8;
+    buffer.writeUInt32BE(nonce, offset);
+    offset += 4;
+    buffer.writeUInt32BE(timestamp, offset);
+    return this.transport
+      .send(0xf0, 0x04, 0x01, 0x00, buffer)
+      .then(response => {
+        return response.slice(0, response.length - 2);
+      });
+  }
+
+  /**
+   * sign a Stark transfer
+   * @param path a path in BIP 32 format
+   * @option transferTokenAddress contract address of the token to be transferred (not present for ETH)
+   * @param transferQuantization quantization used for the token to be transferred
+   * @param targetPublicKey target Stark public key
+   * @param sourceVault ID of the source vault
+   * @param destinationVault ID of the destination vault
+   * @param amountTransfer amount to transfer
+   * @param nonce transaction nonce
+   * @param timestamp transaction validity timestamp
+   * @return the signature
+   */
+  starkSignTransfer(
+    path: string,
+    transferTokenAddress?: string,
+    transferQuantization: BigNumber,
+    targetPublicKey: string,
+    sourceVault: number,
+    destinationVault: number,
+    amountTransfer: BigNumber,
+    nonce: number,
+    timestamp: number
+  ): Promise<Buffer> {
+    let paths = splitPath(path);
+    let nullAddress = Buffer.alloc(20, 0);
+    let buffer = Buffer.alloc(
+      1 + paths.length * 4 + 20 + 32 + 32 + 4 + 4 + 8 + 4 + 4
+    );
+    let offset = 0;
+    buffer[0] = paths.length;
+    paths.forEach((element, index) => {
+      buffer.writeUInt32BE(element, 1 + 4 * index);
+    });
+    offset = 1 + 4 * paths.length;
+    if (transferTokenAddress) {
+      Buffer.from(transferTokenAddress, "hex").copy(buffer, offset);
+    } else {
+      nullAddress.copy(buffer, offset);
+    }
+    offset += 20;
+    Buffer.from(
+      transferQuantization.toString(16).padStart(64, "0"),
+      "hex"
+    ).copy(buffer, offset);
+    offset += 32;
+    Buffer.from(targetPublicKey, "hex").copy(buffer, offset);
+    offset += 32;
+    buffer.writeUInt32BE(sourceVault, offset);
+    offset += 4;
+    buffer.writeUInt32BE(destinationVault, offset);
+    offset += 4;
+    Buffer.from(amountTransfer.toString(16).padStart(16, "0"), "hex").copy(
+      buffer,
+      offset
+    );
+    offset += 8;
+    buffer.writeUInt32BE(nonce, offset);
+    offset += 4;
+    buffer.writeUInt32BE(timestamp, offset);
+    return this.transport
+      .send(0xf0, 0x04, 0x02, 0x00, buffer)
+      .then(response => {
+        return response.slice(0, response.length - 2);
+      });
   }
 }
