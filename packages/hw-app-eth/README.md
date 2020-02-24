@@ -213,9 +213,11 @@ Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 
 provide quantization information before singing a deposit or withdrawal Stark powered contract call
 
+It shall be run following a provideERC20TokenInformation call for the given contract
+
 ##### Parameters
 
--   `operationContract` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** contract address of the token to be transferred
+-   `operationContract` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** contract address of the token to be transferred (not present for ETH)
 -   `operationQuantization` **BigNumber** quantization used for the token to be transferred
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** 
