@@ -131,8 +131,6 @@ export default class Trx {
     let rawTx = Buffer.from(rawTxHex, "hex");
     const toSend = [];
 
-    let offset = 0;
-
     let data = Buffer.alloc(PATHS_LENGTH_SIZE + paths.length * PATH_SIZE);
     // write path for first chuck only
     data[0] = paths.length;
@@ -140,7 +138,7 @@ export default class Trx {
       data.writeUInt32BE(element, 1 + 4 * index);
     });
 
-    while (offset !== rawTx.length) {
+    while (rawTx.length > 0) {
       // get next message field
       const newpos = this.getNextLength(rawTx);
       if (newpos > CHUNK_SIZE) throw new Error("Too many bytes to encode.");
@@ -266,25 +264,24 @@ export default class Trx {
     const sizePack = "00000000".substr(size.length) + size;
     const packed = Buffer.concat([Buffer.from(sizePack, "hex"), message]);
 
-    while (offset !== packed.length) {
+    while (offset < packed.length) {
       // Use small buffer to be compatible with old and new protocol
-      let maxChunkSize = offset === 0 ? 127 - 1 - paths.length * 4 - 4 : 127;
+      let maxChunkSize = offset === 0 ? CHUNK_SIZE - 1 - paths.length * 4 : CHUNK_SIZE;
       let chunkSize =
         offset + maxChunkSize > packed.length
           ? packed.length - offset
           : maxChunkSize;
       let buffer = Buffer.alloc(
-        offset === 0 ? 1 + paths.length * 4 + 4 + chunkSize : chunkSize
+        offset === 0 ? 1 + paths.length * 4 + chunkSize : chunkSize
       );
       if (offset === 0) {
         buffer[0] = paths.length;
         paths.forEach((element, index) => {
           buffer.writeUInt32BE(element, 1 + 4 * index);
         });
-        buffer.writeUInt32BE(packed.length, 1 + 4 * paths.length);
         packed.copy(
           buffer,
-          1 + 4 * paths.length + 4,
+          1 + 4 * paths.length,
           offset,
           offset + chunkSize
         );
@@ -332,6 +329,6 @@ export default class Trx {
 
     return this.transport
       .send(CLA, ECDH_SECRET, 0x00, 0x01, buffer)
-      .then(response => response.toString("hex"));
+      .then(response => response.slice(0, 65).toString("hex"));
   }
 }
