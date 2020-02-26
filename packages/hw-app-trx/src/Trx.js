@@ -266,7 +266,8 @@ export default class Trx {
 
     while (offset < packed.length) {
       // Use small buffer to be compatible with old and new protocol
-      let maxChunkSize = offset === 0 ? CHUNK_SIZE - 1 - paths.length * 4 : CHUNK_SIZE;
+      let maxChunkSize =
+        offset === 0 ? CHUNK_SIZE - 1 - paths.length * 4 : CHUNK_SIZE;
       let chunkSize =
         offset + maxChunkSize > packed.length
           ? packed.length - offset
@@ -279,12 +280,7 @@ export default class Trx {
         paths.forEach((element, index) => {
           buffer.writeUInt32BE(element, 1 + 4 * index);
         });
-        packed.copy(
-          buffer,
-          1 + 4 * paths.length,
-          offset,
-          offset + chunkSize
-        );
+        packed.copy(buffer, 1 + 4 * paths.length, offset, offset + chunkSize);
       } else {
         packed.copy(buffer, 0, offset, offset + chunkSize);
       }
