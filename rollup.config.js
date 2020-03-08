@@ -12,7 +12,6 @@ export default {
   },
   plugins: [
     resolve({
-      jsnext: true,
       extensions
     }),
     typescript({

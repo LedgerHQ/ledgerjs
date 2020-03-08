@@ -19,7 +19,7 @@
     "flow": "lerna --ignore @ledgerhq/test --concurrency 1 run flow",
     "build": "BABEL_ENV=production && lerna run build",
     "watch": "lerna run --parallel watch",
-    "clean": "rm -rf node_modules packages/*/node_modules/ packages/*/flow-typed/ packages/*/lib flow-typed",
+    "clean": "rm -rf node_modules packages/*/node_modules/ packages/*/flow-typed/ packages/*/lib packages/*/dist flow-typed",
     "rebuild": "lerna run clean && lerna run build",
     "publish": "yarn && lerna run clean && lerna run build && lerna publish --registry=https://registry.npmjs.org/"
   },
