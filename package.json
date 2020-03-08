@@ -25,13 +25,15 @@
     "collectCoverage": true,
     "testPathIgnorePatterns": [
       "packages/.*/lib-es",
-      "packages/.*/lib"
+      "packages/.*/lib",
+      "packages/.*/dist"
     ],
     "coveragePathIgnorePatterns": [
       "packages/create-dapp"
     ],
     "collectCoverageFrom": [
-      "packages/**/src/*.js"
+      "packages/**/src/*.js",
+      "packages/**/src/*.ts"
     ]
   },
   "devDependencies": {
