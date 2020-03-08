@@ -1,4 +1,3 @@
-// @flow
 /* eslint-disable no-continue */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-prototype-builtins */
@@ -8,12 +7,12 @@ const deserializers = {};
 
 export const addCustomErrorDeserializer = (
   name: string,
-  deserializer: Object => *
+  deserializer: (obj: any) => any
 ) => {
   deserializers[name] = deserializer;
 };
 
-export const createCustomErrorClass = (name: string): Class<any> => {
+export const createCustomErrorClass = (name: string): any => {
   const C = function CustomError(message?: string, fields?: Object) {
     Object.assign(this, fields);
     this.name = name;
@@ -29,7 +28,7 @@ export const createCustomErrorClass = (name: string): Class<any> => {
 };
 
 // inspired from https://github.com/programble/errio/blob/master/index.js
-export const deserializeError = (object: mixed): Error => {
+export const deserializeError = (object: any): Error => {
   if (typeof object === "object" && object) {
     try {
       // $FlowFixMe FIXME HACK
@@ -79,7 +78,7 @@ export const deserializeError = (object: mixed): Error => {
 };
 
 // inspired from https://github.com/sindresorhus/serialize-error/blob/master/index.js
-export const serializeError = (value: mixed) => {
+export const serializeError = (value: any) => {
   if (!value) return value;
   if (typeof value === "object") {
     return destroyCircular(value, []);
@@ -91,8 +90,8 @@ export const serializeError = (value: mixed) => {
 };
 
 // https://www.npmjs.com/package/destroy-circular
-function destroyCircular(from: Object, seen) {
-  const to = {};
+function destroyCircular(from: any, seen: any[]) {
+  const to: any = {};
   seen.push(from);
   for (const key of Object.keys(from)) {
     const value = from[key];

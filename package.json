@@ -46,6 +46,7 @@
     "@babel/plugin-syntax-import-meta": "^7.8.3",
     "@babel/preset-env": "^7.8.3",
     "@babel/preset-flow": "^7.8.3",
+    "@rollup/plugin-node-resolve": "^7.1.1",
     "babel-eslint": "^10.0.3",
     "babel-jest": "^25.1.0",
     "browserify": "^16.5.0",
@@ -62,6 +63,9 @@
     "jest": "^25.1.0",
     "lerna": "3.20.2",
     "prettier": "^1.18.2",
+    "rollup": "^2.0.2",
+    "rollup-plugin-typescript2": "^0.26.0",
+    "typescript": "^3.8.3",
     "uglify-js": "^3.8.0"
   },
   "dependencies": {

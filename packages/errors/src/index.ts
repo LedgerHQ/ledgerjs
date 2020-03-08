@@ -1,5 +1,3 @@
-// @flow
-
 import {
   serializeError,
   deserializeError,
@@ -274,7 +272,7 @@ export const StatusCodes = {
   HALTED: 0x6faa
 };
 
-export function getAltStatusMessage(code: number): ?string {
+export function getAltStatusMessage(code: number): string | undefined | null {
   switch (code) {
     // improve text of most common errors
     case 0x6700:
