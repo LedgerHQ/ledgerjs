@@ -7,12 +7,10 @@
   ],
   "scripts": {
     "preinstall": "node -e \"if (process.env.npm_execpath.indexOf('yarn') === -1) { console.log('\u001b[31mPlease use yarn\u001b[0m'); process.exit(1); }\"",
-    "test": "yarn run build && yarn run lint && yarn run prettier-diff && yarn run doc && jest",
+    "test": "yarn run build && yarn run lint && yarn run doc && jest",
     "test-no-git-diff": "git diff --exit-code || exit 1",
     "test-node": "cd packages/test && yarn run test-node",
     "test-browser": "cd packages/test && yarn run test-browser",
-    "prettier": "prettier --write 'packages/*/src/**/*.js'",
-    "prettier-diff": "prettier --list-different 'packages/*/src/**/*.js'",
     "doc": "lerna run doc",
     "lint": "eslint packages/**/src --no-error-on-unmatched-pattern --ext .js,jsx && eslint packages/**/src --no-error-on-unmatched-pattern --ext .ts,.tsx -c .eslintrc.ts.js",
     "flow-install": "flow-mono create-symlinks packages/hw-transport/.flowconfig && flow-mono install-types --ignoreDeps=peer || echo 'failed to setup flow-typed'",

@@ -14,7 +14,8 @@ module.exports = {
     quotes: ["error", "double"],
     semi: ["error", "always"],
     "flowtype/space-after-type-colon": [2, "always", { allowLineBreak: true }],
-    "prettier/prettier": "error"
+    "prettier/prettier": "error",
+    "@typescript-eslint/no-use-before-define": "off"
   },
   settings: {
     flowtype: {
