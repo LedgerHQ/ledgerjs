@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-app-btc",
-  "version": "5.9.0",
+  "version": "5.11.0",
   "description": "Ledger Hardware Wallet Bitcoin Application API",
   "keywords": [
     "Ledger",
@@ -26,13 +26,13 @@
   "module": "lib-es/Btc.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^5.9.0",
+    "@ledgerhq/hw-transport": "^5.11.0",
     "bip32-path": "^0.4.2",
     "ripemd160": "2",
     "sha.js": "2"
   },
   "devDependencies": {
-    "flow-bin": "^0.118.0"
+    "flow-bin": "^0.120.1"
   },
   "scripts": {
     "flow": "flow",
