@@ -1,0 +1,42 @@
+{
+  "name": "@ledgerhq/hw-app-ckb",
+  "version": "5.9.0",
+  "description": "Ledger Hardware Wallet Nervos CKB API",
+  "keywords": [
+    "Ledger",
+    "LedgerWallet",
+    "ckb",
+    "NanoS",
+    "Blue",
+    "Hardware Wallet"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LedgerHQ/ledgerjs"
+  },
+  "bugs": {
+    "url": "https://github.com/LedgerHQ/ledgerjs/issues"
+  },
+  "homepage": "https://github.com/LedgerHQ/ledgerjs",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "lib/Ckb.js",
+  "module": "lib-es/Ckb.js",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@ledgerhq/hw-transport": "^5.9.0",
+    "bip32-path": "0.4.2"
+  },
+  "devDependencies": {
+    "flow-bin": "^0.118.0"
+  },
+  "scripts": {
+    "flow": "flow",
+    "clean": "bash ../../script/clean.sh",
+    "build": "bash ../../script/build.sh",
+    "watch": "bash ../../script/watch.sh",
+    "doc": "bash ../../script/doc.sh"
+  },
+  "gitHead": "fca2c7ce74fdb88df4d59dca4cc0e668410d66af"
+}
