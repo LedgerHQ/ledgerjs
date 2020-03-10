@@ -60,7 +60,7 @@ export default class Ckb {
    *
    * @param path a path in BIP 32 format
    * @param rawTxHex transaction to sign
-   * @param contextTransaction transaction context to use in parsing (optional)
+   * @param contextTransaction list of transaction context to use in parsing (optional)
    * @return a signature as hex string
    * @example
    * const signature = await ckb.signTransaction("44'/144'/0'/0/0", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
@@ -68,7 +68,7 @@ export default class Ckb {
   async signTransaction(
     path: string,
     rawTxHex: string,
-    rawContextTxHex: string
+    rawContextsTxHex: [string]
   ): Promise<string> {
     const bipPath = BIPPath.fromString(path).toPathArray();
     const rawTx = Buffer.from(rawTxHex, "hex");
@@ -82,7 +82,9 @@ export default class Ckb {
 
     const maxApduSize = 230;
 
-    if (rawContextTxHex) {
+    if (!rawContextsTxHex) rawContextsTxHex = [];
+
+    for (const rawContextTxHex of rawContextsTxHex) {
       let rawContextTx =
         rawContextTxHex !== null ? Buffer.from(rawTxHex, "hex") : null;
       for (let i = 0; i < Math.floor(rawContextTx.length / maxApduSize); i++) {
