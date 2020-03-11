@@ -109,7 +109,7 @@ export function decodeVarint(stream: Buffer, index: number): DecodeResult {
   let shift = 0;
   let pos = index;
   // eslint-disable-next-line no-constant-condition
-  while (true) {
+  while (shift < 64) {
     const b = stream[pos];
     result |= (b & 0x7f) << shift;
     pos += 1;
@@ -121,8 +121,6 @@ export function decodeVarint(stream: Buffer, index: number): DecodeResult {
       };
     }
     shift += 7;
-    if (shift >= 64) {
-      throw new Error("Too many bytes when decoding varint.");
-    }
   }
+  throw new Error("Too many bytes when decoding varint.");
 }
