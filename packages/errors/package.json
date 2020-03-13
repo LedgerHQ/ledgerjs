@@ -16,7 +16,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "dist/index.js",
+  "main": "dist/index.cjs.js",
   "module": "dist/index.js",
   "license": "Apache-2.0",
   "devDependencies": {
