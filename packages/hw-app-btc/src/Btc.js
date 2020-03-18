@@ -233,7 +233,7 @@ getTrustedInput(
   transaction: Transaction,
   additionals: Array<string> = []
 ): Promise<string> {
-    return getTrustedInput(transport, indexLookup, transaction, additionals)
+    return getTrustedInput(transport, indexLookup, transaction, additionals);
 }
 
 getTrustedInputBIP143(
@@ -242,7 +242,7 @@ getTrustedInputBIP143(
   transaction: Transaction,
   additionals: Array<string> = []
 ): Promise<string> {
-  return getTrustedInputBIP143(transport, indexLookup, transaction, additionals)
+  return getTrustedInputBIP143(transport, indexLookup, transaction, additionals);
 }
 
 }
