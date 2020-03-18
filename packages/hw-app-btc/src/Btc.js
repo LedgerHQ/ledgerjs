@@ -4,6 +4,8 @@ import { signMessage } from "./signMessage";
 import { getWalletPublicKey } from "./getWalletPublicKey";
 import type { AddressFormat } from "./getWalletPublicKey";
 import { splitTransaction } from "./splitTransaction";
+import { getTrustedInput } from "./getTrustedInput";
+import { getTrustedInputBIP143 } from "./getTrustedInputBIP143";
 import type { Transaction } from "./types";
 import { createTransaction } from "./createTransaction";
 import type { CreateTransactionArg } from "./createTransaction";
@@ -30,7 +32,9 @@ export default class Btc {
         "getWalletPublicKey",
         "signP2SHTransaction",
         "signMessageNew",
-        "createPaymentTransactionNew"
+        "createPaymentTransactionNew",
+        "getTrustedInput",
+        "getTrustedInputBIP143"
       ],
       scrambleKey
     );
@@ -219,6 +223,29 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
       isSegwitSupported,
       hasTimestamp,
       hasExtraData,
+      additionals
+    );
+  }
+
+  getTrustedInput(
+    transport: Transport<*>,
+    indexLookup: number,
+    transaction: Transaction,
+    additionals: Array<string> = []
+  ): Promise<string> {
+    return getTrustedInput(transport, indexLookup, transaction, additionals);
+  }
+
+  getTrustedInputBIP143(
+    transport: Transport<*>,
+    indexLookup: number,
+    transaction: Transaction,
+    additionals: Array<string> = []
+  ): Promise<string> {
+    return getTrustedInputBIP143(
+      transport,
+      indexLookup,
+      transaction,
       additionals
     );
   }
