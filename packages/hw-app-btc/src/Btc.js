@@ -241,7 +241,7 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
     indexLookup: number,
     transaction: Transaction,
     additionals: Array<string> = []
-  ): Promise<string> {
+  ): string {
     return getTrustedInputBIP143(
       transport,
       indexLookup,
