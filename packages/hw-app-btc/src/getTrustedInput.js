@@ -52,7 +52,10 @@ export async function getTrustedInput(
         scriptBlocks.push(script.slice(offset, offset + blockSize));
       } else {
         scriptBlocks.push(
-          Buffer.concat([script.slice(offset, offset + blockSize), sequence || Buffer.alloc(0)])
+          Buffer.concat([
+            script.slice(offset, offset + blockSize),
+            sequence || Buffer.alloc(0)
+          ])
         );
       }
       offset += blockSize;
@@ -120,12 +123,17 @@ export async function getTrustedInput(
     // in that way
     let res;
     if (isZencash && transaction.extraData.length > 0) {
-      const finalData = Buffer.concat([locktime, createVarint(transaction.extraData.length), transaction.extraData]);
+      const finalData = Buffer.concat([
+        locktime,
+        createVarint(transaction.extraData.length),
+        transaction.extraData
+      ]);
       res = await processScriptBlocks(finalData);
     } else {
       //Add expiry height for decred
       const finalData = isDecred
-        ? Buffer.concat([locktime, Buffer.from([0x00, 0x00, 0x00, 0x00])]) : locktime;
+        ? Buffer.concat([locktime, Buffer.from([0x00, 0x00, 0x00, 0x00])])
+        : locktime;
       res = await getTrustedInputRaw(transport, finalData);
     }
 

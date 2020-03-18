@@ -34,7 +34,7 @@ export default class Btc {
         "signMessageNew",
         "createPaymentTransactionNew",
         "getTrustedInput",
-        "getTrustedInputBIP143",
+        "getTrustedInputBIP143"
       ],
       scrambleKey
     );
@@ -227,24 +227,28 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
     );
   }
 
-getTrustedInput(
-  transport: Transport<*>,
-  indexLookup: number,
-  transaction: Transaction,
-  additionals: Array<string> = []
-): Promise<string> {
+  getTrustedInput(
+    transport: Transport<*>,
+    indexLookup: number,
+    transaction: Transaction,
+    additionals: Array<string> = []
+  ): Promise<string> {
     return getTrustedInput(transport, indexLookup, transaction, additionals);
-}
+  }
 
-getTrustedInputBIP143(
-  transport: Transport<*>,
-  indexLookup: number,
-  transaction: Transaction,
-  additionals: Array<string> = []
-): Promise<string> {
-  return getTrustedInputBIP143(transport, indexLookup, transaction, additionals);
-}
-
+  getTrustedInputBIP143(
+    transport: Transport<*>,
+    indexLookup: number,
+    transaction: Transaction,
+    additionals: Array<string> = []
+  ): Promise<string> {
+    return getTrustedInputBIP143(
+      transport,
+      indexLookup,
+      transaction,
+      additionals
+    );
+  }
 }
 
 function fromDeprecateArguments(args, keys) {
