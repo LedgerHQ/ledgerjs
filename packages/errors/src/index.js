@@ -244,6 +244,7 @@ addCustomErrorDeserializer(
 export const StatusCodes = {
   PIN_REMAINING_ATTEMPTS: 0x63c0,
   INCORRECT_LENGTH: 0x6700,
+  MISSING_CRITICAL_PARAMETER: 0x6800,
   COMMAND_INCOMPATIBLE_FILE_STRUCTURE: 0x6981,
   SECURITY_STATUS_NOT_SATISFIED: 0x6982,
   CONDITIONS_OF_USE_NOT_SATISFIED: 0x6985,
@@ -279,6 +280,8 @@ export function getAltStatusMessage(code: number): ?string {
     // improve text of most common errors
     case 0x6700:
       return "Incorrect length";
+    case 0x6800:
+      return "Missing critical parameter";
     case 0x6982:
       return "Security not satisfied (dongle locked or have invalid access rights)";
     case 0x6985:
