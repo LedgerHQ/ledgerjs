@@ -1,5 +1,3 @@
-// @flow
-
 import {
   serializeError,
   deserializeError,
@@ -227,13 +225,12 @@ export const DBNotReset = createCustomErrorClass("DBNotReset");
  * TransportError is used for any generic transport errors.
  * e.g. Error thrown when data received by exchanges are incorrect or if exchanged failed to communicate with the device for various reason.
  */
-export function TransportError(message: string, id: string) {
+export function TransportError(message: string, id: string): void {
   this.name = "TransportError";
   this.message = message;
   this.stack = new Error().stack;
   this.id = id;
 }
-//$FlowFixMe
 TransportError.prototype = new Error();
 
 addCustomErrorDeserializer(
@@ -275,7 +272,7 @@ export const StatusCodes = {
   HALTED: 0x6faa
 };
 
-export function getAltStatusMessage(code: number): ?string {
+export function getAltStatusMessage(code: number): string | undefined | null {
   switch (code) {
     // improve text of most common errors
     case 0x6700:
@@ -300,7 +297,7 @@ export function getAltStatusMessage(code: number): ?string {
  * Error thrown when a device returned a non success status.
  * the error.statusCode is one of the `StatusCodes` exported by this library.
  */
-export function TransportStatusError(statusCode: number) {
+export function TransportStatusError(statusCode: number): void {
   this.name = "TransportStatusError";
   const statusText =
     Object.keys(StatusCodes).find(k => StatusCodes[k] === statusCode) ||
@@ -312,7 +309,6 @@ export function TransportStatusError(statusCode: number) {
   this.statusCode = statusCode;
   this.statusText = statusText;
 }
-//$FlowFixMe
 TransportStatusError.prototype = new Error();
 
 addCustomErrorDeserializer(

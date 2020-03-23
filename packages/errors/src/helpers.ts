@@ -1,4 +1,3 @@
-// @flow
 /* eslint-disable no-continue */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-prototype-builtins */
@@ -8,28 +7,30 @@ const deserializers = {};
 
 export const addCustomErrorDeserializer = (
   name: string,
-  deserializer: Object => *
-) => {
+  deserializer: (obj: any) => any
+): void => {
   deserializers[name] = deserializer;
 };
 
-export const createCustomErrorClass = (name: string): Class<any> => {
-  const C = function CustomError(message?: string, fields?: Object) {
+type CustomErrorFunc = (
+  message?: string,
+  fields?: { [key: string]: any }
+) => void;
+
+export const createCustomErrorClass = (name: string): CustomErrorFunc => {
+  const C: CustomErrorFunc = function CustomError(message, fields): void {
     Object.assign(this, fields);
     this.name = name;
     this.message = message || name;
     this.stack = new Error().stack;
   };
-  // $FlowFixMe
   C.prototype = new Error();
-
   errorClasses[name] = C;
-  // $FlowFixMe we can't easily type a subset of Error for now...
   return C;
 };
 
 // inspired from https://github.com/programble/errio/blob/master/index.js
-export const deserializeError = (object: mixed): Error => {
+export const deserializeError = (object: any): Error => {
   if (typeof object === "object" && object) {
     try {
       // $FlowFixMe FIXME HACK
@@ -79,7 +80,7 @@ export const deserializeError = (object: mixed): Error => {
 };
 
 // inspired from https://github.com/sindresorhus/serialize-error/blob/master/index.js
-export const serializeError = (value: mixed) => {
+export const serializeError = (value: any): undefined | To | string => {
   if (!value) return value;
   if (typeof value === "object") {
     return destroyCircular(value, []);
@@ -90,9 +91,15 @@ export const serializeError = (value: mixed) => {
   return value;
 };
 
+interface To {
+  name?: string;
+  message?: string;
+  stack?: string;
+}
+
 // https://www.npmjs.com/package/destroy-circular
-function destroyCircular(from: Object, seen) {
-  const to = {};
+function destroyCircular(from: any, seen: any[]): To {
+  const to: To = {};
   seen.push(from);
   for (const key of Object.keys(from)) {
     const value = from[key];
