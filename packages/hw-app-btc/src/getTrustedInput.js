@@ -1,4 +1,5 @@
 // @flow
+import invariant from "invariant";
 import type Transport from "@ledgerhq/hw-transport";
 import type { Transaction } from "./types";
 import { MAX_SCRIPT_BLOCK } from "./constants";
@@ -37,9 +38,11 @@ export async function getTrustedInput(
     throw new Error("getTrustedInput: locktime & outputs is expected");
   }
   const isDecred = additionals.includes("decred");
+  const isZencash = additionals.includes("zencash");
   const isXST = additionals.includes("stealthcoin");
 
   const processScriptBlocks = async (script, sequence) => {
+    const seq = sequence || Buffer.alloc(0);
     const scriptBlocks = [];
     let offset = 0;
     while (offset !== script.length) {
@@ -51,7 +54,7 @@ export async function getTrustedInput(
         scriptBlocks.push(script.slice(offset, offset + blockSize));
       } else {
         scriptBlocks.push(
-          Buffer.concat([script.slice(offset, offset + blockSize), sequence])
+          Buffer.concat([script.slice(offset, offset + blockSize), seq])
         );
       }
       offset += blockSize;
@@ -60,12 +63,14 @@ export async function getTrustedInput(
     // Handle case when no script length: we still want to pass the sequence
     // relatable: https://github.com/LedgerHQ/ledger-live-desktop/issues/1386
     if (script.length === 0) {
-      scriptBlocks.push(sequence);
+      scriptBlocks.push(seq);
     }
 
+    let res;
     for (let scriptBlock of scriptBlocks) {
-      await getTrustedInputRaw(transport, scriptBlock);
+      res = await getTrustedInputRaw(transport, scriptBlock);
     }
+    return res;
   };
 
   const processWholeScriptBlock = block => getTrustedInputRaw(transport, block);
@@ -113,11 +118,26 @@ export async function getTrustedInput(
       await getTrustedInputRaw(transport, data);
     }
 
-    //Add expiry height for decred
-    const finalData = isDecred
-      ? Buffer.concat([locktime, Buffer.from([0x00, 0x00, 0x00, 0x00])])
-      : locktime;
-    const res = await getTrustedInputRaw(transport, finalData);
+    // All currencies that have extra data like Zencash should be processed
+    // in that way
+    let res;
+    const { extraData } = transaction;
+    if (isZencash && extraData && extraData.length > 0) {
+      const finalData = Buffer.concat([
+        locktime,
+        createVarint(extraData.length),
+        extraData
+      ]);
+      res = await processScriptBlocks(finalData);
+      invariant(res, "missing result in processScriptBlocks");
+    } else {
+      //Add expiry height for decred
+      const finalData = isDecred
+        ? Buffer.concat([locktime, Buffer.from([0x00, 0x00, 0x00, 0x00])])
+        : locktime;
+      res = await getTrustedInputRaw(transport, finalData);
+    }
+
     return res;
   };
 
