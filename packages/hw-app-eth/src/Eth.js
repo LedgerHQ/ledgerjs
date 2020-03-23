@@ -389,7 +389,9 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     return this.transport
       .send(0xf0, 0x04, 0x01, 0x00, buffer)
       .then(response => {
-        return response.slice(0, response.length - 2);
+        const r = response.slice(1, 1 + 32).toString("hex");
+        const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
+        return { r, s };
       });
   }
 
@@ -456,7 +458,9 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     return this.transport
       .send(0xf0, 0x04, 0x02, 0x00, buffer)
       .then(response => {
-        return response.slice(0, response.length - 2);
+        const r = response.slice(1, 1 + 32).toString("hex");
+        const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
+        return { r, s };
       });
   }
 
