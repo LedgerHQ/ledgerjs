@@ -17,10 +17,19 @@
 //@flow
 
 // FIXME drop:
-import { splitPath, foreach, convertHexString } from "./utils";
+import { splitPath, foreach } from "./utils";
 import { EthAppPleaseEnableContractData } from "@ledgerhq/errors";
 import type Transport from "@ledgerhq/hw-transport";
 import { BigNumber } from "bignumber.js";
+
+function hexBuffer(str: string): Buffer {
+  return Buffer.from(str.startsWith("0x") ? str.slice(2) : str, "hex");
+}
+
+function maybeHexBuffer(str: ?string): ?Buffer {
+  if (!str) return null;
+  return hexBuffer(str);
+}
 
 const remapTransactionRelatedErrors = e => {
   if (e && e.statusCode === 0x6a80) {
@@ -338,8 +347,8 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     nonce: number,
     timestamp: number
   ): Promise<Buffer> {
-    sourceTokenAddress = convertHexString(sourceTokenAddress);
-    destinationTokenAddress = convertHexString(destinationTokenAddress);
+    const sourceTokenAddressHex = maybeHexBuffer(sourceTokenAddress);
+    const destinationTokenAddressHex = maybeHexBuffer(destinationTokenAddress);
     let paths = splitPath(path);
     let buffer = Buffer.alloc(
       1 + paths.length * 4 + 20 + 32 + 20 + 32 + 4 + 4 + 8 + 8 + 4 + 4,
@@ -351,8 +360,8 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
       buffer.writeUInt32BE(element, 1 + 4 * index);
     });
     offset = 1 + 4 * paths.length;
-    if (sourceTokenAddress) {
-      Buffer.from(sourceTokenAddress, "hex").copy(buffer, offset);
+    if (sourceTokenAddressHex) {
+      sourceTokenAddressHex.copy(buffer, offset);
     }
     offset += 20;
     Buffer.from(sourceQuantization.toString(16).padStart(64, "0"), "hex").copy(
@@ -360,8 +369,8 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
       offset
     );
     offset += 32;
-    if (destinationTokenAddress) {
-      Buffer.from(destinationTokenAddress, "hex").copy(buffer, offset);
+    if (destinationTokenAddressHex) {
+      destinationTokenAddressHex.copy(buffer, offset);
     }
     offset += 20;
     Buffer.from(
@@ -419,8 +428,8 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     nonce: number,
     timestamp: number
   ): Promise<Buffer> {
-    transferTokenAddress = convertHexString(transferTokenAddress);
-    targetPublicKey = convertHexString(targetPublicKey);
+    const transferTokenAddressHex = maybeHexBuffer(transferTokenAddress);
+    const targetPublicKeyHex = hexBuffer(targetPublicKey);
     let paths = splitPath(path);
     let buffer = Buffer.alloc(
       1 + paths.length * 4 + 20 + 32 + 32 + 4 + 4 + 8 + 4 + 4,
@@ -432,8 +441,8 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
       buffer.writeUInt32BE(element, 1 + 4 * index);
     });
     offset = 1 + 4 * paths.length;
-    if (transferTokenAddress) {
-      Buffer.from(transferTokenAddress, "hex").copy(buffer, offset);
+    if (transferTokenAddressHex) {
+      transferTokenAddressHex.copy(buffer, offset);
     }
     offset += 20;
     Buffer.from(
@@ -441,7 +450,7 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
       "hex"
     ).copy(buffer, offset);
     offset += 32;
-    Buffer.from(targetPublicKey, "hex").copy(buffer, offset);
+    targetPublicKeyHex.copy(buffer, offset);
     offset += 32;
     buffer.writeUInt32BE(sourceVault, offset);
     offset += 4;
@@ -476,10 +485,10 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     operationContract?: string,
     operationQuantization: BigNumber
   ): Promise<boolean> {
-    operationContract = convertHexString(operationContract);
+    const operationContractHex = maybeHexBuffer(operationContract);
     let buffer = Buffer.alloc(20 + 32, 0);
-    if (operationContract) {
-      Buffer.from(operationContract, "hex").copy(buffer, 0);
+    if (operationContractHex) {
+      operationContractHex.copy(buffer, 0);
     }
     Buffer.from(
       operationQuantization.toString(16).padStart(64, "0"),

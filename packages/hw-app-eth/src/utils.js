@@ -98,10 +98,3 @@ export function asyncWhile<T>(
   }
   return Promise.resolve([]).then(iterate);
 }
-
-export function convertHexString(address: string): string {
-  if (typeof address !== "string" || address.slice(0, 2) !== "0x") {
-    return address;
-  }
-  return address.slice(2);
-}
