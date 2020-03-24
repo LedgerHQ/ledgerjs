@@ -34,7 +34,7 @@
     "@ledgerhq/hw-transport-u2f": "^5.11.0",
     "ethereumjs-tx": "^2.1.2",
     "strip-hex-prefix": "^1.0.0",
-    "web3-provider-engine": "^15.0.4"
+    "web3-provider-engine": "^15.0.6"
   },
   "devDependencies": {
     "flow-bin": "^0.120.1"
