@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-transport-webauthn",
-  "version": "5.11.0",
+  "version": "5.12.0",
   "description": "Ledger Hardware Wallet Web implementation of the communication layer, using WebAuthN api",
   "keywords": [
     "Ledger",
@@ -27,9 +27,9 @@
   "module": "lib-es/TransportWebAuthn.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/devices": "^5.11.0",
-    "@ledgerhq/errors": "^5.11.0",
-    "@ledgerhq/hw-transport": "^5.11.0",
+    "@ledgerhq/devices": "^5.12.0",
+    "@ledgerhq/errors": "^5.12.0",
+    "@ledgerhq/hw-transport": "^5.12.0",
     "@ledgerhq/logs": "^5.11.0"
   },
   "devDependencies": {
