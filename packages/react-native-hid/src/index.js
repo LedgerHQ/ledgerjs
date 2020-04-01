@@ -1,6 +1,7 @@
 //@flow
 import { NativeModules, DeviceEventEmitter } from "react-native";
 import { ledgerUSBVendorId, identifyUSBProductId } from "@ledgerhq/devices";
+import type { DeviceModel } from "@ledgerhq/devices";
 import {
   DisconnectedDeviceDuringOperation,
   DisconnectedDevice
@@ -59,10 +60,12 @@ const liveDeviceEvents = liveDeviceEventsSubject;
  */
 export default class HIDTransport extends Transport<DeviceObj> {
   id: number;
+  deviceModel: DeviceModel;
 
-  constructor(id: number) {
+  constructor(nativeId: number, productId: number) {
     super();
-    this.id = id;
+    this.id = nativeId;
+    this.deviceModel = identifyUSBProductId(productId);
   }
 
   /**
@@ -108,7 +111,7 @@ export default class HIDTransport extends Transport<DeviceObj> {
   static async open(deviceObj: DeviceObj) {
     try {
       const nativeObj = await NativeModules.HID.openDevice(deviceObj);
-      return new HIDTransport(nativeObj.id);
+      return new HIDTransport(nativeObj.id, deviceObj.productId);
     } catch (error) {
       if (disconnectedErrors.includes(error.message)) {
         throw new DisconnectedDevice(error.message);
