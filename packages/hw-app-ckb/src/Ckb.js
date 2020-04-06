@@ -86,50 +86,24 @@ export default class Ckb {
 
     for (const rawContextTxHex of rawContextsTxHex) {
       let rawContextTx =
-        rawContextTxHex !== null ? Buffer.from(rawTxHex, "hex") : null;
+        rawContextTxHex !== null ? Buffer.from(rawContextTxHex, "hex") : null;
       for (let i = 0; i < Math.floor(rawContextTx.length / maxApduSize); i++) {
-        let data = Buffer.alloc(maxApduSize);
-        for (let j = 0; j < maxApduSize; j++) {
-          let index = i * maxApduSize + j;
-          if (index >= rawContextTx.length) {
-            break;
-          }
-          rawContextTx.copy(data, 1, index);
-        }
+        let data = rawContextTx.slice(i*maxApduSize, (i+1)*maxApduSize);
         await this.transport.send(0x80, 0x03, 0x21, 0x00, data);
       }
 
-      let lastContextData = Buffer.alloc(maxApduSize);
-      let lastContextOffset =
-        Math.floor(rawTx.length / maxApduSize) * maxApduSize;
-      for (
-        let index = lastContextOffset;
-        index < rawContextTx.length;
-        index++
-      ) {
-        rawContextTx.copy(lastData, 1, index);
-      }
+      let lastContextOffset = Math.floor(rawContextTx.length / maxApduSize) * maxApduSize;
+      let lastContextData = rawContextTx.slice(lastContextOffset, lastContextOffset+maxApduSize);
       await this.transport.send(0x80, 0x03, 0xa1, 0x00, lastContextData);
     }
 
     for (let i = 0; i < Math.floor(rawTx.length / maxApduSize); i++) {
-      let data = Buffer.alloc(maxApduSize);
-      for (let j = 0; j < maxApduSize; j++) {
-        let index = i * maxApduSize + j;
-        if (index >= rawTx.length) {
-          break;
-        }
-        rawTx.copy(data, 1, index);
-      }
+      let data = rawTx.slice(i*maxApduSize, (i+1)*maxApduSize);
       await this.transport.send(0x80, 0x03, 0x01, 0x00, data);
     }
 
-    let lastData = Buffer.alloc(maxApduSize);
     let lastOffset = Math.floor(rawTx.length / maxApduSize) * maxApduSize;
-    for (let index = lastOffset; index < rawTx.length; index++) {
-      rawTx.copy(lastData, 1, index);
-    }
-
+    let lastData = rawTx.slice(lastOffset, lastOffset+maxApduSize);
     let response = await this.transport.send(0x80, 0x03, 0x81, 0x00, lastData);
     return response.toString("hex");
   }
