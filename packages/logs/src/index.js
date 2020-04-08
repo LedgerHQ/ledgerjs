@@ -56,4 +56,6 @@ function dispatch(log: Log) {
 }
 
 // for debug purpose
-global.__ledgerLogsListen = listen;
+if (typeof window !== "undefined") {
+  window.__ledgerLogsListen = listen;
+}
