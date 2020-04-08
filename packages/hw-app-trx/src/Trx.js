@@ -36,7 +36,7 @@ const SIGN = 0x04;
 const SIGN_MESSAGE = 0x08;
 const ECDH_SECRET = 0x0a;
 const VERSION = 0x06;
-const CHUNK_SIZE = 255;
+const CHUNK_SIZE = 250;
 
 /**
  * Tron API
