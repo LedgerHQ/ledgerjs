@@ -301,6 +301,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
     log("ble-verbose", "listen...");
     let unsubscribed;
 
+    // $FlowFixMe
     const stateSub = bleManager.onStateChange(async state => {
       if (state === "PoweredOn") {
         stateSub.remove();
@@ -395,6 +396,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
         log("apdu", `=> ${msgIn}`);
 
         const data = await merge(
+          // $FlowFixMe
           this.notifyObservable.pipe(receiveAPDU),
           sendAPDU(this.write, apdu, this.mtuSize)
         ).toPromise();

@@ -53,6 +53,7 @@ export type Observer<Ev> = $ReadOnly<{
 export default class Transport<Descriptor> {
   exchangeTimeout: number = 30000;
   unresponsiveTimeout: number = 15000;
+  deviceModel: ?DeviceModel = null;
 
   /**
    * Statically check if a transport is supported on the user's platform/browser.

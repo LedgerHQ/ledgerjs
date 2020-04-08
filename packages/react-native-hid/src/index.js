@@ -60,7 +60,7 @@ const liveDeviceEvents = liveDeviceEventsSubject;
  */
 export default class HIDTransport extends Transport<DeviceObj> {
   id: number;
-  deviceModel: DeviceModel;
+  deviceModel: ?DeviceModel;
 
   constructor(nativeId: number, productId: number) {
     super();

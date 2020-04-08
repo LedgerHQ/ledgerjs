@@ -33,7 +33,7 @@
     "@ledgerhq/logs": "^5.11.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.120.1",
+    "flow-bin": "^0.122.0",
     "flow-typed": "^2.6.1"
   },
   "scripts": {
