@@ -28,6 +28,7 @@
   "dependencies": {
     "@ledgerhq/hw-transport": "^5.13.0",
     "bip32-path": "^0.4.2",
+    "invariant": "^2.2.4",
     "ripemd160": "2",
     "sha.js": "2"
   },
