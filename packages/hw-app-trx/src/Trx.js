@@ -210,17 +210,21 @@ export default class Trx {
    *   "versionN": "105".
    *   "allowData": false,
    *   "allowContract": false,
-   *   "truncateAddress": false
+   *   "truncateAddress": false,
+   *   "signByHash": false
    * }
    */
   getAppConfiguration(): Promise<{
     allowContract: Boolean,
     truncateAddress: Boolean,
     allowData: Boolean,
+    signByHash: Boolean,
     version: string,
     versionN: number
   }> {
     return this.transport.send(CLA, VERSION, 0x00, 0x00).then(response => {
+      // eslint-disable-next-line no-bitwise
+      let signByHash = (response[0] & (1 << 3)) > 0;
       // eslint-disable-next-line no-bitwise
       let truncateAddress = (response[0] & (1 << 2)) > 0;
       // eslint-disable-next-line no-bitwise
@@ -239,7 +243,8 @@ export default class Trx {
         versionN: response[1] * 10000 + response[2] * 100 + response[3],
         allowData,
         allowContract,
-        truncateAddress
+        truncateAddress,
+        signByHash
       };
       return result;
     });
