@@ -1,5 +1,6 @@
 // @flow
 
+import semver from "semver";
 import type Transport from "@ledgerhq/hw-transport";
 import { hashPublicKey } from "./hashPublicKey";
 import { getWalletPublicKey } from "./getWalletPublicKey";
@@ -11,6 +12,7 @@ import { getTrustedInputBIP143 } from "./getTrustedInputBIP143";
 import { compressPublicKey } from "./compressPublicKey";
 import { signTransaction } from "./signTransaction";
 import { hashOutputFull, provideOutputFullChangePath } from "./finalizeInput";
+import { getAppAndVersion } from "./getAppAndVersion";
 import type { TransactionOutput, Transaction } from "./types";
 import {
   DEFAULT_LOCKTIME,
@@ -49,6 +51,7 @@ export type CreateTransactionArg = {
   initialTimestamp?: number,
   additionals: Array<string>,
   expiryHeight?: Buffer,
+  useTrustedInputForSegwit?: boolean,
   onDeviceStreaming?: ({
     progress: number,
     total: number,
@@ -62,7 +65,7 @@ export async function createTransaction(
   transport: Transport<*>,
   arg: CreateTransactionArg
 ) {
-  const {
+  let {
     inputs,
     associatedKeysets,
     changePath,
@@ -73,6 +76,7 @@ export async function createTransaction(
     initialTimestamp,
     additionals,
     expiryHeight,
+    useTrustedInputForSegwit,
     onDeviceStreaming,
     onDeviceSignatureGranted,
     onDeviceSignatureRequested
@@ -80,6 +84,11 @@ export async function createTransaction(
     ...defaultsSignTransaction,
     ...arg
   };
+
+  if (useTrustedInputForSegwit === undefined) {
+    const { version } = await getAppAndVersion(transport);
+    useTrustedInputForSegwit = semver.gte(version, "1.3.23");
+  }
 
   // loop: 0 or 1 (before and after)
   // i: index of the input being streamed
@@ -128,9 +137,11 @@ export async function createTransaction(
     version: defaultVersion,
     timestamp: Buffer.alloc(0)
   };
-  const getTrustedInputCall = useBip143
-    ? getTrustedInputBIP143
-    : getTrustedInput;
+
+  const getTrustedInputCall =
+    useBip143 && !useTrustedInputForSegwit
+      ? getTrustedInputBIP143
+      : getTrustedInput;
   const outputScript = Buffer.from(outputScriptHex, "hex");
 
   notify(0, 0);
@@ -232,7 +243,8 @@ export async function createTransaction(
       trustedInputs,
       true,
       !!expiryHeight,
-      additionals
+      additionals,
+      useTrustedInputForSegwit
     );
 
     if (!resuming && changePath) {
@@ -274,7 +286,8 @@ export async function createTransaction(
       pseudoTrustedInputs,
       useBip143,
       !!expiryHeight && !isDecred,
-      additionals
+      additionals,
+      useTrustedInputForSegwit
     );
 
     if (!useBip143) {
@@ -328,7 +341,7 @@ export async function createTransaction(
         publicKeys[i]
       ]);
     }
-    let offset = useBip143 ? 0 : 4;
+    let offset = useBip143 && !useTrustedInputForSegwit ? 0 : 4;
     targetTransaction.inputs[i].prevout = trustedInputs[i].value.slice(
       offset,
       offset + 0x24

@@ -36,7 +36,8 @@ export async function startUntrustedHashTransactionInput(
   inputs: Array<{ trustedInput: boolean, value: Buffer }>,
   bip143?: boolean = false,
   overwinter?: boolean = false,
-  additionals: Array<string> = []
+  additionals: Array<string> = [],
+  useTrustedInputForSegwit?: boolean = false
 ) {
   let data = Buffer.concat([
     transaction.version,
@@ -60,8 +61,13 @@ export async function startUntrustedHashTransactionInput(
 
   for (let input of transaction.inputs) {
     let prefix;
+    let inputValue = inputs[i].value;
     if (bip143) {
-      prefix = Buffer.from([0x02]);
+      if (useTrustedInputForSegwit && inputs[i].trustedInput) {
+        prefix = Buffer.from([0x01, inputValue.length]);
+      } else {
+        prefix = Buffer.from([0x02]);
+      }
     } else {
       if (inputs[i].trustedInput) {
         prefix = Buffer.from([0x01, inputs[i].value.length]);
@@ -71,7 +77,7 @@ export async function startUntrustedHashTransactionInput(
     }
     data = Buffer.concat([
       prefix,
-      inputs[i].value,
+      inputValue,
       isDecred ? Buffer.from([0x00]) : Buffer.alloc(0),
       createVarint(input.script.length)
     ]);

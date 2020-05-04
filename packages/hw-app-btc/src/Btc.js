@@ -122,6 +122,7 @@ export default class Btc {
    * - "bipxxx" for using BIPxxx
    * - "sapling" to indicate a zec transaction is supporting sapling (to be set over block 419200)
    * @param expiryHeight is an optional Buffer for zec overwinter / sapling Txs
+   * @param useTrustedInputForSegwit trust inputs for segwit transactions
    * @return the signed transaction ready to be broadcast
    * @example
 btc.createTransaction({
@@ -145,7 +146,8 @@ btc.createTransaction({
         "segwit",
         "initialTimestamp",
         "additionals",
-        "expiryHeight"
+        "expiryHeight",
+        "useTrustedInputForSegwit"
       ]);
     }
     return createTransaction(this.transport, arg);
