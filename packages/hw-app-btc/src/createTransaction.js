@@ -87,7 +87,7 @@ export async function createTransaction(
 
   if (useTrustedInputForSegwit === undefined) {
     const { version } = await getAppAndVersion(transport);
-    useTrustedInputForSegwit = semver.gte(version, "1.3.23");
+    useTrustedInputForSegwit = semver.gte(version, "1.4.0");
   }
 
   // loop: 0 or 1 (before and after)
