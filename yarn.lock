@@ -9139,7 +9139,7 @@ posix-character-classes@^0.1.0:
   resolved "https://registry.yarnpkg.com/posix-character-classes/-/posix-character-classes-0.1.1.tgz#01eac0fe3b5af71a2a6c02feabb8c1fef7e00eab"
   integrity sha1-AerA/jta9xoqbAL+q7jB/vfgDqs=
 
-prebuild-install@^5.1.0, prebuild-install@^5.3.3:
+prebuild-install@^5.3.3:
   version "5.3.3"
   resolved "https://registry.yarnpkg.com/prebuild-install/-/prebuild-install-5.3.3.tgz#ef4052baac60d465f5ba6bf003c9c1de79b9da8e"
   integrity sha512-GV+nsUXuPW2p8Zy7SarF/2W/oiK8bFQgJcncoJ0d7kRpekEA0ftChjfEaF9/Y+QJEc/wFR7RAEa8lYByuUIe2g==
@@ -11494,15 +11494,15 @@ url@~0.11.0:
     punycode "1.3.2"
     querystring "0.2.0"
 
-usb-detection@^4.5.0:
-  version "4.7.0"
-  resolved "https://registry.yarnpkg.com/usb-detection/-/usb-detection-4.7.0.tgz#2a740888e5043fcebf1fcbd7511dd0bc2c5408a4"
-  integrity sha512-HE9y5uYfA2ebVo64BrIB0OVNaVKZ2oWkadpTItCi4YQXyZ9vD0705iqQ3B7Rz8xevcrW/RNg/85E2o2JoPFmsQ==
+usb-detection@^4.9.0:
+  version "4.9.0"
+  resolved "https://registry.yarnpkg.com/usb-detection/-/usb-detection-4.9.0.tgz#52467fd0b5d511860ebe649d19d3a8d4a40e73c5"
+  integrity sha512-Ez9mmMz20+jD3ckdCkd0vYvcr88h4ijR9XXFt0o7+TvUijktxC07r8D/HlcHVFP+kbi8V2+iMXTqq7Rfwjh60g==
   dependencies:
     bindings "^1.3.0"
     eventemitter2 "^5.0.1"
     nan "^2.13.2"
-    prebuild-install "^5.1.0"
+    prebuild-install "^5.3.3"
 
 usb@^1.6.2, usb@^1.6.3:
   version "1.6.3"
