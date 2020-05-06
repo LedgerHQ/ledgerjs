@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/errors",
-  "version": "5.13.1",
+  "version": "5.15.0",
   "description": "Ledger common errors",
   "keywords": [
     "Ledger"
