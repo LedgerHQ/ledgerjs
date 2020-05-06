@@ -1,4 +1,5 @@
 //@flow
+import { Subject } from "rxjs";
 import net from "net";
 import Transport from "@ledgerhq/hw-transport";
 import {
@@ -14,6 +15,7 @@ import { log } from "@ledgerhq/logs";
 export type SpeculosTransportOpts = {
   apduPort: number,
   buttonPort?: number,
+  automationPort?: number,
   host?: string,
 };
 
@@ -55,31 +57,50 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
       });
     });
 
-  socket: net.Socket;
+  apduSocket: net.Socket;
   opts: SpeculosTransportOpts;
   rejectExchange: (Error) => void = (_e) => {};
   resolveExchange: (Buffer) => void = (_b) => {};
 
-  constructor(socket: net.Socket, opts: SpeculosTransportOpts) {
+  automationSocket: ?net.Socket;
+  automationEvents = new Subject();
+
+  constructor(apduSocket: net.Socket, opts: SpeculosTransportOpts) {
     super();
     this.opts = opts;
-    this.socket = socket;
-    socket.on("error", (e) => {
+    this.apduSocket = apduSocket;
+    apduSocket.on("error", (e) => {
       this.emit("disconnect", new DisconnectedDevice(e.message));
       this.rejectExchange(e);
-      this.socket.destroy();
+      this.apduSocket.destroy();
     });
-    socket.on("end", () => {
+    apduSocket.on("end", () => {
       this.emit("disconnect", new DisconnectedDevice());
       this.rejectExchange(new DisconnectedDeviceDuringOperation());
     });
-    socket.on("data", (data) => {
+    apduSocket.on("data", (data) => {
       try {
         this.resolveExchange(decodeAPDUPayload(data));
       } catch (e) {
         this.rejectExchange(e);
       }
     });
+
+    const { automationPort } = opts;
+    if (automationPort) {
+      const socket = new net.Socket();
+      this.automationSocket = socket;
+      socket.on("error", (e) => {
+        log("automation-error", String(e));
+        socket.destroy();
+      });
+      socket.on("data", (data) => {
+        const ascii = data.toString("ascii");
+        const json = JSON.parse(ascii);
+        this.automationEvents.next(json);
+      });
+      socket.connect(automationPort, opts.host || "127.0.0.1");
+    }
   }
 
   /**
@@ -111,7 +132,7 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
     const res = await new Promise((resolve, reject) => {
       this.rejectExchange = reject;
       this.resolveExchange = resolve;
-      this.socket.write(encoded);
+      this.apduSocket.write(encoded);
     });
     log("apdu", "<= " + res.toString("hex"));
     return res;
@@ -120,7 +141,8 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
   setScrambleKey() {}
 
   async close() {
-    this.socket.destroy();
+    if (this.automationSocket) this.automationSocket.destroy();
+    this.apduSocket.destroy();
     return Promise.resolve(true);
   }
 }

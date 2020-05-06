@@ -29,7 +29,8 @@
   "dependencies": {
     "@ledgerhq/errors": "^5.13.1",
     "@ledgerhq/hw-transport": "^5.13.1",
-    "@ledgerhq/logs": "^5.13.1"
+    "@ledgerhq/logs": "^5.13.1",
+    "rxjs": "^6.5.5"
   },
   "devDependencies": {
     "flow-bin": "^0.124.0"
