@@ -10,14 +10,14 @@ import {
   DEFAULT_LOCKTIME,
   DEFAULT_VERSION,
   DEFAULT_SEQUENCE,
-  SIGHASH_ALL
+  SIGHASH_ALL,
 } from "./constants";
 
 const defaultArg = {
   lockTime: DEFAULT_LOCKTIME,
   sigHashType: SIGHASH_ALL,
   segwit: false,
-  transactionVersion: DEFAULT_VERSION
+  transactionVersion: DEFAULT_VERSION,
 };
 
 /**
@@ -30,7 +30,7 @@ export type SignP2SHTransactionArg = {
   lockTime?: number,
   sigHashType?: number,
   segwit?: boolean,
-  transactionVersion?: number
+  transactionVersion?: number,
 };
 
 export async function signP2SHTransaction(
@@ -44,7 +44,7 @@ export async function signP2SHTransaction(
     lockTime,
     sigHashType,
     segwit,
-    transactionVersion
+    transactionVersion,
   } = { ...defaultArg, ...arg };
   // Inputs are provided as arrays of [transaction, output_index, redeem script, optional sequence]
   // associatedKeysets are provided as arrays of [path]
@@ -59,7 +59,7 @@ export async function signP2SHTransaction(
   const resuming = false;
   let targetTransaction: Transaction = {
     inputs: [],
-    version: defaultVersion
+    version: defaultVersion,
   };
 
   const getTrustedInputCall = segwit ? getTrustedInputBIP143 : getTrustedInput;
@@ -85,7 +85,7 @@ export async function signP2SHTransaction(
         value: segwit
           ? Buffer.from(trustedInput, "hex")
           : Buffer.from(trustedInput, "hex").slice(4, 4 + 0x24),
-        sequence
+        sequence,
       });
     }
 
@@ -108,7 +108,7 @@ export async function signP2SHTransaction(
     targetTransaction.inputs.push({
       script: nullScript,
       prevout: nullPrevout,
-      sequence
+      sequence,
     });
   }
 

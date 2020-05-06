@@ -7,7 +7,7 @@
   ],
   "scripts": {
     "preinstall": "node -e \"if (process.env.npm_execpath.indexOf('yarn') === -1) { console.log('\u001b[31mPlease use yarn\u001b[0m'); process.exit(1); }\"",
-    "prettier": "prettier --write 'packages/*/src/**/*.js'",
+    "prettier": "prettier --write 'packages/*/src/**/*.?s'",
     "test": "yarn run build && yarn run lint && yarn run doc && jest",
     "test-no-git-diff": "git diff --exit-code || exit 1",
     "doc": "lerna run doc",
@@ -62,7 +62,7 @@
     "flow-typed": "^2.6.1",
     "jest": "^25.4.0",
     "lerna": "3.20.2",
-    "prettier": "^1.18.2",
+    "prettier": "^2.0.5",
     "rollup": "^2.6.1",
     "rollup-plugin-typescript2": "^0.27.0",
     "typescript": "^3.8.3",

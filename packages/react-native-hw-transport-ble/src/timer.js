@@ -15,13 +15,13 @@ const timer =
           return () => {
             clearInterval(interval);
           };
-        }
+        },
       }
     : {
         timeout: (fn: Function, ms: number) => {
           const timeout = setTimeout(fn, ms);
           return () => clearTimeout(timeout);
-        }
+        },
       };
 
 export default timer;

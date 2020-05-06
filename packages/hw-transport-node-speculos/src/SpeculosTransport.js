@@ -4,7 +4,7 @@ import Transport from "@ledgerhq/hw-transport";
 import {
   DisconnectedDevice,
   DisconnectedDeviceDuringOperation,
-  TransportError
+  TransportError,
 } from "@ledgerhq/errors";
 import { log } from "@ledgerhq/logs";
 
@@ -14,7 +14,7 @@ import { log } from "@ledgerhq/logs";
 export type SpeculosTransportOpts = {
   apduPort: number,
   buttonPort?: number,
-  host?: string
+  host?: string,
 };
 
 /**
@@ -31,7 +31,7 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
   // this transport is not discoverable
   static list = (): * => Promise.resolve([]);
   static listen = (_observer: *) => ({
-    unsubscribe: () => {}
+    unsubscribe: () => {},
   });
 
   /**
@@ -40,7 +40,7 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
   static open = (opts: SpeculosTransportOpts): Promise<SpeculosTransport> =>
     new Promise((resolve, reject) => {
       const socket = new net.Socket();
-      socket.on("error", e => {
+      socket.on("error", (e) => {
         socket.destroy();
         reject(e);
       });
@@ -57,14 +57,14 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
 
   socket: net.Socket;
   opts: SpeculosTransportOpts;
-  rejectExchange: Error => void = _e => {};
-  resolveExchange: Buffer => void = _b => {};
+  rejectExchange: (Error) => void = (_e) => {};
+  resolveExchange: (Buffer) => void = (_b) => {};
 
   constructor(socket: net.Socket, opts: SpeculosTransportOpts) {
     super();
     this.opts = opts;
     this.socket = socket;
-    socket.on("error", e => {
+    socket.on("error", (e) => {
       this.emit("disconnect", new DisconnectedDevice(e.message));
       this.rejectExchange(e);
       this.socket.destroy();
@@ -73,7 +73,7 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
       this.emit("disconnect", new DisconnectedDevice());
       this.rejectExchange(new DisconnectedDeviceDuringOperation());
     });
-    socket.on("data", data => {
+    socket.on("data", (data) => {
       try {
         this.resolveExchange(decodeAPDUPayload(data));
       } catch (e) {
@@ -93,7 +93,7 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
       const { buttonPort, host } = this.opts;
       if (!buttonPort) throw new Error("buttonPort is missing");
       const socket = new net.Socket();
-      socket.on("error", e => {
+      socket.on("error", (e) => {
         socket.destroy();
         reject(e);
       });

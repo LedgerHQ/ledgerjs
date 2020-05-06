@@ -31,7 +31,7 @@ function maybeHexBuffer(str: ?string): ?Buffer {
   return hexBuffer(str);
 }
 
-const remapTransactionRelatedErrors = e => {
+const remapTransactionRelatedErrors = (e) => {
   if (e && e.statusCode === 0x6a80) {
     return new EthAppPleaseEnableContractData(
       "Please enable Contract data on the Ethereum app Settings"
@@ -63,7 +63,7 @@ export default class Eth {
         "starkGetPublicKey",
         "starkSignOrder",
         "starkSignTransfer",
-        "starkProvideQuantum"
+        "starkProvideQuantum",
       ],
       scrambleKey
     );
@@ -85,7 +85,7 @@ export default class Eth {
   ): Promise<{
     publicKey: string,
     address: string,
-    chainCode?: string
+    chainCode?: string,
   }> {
     let paths = splitPath(path);
     let buffer = Buffer.alloc(1 + paths.length * 4);
@@ -101,7 +101,7 @@ export default class Eth {
         boolChaincode ? 0x01 : 0x00,
         buffer
       )
-      .then(response => {
+      .then((response) => {
         let result = {};
         let publicKeyLength = response[0];
         let addressLength = response[1 + publicKeyLength];
@@ -146,7 +146,7 @@ export default class Eth {
   provideERC20TokenInformation({ data }: { data: Buffer }): Promise<boolean> {
     return this.transport.send(0xe0, 0x0a, 0x00, 0x00, data).then(
       () => true,
-      e => {
+      (e) => {
         if (e && e.statusCode === 0x6d00) {
           // this case happen for older version of ETH app, since older app version had the ERC20 data hardcoded, it's fine to assume it worked.
           // we return a flag to know if the call was effective or not
@@ -168,7 +168,7 @@ export default class Eth {
   ): Promise<{
     s: string,
     v: string,
-    r: string
+    r: string,
   }> {
     let paths = splitPath(path);
     let offset = 0;
@@ -199,7 +199,7 @@ export default class Eth {
     return foreach(toSend, (data, i) =>
       this.transport
         .send(0xe0, 0x04, i === 0 ? 0x00 : 0x80, 0x00, data)
-        .then(apduResponse => {
+        .then((apduResponse) => {
           response = apduResponse;
         })
     ).then(
@@ -209,7 +209,7 @@ export default class Eth {
         const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
         return { v, r, s };
       },
-      e => {
+      (e) => {
         throw remapTransactionRelatedErrors(e);
       }
     );
@@ -221,9 +221,9 @@ export default class Eth {
     arbitraryDataEnabled: number,
     erc20ProvisioningNecessary: number,
     starkEnabled: number,
-    version: string
+    version: string,
   }> {
-    return this.transport.send(0xe0, 0x06, 0x00, 0x00).then(response => {
+    return this.transport.send(0xe0, 0x06, 0x00, 0x00).then((response) => {
       let result = {};
       result.arbitraryDataEnabled = response[0] & 0x01;
       result.erc20ProvisioningNecessary = response[0] & 0x02;
@@ -251,7 +251,7 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
   ): Promise<{
     v: number,
     s: string,
-    r: string
+    r: string,
   }> {
     let paths = splitPath(path);
     let offset = 0;
@@ -288,7 +288,7 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     return foreach(toSend, (data, i) =>
       this.transport
         .send(0xe0, 0x08, i === 0 ? 0x00 : 0x80, 0x00, data)
-        .then(apduResponse => {
+        .then((apduResponse) => {
           response = apduResponse;
         })
     ).then(() => {
@@ -314,7 +314,7 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     });
     return this.transport
       .send(0xf0, 0x02, boolDisplay ? 0x01 : 0x00, 0x00, buffer)
-      .then(response => {
+      .then((response) => {
         return response.slice(0, response.length - 2);
       });
   }
@@ -397,7 +397,7 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     buffer.writeUInt32BE(timestamp, offset);
     return this.transport
       .send(0xf0, 0x04, 0x01, 0x00, buffer)
-      .then(response => {
+      .then((response) => {
         const r = response.slice(1, 1 + 32).toString("hex");
         const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
         return { r, s };
@@ -466,7 +466,7 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     buffer.writeUInt32BE(timestamp, offset);
     return this.transport
       .send(0xf0, 0x04, 0x02, 0x00, buffer)
-      .then(response => {
+      .then((response) => {
         const r = response.slice(1, 1 + 32).toString("hex");
         const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
         return { r, s };
@@ -496,7 +496,7 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     ).copy(buffer, 20);
     return this.transport.send(0xf0, 0x08, 0x00, 0x00, buffer).then(
       () => true,
-      e => {
+      (e) => {
         if (e && e.statusCode === 0x6d00) {
           // this case happen for ETH application versions not supporting Stark extensions
           return false;

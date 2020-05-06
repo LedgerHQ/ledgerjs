@@ -43,7 +43,7 @@ export async function startUntrustedHashTransactionInput(
     transaction.version,
     transaction.timestamp || Buffer.alloc(0),
     transaction.nVersionGroupId || Buffer.alloc(0),
-    createVarint(transaction.inputs.length)
+    createVarint(transaction.inputs.length),
   ]);
 
   await startUntrustedHashTransactionInputRaw(
@@ -79,7 +79,7 @@ export async function startUntrustedHashTransactionInput(
       prefix,
       inputValue,
       isDecred ? Buffer.from([0x00]) : Buffer.alloc(0),
-      createVarint(input.script.length)
+      createVarint(input.script.length),
     ]);
 
     await startUntrustedHashTransactionInputRaw(
@@ -109,7 +109,7 @@ export async function startUntrustedHashTransactionInput(
           scriptBlocks.push(
             Buffer.concat([
               input.script.slice(offset, offset + blockSize),
-              input.sequence
+              input.sequence,
             ])
           );
         }

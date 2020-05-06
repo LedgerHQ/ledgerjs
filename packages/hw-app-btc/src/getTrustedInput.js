@@ -22,7 +22,7 @@ export function getTrustedInputRaw(
   }
   return transport
     .send(0xe0, 0x42, firstRound ? 0x00 : 0x80, 0x00, data)
-    .then(trustedInput =>
+    .then((trustedInput) =>
       trustedInput.slice(0, trustedInput.length - 2).toString("hex")
     );
 }
@@ -73,7 +73,8 @@ export async function getTrustedInput(
     return res;
   };
 
-  const processWholeScriptBlock = block => getTrustedInputRaw(transport, block);
+  const processWholeScriptBlock = (block) =>
+    getTrustedInputRaw(transport, block);
 
   const processInputs = async () => {
     for (let input of inputs) {
@@ -86,7 +87,7 @@ export async function getTrustedInput(
       const data = Buffer.concat([
         input.prevout,
         treeField,
-        isXSTV2 ? Buffer.from([0x00]) : createVarint(input.script.length)
+        isXSTV2 ? Buffer.from([0x00]) : createVarint(input.script.length),
       ]);
       await getTrustedInputRaw(transport, data);
 
@@ -113,7 +114,7 @@ export async function getTrustedInput(
         data,
         isDecred ? Buffer.from([0x00, 0x00]) : Buffer.alloc(0), //Version script
         createVarint(output.script.length),
-        output.script
+        output.script,
       ]);
       await getTrustedInputRaw(transport, data);
     }
@@ -126,7 +127,7 @@ export async function getTrustedInput(
       const finalData = Buffer.concat([
         locktime,
         createVarint(extraData.length),
-        extraData
+        extraData,
       ]);
       res = await processScriptBlocks(finalData);
       invariant(res, "missing result in processScriptBlocks");
@@ -144,7 +145,7 @@ export async function getTrustedInput(
   const data = Buffer.concat([
     transaction.version,
     transaction.timestamp || Buffer.alloc(0),
-    createVarint(inputs.length)
+    createVarint(inputs.length),
   ]);
 
   return getTrustedInputRaw(transport, data, indexLookup)

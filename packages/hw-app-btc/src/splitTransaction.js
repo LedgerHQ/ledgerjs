@@ -131,6 +131,6 @@ export function splitTransaction(
     timestamp,
     nVersionGroupId,
     nExpiryHeight,
-    extraData
+    extraData,
   };
 }

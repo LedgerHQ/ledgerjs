@@ -3,7 +3,7 @@ import Transport from "@ledgerhq/hw-transport";
 import type {
   Observer,
   DescriptorEvent,
-  Subscription
+  Subscription,
 } from "@ledgerhq/hw-transport";
 import hidFraming from "@ledgerhq/devices/lib/hid-framing";
 import { identifyUSBProductId } from "@ledgerhq/devices";
@@ -14,13 +14,13 @@ import {
   TransportInterfaceNotAvailable,
   TransportWebUSBGestureRequired,
   DisconnectedDeviceDuringOperation,
-  DisconnectedDevice
+  DisconnectedDevice,
 } from "@ledgerhq/errors";
 import {
   getLedgerDevices,
   getFirstLedgerDevice,
   requestLedgerDevice,
-  isSupported
+  isSupported,
 } from "./webusb";
 
 const configurationValue = 1;
@@ -68,14 +68,14 @@ export default class TransportWebUSB extends Transport<USBDevice> {
   ): Subscription => {
     let unsubscribed = false;
     getFirstLedgerDevice().then(
-      device => {
+      (device) => {
         if (!unsubscribed) {
           const deviceModel = identifyUSBProductId(device.productId);
           observer.next({ type: "add", descriptor: device, deviceModel });
           observer.complete();
         }
       },
-      error => {
+      (error) => {
         if (
           window.DOMException &&
           error instanceof window.DOMException &&
@@ -120,7 +120,7 @@ export default class TransportWebUSB extends Transport<USBDevice> {
     }
     await device.reset();
     const iface = device.configurations[0].interfaces.find(({ alternates }) =>
-      alternates.some(a => a.interfaceClass === 255)
+      alternates.some((a) => a.interfaceClass === 255)
     );
     if (!iface) {
       throw new TransportInterfaceNotAvailable(
@@ -135,7 +135,7 @@ export default class TransportWebUSB extends Transport<USBDevice> {
       throw new TransportInterfaceNotAvailable(e.message);
     }
     const transport = new TransportWebUSB(device, interfaceNumber);
-    const onDisconnect = e => {
+    const onDisconnect = (e) => {
       if (device === e.device) {
         // $FlowFixMe
         navigator.usb.removeEventListener("disconnect", onDisconnect);
@@ -195,7 +195,7 @@ export default class TransportWebUSB extends Transport<USBDevice> {
 
       log("apdu", "<= " + result.toString("hex"));
       return result;
-    }).catch(e => {
+    }).catch((e) => {
       if (e && e.message && e.message.includes("disconnected")) {
         this._emitDisconnect(e);
         throw new DisconnectedDeviceDuringOperation(e.message);
