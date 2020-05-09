@@ -22,14 +22,17 @@ Ledger Hardware Wallet TRX JavaScript bindings.
     -   [signTransaction](#signtransaction)
         -   [Parameters](#parameters-2)
         -   [Examples](#examples-2)
-    -   [getAppConfiguration](#getappconfiguration)
-        -   [Examples](#examples-3)
-    -   [signPersonalMessage](#signpersonalmessage)
+    -   [signTransactionHash](#signtransactionhash)
         -   [Parameters](#parameters-3)
+        -   [Examples](#examples-3)
+    -   [getAppConfiguration](#getappconfiguration)
         -   [Examples](#examples-4)
-    -   [getECDHPairKey](#getecdhpairkey)
+    -   [signPersonalMessage](#signpersonalmessage)
         -   [Parameters](#parameters-4)
         -   [Examples](#examples-5)
+    -   [getECDHPairKey](#getecdhpairkey)
+        -   [Parameters](#parameters-5)
+        -   [Examples](#examples-6)
 
 ### Trx
 
@@ -78,6 +81,24 @@ sign a Tron transaction with a given BIP 32 path and Token Names
 
 ```javascript
 const signature = await tron.signTransaction("44'/195'/0'/0/0", "0a02f5942208704dda506d59dceb40f0f4978f802e5a69080112650a2d747970652e676f6f676c65617069732e636f6d2f70726f746f636f6c2e5472616e73666572436f6e747261637412340a1541978dbd103cfe59c35e753d09dd44ae1ae64621c7121541e2ae49db6a70b9b4757d2137a43b69b24a445780188ef8b5ba0470cbb5948f802e", [], 105);
+```
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** a signature as hex string
+
+#### signTransactionHash
+
+sign a Tron transaction hash with a given BIP 32 path
+
+##### Parameters
+
+-   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
+-   `rawTxHashHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `rawTxHex`  a raw transaction hex string
+
+##### Examples
+
+```javascript
+const signature = await tron.signTransactionHash("44'/195'/0'/0/0", "25b18a55f86afb10e7aca38d0073d04c80397c6636069193953fdefaea0b8369");
 ```
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** a signature as hex string
