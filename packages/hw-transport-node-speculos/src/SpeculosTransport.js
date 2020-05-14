@@ -63,7 +63,7 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
   resolveExchange: (Buffer) => void = (_b) => {};
 
   automationSocket: ?net.Socket;
-  automationEvents = new Subject();
+  automationEvents: Subject<Object> = new Subject();
 
   constructor(apduSocket: net.Socket, opts: SpeculosTransportOpts) {
     super();
@@ -143,7 +143,7 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
   async close() {
     if (this.automationSocket) this.automationSocket.destroy();
     this.apduSocket.destroy();
-    return Promise.resolve(true);
+    return Promise.resolve();
   }
 }
 
