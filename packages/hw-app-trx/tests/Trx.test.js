@@ -60,6 +60,25 @@ test("signTransaction", async () => {
   );
 });
 
+test("signTransactionHash", async () => {
+  const Transport = createTransportReplayer(
+    RecordStore.fromString(`
+    => e005000035058000002c800000c3800000000000000000000000abfcd07e44a6bfc18efb18062c8e588c34f187e3d2b286d4411781acdf6692eb
+    <= 37a3cce70ebf7d792222d93509475a28ef1c7709d9ba032bf01dff3e52bca98c5a6cf64b73428a3f412b7dab1504afe4ac11995049c27ecdf1b46493292e4c68019000
+    `)
+  );
+  const transport = await Transport.open();
+  const trx = new Trx(transport);
+  const result = await trx.signTransactionHash(
+    "44'/195'/0'/0/0",
+    "abfcd07e44a6bfc18efb18062c8e588c34f187e3d2b286d4411781acdf6692eb",
+    []
+  );
+  expect(result).toEqual(
+    "37a3cce70ebf7d792222d93509475a28ef1c7709d9ba032bf01dff3e52bca98c5a6cf64b73428a3f412b7dab1504afe4ac11995049c27ecdf1b46493292e4c6801"
+  );
+});
+
 test("signPersonalMessage", async () => {
   const Transport = createTransportReplayer(
     RecordStore.fromString(`
