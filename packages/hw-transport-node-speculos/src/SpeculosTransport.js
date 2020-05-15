@@ -95,9 +95,13 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
         socket.destroy();
       });
       socket.on("data", (data) => {
-        const ascii = data.toString("ascii");
-        const json = JSON.parse(ascii);
-        this.automationEvents.next(json);
+        const split = data.toString("ascii").split("\n");
+        split
+          .filter((ascii) => !!ascii)
+          .forEach((ascii) => {
+            const json = JSON.parse(ascii);
+            this.automationEvents.next(json);
+          });
       });
       socket.connect(automationPort, opts.host || "127.0.0.1");
     }
