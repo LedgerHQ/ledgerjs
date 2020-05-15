@@ -4,7 +4,7 @@ import { ledgerUSBVendorId, identifyUSBProductId } from "@ledgerhq/devices";
 import type { DeviceModel } from "@ledgerhq/devices";
 import {
   DisconnectedDeviceDuringOperation,
-  DisconnectedDevice
+  DisconnectedDevice,
 } from "@ledgerhq/errors";
 import { log } from "@ledgerhq/logs";
 import Transport from "@ledgerhq/hw-transport";
@@ -14,17 +14,17 @@ import { mergeMap } from "rxjs/operators";
 
 type DeviceObj = {
   vendorId: number,
-  productId: number
+  productId: number,
 };
 
 const disconnectedErrors = [
   "I/O error",
-  "Attempt to invoke virtual method 'int android.hardware.usb.UsbDevice.getDeviceClass()' on a null object reference"
+  "Attempt to invoke virtual method 'int android.hardware.usb.UsbDevice.getDeviceClass()' on a null object reference",
 ];
 
 const listLedgerDevices = async () => {
   const devices = await NativeModules.HID.getDeviceList();
-  return devices.filter(d => d.vendorId === ledgerUSBVendorId);
+  return devices.filter((d) => d.vendorId === ledgerUSBVendorId);
 };
 
 const liveDeviceEventsSubject: Subject<DescriptorEvent<*>> = new Subject();
@@ -35,7 +35,7 @@ DeviceEventEmitter.addListener("onDeviceConnect", (device: *) => {
   liveDeviceEventsSubject.next({
     type: "add",
     descriptor: device,
-    deviceModel
+    deviceModel,
   });
 });
 
@@ -45,7 +45,7 @@ DeviceEventEmitter.addListener("onDeviceDisconnect", (device: *) => {
   liveDeviceEventsSubject.next({
     type: "remove",
     descriptor: device,
-    deviceModel
+    deviceModel,
   });
 });
 
@@ -91,12 +91,12 @@ export default class HIDTransport extends Transport<DeviceObj> {
     if (!NativeModules.HID) return { unsubscribe: () => {} };
     return concat(
       from(listLedgerDevices()).pipe(
-        mergeMap(devices =>
+        mergeMap((devices) =>
           from(
-            devices.map(device => ({
+            devices.map((device) => ({
               type: "add",
               descriptor: device,
-              deviceModel: identifyUSBProductId(device.productId)
+              deviceModel: identifyUSBProductId(device.productId),
             }))
           )
         )

@@ -18,12 +18,12 @@ export type TokenInfo = {
   decimals: number,
   chainId: number,
   signature: Buffer,
-  data: Buffer
+  data: Buffer,
 };
 
 export type API = {
-  byContract: string => ?TokenInfo,
-  list: () => TokenInfo[]
+  byContract: (string) => ?TokenInfo,
+  list: () => TokenInfo[],
 };
 
 const asContractAddress = (addr: string) => {
@@ -64,7 +64,7 @@ const get: () => API = (() => {
         decimals,
         chainId,
         signature,
-        data: item
+        data: item,
       };
       entries.push(entry);
       byContract[contractAddress] = entry;
@@ -72,7 +72,7 @@ const get: () => API = (() => {
     }
     const api = {
       list: () => entries,
-      byContract: contractAddress => byContract[contractAddress]
+      byContract: (contractAddress) => byContract[contractAddress],
     };
     cache = api;
     return api;

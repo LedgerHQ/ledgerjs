@@ -10,3 +10,4 @@ export const OP_HASH160 = 0xa9;
 export const HASH_SIZE = 0x14;
 export const OP_EQUALVERIFY = 0x88;
 export const OP_CHECKSIG = 0xac;
+export const OP_RETURN = 0x6a;

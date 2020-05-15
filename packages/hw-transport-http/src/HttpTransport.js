@@ -14,7 +14,7 @@ export default class HttpTransport extends Transport<string> {
   // this transport is not discoverable
   static list = (): * => Promise.resolve([]);
   static listen = (_observer: *) => ({
-    unsubscribe: () => {}
+    unsubscribe: () => {},
   });
 
   static check = async (url: string, timeout: number = 5000) => {
@@ -50,9 +50,9 @@ export default class HttpTransport extends Transport<string> {
       url: this.url,
       headers: {
         Accept: "application/json",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
       },
-      data: JSON.stringify({ apduHex })
+      data: JSON.stringify({ apduHex }),
     });
     if (response.status !== 200) {
       throw new TransportError(

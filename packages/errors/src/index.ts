@@ -2,14 +2,14 @@ import {
   serializeError,
   deserializeError,
   createCustomErrorClass,
-  addCustomErrorDeserializer
+  addCustomErrorDeserializer,
 } from "./helpers";
 
 export {
   serializeError,
   deserializeError,
   createCustomErrorClass,
-  addCustomErrorDeserializer
+  addCustomErrorDeserializer,
 };
 
 export const AccountNameRequiredError = createCustomErrorClass(
@@ -235,7 +235,7 @@ TransportError.prototype = new Error();
 
 addCustomErrorDeserializer(
   "TransportError",
-  e => new TransportError(e.message, e.id)
+  (e) => new TransportError(e.message, e.id)
 );
 
 export const StatusCodes = {
@@ -269,7 +269,7 @@ export const StatusCodes = {
   MAX_VALUE_REACHED: 0x9850,
   GP_AUTH_FAILED: 0x6300,
   LICENSING: 0x6f42,
-  HALTED: 0x6faa
+  HALTED: 0x6faa,
 };
 
 export function getAltStatusMessage(code: number): string | undefined | null {
@@ -300,7 +300,7 @@ export function getAltStatusMessage(code: number): string | undefined | null {
 export function TransportStatusError(statusCode: number): void {
   this.name = "TransportStatusError";
   const statusText =
-    Object.keys(StatusCodes).find(k => StatusCodes[k] === statusCode) ||
+    Object.keys(StatusCodes).find((k) => StatusCodes[k] === statusCode) ||
     "UNKNOWN_ERROR";
   const smsg = getAltStatusMessage(statusCode) || statusText;
   const statusCodeStr = statusCode.toString(16);
@@ -313,5 +313,5 @@ TransportStatusError.prototype = new Error();
 
 addCustomErrorDeserializer(
   "TransportStatusError",
-  e => new TransportStatusError(e.statusCode)
+  (e) => new TransportStatusError(e.statusCode)
 );

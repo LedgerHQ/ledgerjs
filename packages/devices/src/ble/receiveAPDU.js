@@ -10,7 +10,7 @@ const TagId = 0x05;
 export const receiveAPDU = (
   rawStream: Observable<Buffer>
 ): Observable<Buffer> =>
-  Observable.create(o => {
+  Observable.create((o) => {
     let notifiedIndex = 0;
     let notifiedDataLength = 0;
     let notifiedData = Buffer.alloc(0);
@@ -20,12 +20,12 @@ export const receiveAPDU = (
         o.error(new DisconnectedDevice());
         sub.unsubscribe();
       },
-      error: e => {
+      error: (e) => {
         log("ble-error", "in receiveAPDU " + String(e));
         o.error(e);
         sub.unsubscribe();
       },
-      next: value => {
+      next: (value) => {
         const tag = value.readUInt8(0);
         const index = value.readUInt16BE(1);
         let data = value.slice(3);
@@ -73,7 +73,7 @@ export const receiveAPDU = (
           o.complete();
           sub.unsubscribe();
         }
-      }
+      },
     });
 
     return () => {

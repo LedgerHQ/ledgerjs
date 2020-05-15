@@ -34,7 +34,7 @@ export default class Btc {
         "signMessageNew",
         "createPaymentTransactionNew",
         "getTrustedInput",
-        "getTrustedInputBIP143"
+        "getTrustedInputBIP143",
       ],
       scrambleKey
     );
@@ -66,7 +66,7 @@ export default class Btc {
   ): Promise<{
     publicKey: string,
     bitcoinAddress: string,
-    chainCode: string
+    chainCode: string,
   }> {
     let options;
     if (arguments.length > 2 || typeof opts === "boolean") {
@@ -75,7 +75,7 @@ export default class Btc {
       );
       options = {
         verify: !!opts,
-        format: arguments[2] ? "p2sh" : "legacy"
+        format: arguments[2] ? "p2sh" : "legacy",
       };
     } else {
       options = opts || {};
@@ -122,6 +122,7 @@ export default class Btc {
    * - "bipxxx" for using BIPxxx
    * - "sapling" to indicate a zec transaction is supporting sapling (to be set over block 419200)
    * @param expiryHeight is an optional Buffer for zec overwinter / sapling Txs
+   * @param useTrustedInputForSegwit trust inputs for segwit transactions
    * @return the signed transaction ready to be broadcast
    * @example
 btc.createTransaction({
@@ -145,7 +146,8 @@ btc.createTransaction({
         "segwit",
         "initialTimestamp",
         "additionals",
-        "expiryHeight"
+        "expiryHeight",
+        "useTrustedInputForSegwit",
       ]);
     }
     return createTransaction(this.transport, arg);
@@ -182,7 +184,7 @@ btc.signP2SHTransaction({
         lockTime,
         sigHashType,
         segwit,
-        transactionVersion
+        transactionVersion,
       ] = arguments;
       arg = {
         inputs,
@@ -191,7 +193,7 @@ btc.signP2SHTransaction({
         lockTime,
         sigHashType,
         segwit,
-        transactionVersion
+        transactionVersion,
       };
       arg = fromDeprecateArguments(arguments, [
         "inputs",
@@ -200,7 +202,7 @@ btc.signP2SHTransaction({
         "lockTime",
         "sigHashType",
         "segwit",
-        "transactionVersion"
+        "transactionVersion",
       ]);
     }
     return signP2SHTransaction(this.transport, arg);

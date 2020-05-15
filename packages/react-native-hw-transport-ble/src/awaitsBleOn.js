@@ -13,7 +13,7 @@ export const awaitsBleOn = (
     let done = false;
     let lastState = "Unknown";
 
-    const stateSub = bleManager.onStateChange(state => {
+    const stateSub = bleManager.onStateChange((state) => {
       lastState = state;
       log("ble-verbose", `ble state -> ${state}`);
       if (state === "PoweredOn") {

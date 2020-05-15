@@ -7,14 +7,14 @@ import {
   TransportError,
   StatusCodes,
   getAltStatusMessage,
-  TransportStatusError
+  TransportStatusError,
 } from "@ledgerhq/errors";
 
 export {
   TransportError,
   TransportStatusError,
   StatusCodes,
-  getAltStatusMessage
+  getAltStatusMessage,
 };
 
 /**
@@ -35,14 +35,14 @@ export type DescriptorEvent<Descriptor> = {
   type: "add" | "remove",
   descriptor: Descriptor,
   deviceModel?: ?DeviceModel,
-  device?: Device
+  device?: Device,
 };
 /**
  */
 export type Observer<Ev> = $ReadOnly<{
   next: (event: Ev) => mixed,
   error: (e: any) => mixed,
-  complete: () => mixed
+  complete: () => mixed,
 }>;
 
 /**
@@ -204,11 +204,11 @@ TransportFoo.open(descriptor).then(transport => ...)
       Buffer.concat([
         Buffer.from([cla, ins, p1, p2]),
         Buffer.from([data.length]),
-        data
+        data,
       ])
     );
     const sw = response.readUInt16BE(response.length - 2);
-    if (!statusList.some(s => s === sw)) {
+    if (!statusList.some((s) => s === sw)) {
       throw new TransportStatusError(sw);
     }
     return response;
@@ -228,13 +228,13 @@ TransportFoo.create().then(transport => ...)
     return new Promise((resolve, reject) => {
       let found = false;
       const sub = this.listen({
-        next: e => {
+        next: (e) => {
           found = true;
           if (sub) sub.unsubscribe();
           if (listenTimeoutId) clearTimeout(listenTimeoutId);
           this.open(e.descriptor, openTimeout).then(resolve, reject);
         },
-        error: e => {
+        error: (e) => {
           if (listenTimeoutId) clearTimeout(listenTimeoutId);
           reject(e);
         },
@@ -248,7 +248,7 @@ TransportFoo.create().then(transport => ...)
               )
             );
           }
-        }
+        },
       });
       const listenTimeoutId = listenTimeout
         ? setTimeout(() => {
@@ -267,14 +267,14 @@ TransportFoo.create().then(transport => ...)
   exchangeBusyPromise: ?Promise<void>;
 
   // $FlowFixMe
-  exchangeAtomicImpl = async f => {
+  exchangeAtomicImpl = async (f) => {
     if (this.exchangeBusyPromise) {
       throw new TransportRaceCondition(
         "An action was already pending on the Ledger device. Please deny or reconnect."
       );
     }
     let resolveBusy;
-    const busyPromise = new Promise(r => {
+    const busyPromise = new Promise((r) => {
       resolveBusy = r;
     });
     this.exchangeBusyPromise = busyPromise;
