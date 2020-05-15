@@ -21,7 +21,7 @@ import { splitPath, foreach, decodeVarint } from "./utils";
 //import { StatusCodes, TransportStatusError } from "@ledgerhq/errors";
 import type Transport from "@ledgerhq/hw-transport";
 
-const remapTransactionRelatedErrors = e => {
+const remapTransactionRelatedErrors = (e) => {
   if (e && e.statusCode === 0x6a80) {
     // TODO:
   }
@@ -57,8 +57,9 @@ export default class Trx {
         "getAddress",
         "getECDHPairKey",
         "signTransaction",
+        "signTransactionHash",
         "signPersonalMessage",
-        "getAppConfiguration"
+        "getAppConfiguration",
       ],
       scrambleKey
     );
@@ -77,7 +78,7 @@ export default class Trx {
     boolDisplay?: boolean
   ): Promise<{
     publicKey: string,
-    address: string
+    address: string,
   }> {
     let paths = splitPath(path);
     let buffer = Buffer.alloc(PATHS_LENGTH_SIZE + paths.length * PATH_SIZE);
@@ -87,7 +88,7 @@ export default class Trx {
     });
     return this.transport
       .send(CLA, ADDRESS, boolDisplay ? 0x01 : 0x00, 0x00, buffer)
-      .then(response => {
+      .then((response) => {
         let result = {};
         let publicKeyLength = response[0];
         let addressLength = response[1 + publicKeyLength];
@@ -187,14 +188,14 @@ export default class Trx {
     return foreach(toSend, (data, i) => {
       return this.transport
         .send(CLA, SIGN, startBytes[i], 0x00, data)
-        .then(apduResponse => {
+        .then((apduResponse) => {
           response = apduResponse;
         });
     }).then(
       () => {
         return response.slice(0, 65).toString("hex");
       },
-      e => {
+      (e) => {
         throw remapTransactionRelatedErrors(e);
       }
     );
@@ -224,7 +225,7 @@ export default class Trx {
 
     return this.transport
       .send(CLA, SIGN_HASH, 0x00, 0x00, data)
-      .then(response => {
+      .then((response) => {
         return response.slice(0, 65).toString("hex");
       });
   }
@@ -250,9 +251,9 @@ export default class Trx {
     allowData: Boolean,
     signByHash: Boolean,
     version: string,
-    versionN: number
+    versionN: number,
   }> {
-    return this.transport.send(CLA, VERSION, 0x00, 0x00).then(response => {
+    return this.transport.send(CLA, VERSION, 0x00, 0x00).then((response) => {
       // eslint-disable-next-line no-bitwise
       let signByHash = (response[0] & (1 << 3)) > 0;
       // eslint-disable-next-line no-bitwise
@@ -274,7 +275,7 @@ export default class Trx {
         allowData,
         allowContract,
         truncateAddress,
-        signByHash
+        signByHash,
       };
       return result;
     });
@@ -326,7 +327,7 @@ export default class Trx {
     return foreach(toSend, (data, i) => {
       return this.transport
         .send(CLA, SIGN_MESSAGE, i === 0 ? 0x00 : 0x80, 0x00, data)
-        .then(apduResponse => {
+        .then((apduResponse) => {
           response = apduResponse;
         });
     }).then(() => {
@@ -347,7 +348,7 @@ export default class Trx {
     publicKey: string
   ): Promise<{
     publicKey: string,
-    address: string
+    address: string,
   }> {
     const paths = splitPath(path);
     const data = Buffer.from(publicKey, "hex");
@@ -360,6 +361,6 @@ export default class Trx {
 
     return this.transport
       .send(CLA, ECDH_SECRET, 0x00, 0x01, buffer)
-      .then(response => response.slice(0, 65).toString("hex"));
+      .then((response) => response.slice(0, 65).toString("hex"));
   }
 }
