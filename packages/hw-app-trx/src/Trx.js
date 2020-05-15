@@ -212,10 +212,8 @@ export default class Trx {
    */
   signTransactionHash(path: string, rawTxHashHex: string): Promise<string> {
     const paths = splitPath(path);
-    const HASH_SIZE = 32;
-
     let data = Buffer.alloc(
-      PATHS_LENGTH_SIZE + paths.length * PATH_SIZE + HASH_SIZE
+      PATHS_LENGTH_SIZE + paths.length * PATH_SIZE
     );
     data[0] = paths.length;
     paths.forEach((element, index) => {
