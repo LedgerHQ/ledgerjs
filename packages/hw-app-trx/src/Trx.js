@@ -212,9 +212,7 @@ export default class Trx {
    */
   signTransactionHash(path: string, rawTxHashHex: string): Promise<string> {
     const paths = splitPath(path);
-    let data = Buffer.alloc(
-      PATHS_LENGTH_SIZE + paths.length * PATH_SIZE
-    );
+    let data = Buffer.alloc(PATHS_LENGTH_SIZE + paths.length * PATH_SIZE);
     data[0] = paths.length;
     paths.forEach((element, index) => {
       data.writeUInt32BE(element, 1 + 4 * index);
