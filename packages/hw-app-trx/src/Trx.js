@@ -221,7 +221,7 @@ export default class Trx {
     paths.forEach((element, index) => {
       data.writeUInt32BE(element, 1 + 4 * index);
     });
-    data.write(rawTxHashHex, "hex");
+    data = Buffer.concat([data, Buffer.from(rawTxHashHex, "hex")]);
 
     return this.transport
       .send(CLA, SIGN_HASH, 0x00, 0x00, data)
