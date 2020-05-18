@@ -87,7 +87,8 @@ export default class Ckb {
     for (const rawContextTxHex of rawContextsTxHex) {
       let rawContextTx =
         rawContextTxHex !== null ? Buffer.from(rawContextTxHex, "hex") : null;
-      for (let i = 0; i < Math.floor(rawContextTx.length / maxApduSize); i++) {
+      let rawContextFullChunks = Math.floor(rawContextTx.length / maxApduSize);
+      for (let i = 0; i < rawContextFullChunks; i++) {
         let data = rawContextTx.slice(i*maxApduSize, (i+1)*maxApduSize);
         await this.transport.send(0x80, 0x03, 0x21, 0x00, data);
       }
@@ -97,7 +98,8 @@ export default class Ckb {
       await this.transport.send(0x80, 0x03, 0xa1, 0x00, lastContextData);
     }
 
-    for (let i = 0; i < Math.floor(rawTx.length / maxApduSize); i++) {
+    let txFullChunks = Math.floor(rawTx.length / maxApduSize);
+    for (let i = 0; i < txFullChunks; i++) {
       let data = rawTx.slice(i*maxApduSize, (i+1)*maxApduSize);
       await this.transport.send(0x80, 0x03, 0x01, 0x00, data);
     }
