@@ -2,6 +2,7 @@
 
 import type Transport from "@ledgerhq/hw-transport";
 import BIPPath from "bip32-path";
+import blockchain from "./annotated";
 
 /**
  * Nervos API
@@ -58,55 +59,81 @@ export default class Ckb {
   /**
    * Sign a Nervos transaction with a given BIP 32 path
    *
-   * @param path a path in BIP 32 format
+   * @param signPath the path to sign with, in BIP 32 format
    * @param rawTxHex transaction to sign
-   * @param contextTransaction list of transaction context to use in parsing (optional)
+   * @param groupWitnessesHex hex of in-group and extra witnesses to include in signature
+   * @param contextTransaction list of transaction contexts for parsing
+   * @param changePath the path the transaction sends change to, in BIP 32 format (optional, defaults to signPath)
    * @return a signature as hex string
    * @example
    * const signature = await ckb.signTransaction("44'/144'/0'/0/0", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
    */
   async signTransaction(
-    path: string,
+    signPath: string,
     rawTxHex: string,
-    rawContextsTxHex: [string]
+    groupWitnessesHex: [string],
+    rawContextsTxHex: [string],
+    changePath: string
   ): Promise<string> {
-    const bipPath = BIPPath.fromString(path).toPathArray();
-    const rawTx = Buffer.from(rawTxHex, "hex");
+    const signBipPath = BIPPath.fromString(signPath).toPathArray();
+    const changeBipPath = BIPPath.fromString(changePath).toPathArray();
+    const rawTxBuffer = Buffer.from(rawTxHex, "hex");
 
-    let rawPath = Buffer.alloc(1 + bipPath.length * 4);
-    rawPath.writeInt8(bipPath.length, 0);
-    bipPath.forEach((segment, index) => {
-      rawPath.writeUInt32BE(segment, 1 + index * 4);
-    });
-    await this.transport.send(0x80, 0x03, 0x00, 0x00, rawPath);
+    const buildBip32 = function(bipPath) {
+      let rawPath = Buffer.alloc(1 + bipPath.length * 4);
+      rawPath.writeInt32(bipPath.length, 0);
+      bipPath.forEach((segment, index) => {
+	rawPath.writeUInt32BE(segment, 1 + index * 4);
+      });
+      return rawPath;
+    }
+
+    const rawSignPath = buildBip32(signBipPath);
+    const rawChangePath = buildBip32(changeBipPath);
+
+    const contextTransactions = rawContentsTxHex.map(ctx => new blockchain.RawTransaction(Buffer.from(ctx, "hex")));
+
+    const rawTx = new blockchain.RawTransaction(rawTxBuffer);
+
+    const annotatedCellInputVec = rawTx.getInputs().map((inpt, idx)=>({
+      input: inpt,
+      source: contextTransactions[idx]
+    }));
+
+    const annotatedRawTransaction = {
+      version: rawTx.getVersion(),
+      cell_deps: rawTx.getCellDeps(),
+      header_deps: rawTx.getHeaderDeps(),
+      inputs: annotatedInputs,
+      outputs: rawTx.getOutputs(),
+      outputs_data: rawTx.getOutputsData()
+    };
+
+    const annotatedTransaction = {
+      signPath: signBipPath,
+      changePath: changeBipPath,
+      inputCount: rawTx.getInputs().length(),
+      raw: annotatedRawTransaction,
+      witnesses: groupWitnessesHex.map(item => Buffer.from(item, "hex"))
+    };
+
+    const rawAnTx = SerializeAnnotatedTransaction(annotatedTransaction);
 
     const maxApduSize = 230;
+    
+    await this.transport.send(0x80, 0x03, 0x00, 0x00, rawPath);
 
-    if (!rawContextsTxHex) rawContextsTxHex = [];
-
-    for (const rawContextTxHex of rawContextsTxHex) {
-      let rawContextTx =
-        rawContextTxHex !== null ? Buffer.from(rawContextTxHex, "hex") : null;
-      let rawContextFullChunks = Math.floor(rawContextTx.length / maxApduSize);
-      for (let i = 0; i < rawContextFullChunks; i++) {
-        let data = rawContextTx.slice(i*maxApduSize, (i+1)*maxApduSize);
-        await this.transport.send(0x80, 0x03, 0x21, 0x00, data);
-      }
-
-      let lastContextOffset = Math.floor(rawContextTx.length / maxApduSize) * maxApduSize;
-      let lastContextData = rawContextTx.slice(lastContextOffset, lastContextOffset+maxApduSize);
-      await this.transport.send(0x80, 0x03, 0xa1, 0x00, lastContextData);
-    }
-
-    let txFullChunks = Math.floor(rawTx.length / maxApduSize);
+    let txFullChunks = Math.floor(rawAnTx.length / maxApduSize);
+    let isContinuation = 0x00;
     for (let i = 0; i < txFullChunks; i++) {
-      let data = rawTx.slice(i*maxApduSize, (i+1)*maxApduSize);
-      await this.transport.send(0x80, 0x03, 0x01, 0x00, data);
+      let data = rawAnTx.slice(i*maxApduSize, (i+1)*maxApduSize);
+      await this.transport.send(0x80, 0x03, isContinuation, 0x00, data);
+      isContinuation = 0x01;
     }
 
-    let lastOffset = Math.floor(rawTx.length / maxApduSize) * maxApduSize;
-    let lastData = rawTx.slice(lastOffset, lastOffset+maxApduSize);
-    let response = await this.transport.send(0x80, 0x03, 0x81, 0x00, lastData);
+    let lastOffset = Math.floor(rawAnTx.length / maxApduSize) * maxApduSize;
+    let lastData = rawAnTx.slice(lastOffset, lastOffset+maxApduSize);
+    let response = await this.transport.send(0x80, 0x03, isContinuation | 0x80, 0x00, lastData);
     return response.toString("hex");
   }
 
