@@ -25,6 +25,8 @@ e.g. Error thrown when data received by exchanges are incorrect or if exchanged 
 -   `message` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 -   `id` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
+Returns **void** 
+
 ### TransportStatusError
 
 Error thrown when a device returned a non success status.
@@ -33,3 +35,5 @@ the error.statusCode is one of the `StatusCodes` exported by this library.
 #### Parameters
 
 -   `statusCode` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+
+Returns **void** 

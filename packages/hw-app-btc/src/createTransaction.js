@@ -1,5 +1,6 @@
 // @flow
 
+import semver from "semver";
 import type Transport from "@ledgerhq/hw-transport";
 import { hashPublicKey } from "./hashPublicKey";
 import { getWalletPublicKey } from "./getWalletPublicKey";
@@ -11,6 +12,7 @@ import { getTrustedInputBIP143 } from "./getTrustedInputBIP143";
 import { compressPublicKey } from "./compressPublicKey";
 import { signTransaction } from "./signTransaction";
 import { hashOutputFull, provideOutputFullChangePath } from "./finalizeInput";
+import { getAppAndVersion } from "./getAppAndVersion";
 import type { TransactionOutput, Transaction } from "./types";
 import {
   DEFAULT_LOCKTIME,
@@ -20,7 +22,7 @@ import {
   OP_HASH160,
   HASH_SIZE,
   OP_EQUALVERIFY,
-  OP_CHECKSIG
+  OP_CHECKSIG,
 } from "./constants";
 
 export type { AddressFormat };
@@ -30,9 +32,9 @@ const defaultsSignTransaction = {
   sigHashType: SIGHASH_ALL,
   segwit: false,
   additionals: [],
-  onDeviceStreaming: _e => {},
+  onDeviceStreaming: (_e) => {},
   onDeviceSignatureGranted: () => {},
-  onDeviceSignatureRequested: () => {}
+  onDeviceSignatureRequested: () => {},
 };
 
 /**
@@ -49,20 +51,21 @@ export type CreateTransactionArg = {
   initialTimestamp?: number,
   additionals: Array<string>,
   expiryHeight?: Buffer,
+  useTrustedInputForSegwit?: boolean,
   onDeviceStreaming?: ({
     progress: number,
     total: number,
-    index: number
+    index: number,
   }) => void,
   onDeviceSignatureRequested?: () => void,
-  onDeviceSignatureGranted?: () => void
+  onDeviceSignatureGranted?: () => void,
 };
 
 export async function createTransaction(
   transport: Transport<*>,
   arg: CreateTransactionArg
 ) {
-  const {
+  let {
     inputs,
     associatedKeysets,
     changePath,
@@ -73,13 +76,19 @@ export async function createTransaction(
     initialTimestamp,
     additionals,
     expiryHeight,
+    useTrustedInputForSegwit,
     onDeviceStreaming,
     onDeviceSignatureGranted,
-    onDeviceSignatureRequested
+    onDeviceSignatureRequested,
   } = {
     ...defaultsSignTransaction,
-    ...arg
+    ...arg,
   };
+
+  if (useTrustedInputForSegwit === undefined) {
+    const { version } = await getAppAndVersion(transport);
+    useTrustedInputForSegwit = semver.gte(version, "1.4.0");
+  }
 
   // loop: 0 or 1 (before and after)
   // i: index of the input being streamed
@@ -126,11 +135,13 @@ export async function createTransaction(
   const targetTransaction: Transaction = {
     inputs: [],
     version: defaultVersion,
-    timestamp: Buffer.alloc(0)
+    timestamp: Buffer.alloc(0),
   };
-  const getTrustedInputCall = useBip143
-    ? getTrustedInputBIP143
-    : getTrustedInput;
+
+  const getTrustedInputCall =
+    useBip143 && !useTrustedInputForSegwit
+      ? getTrustedInputBIP143
+      : getTrustedInput;
   const outputScript = Buffer.from(outputScriptHex, "hex");
 
   notify(0, 0);
@@ -154,7 +165,7 @@ export async function createTransaction(
       trustedInputs.push({
         trustedInput: true,
         value: Buffer.from(trustedInput, "hex"),
-        sequence
+        sequence,
       });
     }
 
@@ -181,7 +192,7 @@ export async function createTransaction(
     }
   }
 
-  targetTransaction.inputs = inputs.map(input => {
+  targetTransaction.inputs = inputs.map((input) => {
     let sequence = Buffer.alloc(4);
     sequence.writeUInt32LE(
       input.length >= 4 && typeof input[3] === "number"
@@ -192,7 +203,7 @@ export async function createTransaction(
     return {
       script: nullScript,
       prevout: nullPrevout,
-      sequence
+      sequence,
     };
   });
 
@@ -201,7 +212,7 @@ export async function createTransaction(
     const result = [];
     for (let i = 0; i < inputs.length; i++) {
       const r = await getWalletPublicKey(transport, {
-        path: associatedKeysets[i]
+        path: associatedKeysets[i],
       });
       notify(0, i + 1);
       result.push(r);
@@ -232,7 +243,8 @@ export async function createTransaction(
       trustedInputs,
       true,
       !!expiryHeight,
-      additionals
+      additionals,
+      useTrustedInputForSegwit
     );
 
     if (!resuming && changePath) {
@@ -257,7 +269,7 @@ export async function createTransaction(
         : Buffer.concat([
             Buffer.from([OP_DUP, OP_HASH160, HASH_SIZE]),
             hashPublicKey(publicKeys[i]),
-            Buffer.from([OP_EQUALVERIFY, OP_CHECKSIG])
+            Buffer.from([OP_EQUALVERIFY, OP_CHECKSIG]),
           ]);
     let pseudoTX = Object.assign({}, targetTransaction);
     let pseudoTrustedInputs = useBip143 ? [trustedInputs[i]] : trustedInputs;
@@ -274,7 +286,8 @@ export async function createTransaction(
       pseudoTrustedInputs,
       useBip143,
       !!expiryHeight && !isDecred,
-      additionals
+      additionals,
+      useTrustedInputForSegwit
     );
 
     if (!useBip143) {
@@ -313,7 +326,7 @@ export async function createTransaction(
       if (!bech32) {
         targetTransaction.inputs[i].script = Buffer.concat([
           Buffer.from("160014", "hex"),
-          hashPublicKey(publicKeys[i])
+          hashPublicKey(publicKeys[i]),
         ]);
       }
     } else {
@@ -325,10 +338,10 @@ export async function createTransaction(
         signatureSize,
         signatures[i],
         keySize,
-        publicKeys[i]
+        publicKeys[i],
       ]);
     }
-    let offset = useBip143 ? 0 : 4;
+    let offset = useBip143 && !useTrustedInputForSegwit ? 0 : 4;
     targetTransaction.inputs[i].prevout = trustedInputs[i].value.slice(
       offset,
       offset + 0x24
@@ -345,7 +358,7 @@ export async function createTransaction(
       targetTransaction.timestamp,
       additionals
     ),
-    outputScript
+    outputScript,
   ]);
 
   if (segwit && !isDecred) {
@@ -356,7 +369,7 @@ export async function createTransaction(
         Buffer.from([signatures[i].length]),
         signatures[i],
         Buffer.from([publicKeys[i].length]),
-        publicKeys[i]
+        publicKeys[i],
       ]);
       witness = Buffer.concat([witness, tmpScriptData]);
     }
@@ -373,7 +386,7 @@ export async function createTransaction(
     result = Buffer.concat([
       result,
       targetTransaction.nExpiryHeight || Buffer.alloc(0),
-      targetTransaction.extraData || Buffer.alloc(0)
+      targetTransaction.extraData || Buffer.alloc(0),
     ]);
   }
 
@@ -386,7 +399,7 @@ export async function createTransaction(
         Buffer.from([0x00, 0x00, 0x00, 0x00]), //Block height
         Buffer.from([0xff, 0xff, 0xff, 0xff]), //Block index
         Buffer.from([targetTransaction.inputs[inputIndex].script.length]),
-        targetTransaction.inputs[inputIndex].script
+        targetTransaction.inputs[inputIndex].script,
       ]);
     });
 

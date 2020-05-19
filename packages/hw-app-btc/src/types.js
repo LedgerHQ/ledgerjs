@@ -6,14 +6,14 @@ export type TransactionInput = {
   prevout: Buffer,
   script: Buffer,
   sequence: Buffer,
-  tree?: Buffer
+  tree?: Buffer,
 };
 
 /**
  */
 export type TransactionOutput = {
   amount: Buffer,
-  script: Buffer
+  script: Buffer,
 };
 
 /**
@@ -27,5 +27,5 @@ export type Transaction = {
   timestamp?: Buffer,
   nVersionGroupId?: Buffer,
   nExpiryHeight?: Buffer,
-  extraData?: Buffer
+  extraData?: Buffer,
 };

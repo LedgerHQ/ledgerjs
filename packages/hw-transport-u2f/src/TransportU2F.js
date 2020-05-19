@@ -22,10 +22,7 @@ function wrapApdu(apdu: Buffer, key: Buffer) {
 
 // Convert from normal to web-safe, strip trailing "="s
 const webSafe64 = (base64: string) =>
-  base64
-    .replace(/\+/g, "-")
-    .replace(/\//g, "_")
-    .replace(/=+$/, "");
+  base64.replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 
 // Convert from web-safe to normal, add trailing "="s
 const normal64 = (base64: string) =>
@@ -47,10 +44,10 @@ function attemptExchange(
     version: "U2F_V2",
     keyHandle: webSafe64(keyHandle.toString("base64")),
     challenge: webSafe64(challenge.toString("base64")),
-    appId: location.origin
+    appId: location.origin,
   };
   log("apdu", "=> " + apdu.toString("hex"));
-  return sign(signRequest, timeoutMillis / 1000).then(response => {
+  return sign(signRequest, timeoutMillis / 1000).then((response) => {
     const { signatureData } = response;
     if (typeof signatureData === "string") {
       const data = Buffer.from(normal64(signatureData), "base64");
@@ -71,7 +68,7 @@ function attemptExchange(
 let transportInstances = [];
 
 function emitDisconnect() {
-  transportInstances.forEach(t => t.emit("disconnect"));
+  transportInstances.forEach((t) => t.emit("disconnect"));
   transportInstances = [];
 }
 
@@ -93,13 +90,13 @@ export default class TransportU2F extends Transport<null> {
    */
   static list = (): * =>
     // this transport is not discoverable but we are going to guess if it is here with isSupported()
-    isSupported().then(supported => (supported ? [null] : []));
+    isSupported().then((supported) => (supported ? [null] : []));
 
   /*
    */
   static listen = (observer: *) => {
     let unsubscribed = false;
-    isSupported().then(supported => {
+    isSupported().then((supported) => {
       if (unsubscribed) return;
       if (supported) {
         observer.next({ type: "add", descriptor: null });
@@ -118,7 +115,7 @@ export default class TransportU2F extends Transport<null> {
     return {
       unsubscribe: () => {
         unsubscribed = true;
-      }
+      },
     };
   };
 

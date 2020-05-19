@@ -27,7 +27,7 @@ Ledger Hardware Wallet XRP JavaScript bindings.
 
 ### Xrp
 
-Ripple API
+XRP API
 
 #### Parameters
 
@@ -37,13 +37,52 @@ Ripple API
 #### Examples
 
 ```javascript
+import Transport from "@ledgerhq/hw-transport-node-hid";
+// import Transport from "@ledgerhq/hw-transport-u2f"; // for browser
 import Xrp from "@ledgerhq/hw-app-xrp";
-const xrp = new Xrp(transport);
+import { encode } from 'ripple-binary-codec';
+
+function establishConnection() {
+    return Transport.create()
+        .then(transport => new Xrp(transport));
+}
+
+function fetchAddress(xrp) {
+    return xrp.getAddress("44'/144'/0'/0/0");
+}
+
+function signTransaction(xrp, deviceData, seqNo) {
+    let transactionJSON = {
+        TransactionType: "Payment",
+        Account: deviceData.address,
+        Destination: "rTooLkitCksh5mQa67eaa2JaWHDBnHkpy",
+        Amount: "1000000",
+        Fee: "15",
+        Flags: 2147483648,
+        Sequence: seqNo,
+        SigningPubKey: deviceData.publicKey.toUpperCase()
+    };
+
+    const transactionBlob = encode(transactionJSON);
+
+    console.log('Sending transaction to device for approval...');
+    return xrp.signTransaction("44'/144'/0'/0/0", transactionBlob);
+}
+
+function prepareAndSign(xrp, seqNo) {
+    return fetchAddress(xrp)
+        .then(deviceData => signTransaction(xrp, deviceData, seqNo));
+}
+
+establishConnection()
+    .then(xrp => prepareAndSign(xrp, 123))
+    .then(signature => console.log(`Signature: ${signature}`))
+    .catch(e => console.log(`An error occurred (${e.message})`));
 ```
 
 #### getAddress
 
-get Ripple address for a given BIP 32 path.
+get XRP address for a given BIP 32 path.
 
 ##### Parameters
 
@@ -63,12 +102,17 @@ Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 
 #### signTransaction
 
-sign a Ripple transaction with a given BIP 32 path
+sign a XRP transaction with a given BIP 32 path
+
+The rawTxHex parameter is the serialized transaction blob represented as
+hex.
 
 ##### Parameters
 
 -   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
--   `rawTxHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a raw transaction hex string
+-   `rawTxHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a raw hex string representing a serialized transaction blob.
+           This parameter can be encoded using [ripple-binary-codec](https://www.npmjs.com/package/ripple-binary-codec).
+           See <https://xrpl.org/serialization.html> for more documentation on the serialization format.
 -   `ed25519` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** optionally enable or not the ed25519 curve (secp256k1 is default)
 
 ##### Examples
@@ -81,7 +125,7 @@ Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 
 #### getAppConfiguration
 
-get the version of the Ripple app installed on the hardware device
+get the version of the XRP app installed on the hardware device
 
 ##### Examples
 

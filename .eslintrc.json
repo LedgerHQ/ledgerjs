@@ -13,14 +13,19 @@
     "plugin:flowtype/recommended",
     "prettier"
   ],
-  "plugins": ["flowtype", "react"],
+  "plugins": ["flowtype", "react", "prettier"],
   "rules": {
     "no-console": 0,
     "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "linebreak-style": ["error", "unix"],
     "quotes": ["error", "double"],
     "semi": ["error", "always"],
-    "flowtype/space-after-type-colon": [ 2, "always", { "allowLineBreak": true } ]
+    "flowtype/space-after-type-colon": [
+      2,
+      "always",
+      { "allowLineBreak": true }
+    ],
+    "prettier/prettier": "error"
   },
   "settings": {
     "flowtype": {

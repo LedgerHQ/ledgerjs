@@ -30,13 +30,30 @@ Summary of implementations available per platform
 
 |    Platforms     |  U2F/WebAuthn    |                HID                |       WebUSB        |           Bluetooth           |
 |------------------|------------------|-----------------------------------|---------------------|-------------------------------|
-| Web              | @ledgerhq/hw-transport-u2f (Chrome, Opera) | @ledgerhq/hw-transport-webhid _(Chrome DEV under experimental flags)_ | @ledgerhq/hw-transport-webusb (Chrome) | @ledgerhq/hw-transport-web-ble (Chrome)          |
-| Electron/Node.js | NO               | @ledgerhq/hw-transport-node-hid<sup>1</sup> | NO                  | @ledgerhq/hw-transport-node-ble         |
-| iOS              | NO               | NO                                | NO                  | @ledgerhq/react-native-hw-transport-ble |
-| Android          | @ledgerhq/hw-transport-u2f<sup>2</sup> | @ledgerhq/react-native-hid                  | @ledgerhq/hw-transport-webusb<sup>2</sup>    | @ledgerhq/react-native-hw-transport-ble |
+| Web              | `@ledgerhq/hw-transport-u2f` | `@ledgerhq/hw-transport-webhid` | `@ledgerhq/hw-transport-webusb` | `@ledgerhq/hw-transport-web-ble`          |
+| Electron/Node.js | NO               | `@ledgerhq/hw-transport-node-hid`<sup>1</sup> | NO                  | `@ledgerhq/hw-transport-node-ble`         |
+| iOS              | NO               | NO                                | NO                  | `@ledgerhq/react-native-hw-transport-ble` |
+| Android          | `@ledgerhq/hw-transport-u2f`<sup>2</sup> | `@ledgerhq/react-native-hid`                  | `@ledgerhq/hw-transport-webusb`<sup>2</sup>    | `@ledgerhq/react-native-hw-transport-ble` |
 
 1. 3 implementations available
 2. via Android Chrome
+
+**Beware the current web support:**
+
+
+| Channels | U2F               | WebHID.         | WebUSB             | WebBluetooth |
+|----------|-------------------|-----------------|--------------------|--------------|
+| Windows  | ISSUE<sup>1</sup> | YES             | OK BUT<sup>2</sup> | YES          |
+| Mac      | YES               | YES             | YES                | YES          |
+| Linux    | YES               | YES             | YES                | YES          |
+| Chrome   | YES               | YES<sup>3</sup> | YES                | YES          |
+| Safari   | YES               | NO              | NO                 | NO           |
+| Firefox  | YES               | NO              | NO                 | NO           |
+| IE.      | YES               | NO              | NO                 | NO           |
+
+1. problem with undesired windows popup that happens during device exchanges.
+2. instabilities has been reported
+3. WebHID supported under _Chrome experimental flags_
 
 
 **Please find respective documentation for each transport:**

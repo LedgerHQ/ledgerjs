@@ -31,13 +31,13 @@ const attemptExchange = (
           allowCredentials: [
             {
               type: "public-key",
-              id: new Uint8Array(wrapApdu(apdu, scrambleKey))
-            }
-          ]
-        }
+              id: new Uint8Array(wrapApdu(apdu, scrambleKey)),
+            },
+          ],
+        },
       })
       // $FlowFixMe
-      .then(r => Buffer.from(r.response.signature))
+      .then((r) => Buffer.from(r.response.signature))
   );
 };
 

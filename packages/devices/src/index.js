@@ -30,7 +30,7 @@ const devices = {
     legacyUsbProductId: 0x0000,
     usbOnly: true,
     memorySize: 480 * 1024,
-    blockSize: 4 * 1024
+    blockSize: 4 * 1024,
   },
   nanoS: {
     id: "nanoS",
@@ -39,7 +39,7 @@ const devices = {
     legacyUsbProductId: 0x0001,
     usbOnly: true,
     memorySize: 320 * 1024,
-    blockSize: 4 * 1024
+    blockSize: 4 * 1024,
   },
   nanoX: {
     id: "nanoX",
@@ -54,21 +54,21 @@ const devices = {
         // this is the legacy one (prototype version). we will eventually drop it.
         serviceUuid: "d973f2e0-b19e-11e2-9e96-0800200c9a66",
         notifyUuid: "d973f2e1-b19e-11e2-9e96-0800200c9a66",
-        writeUuid: "d973f2e2-b19e-11e2-9e96-0800200c9a66"
+        writeUuid: "d973f2e2-b19e-11e2-9e96-0800200c9a66",
       },
       {
         serviceUuid: "13d63400-2c97-0004-0000-4c6564676572",
         notifyUuid: "13d63400-2c97-0004-0001-4c6564676572",
-        writeUuid: "13d63400-2c97-0004-0002-4c6564676572"
-      }
-    ]
-  }
+        writeUuid: "13d63400-2c97-0004-0002-4c6564676572",
+      },
+    ],
+  },
 };
 
 const productMap = {
   Blue: "blue",
   "Nano S": "nanoS",
-  "Nano X": "nanoX"
+  "Nano X": "nanoX",
 };
 
 // $FlowFixMe
@@ -92,24 +92,24 @@ export const getDeviceModel = (id: DeviceModelId): DeviceModel => {
  *
  */
 export const identifyUSBProductId = (usbProductId: number): ?DeviceModel => {
-  const legacy = devicesList.find(d => d.legacyUsbProductId === usbProductId);
+  const legacy = devicesList.find((d) => d.legacyUsbProductId === usbProductId);
   if (legacy) return legacy;
 
   const mm = usbProductId >> 8;
-  const deviceModel = devicesList.find(d => d.productIdMM === mm);
+  const deviceModel = devicesList.find((d) => d.productIdMM === mm);
   return deviceModel;
 };
 
 export const identifyProductName = (productName: string): ?DeviceModel => {
   const productId = productMap[productName];
-  const deviceModel = devicesList.find(d => d.id === productId);
+  const deviceModel = devicesList.find((d) => d.id === productId);
 
   return deviceModel;
 };
 
 const bluetoothServices: string[] = [];
 const serviceUuidToInfos: {
-  [_: string]: BluetoothInfos
+  [_: string]: BluetoothInfos,
 } = {};
 
 for (let id in devices) {
@@ -156,8 +156,8 @@ export type DeviceModel = {
   bluetoothSpec?: Array<{
     serviceUuid: string,
     writeUuid: string,
-    notifyUuid: string
-  }>
+    notifyUuid: string,
+  }>,
 };
 
 /**
@@ -167,5 +167,5 @@ export type BluetoothInfos = {
   deviceModel: DeviceModel,
   serviceUuid: string,
   writeUuid: string,
-  notifyUuid: string
+  notifyUuid: string,
 };

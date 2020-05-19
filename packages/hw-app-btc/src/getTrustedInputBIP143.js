@@ -20,9 +20,7 @@ export function getTrustedInputBIP143(
   }
   let hash = shajs("sha256")
     .update(
-      shajs("sha256")
-        .update(serializeTransaction(transaction, true))
-        .digest()
+      shajs("sha256").update(serializeTransaction(transaction, true)).digest()
     )
     .digest();
   const data = Buffer.alloc(4);
