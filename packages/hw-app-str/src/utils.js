@@ -24,7 +24,7 @@ import { sha256 } from "sha.js";
 export function splitPath(path: string): number[] {
   let result = [];
   let components = path.split("/");
-  components.forEach(element => {
+  components.forEach((element) => {
     let number = parseInt(element, 10);
     if (isNaN(number)) {
       return; // FIXME shouldn't it throws instead?
@@ -45,7 +45,7 @@ export function foreach<T, A>(
     if (index >= array.length) {
       return result;
     } else {
-      return callback(array[index], index).then(function(res) {
+      return callback(array[index], index).then(function (res) {
         result.push(res);
         return iterate(index + 1, array, result);
       });
@@ -104,7 +104,7 @@ export function hash(data: Buffer) {
 }
 
 export function checkStellarBip32Path(path: string): void {
-  path.split("/").forEach(function(element) {
+  path.split("/").forEach(function (element) {
     if (!element.toString().endsWith("'")) {
       throw new Error(
         "Detected a non-hardened path element in requested BIP32 path." +

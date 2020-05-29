@@ -18,13 +18,13 @@
 
 type Defer<T> = {
   promise: Promise<T>,
-  resolve: T => void,
-  reject: any => void
+  resolve: (T) => void,
+  reject: (any) => void,
 };
 
 export function defer<T>(): Defer<T> {
   let resolve, reject;
-  let promise = new Promise(function(success, failure) {
+  let promise = new Promise(function (success, failure) {
     resolve = success;
     reject = failure;
   });
@@ -36,7 +36,7 @@ export function defer<T>(): Defer<T> {
 export function splitPath(path: string): number[] {
   let result = [];
   let components = path.split("/");
-  components.forEach(element => {
+  components.forEach((element) => {
     let number = parseInt(element, 10);
     if (isNaN(number)) {
       return; // FIXME shouldn't it throws instead?
@@ -51,7 +51,7 @@ export function splitPath(path: string): number[] {
 
 // TODO use async await
 
-export function eachSeries<A>(arr: A[], fun: A => Promise<*>): Promise<*> {
+export function eachSeries<A>(arr: A[], fun: (A) => Promise<*>): Promise<*> {
   return arr.reduce((p, e) => p.then(() => fun(e)), Promise.resolve());
 }
 
@@ -63,7 +63,7 @@ export function foreach<T, A>(
     if (index >= array.length) {
       return result;
     } else
-      return callback(array[index], index).then(function(res) {
+      return callback(array[index], index).then(function (res) {
         result.push(res);
         return iterate(index + 1, array, result);
       });
@@ -90,7 +90,7 @@ export function asyncWhile<T>(
     if (!predicate()) {
       return result;
     } else {
-      return callback().then(res => {
+      return callback().then((res) => {
         result.push(res);
         return iterate(result);
       });

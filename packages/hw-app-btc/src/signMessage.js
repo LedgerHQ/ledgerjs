@@ -9,7 +9,7 @@ export async function signMessage(
 ): Promise<{
   v: number,
   r: string,
-  s: string
+  s: string,
 }> {
   const paths = bippath.fromString(path).toPathArray();
   const message = Buffer.from(messageHex, "hex");

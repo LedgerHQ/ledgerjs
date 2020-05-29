@@ -62,12 +62,12 @@ export type Queue = [string, string][];
  */
 export type RecordStoreOptions = {
   autoSkipUnknownApdu: boolean,
-  warning: string => void
+  warning: (string) => void,
 };
 
 const defaultOpts: RecordStoreOptions = {
   autoSkipUnknownApdu: false,
-  warning: log => console.warn(log)
+  warning: (log) => console.warn(log),
 };
 
 /**
@@ -164,9 +164,9 @@ export class RecordStore {
     let value = [];
     str
       .split("\n")
-      .map(line => line.replace(/ /g, ""))
-      .filter(o => o)
-      .forEach(line => {
+      .map((line) => line.replace(/ /g, ""))
+      .filter((o) => o)
+      .forEach((line) => {
         if (value.length === 0) {
           const m = line.match(/^=>([0-9a-fA-F]+)$/);
           if (!m) {

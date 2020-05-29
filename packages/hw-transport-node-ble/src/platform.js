@@ -6,26 +6,28 @@ import { Observable } from "rxjs";
 import { log } from "@ledgerhq/logs";
 import {
   getInfosForServiceUuid,
-  getBluetoothServiceUuids
+  getBluetoothServiceUuids,
 } from "@ledgerhq/devices";
 import { TransportError } from "@ledgerhq/errors";
 
-noble.on("warning", message => {
+noble.on("warning", (message) => {
   log("ble-warning", message);
 });
 
 const POWERED_ON = "poweredOn";
 
-export const availability: Observable<boolean> = Observable.create(observer => {
-  const onAvailabilityChanged = e => {
-    observer.next(e === POWERED_ON);
-  };
-  noble.addListener("stateChanged", onAvailabilityChanged); // events lib?
-  observer.next(noble.state === POWERED_ON);
-  return () => {
-    noble.removeListener("stateChanged", onAvailabilityChanged);
-  };
-});
+export const availability: Observable<boolean> = Observable.create(
+  (observer) => {
+    const onAvailabilityChanged = (e) => {
+      observer.next(e === POWERED_ON);
+    };
+    noble.addListener("stateChanged", onAvailabilityChanged); // events lib?
+    observer.next(noble.state === POWERED_ON);
+    return () => {
+      noble.removeListener("stateChanged", onAvailabilityChanged);
+    };
+  }
+);
 
 export const listenDeviceDisconnect = (device: *, onDisconnect: *) => {
   device.addListener("disconnect", onDisconnect);
@@ -36,7 +38,7 @@ export const listenDeviceDisconnect = (device: *, onDisconnect: *) => {
 
 export const connectDevice = (device: *): Promise<void> =>
   new Promise((resolve, reject) => {
-    device.connect(error => {
+    device.connect((error) => {
       if (error) {
         reject(error);
       } else {
@@ -47,7 +49,7 @@ export const connectDevice = (device: *): Promise<void> =>
 
 export const disconnectDevice = (device: *): Promise<void> =>
   new Promise((resolve, reject) => {
-    device.disconnect(error => {
+    device.disconnect((error) => {
       if (error) {
         reject(error);
       } else {
@@ -59,7 +61,7 @@ export const disconnectDevice = (device: *): Promise<void> =>
 export const isDeviceDisconnected = (device: *): boolean =>
   device.state === "disconnected";
 
-const discoverDeviceServices = device =>
+const discoverDeviceServices = (device) =>
   new Promise((resolve, reject) =>
     device.discoverServices(null, (error, services) => {
       if (error) reject(error);
@@ -67,7 +69,7 @@ const discoverDeviceServices = device =>
     })
   );
 
-const discoverServiceCharacteristics = service =>
+const discoverServiceCharacteristics = (service) =>
   new Promise((resolve, reject) =>
     service.discoverCharacteristics(null, (error, chs) => {
       if (error) reject(error);
@@ -76,10 +78,10 @@ const discoverServiceCharacteristics = service =>
   );
 
 export const listen = (): Observable<*> =>
-  Observable.create(observer => {
+  Observable.create((observer) => {
     const discoveredDevices = {};
 
-    const onDiscover = peripheral => {
+    const onDiscover = (peripheral) => {
       const { uuid: id } = peripheral;
       const { localName } = peripheral.advertisement;
       const name =
@@ -90,7 +92,7 @@ export const listen = (): Observable<*> =>
       observer.next({
         type: "add",
         descriptor: peripheral,
-        device: { id, name }
+        device: { id, name },
       });
     };
 
@@ -128,7 +130,7 @@ export const retrieveServiceAndCharacteristics = async (device: *) => {
   return {
     writeC,
     notifyC,
-    deviceModel: infos.deviceModel
+    deviceModel: infos.deviceModel,
   };
 };
 
@@ -142,7 +144,7 @@ export const monitorCharacteristic = (
     reject = rej;
   });
 
-  const observable = Observable.create(o => {
+  const observable = Observable.create((o) => {
     function onCharacteristicValueChanged(data) {
       o.next(Buffer.from(data));
     }
@@ -172,7 +174,7 @@ export const monitorCharacteristic = (
 
 export const write = (writeCharacteristic: *, buffer: Buffer): Promise<void> =>
   new Promise((resolve, reject) => {
-    writeCharacteristic.write(buffer, false, e => {
+    writeCharacteristic.write(buffer, false, (e) => {
       if (e) reject(e);
       else resolve();
     });

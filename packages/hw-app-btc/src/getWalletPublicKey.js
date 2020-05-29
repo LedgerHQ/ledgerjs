@@ -10,7 +10,7 @@ export type AddressFormat = "legacy" | "p2sh" | "bech32";
 const addressFormatMap = {
   legacy: 0,
   p2sh: 1,
-  bech32: 2
+  bech32: 2,
 };
 
 export async function getWalletPublicKey(
@@ -19,12 +19,12 @@ export async function getWalletPublicKey(
 ): Promise<{
   publicKey: string,
   bitcoinAddress: string,
-  chainCode: string
+  chainCode: string,
 }> {
   const { path, verify, format } = {
     verify: false,
     format: "legacy",
-    ...options
+    ...options,
   };
   if (!(format in addressFormatMap)) {
     throw new Error("btc.getWalletPublicKey invalid format=" + format);

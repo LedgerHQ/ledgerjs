@@ -13,7 +13,7 @@ const createTransportReplayer = (
   class TransportReplayer extends Transport<*> {
     static isSupported = () => Promise.resolve(true);
     static list = () => Promise.resolve([null]);
-    static listen = o => {
+    static listen = (o) => {
       let unsubscribed;
       setTimeout(() => {
         if (unsubscribed) return;
@@ -23,7 +23,7 @@ const createTransportReplayer = (
       return {
         unsubscribe: () => {
           unsubscribed = true;
-        }
+        },
       };
     };
     static open = () => Promise.resolve(new TransportReplayer());

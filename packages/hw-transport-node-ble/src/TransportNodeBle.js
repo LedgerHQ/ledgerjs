@@ -10,7 +10,7 @@ import { Observable, defer, merge, from } from "rxjs";
 import { share, ignoreElements, first, map, tap } from "rxjs/operators";
 import {
   CantOpenDevice,
-  DisconnectedDeviceDuringOperation
+  DisconnectedDeviceDuringOperation,
 } from "@ledgerhq/errors";
 import {
   monitorCharacteristic,
@@ -21,7 +21,7 @@ import {
   listen,
   listenDeviceDisconnect,
   connectDevice,
-  isDeviceDisconnected
+  isDeviceDisconnected,
 } from "./platform";
 
 type Device = *;
@@ -30,17 +30,17 @@ const transportsCache = {};
 
 type ReconnectionConfig = {
   pairingThreshold: number,
-  delayAfterFirstPairing: number
+  delayAfterFirstPairing: number,
 };
 let reconnectionConfig: ?ReconnectionConfig = {
   pairingThreshold: 1000,
-  delayAfterFirstPairing: 4000
+  delayAfterFirstPairing: 4000,
 };
 export function setReconnectionConfig(config: ?ReconnectionConfig) {
   reconnectionConfig = config;
 }
 
-const delay = ms => new Promise(success => setTimeout(success, ms));
+const delay = (ms) => new Promise((success) => setTimeout(success, ms));
 
 async function open(deviceOrId: Device | string, needsReconnect: boolean) {
   let device;
@@ -57,7 +57,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
     throw new CantOpenDevice();
   }
 
-  await availability.pipe(first(enabled => enabled)).toPromise();
+  await availability.pipe(first((enabled) => enabled)).toPromise();
 
   if (isDeviceDisconnected(device)) {
     log("ble-verbose", "not connected. connecting...");
@@ -67,13 +67,13 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
   const {
     notifyC,
     writeC,
-    deviceModel
+    deviceModel,
   } = await retrieveServiceAndCharacteristics(device);
 
   const [observable, monitoringReady] = monitorCharacteristic(notifyC);
 
   const notifyObservable = observable.pipe(
-    tap(value => {
+    tap((value) => {
       log("ble-frame", "<= " + value.toString("hex"));
     }),
     share()
@@ -88,7 +88,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
     deviceModel
   );
 
-  const onDisconnect = e => {
+  const onDisconnect = (e) => {
     transport.notYetDisconnected = false;
     notif.unsubscribe();
     disconnectedSub();
@@ -99,7 +99,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
 
   // eslint-disable-next-line require-atomic-updates
   transportsCache[transport.id] = transport;
-  const disconnectedSub = listenDeviceDisconnect(device, e => {
+  const disconnectedSub = listenDeviceDisconnect(device, (e) => {
     if (!transport.notYetDisconnected) return;
     onDisconnect(e);
   });
@@ -248,8 +248,8 @@ export default class BluetoothTransport extends Transport<Device | string> {
         mtu =
           (await merge(
             this.notifyObservable.pipe(
-              first(buffer => buffer.readUInt8(0) === 0x08),
-              map(buffer => buffer.readUInt8(5))
+              first((buffer) => buffer.readUInt8(0) === 0x08),
+              map((buffer) => buffer.readUInt8(5))
             ),
             defer(() => from(this.write(Buffer.from([0x08, 0, 0, 0, 0])))).pipe(
               ignoreElements()

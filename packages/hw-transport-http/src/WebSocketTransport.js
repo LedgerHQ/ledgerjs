@@ -15,7 +15,7 @@ export default class WebSocketTransport extends Transport<string> {
   // this transport is not discoverable
   static list = (): * => Promise.resolve([]);
   static listen = (_observer: *) => ({
-    unsubscribe: () => {}
+    unsubscribe: () => {},
   });
 
   static check = async (url: string, timeout: number = 5000) =>
@@ -59,12 +59,12 @@ export default class WebSocketTransport extends Transport<string> {
           rejectExchange: (_e: *) => {},
           onDisconnect: () => {},
           close: () => socket.close(),
-          send: msg => socket.send(msg)
+          send: (msg) => socket.send(msg),
         };
         socket.onopen = () => {
           socket.send("open");
         };
-        socket.onerror = e => {
+        socket.onerror = (e) => {
           exchangeMethods.onDisconnect();
           reject(e);
         };
@@ -72,7 +72,7 @@ export default class WebSocketTransport extends Transport<string> {
           exchangeMethods.onDisconnect();
           reject(new TransportError("OpenFailed", "OpenFailed"));
         };
-        socket.onmessage = e => {
+        socket.onmessage = (e) => {
           if (typeof e.data !== "string") return;
           const data = JSON.parse(e.data);
           switch (data.type) {
@@ -125,7 +125,7 @@ export default class WebSocketTransport extends Transport<string> {
 
   async close() {
     this.hook.close();
-    return new Promise(success => {
+    return new Promise((success) => {
       setTimeout(success, 200);
     });
   }

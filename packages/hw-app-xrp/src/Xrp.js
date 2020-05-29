@@ -81,7 +81,7 @@ export default class Xrp {
   ): Promise<{
     publicKey: string,
     address: string,
-    chainCode?: string
+    chainCode?: string,
   }> {
     const bipPath = BIPPath.fromString(path).toPathArray();
     const curveMask = ed25519 ? 0x80 : 0x40;
@@ -162,7 +162,7 @@ export default class Xrp {
         p2: curveMask,
         data: isFirst
           ? Buffer.alloc(1 + bipPath.length * 4 + chunkSize)
-          : Buffer.alloc(chunkSize)
+          : Buffer.alloc(chunkSize),
       };
 
       if (isFirst) {
@@ -211,7 +211,7 @@ export default class Xrp {
    * }
    */
   async getAppConfiguration(): Promise<{
-    version: string
+    version: string,
   }> {
     const response = await this.transport.send(0xe0, 0x06, 0x00, 0x00);
     const result = {};

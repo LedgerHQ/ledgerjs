@@ -5,7 +5,7 @@ import type { Transaction } from "./types";
 import { MAX_SCRIPT_BLOCK } from "./constants";
 import { createVarint } from "./varint";
 
-export function getTrustedInputRaw(
+export async function getTrustedInputRaw(
   transport: Transport<*>,
   transactionData: Buffer,
   indexLookup: ?number
@@ -20,11 +20,16 @@ export function getTrustedInputRaw(
   } else {
     data = transactionData;
   }
-  return transport
-    .send(0xe0, 0x42, firstRound ? 0x00 : 0x80, 0x00, data)
-    .then(trustedInput =>
-      trustedInput.slice(0, trustedInput.length - 2).toString("hex")
-    );
+  const trustedInput = await transport.send(
+    0xe0,
+    0x42,
+    firstRound ? 0x00 : 0x80,
+    0x00,
+    data
+  );
+
+  const res = trustedInput.slice(0, trustedInput.length - 2).toString("hex");
+  return res;
 }
 
 export async function getTrustedInput(
@@ -73,7 +78,8 @@ export async function getTrustedInput(
     return res;
   };
 
-  const processWholeScriptBlock = block => getTrustedInputRaw(transport, block);
+  const processWholeScriptBlock = (block) =>
+    getTrustedInputRaw(transport, block);
 
   const processInputs = async () => {
     for (let input of inputs) {
@@ -86,7 +92,7 @@ export async function getTrustedInput(
       const data = Buffer.concat([
         input.prevout,
         treeField,
-        isXSTV2 ? Buffer.from([0x00]) : createVarint(input.script.length)
+        isXSTV2 ? Buffer.from([0x00]) : createVarint(input.script.length),
       ]);
       await getTrustedInputRaw(transport, data);
 
@@ -113,7 +119,7 @@ export async function getTrustedInput(
         data,
         isDecred ? Buffer.from([0x00, 0x00]) : Buffer.alloc(0), //Version script
         createVarint(output.script.length),
-        output.script
+        output.script,
       ]);
       await getTrustedInputRaw(transport, data);
     }
@@ -126,7 +132,7 @@ export async function getTrustedInput(
       const finalData = Buffer.concat([
         locktime,
         createVarint(extraData.length),
-        extraData
+        extraData,
       ]);
       res = await processScriptBlocks(finalData);
       invariant(res, "missing result in processScriptBlocks");
@@ -144,7 +150,7 @@ export async function getTrustedInput(
   const data = Buffer.concat([
     transaction.version,
     transaction.timestamp || Buffer.alloc(0),
-    createVarint(inputs.length)
+    createVarint(inputs.length),
   ]);
 
   return getTrustedInputRaw(transport, data, indexLookup)

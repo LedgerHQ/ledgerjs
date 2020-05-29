@@ -5,10 +5,10 @@ import Transport from "@ledgerhq/hw-transport";
 import type {
   Observer,
   DescriptorEvent,
-  Subscription
+  Subscription,
 } from "@ledgerhq/hw-transport";
 
-const getTransport = url =>
+const getTransport = (url) =>
   !url.startsWith("ws") ? HttpTransport : WebSocketTransport;
 
 type InS = string | string[];
@@ -26,9 +26,9 @@ export default (urls: In): Class<Transport<string>> => {
 
     static list = (): Promise<*[]> =>
       inferURLs(urls)
-        .then(urls =>
+        .then((urls) =>
           Promise.all(
-            urls.map(url =>
+            urls.map((url) =>
               getTransport(url)
                 .check(url)
                 .then(() => [url])
@@ -36,7 +36,7 @@ export default (urls: In): Class<Transport<string>> => {
             )
           )
         )
-        .then(arrs => arrs.reduce((acc, a) => acc.concat(a), []));
+        .then((arrs) => arrs.reduce((acc, a) => acc.concat(a), []));
 
     static listen = (observer: Observer<DescriptorEvent<*>>): Subscription => {
       let unsubscribed = false;
@@ -44,9 +44,9 @@ export default (urls: In): Class<Transport<string>> => {
       function checkLoop() {
         if (unsubscribed) return;
         inferURLs(urls)
-          .then(urls =>
+          .then((urls) =>
             Promise.all(
-              urls.map(async url => {
+              urls.map(async (url) => {
                 if (unsubscribed) return;
                 try {
                   await getTransport(url).check(url);
@@ -65,18 +65,18 @@ export default (urls: In): Class<Transport<string>> => {
               })
             )
           )
-          .then(() => new Promise(success => setTimeout(success, 5000)))
+          .then(() => new Promise((success) => setTimeout(success, 5000)))
           .then(checkLoop);
       }
       checkLoop();
       return {
         unsubscribe: () => {
           unsubscribed = true;
-        }
+        },
       };
     };
 
-    static open = url => getTransport(url).open(url);
+    static open = (url) => getTransport(url).open(url);
   }
 
   return StaticTransport;

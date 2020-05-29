@@ -11,12 +11,12 @@ export function serializeTransactionOutputs({ outputs }: Transaction): Buffer {
   let outputBuffer = Buffer.alloc(0);
   if (typeof outputs !== "undefined") {
     outputBuffer = Buffer.concat([outputBuffer, createVarint(outputs.length)]);
-    outputs.forEach(output => {
+    outputs.forEach((output) => {
       outputBuffer = Buffer.concat([
         outputBuffer,
         output.amount,
         createVarint(output.script.length),
-        output.script
+        output.script,
       ]);
     });
   }
@@ -33,21 +33,21 @@ export function serializeTransaction(
   const isBech32 = additionals.includes("bech32");
   let inputBuffer = Buffer.alloc(0);
   let useWitness = typeof transaction["witness"] != "undefined" && !skipWitness;
-  transaction.inputs.forEach(input => {
+  transaction.inputs.forEach((input) => {
     inputBuffer =
       isDecred || isBech32
         ? Buffer.concat([
             inputBuffer,
             input.prevout,
             Buffer.from([0x00]), //tree
-            input.sequence
+            input.sequence,
           ])
         : Buffer.concat([
             inputBuffer,
             input.prevout,
             createVarint(input.script.length),
             input.script,
-            input.sequence
+            input.sequence,
           ]);
   });
 
@@ -61,7 +61,7 @@ export function serializeTransaction(
       (useWitness && transaction.witness) || Buffer.alloc(0),
       transaction.locktime,
       transaction.nExpiryHeight || Buffer.alloc(0),
-      transaction.extraData || Buffer.alloc(0)
+      transaction.extraData || Buffer.alloc(0),
     ]);
   }
 
@@ -72,6 +72,6 @@ export function serializeTransaction(
     useWitness ? Buffer.from("0001", "hex") : Buffer.alloc(0),
     createVarint(transaction.inputs.length),
     inputBuffer,
-    outputBuffer
+    outputBuffer,
   ]);
 }
