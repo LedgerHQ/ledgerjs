@@ -194,7 +194,6 @@ export default class TransportWebHID extends Transport<HIDDevice> {
       // Write...
       const blocks = framing.makeBlocks(apdu);
       for (let i = 0; i < blocks.length; i++) {
-        log("hid-frame", "=> " + blocks[i].toString("hex"));
         await this.device.sendReport(0, blocks[i]);
       }
 
@@ -203,7 +202,6 @@ export default class TransportWebHID extends Transport<HIDDevice> {
       let acc;
       while (!(result = framing.getReducedResult(acc))) {
         const buffer = await this.read();
-        log("hid-frame", "<= " + buffer.toString("hex"));
         acc = framing.reduceResponse(acc, buffer);
       }
 

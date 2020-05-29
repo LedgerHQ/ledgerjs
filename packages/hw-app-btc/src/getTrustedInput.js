@@ -5,7 +5,7 @@ import type { Transaction } from "./types";
 import { MAX_SCRIPT_BLOCK } from "./constants";
 import { createVarint } from "./varint";
 
-export function getTrustedInputRaw(
+export async function getTrustedInputRaw(
   transport: Transport<*>,
   transactionData: Buffer,
   indexLookup: ?number
@@ -20,11 +20,16 @@ export function getTrustedInputRaw(
   } else {
     data = transactionData;
   }
-  return transport
-    .send(0xe0, 0x42, firstRound ? 0x00 : 0x80, 0x00, data)
-    .then((trustedInput) =>
-      trustedInput.slice(0, trustedInput.length - 2).toString("hex")
-    );
+  const trustedInput = await transport.send(
+    0xe0,
+    0x42,
+    firstRound ? 0x00 : 0x80,
+    0x00,
+    data
+  );
+
+  const res = trustedInput.slice(0, trustedInput.length - 2).toString("hex");
+  return res;
 }
 
 export async function getTrustedInput(

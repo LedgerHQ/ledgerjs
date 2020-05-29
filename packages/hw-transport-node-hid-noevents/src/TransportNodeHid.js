@@ -154,7 +154,6 @@ export default class TransportNodeHidNoEvents extends Transport<?string> {
       // Write...
       const blocks = framing.makeBlocks(apdu);
       for (let i = 0; i < blocks.length; i++) {
-        log("hid-frame", "=> " + blocks[i].toString("hex"));
         await this.writeHID(blocks[i]);
       }
 
@@ -163,7 +162,6 @@ export default class TransportNodeHidNoEvents extends Transport<?string> {
       let acc;
       while (!(result = framing.getReducedResult(acc))) {
         const buffer = await this.readHID();
-        log("hid-frame", "<= " + buffer.toString("hex"));
         acc = framing.reduceResponse(acc, buffer);
       }
 
