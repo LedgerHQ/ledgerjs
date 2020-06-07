@@ -115,10 +115,10 @@ export default class TransportWebHID extends Transport<HIDDevice> {
     getFirstLedgerDevice().then(
       (device) => {
         if (!device) {
-          throw new Error('Access denied to use Ledger device')
-        }
-
-        if (!unsubscribed) {
+          observer.error(
+            new TransportOpenUserCancelled("Access denied to use Ledger device")
+          );
+        } else if (!unsubscribed) {
           const deviceModel = identifyUSBProductId(device.productId);
           observer.next({ type: "add", descriptor: device, deviceModel });
           observer.complete();
