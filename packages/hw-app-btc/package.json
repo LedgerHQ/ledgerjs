@@ -27,6 +27,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/hw-transport": "^5.15.0",
+    "@ledgerhq/logs": "^5.15.0",
     "bip32-path": "^0.4.2",
     "invariant": "^2.2.4",
     "ripemd160": "2",
