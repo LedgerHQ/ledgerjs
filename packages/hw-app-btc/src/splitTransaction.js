@@ -1,6 +1,8 @@
 // @flow
+import { log } from "@ledgerhq/logs";
 import type { Transaction } from "./types";
 import { getVarint } from "./varint";
+import { formatTransactionDebug } from "./debug";
 
 export function splitTransaction(
   transactionHex: string,
@@ -122,7 +124,7 @@ export function splitTransaction(
     }
   }
 
-  return {
+  const t: Transaction = {
     version,
     inputs,
     outputs,
@@ -133,4 +135,11 @@ export function splitTransaction(
     nExpiryHeight,
     extraData,
   };
+
+  log(
+    "btc",
+    `splitTransaction ${transactionHex}:\n${formatTransactionDebug(t)}`
+  );
+
+  return t;
 }
