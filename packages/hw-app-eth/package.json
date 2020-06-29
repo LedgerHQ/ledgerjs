@@ -28,7 +28,8 @@
   "dependencies": {
     "@ledgerhq/errors": "^5.17.0",
     "@ledgerhq/hw-transport": "^5.17.0",
-    "bignumber.js": "^9.0.0"
+    "bignumber.js": "^9.0.0",
+    "rlp": "^2.2.5"
   },
   "devDependencies": {
     "flow-bin": "^0.127.0"
