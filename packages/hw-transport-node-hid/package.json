@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-transport-node-hid",
-  "version": "5.17.0",
+  "version": "5.18.0",
   "description": "Ledger Hardware Wallet Node implementation of the communication layer, using node-hid",
   "keywords": [
     "Ledger",
@@ -29,7 +29,7 @@
     "@ledgerhq/devices": "^5.17.0",
     "@ledgerhq/errors": "^5.17.0",
     "@ledgerhq/hw-transport": "^5.17.0",
-    "@ledgerhq/hw-transport-node-hid-noevents": "^5.17.0",
+    "@ledgerhq/hw-transport-node-hid-noevents": "^5.18.0",
     "@ledgerhq/logs": "^5.17.0",
     "lodash": "^4.17.15",
     "node-hid": "^1.3.0",
