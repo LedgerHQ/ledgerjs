@@ -1,6 +1,7 @@
 // @flow
 
 import semver from "semver";
+import { log } from "@ledgerhq/logs";
 import type Transport from "@ledgerhq/hw-transport";
 import { hashPublicKey } from "./hashPublicKey";
 import { getWalletPublicKey } from "./getWalletPublicKey";
@@ -155,6 +156,7 @@ export async function createTransaction(
         input[0],
         additionals
       );
+      log("hw", "got trustedInput=" + trustedInput);
       let sequence = Buffer.alloc(4);
       sequence.writeUInt32LE(
         input.length >= 4 && typeof input[3] === "number"
