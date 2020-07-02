@@ -33,6 +33,7 @@ const PATHS_LENGTH_SIZE = 1;
 const CLA = 0xe0;
 const ADDRESS = 0x02;
 const SIGN = 0x04;
+const SIGN_HASH = 0x05;
 const SIGN_MESSAGE = 0x08;
 const ECDH_SECRET = 0x0a;
 const VERSION = 0x06;
@@ -56,6 +57,7 @@ export default class Trx {
         "getAddress",
         "getECDHPairKey",
         "signTransaction",
+        "signTransactionHash",
         "signPersonalMessage",
         "getAppConfiguration",
       ],
@@ -200,6 +202,31 @@ export default class Trx {
   }
 
   /**
+   * sign a Tron transaction hash with a given BIP 32 path
+   *
+   * @param path a path in BIP 32 format
+   * @param rawTxHex a raw transaction hex string
+   * @return a signature as hex string
+   * @example
+   * const signature = await tron.signTransactionHash("44'/195'/0'/0/0", "25b18a55f86afb10e7aca38d0073d04c80397c6636069193953fdefaea0b8369");
+   */
+  signTransactionHash(path: string, rawTxHashHex: string): Promise<string> {
+    const paths = splitPath(path);
+    let data = Buffer.alloc(PATHS_LENGTH_SIZE + paths.length * PATH_SIZE);
+    data[0] = paths.length;
+    paths.forEach((element, index) => {
+      data.writeUInt32BE(element, 1 + 4 * index);
+    });
+    data = Buffer.concat([data, Buffer.from(rawTxHashHex, "hex")]);
+
+    return this.transport
+      .send(CLA, SIGN_HASH, 0x00, 0x00, data)
+      .then((response) => {
+        return response.slice(0, 65).toString("hex");
+      });
+  }
+
+  /**
    * get the version of the Tron app installed on the hardware device
    *
    * @return an object with a version
@@ -210,17 +237,21 @@ export default class Trx {
    *   "versionN": "105".
    *   "allowData": false,
    *   "allowContract": false,
-   *   "truncateAddress": false
+   *   "truncateAddress": false,
+   *   "signByHash": false
    * }
    */
   getAppConfiguration(): Promise<{
     allowContract: Boolean,
     truncateAddress: Boolean,
     allowData: Boolean,
+    signByHash: Boolean,
     version: string,
     versionN: number,
   }> {
     return this.transport.send(CLA, VERSION, 0x00, 0x00).then((response) => {
+      // eslint-disable-next-line no-bitwise
+      let signByHash = (response[0] & (1 << 3)) > 0;
       // eslint-disable-next-line no-bitwise
       let truncateAddress = (response[0] & (1 << 2)) > 0;
       // eslint-disable-next-line no-bitwise
@@ -240,6 +271,7 @@ export default class Trx {
         allowData,
         allowContract,
         truncateAddress,
+        signByHash,
       };
       return result;
     });
