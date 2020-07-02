@@ -20,12 +20,12 @@
   "module": "lib-es/index.js",
   "license": "Apache-2.0",
   "devDependencies": {
-    "flow-bin": "^0.127.0"
+    "flow-bin": "^0.128.0"
   },
   "dependencies": {
     "@ledgerhq/errors": "^5.17.0",
     "@ledgerhq/logs": "^5.17.0",
-    "rxjs": "^6.5.5"
+    "rxjs": "^6.6.0"
   },
   "scripts": {
     "flow": "flow",

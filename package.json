@@ -63,9 +63,9 @@
     "jest": "^26.1.0",
     "lerna": "3.22.1",
     "prettier": "^2.0.5",
-    "rollup": "^2.18.1",
+    "rollup": "^2.18.2",
     "rollup-plugin-typescript2": "^0.27.1",
-    "typescript": "^3.9.5",
+    "typescript": "^3.9.6",
     "uglify-js": "^3.10.0"
   },
   "dependencies": {
