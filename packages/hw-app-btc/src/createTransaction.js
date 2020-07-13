@@ -1,6 +1,5 @@
 // @flow
 
-import semver from "semver";
 import { log } from "@ledgerhq/logs";
 import type Transport from "@ledgerhq/hw-transport";
 import { hashPublicKey } from "./hashPublicKey";
@@ -25,6 +24,7 @@ import {
   OP_EQUALVERIFY,
   OP_CHECKSIG,
 } from "./constants";
+import { shouldUseTrustedInputForSegwit } from "./shouldUseTrustedInputForSegwit";
 
 export type { AddressFormat };
 
@@ -87,8 +87,16 @@ export async function createTransaction(
   };
 
   if (useTrustedInputForSegwit === undefined) {
-    const { version } = await getAppAndVersion(transport);
-    useTrustedInputForSegwit = semver.gte(version, "1.4.0");
+    try {
+      const a = await getAppAndVersion(transport);
+      useTrustedInputForSegwit = shouldUseTrustedInputForSegwit(a);
+    } catch (e) {
+      if (e.statusCode === 0x6d00) {
+        useTrustedInputForSegwit = false;
+      } else {
+        throw e;
+      }
+    }
   }
 
   // loop: 0 or 1 (before and after)
