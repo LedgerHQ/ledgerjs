@@ -13,7 +13,9 @@ export function startUntrustedHashTransactionInputRaw(
   overwinter?: boolean = false,
   additionals: Array<string> = []
 ) {
-  const p2 = bip143
+  const p2 = additionals.includes("cashaddr")
+    ? 0x03
+    : bip143
     ? additionals.includes("sapling")
       ? 0x05
       : overwinter
