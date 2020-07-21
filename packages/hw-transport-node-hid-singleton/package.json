@@ -33,7 +33,7 @@
     "@ledgerhq/logs": "^5.19.1",
     "lodash": "^4.17.19",
     "node-hid": "^1.3.0",
-    "usb-detection": "^4.9.0"
+    "usb-detection": "^4.10.0"
   },
   "devDependencies": {
     "flow-bin": "^0.129.0"
