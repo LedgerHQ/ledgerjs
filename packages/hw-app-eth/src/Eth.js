@@ -21,6 +21,7 @@ import { splitPath, foreach } from "./utils";
 import { EthAppPleaseEnableContractData } from "@ledgerhq/errors";
 import type Transport from "@ledgerhq/hw-transport";
 import { BigNumber } from "bignumber.js";
+import { encode, decode } from "rlp";
 
 function hexBuffer(str: string): Buffer {
   return Buffer.from(str.startsWith("0x") ? str.slice(2) : str, "hex");
@@ -175,12 +176,23 @@ export default class Eth {
     let rawTx = Buffer.from(rawTxHex, "hex");
     let toSend = [];
     let response;
+    // Check if the TX is encoded following EIP 155
+    let rlpTx = decode(rawTx);
+    let rlpOffset = 0;
+    if (rlpTx.length > 6) {
+      let rlpVrs = encode(rlpTx.slice(-3));
+      rlpOffset = rawTx.length - (rlpVrs.length - 1);
+    }
     while (offset !== rawTx.length) {
       let maxChunkSize = offset === 0 ? 150 - 1 - paths.length * 4 : 150;
       let chunkSize =
         offset + maxChunkSize > rawTx.length
           ? rawTx.length - offset
           : maxChunkSize;
+      if (rlpOffset != 0 && offset + chunkSize == rlpOffset) {
+        // Make sure that the chunk doesn't end right on the EIP 155 marker if set
+        chunkSize--;
+      }
       let buffer = Buffer.alloc(
         offset === 0 ? 1 + paths.length * 4 + chunkSize : chunkSize
       );

@@ -91,10 +91,11 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
       const socket = new net.Socket();
       this.automationSocket = socket;
       socket.on("error", (e) => {
-        log("automation-error", String(e));
+        log("speculos-automation-error", String(e));
         socket.destroy();
       });
       socket.on("data", (data) => {
+        log("speculos-automation-data", data);
         const split = data.toString("ascii").split("\n");
         split
           .filter((ascii) => !!ascii)
@@ -115,6 +116,7 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
    */
   button = (command: string): Promise<void> =>
     new Promise((resolve, reject) => {
+      log("speculos-button", command);
       const { buttonPort, host } = this.opts;
       if (!buttonPort) throw new Error("buttonPort is missing");
       const socket = new net.Socket();

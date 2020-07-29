@@ -22,14 +22,17 @@ Ledger Hardware Wallet TRX JavaScript bindings.
     -   [signTransaction](#signtransaction)
         -   [Parameters](#parameters-2)
         -   [Examples](#examples-2)
-    -   [getAppConfiguration](#getappconfiguration)
-        -   [Examples](#examples-3)
-    -   [signPersonalMessage](#signpersonalmessage)
+    -   [signTransactionHash](#signtransactionhash)
         -   [Parameters](#parameters-3)
+        -   [Examples](#examples-3)
+    -   [getAppConfiguration](#getappconfiguration)
         -   [Examples](#examples-4)
-    -   [getECDHPairKey](#getecdhpairkey)
+    -   [signPersonalMessage](#signpersonalmessage)
         -   [Parameters](#parameters-4)
         -   [Examples](#examples-5)
+    -   [getECDHPairKey](#getecdhpairkey)
+        -   [Parameters](#parameters-5)
+        -   [Examples](#examples-6)
 
 ### Trx
 
@@ -82,6 +85,24 @@ const signature = await tron.signTransaction("44'/195'/0'/0/0", "0a02f5942208704
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** a signature as hex string
 
+#### signTransactionHash
+
+sign a Tron transaction hash with a given BIP 32 path
+
+##### Parameters
+
+-   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
+-   `rawTxHashHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `rawTxHex`  a raw transaction hex string
+
+##### Examples
+
+```javascript
+const signature = await tron.signTransactionHash("44'/195'/0'/0/0", "25b18a55f86afb10e7aca38d0073d04c80397c6636069193953fdefaea0b8369");
+```
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** a signature as hex string
+
 #### getAppConfiguration
 
 get the version of the Tron app installed on the hardware device
@@ -95,11 +116,12 @@ const result = await tron.getAppConfiguration();
   "versionN": "105".
   "allowData": false,
   "allowContract": false,
-  "truncateAddress": false
+  "truncateAddress": false,
+  "signByHash": false
 }
 ```
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{allowContract: [Boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean), truncateAddress: [Boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean), allowData: [Boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean), version: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), versionN: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)}>** an object with a version
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{allowContract: [Boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean), truncateAddress: [Boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean), allowData: [Boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean), signByHash: [Boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean), version: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), versionN: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)}>** an object with a version
 
 #### signPersonalMessage
 
