@@ -2,7 +2,7 @@
 
 import type Transport from "@ledgerhq/hw-transport";
 import BIPPath from "bip32-path";
-import blockchain from "./annotated";
+import * as blockchain from "./annotated";
 
 /**
  * Nervos API
@@ -22,7 +22,7 @@ export default class Ckb {
         "getAppConfiguration",
         "getWalletId",
         "getWalletPublicKey",
-        "signTransaction"
+        "signAnnotatedTransaction",
       ],
       scrambleKey
     );
@@ -65,65 +65,101 @@ export default class Ckb {
    * @param contextTransaction list of transaction contexts for parsing
    * @param changePath the path the transaction sends change to, in BIP 32 format (optional, defaults to signPath)
    * @return a signature as hex string
-   * @example
-   * const signature = await ckb.signTransaction("44'/144'/0'/0/0", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+   * @example 
+   * TODO
    */
+
   async signTransaction(
-    signPath: string,
-    rawTxHex: string,
-    groupWitnessesHex: [string],
-    rawContextsTxHex: [string],
-    changePath: string
+    signPath: string | BIPPath | [number],
+    rawTxHex: string | blockchain.RawTransactionJSON,
+    groupWitnessesHex?: [string],
+    rawContextsTxHex: [string | blockchain.RawTransactionJSON],
+    changePath: string | BIPPath | [number]
   ): Promise<string> {
-    const signBipPath = BIPPath.fromString(signPath).toPathArray();
-    const changeBipPath = BIPPath.fromString(changePath).toPathArray();
-    const rawTxBuffer = Buffer.from(rawTxHex, "hex");
+    return await this.signAnnotatedTransaction(this.buildAnnotatedTransaction(signPath, rawTxHex, groupWitnessesHex, rawContextsTxHex, changePath));
+  }
 
-    const buildBip32 = function(bipPath) {
-      let rawPath = Buffer.alloc(1 + bipPath.length * 4);
-      rawPath.writeInt32(bipPath.length, 0);
-      bipPath.forEach((segment, index) => {
-	rawPath.writeUInt32BE(segment, 1 + index * 4);
-      });
-      return rawPath;
-    }
+  /**
+   * Construct an AnnotatedTransaction for a given collection of signing data
+   *
+   * Parameters are the same as for signTransaction, but no ledger interaction is attempted.
+   *
+   * AnnotatedTransaction is a type defined for the ledger app that collects
+   * all of the information needed to securely confirm a transaction on-screen
+   * and a few bits of duplicative information to allow it to be processed as a
+   * stream.
+   */
+  
+  buildAnnotatedTransaction(
+    signPath: string | BIPPath | [number],
+    rawTxHex: string | RawTransactionJSON,
+    groupWitnesses?: [string],
+    rawContextsTxHex: [string | RawTransactionJSON],
+    changePath: string | BIPPath | [number]
+  ): AnnotatedTransactionJSON {
 
-    const rawSignPath = buildBip32(signBipPath);
-    const rawChangePath = buildBip32(changeBipPath);
+    const prepBipPath = pathSrc => {
+      if ( typeof pathSrc === "array" ) {
+	return pathSrc;
+      }
+      if ( typeof pathSrc === "object" ) {
+	return pathSrc.toPathArray();
+      }
+      if ( typeof pathSrc === "string" ) {
+	return BIPPath.fromString(signPath).toPathArray();
+      }
+    };
 
-    const contextTransactions = rawContentsTxHex.map(ctx => new blockchain.RawTransaction(Buffer.from(ctx, "hex")));
+    const signBipPath = prepBipPath(signPath);
+    const changeBipPath = prepBipPath(changePath);
+    
+    const getRawTransactionJSON = rawTrans => {
+      if ( typeof rawTrans === "string" ) {
+	const rawTxBuffer = Buffer.from(rawTrans, "hex");
+	return (new blockchain.RawTransaction(rawTxBuffer.buffer)).toObject();
+      } 
+      return rawTrans;
+    };
 
-    const rawTx = new blockchain.RawTransaction(rawTxBuffer);
+    const contextTransactions = rawContextsTxHex.map(getRawTransactionJSON);
 
-    const annotatedCellInputVec = rawTx.getInputs().map((inpt, idx)=>({
+    const rawTx = getRawTransactionJSON(rawTxHex);
+
+    const annotatedCellInputVec = rawTx.inputs.map((inpt, idx)=>({
       input: inpt,
       source: contextTransactions[idx]
     }));
 
     const annotatedRawTransaction = {
-      version: rawTx.getVersion(),
-      cell_deps: rawTx.getCellDeps(),
-      header_deps: rawTx.getHeaderDeps(),
-      inputs: annotatedInputs,
-      outputs: rawTx.getOutputs(),
-      outputs_data: rawTx.getOutputsData()
+      version: rawTx.version,
+      cell_deps: rawTx.cell_deps,
+      header_deps: rawTx.header_deps,
+      inputs: annotatedCellInputVec,
+      outputs: rawTx.outputs,
+      outputs_data: rawTx.outputs_data
     };
 
-    const annotatedTransaction = {
+    return {
       signPath: signBipPath,
       changePath: changeBipPath,
-      inputCount: rawTx.getInputs().length(),
+      inputCount: rawTx.inputs.length,
       raw: annotatedRawTransaction,
-      witnesses: groupWitnessesHex.map(item => Buffer.from(item, "hex"))
+      witnesses: Array.isArray(groupWitnesses) && groupWitnesses.length > 0 ? groupWitnesses:[this.defaultSighashWitness]
     };
+  }
 
-    const rawAnTx = SerializeAnnotatedTransaction(annotatedTransaction);
+  /**
+   * Sign an already constructed AnnotatedTransaction.
+   */
+  async signAnnotatedTransaction(
+    tx: AnnotatedTransaction | AnnotatedTransactionJSON
+  ): Promise<string> {
+
+    const rawAnTx = Buffer.from(blockchain.SerializeAnnotatedTransaction(tx));
 
     const maxApduSize = 230;
     
-    await this.transport.send(0x80, 0x03, 0x00, 0x00, rawPath);
-
-    let txFullChunks = Math.floor(rawAnTx.length / maxApduSize);
+    let txFullChunks = Math.floor(rawAnTx.byteLength / maxApduSize);
     let isContinuation = 0x00;
     for (let i = 0; i < txFullChunks; i++) {
       let data = rawAnTx.slice(i*maxApduSize, (i+1)*maxApduSize);
@@ -131,11 +167,16 @@ export default class Ckb {
       isContinuation = 0x01;
     }
 
-    let lastOffset = Math.floor(rawAnTx.length / maxApduSize) * maxApduSize;
+    let lastOffset = txFullChunks * maxApduSize;
     let lastData = rawAnTx.slice(lastOffset, lastOffset+maxApduSize);
     let response = await this.transport.send(0x80, 0x03, isContinuation | 0x80, 0x00, lastData);
     return response.toString("hex");
   }
+
+  /**
+   * An empty WitnessArgs with enough space to fit a sighash signature into.
+   */
+  defaultSighashWitness="55000000100000005500000055000000410000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000";
 
   /**
    * Get the version of the Nervos app installed on the hardware device
