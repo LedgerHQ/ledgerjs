@@ -17,7 +17,7 @@ const createTransportRecorder = (
     static list = DecoratedTransport.list;
     static listen = DecoratedTransport.listen;
     static open = (...args) =>
-      DecoratedTransport.open(...args).then(t => new TransportRecorder(t));
+      DecoratedTransport.open(...args).then((t) => new TransportRecorder(t));
     setScrambleKey() {}
     close() {
       return this.transport.close();
@@ -29,7 +29,7 @@ const createTransportRecorder = (
     }
     exchange(apdu: Buffer): Promise<Buffer> {
       const output = this.transport.exchange(apdu);
-      output.then(out => {
+      output.then((out) => {
         recordStore.recordExchange(apdu, out);
       });
       return output;

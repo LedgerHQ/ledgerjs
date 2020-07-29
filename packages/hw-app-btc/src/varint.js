@@ -13,7 +13,7 @@ export function getVarint(data: Buffer, offset: number): [number, number] {
         (data[offset + 3] << 16) +
         (data[offset + 2] << 8) +
         data[offset + 1],
-      5
+      5,
     ];
   }
 

@@ -23,7 +23,7 @@ import {
   encodeEd25519PublicKey,
   verifyEd25519Signature,
   checkStellarBip32Path,
-  hash
+  hash,
 } from "./utils";
 
 const CLA = 0xe0;
@@ -69,16 +69,18 @@ export default class Str {
   }
 
   getAppConfiguration(): Promise<{
-    version: string
+    version: string,
   }> {
-    return this.transport.send(CLA, INS_GET_CONF, 0x00, 0x00).then(response => {
-      let multiOpsEnabled = response[0] === 0x01 || response[1] < 0x02;
-      let version = "" + response[1] + "." + response[2] + "." + response[3];
-      return {
-        version: version,
-        multiOpsEnabled: multiOpsEnabled
-      };
-    });
+    return this.transport
+      .send(CLA, INS_GET_CONF, 0x00, 0x00)
+      .then((response) => {
+        let multiOpsEnabled = response[0] === 0x01 || response[1] < 0x02;
+        let version = "" + response[1] + "." + response[2] + "." + response[3];
+        return {
+          version: version,
+          multiOpsEnabled: multiOpsEnabled,
+        };
+      });
   }
 
   /**
@@ -110,7 +112,7 @@ export default class Str {
     let verifyMsg = Buffer.from("via lumina", "ascii");
     apdus.push(Buffer.concat([buffer, verifyMsg]));
     let keepAlive = false;
-    return foreach(apdus, data =>
+    return foreach(apdus, (data) =>
       this.transport
         .send(
           CLA,
@@ -120,7 +122,7 @@ export default class Str {
           data,
           [SW_OK, SW_KEEP_ALIVE]
         )
-        .then(apduResponse => {
+        .then((apduResponse) => {
           let status = Buffer.from(
             apduResponse.slice(apduResponse.length - 2)
           ).readUInt16BE(0);
@@ -146,7 +148,7 @@ export default class Str {
       }
       return {
         publicKey: publicKey,
-        raw: rawPublicKey
+        raw: rawPublicKey,
       };
     });
   }
@@ -181,7 +183,7 @@ export default class Str {
     let bufferSize = 1 + pathElts.length * 4;
     let buffer = Buffer.alloc(bufferSize);
     buffer[0] = pathElts.length;
-    pathElts.forEach(function(element, index) {
+    pathElts.forEach(function (element, index) {
       buffer.writeUInt32BE(element, 1 + 4 * index);
     });
     let chunkSize = APDU_MAX_SIZE - bufferSize;
@@ -215,7 +217,7 @@ export default class Str {
           data,
           [SW_OK, SW_CANCEL, SW_UNKNOWN_OP, SW_MULTI_OP, SW_KEEP_ALIVE]
         )
-        .then(apduResponse => {
+        .then((apduResponse) => {
           let status = Buffer.from(
             apduResponse.slice(apduResponse.length - 2)
           ).readUInt16BE(0);
@@ -232,7 +234,7 @@ export default class Str {
       if (status === SW_OK) {
         let signature = Buffer.from(response.slice(0, response.length - 2));
         return {
-          signature: signature
+          signature: signature,
         };
       } else if (status === SW_UNKNOWN_OP) {
         // pre-v2 app version: fall back on hash signing
@@ -266,12 +268,12 @@ export default class Str {
     let pathElts = splitPath(path);
     let buffer = Buffer.alloc(1 + pathElts.length * 4);
     buffer[0] = pathElts.length;
-    pathElts.forEach(function(element, index) {
+    pathElts.forEach(function (element, index) {
       buffer.writeUInt32BE(element, 1 + 4 * index);
     });
     apdus.push(Buffer.concat([buffer, hash]));
     let keepAlive = false;
-    return foreach(apdus, data =>
+    return foreach(apdus, (data) =>
       this.transport
         .send(
           CLA,
@@ -281,7 +283,7 @@ export default class Str {
           data,
           [SW_OK, SW_CANCEL, SW_NOT_ALLOWED, SW_UNSUPPORTED, SW_KEEP_ALIVE]
         )
-        .then(apduResponse => {
+        .then((apduResponse) => {
           let status = Buffer.from(
             apduResponse.slice(apduResponse.length - 2)
           ).readUInt16BE(0);
@@ -298,7 +300,7 @@ export default class Str {
       if (status === SW_OK) {
         let signature = Buffer.from(response.slice(0, response.length - 2));
         return {
-          signature: signature
+          signature: signature,
         };
       } else if (status === SW_CANCEL) {
         throw new Error("Transaction approval request was rejected");

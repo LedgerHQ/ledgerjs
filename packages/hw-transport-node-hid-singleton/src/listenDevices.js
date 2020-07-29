@@ -10,7 +10,7 @@ export type Device = {
   deviceName: string,
   manufacturer: string,
   serialNumber: string,
-  deviceAddress: number
+  deviceAddress: number,
 };
 
 const deviceToLog = ({ productId, locationId, deviceAddress }) =>
@@ -40,8 +40,8 @@ process.on("exit", () => {
 });
 
 export const listenDevices = (
-  onAdd: Device => void,
-  onRemove: Device => void
+  onAdd: (Device) => void,
+  onRemove: (Device) => void
 ) => {
   const unmonitor = monitor();
 
@@ -50,7 +50,7 @@ export const listenDevices = (
 
   let timeout;
 
-  const add = device => {
+  const add = (device) => {
     log("usb-detection", "add: " + deviceToLog(device));
     if (!timeout) {
       // a time is needed for the device to actually be connectable over HID..
@@ -62,7 +62,7 @@ export const listenDevices = (
     }
   };
 
-  const remove = device => {
+  const remove = (device) => {
     log("usb-detection", "remove: " + deviceToLog(device));
     if (timeout) {
       clearTimeout(timeout);

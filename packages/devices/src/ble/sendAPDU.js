@@ -7,7 +7,7 @@ const TagId = 0x05;
 
 function chunkBuffer(
   buffer: Buffer,
-  sizeForIndex: number => number
+  sizeForIndex: (number) => number
 ): Array<Buffer> {
   const chunks = [];
   for (
@@ -21,11 +21,11 @@ function chunkBuffer(
 }
 
 export const sendAPDU = (
-  write: Buffer => Promise<void>,
+  write: (Buffer) => Promise<void>,
   apdu: Buffer,
   mtuSize: number
 ): Observable<void> => {
-  const chunks = chunkBuffer(apdu, i => mtuSize - (i === 0 ? 5 : 3)).map(
+  const chunks = chunkBuffer(apdu, (i) => mtuSize - (i === 0 ? 5 : 3)).map(
     (buffer, i) => {
       const head = Buffer.alloc(i === 0 ? 5 : 3);
       head.writeUInt8(TagId, 0);
@@ -37,7 +37,7 @@ export const sendAPDU = (
     }
   );
 
-  return Observable.create(o => {
+  return Observable.create((o) => {
     let terminated = false;
 
     async function main() {
@@ -52,7 +52,7 @@ export const sendAPDU = (
         terminated = true;
         o.complete();
       },
-      e => {
+      (e) => {
         terminated = true;
         log("ble-error", "sendAPDU failure " + String(e));
         o.error(e);

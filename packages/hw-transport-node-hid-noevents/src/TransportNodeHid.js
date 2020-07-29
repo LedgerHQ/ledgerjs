@@ -6,7 +6,7 @@ import { log } from "@ledgerhq/logs";
 import type {
   Observer,
   DescriptorEvent,
-  Subscription
+  Subscription,
 } from "@ledgerhq/hw-transport";
 import { ledgerUSBVendorId } from "@ledgerhq/devices";
 import hidFraming from "@ledgerhq/devices/lib/hid-framing";
@@ -14,7 +14,7 @@ import { identifyUSBProductId, identifyProductName } from "@ledgerhq/devices";
 import type { DeviceModel } from "@ledgerhq/devices";
 import { TransportError, DisconnectedDevice } from "@ledgerhq/errors";
 
-const filterInterface = device =>
+const filterInterface = (device) =>
   ["win32", "darwin"].includes(process.platform)
     ? // $FlowFixMe
       device.usagePage === 0xffa0
@@ -25,7 +25,7 @@ export function getDevices(): Array<*> {
   return HID.devices(ledgerUSBVendorId, 0x0).filter(filterInterface);
 }
 
-const isDisconnectedError = e =>
+const isDisconnectedError = (e) =>
   e && e.message && e.message.indexOf("HID") >= 0;
 
 /**
@@ -46,20 +46,20 @@ export default class TransportNodeHidNoEvents extends Transport<?string> {
    *
    */
   static list = (): Promise<(?string)[]> =>
-    Promise.resolve(getDevices().map(d => d.path));
+    Promise.resolve(getDevices().map((d) => d.path));
 
   /**
    */
   static listen = (
     observer: Observer<DescriptorEvent<?string>>
   ): Subscription => {
-    getDevices().forEach(device => {
+    getDevices().forEach((device) => {
       const deviceModel = identifyUSBProductId(device.productId);
       observer.next({
         type: "add",
         descriptor: device.path,
         deviceModel,
-        device
+        device,
       });
     });
     observer.complete();
@@ -154,7 +154,6 @@ export default class TransportNodeHidNoEvents extends Transport<?string> {
       // Write...
       const blocks = framing.makeBlocks(apdu);
       for (let i = 0; i < blocks.length; i++) {
-        log("hid-frame", "=> " + blocks[i].toString("hex"));
         await this.writeHID(blocks[i]);
       }
 
@@ -163,7 +162,6 @@ export default class TransportNodeHidNoEvents extends Transport<?string> {
       let acc;
       while (!(result = framing.getReducedResult(acc))) {
         const buffer = await this.readHID();
-        log("hid-frame", "<= " + buffer.toString("hex"));
         acc = framing.reduceResponse(acc, buffer);
       }
 

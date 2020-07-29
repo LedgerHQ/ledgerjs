@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-app-xrp",
-  "version": "5.9.0",
+  "version": "5.19.1",
   "description": "Ledger Hardware Wallet Ripple Application API",
   "keywords": [
     "Ledger",
@@ -26,11 +26,11 @@
   "module": "lib-es/Xrp.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^5.9.0",
+    "@ledgerhq/hw-transport": "^5.19.1",
     "bip32-path": "0.4.2"
   },
   "devDependencies": {
-    "flow-bin": "^0.118.0"
+    "flow-bin": "^0.129.0"
   },
   "scripts": {
     "flow": "flow",

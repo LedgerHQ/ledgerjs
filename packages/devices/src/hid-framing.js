@@ -5,7 +5,7 @@ import { TransportError } from "@ledgerhq/errors";
 export type ResponseAcc = ?{
   data: Buffer,
   dataLength: number,
-  sequence: number
+  sequence: number,
 };
 
 const Tag = 0x05;
@@ -19,7 +19,7 @@ function asUInt16BE(value) {
 const initialAcc = {
   data: Buffer.alloc(0),
   dataLength: 0,
-  sequence: 0
+  sequence: 0,
 };
 
 /**
@@ -33,7 +33,7 @@ const createHIDframing = (channel: number, packetSize: number) => {
       const nbBlocks = Math.ceil(data.length / blockSize);
       data = Buffer.concat([
         data, // fill data with padding
-        Buffer.alloc(nbBlocks * blockSize - data.length + 1).fill(0)
+        Buffer.alloc(nbBlocks * blockSize - data.length + 1).fill(0),
       ]);
 
       const blocks = [];
@@ -74,7 +74,7 @@ const createHIDframing = (channel: number, packetSize: number) => {
       return {
         data,
         dataLength,
-        sequence
+        sequence,
       };
     },
 
@@ -82,7 +82,7 @@ const createHIDframing = (channel: number, packetSize: number) => {
       if (acc && acc.dataLength === acc.data.length) {
         return acc.data;
       }
-    }
+    },
   };
 };
 

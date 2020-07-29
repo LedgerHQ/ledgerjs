@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/logs",
-  "version": "5.9.0",
+  "version": "5.19.1",
   "description": "Ledger logs central point",
   "keywords": [
     "Ledger"
@@ -20,7 +20,7 @@
   "module": "lib-es/index.js",
   "license": "Apache-2.0",
   "devDependencies": {
-    "flow-bin": "^0.118.0"
+    "flow-bin": "^0.129.0"
   },
   "scripts": {
     "flow": "flow",

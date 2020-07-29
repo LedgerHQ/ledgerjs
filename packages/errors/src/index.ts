@@ -1,17 +1,15 @@
-// @flow
-
 import {
   serializeError,
   deserializeError,
   createCustomErrorClass,
-  addCustomErrorDeserializer
+  addCustomErrorDeserializer,
 } from "./helpers";
 
 export {
   serializeError,
   deserializeError,
   createCustomErrorClass,
-  addCustomErrorDeserializer
+  addCustomErrorDeserializer,
 };
 
 export const AccountNameRequiredError = createCustomErrorClass(
@@ -227,23 +225,23 @@ export const DBNotReset = createCustomErrorClass("DBNotReset");
  * TransportError is used for any generic transport errors.
  * e.g. Error thrown when data received by exchanges are incorrect or if exchanged failed to communicate with the device for various reason.
  */
-export function TransportError(message: string, id: string) {
+export function TransportError(message: string, id: string): void {
   this.name = "TransportError";
   this.message = message;
   this.stack = new Error().stack;
   this.id = id;
 }
-//$FlowFixMe
 TransportError.prototype = new Error();
 
 addCustomErrorDeserializer(
   "TransportError",
-  e => new TransportError(e.message, e.id)
+  (e) => new TransportError(e.message, e.id)
 );
 
 export const StatusCodes = {
   PIN_REMAINING_ATTEMPTS: 0x63c0,
   INCORRECT_LENGTH: 0x6700,
+  MISSING_CRITICAL_PARAMETER: 0x6800,
   COMMAND_INCOMPATIBLE_FILE_STRUCTURE: 0x6981,
   SECURITY_STATUS_NOT_SATISFIED: 0x6982,
   CONDITIONS_OF_USE_NOT_SATISFIED: 0x6985,
@@ -271,14 +269,16 @@ export const StatusCodes = {
   MAX_VALUE_REACHED: 0x9850,
   GP_AUTH_FAILED: 0x6300,
   LICENSING: 0x6f42,
-  HALTED: 0x6faa
+  HALTED: 0x6faa,
 };
 
-export function getAltStatusMessage(code: number): ?string {
+export function getAltStatusMessage(code: number): string | undefined | null {
   switch (code) {
     // improve text of most common errors
     case 0x6700:
       return "Incorrect length";
+    case 0x6800:
+      return "Missing critical parameter";
     case 0x6982:
       return "Security not satisfied (dongle locked or have invalid access rights)";
     case 0x6985:
@@ -297,10 +297,10 @@ export function getAltStatusMessage(code: number): ?string {
  * Error thrown when a device returned a non success status.
  * the error.statusCode is one of the `StatusCodes` exported by this library.
  */
-export function TransportStatusError(statusCode: number) {
+export function TransportStatusError(statusCode: number): void {
   this.name = "TransportStatusError";
   const statusText =
-    Object.keys(StatusCodes).find(k => StatusCodes[k] === statusCode) ||
+    Object.keys(StatusCodes).find((k) => StatusCodes[k] === statusCode) ||
     "UNKNOWN_ERROR";
   const smsg = getAltStatusMessage(statusCode) || statusText;
   const statusCodeStr = statusCode.toString(16);
@@ -309,10 +309,9 @@ export function TransportStatusError(statusCode: number) {
   this.statusCode = statusCode;
   this.statusText = statusText;
 }
-//$FlowFixMe
 TransportStatusError.prototype = new Error();
 
 addCustomErrorDeserializer(
   "TransportStatusError",
-  e => new TransportStatusError(e.statusCode)
+  (e) => new TransportStatusError(e.statusCode)
 );

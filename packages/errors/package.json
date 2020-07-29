@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/errors",
-  "version": "5.9.0",
+  "version": "5.19.1",
   "description": "Ledger common errors",
   "keywords": [
     "Ledger"
@@ -16,18 +16,18 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "lib/index.js",
-  "module": "lib-es/index.js",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.js",
   "license": "Apache-2.0",
   "devDependencies": {
-    "flow-bin": "^0.118.0"
+    "flow-bin": "^0.129.0"
   },
   "scripts": {
     "flow": "flow",
     "clean": "bash ../../script/clean.sh",
-    "build": "bash ../../script/build.sh",
+    "build": "../../script/build-ts.sh",
     "watch": "bash ../../script/watch.sh",
-    "doc": "bash ../../script/doc.sh"
+    "doc": "bash ../../script/doc-ts.sh"
   },
   "gitHead": "fca2c7ce74fdb88df4d59dca4cc0e668410d66af"
 }

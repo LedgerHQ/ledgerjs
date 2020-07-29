@@ -2,12 +2,12 @@
 
 import HID from "node-hid";
 import TransportNodeHidNoEvents, {
-  getDevices
+  getDevices,
 } from "@ledgerhq/hw-transport-node-hid-noevents";
 import type {
   Observer,
   DescriptorEvent,
-  Subscription
+  Subscription,
 } from "@ledgerhq/hw-transport";
 import { log } from "@ledgerhq/logs";
 import { identifyUSBProductId } from "@ledgerhq/devices";
@@ -38,7 +38,7 @@ export default class TransportNodeHidSingleton extends TransportNodeHidNoEvents 
    */
   static listen = (observer: Observer<DescriptorEvent<*>>): Subscription => {
     let unsubscribed;
-    Promise.resolve(getDevices()).then(devices => {
+    Promise.resolve(getDevices()).then((devices) => {
       // this needs to run asynchronously so the subscription is defined during this phase
       for (const device of devices) {
         if (!unsubscribed) {
@@ -47,29 +47,29 @@ export default class TransportNodeHidSingleton extends TransportNodeHidNoEvents 
             type: "add",
             descriptor: "",
             device: { name: device.deviceName },
-            deviceModel
+            deviceModel,
           });
         }
       }
     });
 
-    const onAdd = device => {
+    const onAdd = (device) => {
       const deviceModel = identifyUSBProductId(device.productId);
       observer.next({
         type: "add",
         descriptor: "",
         deviceModel,
-        device: { name: device.deviceName }
+        device: { name: device.deviceName },
       });
     };
 
-    const onRemove = device => {
+    const onRemove = (device) => {
       const deviceModel = identifyUSBProductId(device.productId);
       observer.next({
         type: "remove",
         descriptor: "",
         deviceModel,
-        device: { name: device.deviceName }
+        device: { name: device.deviceName },
       });
     };
 

@@ -4,11 +4,14 @@ import { signMessage } from "./signMessage";
 import { getWalletPublicKey } from "./getWalletPublicKey";
 import type { AddressFormat } from "./getWalletPublicKey";
 import { splitTransaction } from "./splitTransaction";
+import { getTrustedInput } from "./getTrustedInput";
+import { getTrustedInputBIP143 } from "./getTrustedInputBIP143";
 import type { Transaction } from "./types";
 import { createTransaction } from "./createTransaction";
 import type { CreateTransactionArg } from "./createTransaction";
 import { signP2SHTransaction } from "./signP2SHTransaction";
 import type { SignP2SHTransactionArg } from "./signP2SHTransaction";
+import { serializeTransactionOutputs } from "./serializeTransaction";
 
 export type { AddressFormat };
 
@@ -30,7 +33,9 @@ export default class Btc {
         "getWalletPublicKey",
         "signP2SHTransaction",
         "signMessageNew",
-        "createPaymentTransactionNew"
+        "createPaymentTransactionNew",
+        "getTrustedInput",
+        "getTrustedInputBIP143",
       ],
       scrambleKey
     );
@@ -62,7 +67,7 @@ export default class Btc {
   ): Promise<{
     publicKey: string,
     bitcoinAddress: string,
-    chainCode: string
+    chainCode: string,
   }> {
     let options;
     if (arguments.length > 2 || typeof opts === "boolean") {
@@ -71,7 +76,7 @@ export default class Btc {
       );
       options = {
         verify: !!opts,
-        format: arguments[2] ? "p2sh" : "legacy"
+        format: arguments[2] ? "p2sh" : "legacy",
       };
     } else {
       options = opts || {};
@@ -118,6 +123,7 @@ export default class Btc {
    * - "bipxxx" for using BIPxxx
    * - "sapling" to indicate a zec transaction is supporting sapling (to be set over block 419200)
    * @param expiryHeight is an optional Buffer for zec overwinter / sapling Txs
+   * @param useTrustedInputForSegwit trust inputs for segwit transactions
    * @return the signed transaction ready to be broadcast
    * @example
 btc.createTransaction({
@@ -141,7 +147,8 @@ btc.createTransaction({
         "segwit",
         "initialTimestamp",
         "additionals",
-        "expiryHeight"
+        "expiryHeight",
+        "useTrustedInputForSegwit",
       ]);
     }
     return createTransaction(this.transport, arg);
@@ -178,7 +185,7 @@ btc.signP2SHTransaction({
         lockTime,
         sigHashType,
         segwit,
-        transactionVersion
+        transactionVersion,
       ] = arguments;
       arg = {
         inputs,
@@ -187,7 +194,7 @@ btc.signP2SHTransaction({
         lockTime,
         sigHashType,
         segwit,
-        transactionVersion
+        transactionVersion,
       };
       arg = fromDeprecateArguments(arguments, [
         "inputs",
@@ -196,7 +203,7 @@ btc.signP2SHTransaction({
         "lockTime",
         "sigHashType",
         "segwit",
-        "transactionVersion"
+        "transactionVersion",
       ]);
     }
     return signP2SHTransaction(this.transport, arg);
@@ -219,6 +226,41 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
       isSegwitSupported,
       hasTimestamp,
       hasExtraData,
+      additionals
+    );
+  }
+
+  /**
+  @example
+const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc4af009f4d4dc57ae597ed0420b71010000008a47304402201f36a12c240dbf9e566bc04321050b1984cd6eaf6caee8f02bb0bfec08e3354b022012ee2aeadcbbfd1e92959f57c15c1c6debb757b798451b104665aa3010569b49014104090b15bde569386734abf2a2b99f9ca6a50656627e77de663ca7325702769986cf26cc9dd7fdea0af432c8e2becc867c932e1b9dd742f2a108997c2252e2bdebffffffff0281b72e00000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88aca0860100000000001976a9144533f5fb9b4817f713c48f0bfe96b9f50c476c9b88ac00000000");
+const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
+  */
+  serializeTransactionOutputs(t: Transaction): Buffer {
+    return serializeTransactionOutputs(t);
+  }
+
+  getTrustedInput(
+    indexLookup: number,
+    transaction: Transaction,
+    additionals: Array<string> = []
+  ): Promise<string> {
+    return getTrustedInput(
+      this.transport,
+      indexLookup,
+      transaction,
+      additionals
+    );
+  }
+
+  getTrustedInputBIP143(
+    indexLookup: number,
+    transaction: Transaction,
+    additionals: Array<string> = []
+  ): string {
+    return getTrustedInputBIP143(
+      this.transport,
+      indexLookup,
+      transaction,
       additionals
     );
   }

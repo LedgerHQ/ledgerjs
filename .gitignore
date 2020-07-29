@@ -2,8 +2,10 @@ node_modules
 .DS_Store
 *.pem
 browser/
+dbdata/
 packages/**/lib/
 packages/**/lib-es/
+packages/**/dist/
 flow-typed/
 lerna-debug.log
 lerna-error.log

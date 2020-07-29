@@ -13,7 +13,9 @@ export function startUntrustedHashTransactionInputRaw(
   overwinter?: boolean = false,
   additionals: Array<string> = []
 ) {
-  const p2 = bip143
+  const p2 = additionals.includes("cashaddr")
+    ? 0x03
+    : bip143
     ? additionals.includes("sapling")
       ? 0x05
       : overwinter
@@ -36,13 +38,14 @@ export async function startUntrustedHashTransactionInput(
   inputs: Array<{ trustedInput: boolean, value: Buffer }>,
   bip143?: boolean = false,
   overwinter?: boolean = false,
-  additionals: Array<string> = []
+  additionals: Array<string> = [],
+  useTrustedInputForSegwit?: boolean = false
 ) {
   let data = Buffer.concat([
     transaction.version,
     transaction.timestamp || Buffer.alloc(0),
     transaction.nVersionGroupId || Buffer.alloc(0),
-    createVarint(transaction.inputs.length)
+    createVarint(transaction.inputs.length),
   ]);
 
   await startUntrustedHashTransactionInputRaw(
@@ -60,8 +63,13 @@ export async function startUntrustedHashTransactionInput(
 
   for (let input of transaction.inputs) {
     let prefix;
+    let inputValue = inputs[i].value;
     if (bip143) {
-      prefix = Buffer.from([0x02]);
+      if (useTrustedInputForSegwit && inputs[i].trustedInput) {
+        prefix = Buffer.from([0x01, inputValue.length]);
+      } else {
+        prefix = Buffer.from([0x02]);
+      }
     } else {
       if (inputs[i].trustedInput) {
         prefix = Buffer.from([0x01, inputs[i].value.length]);
@@ -71,9 +79,9 @@ export async function startUntrustedHashTransactionInput(
     }
     data = Buffer.concat([
       prefix,
-      inputs[i].value,
+      inputValue,
       isDecred ? Buffer.from([0x00]) : Buffer.alloc(0),
-      createVarint(input.script.length)
+      createVarint(input.script.length),
     ]);
 
     await startUntrustedHashTransactionInputRaw(
@@ -103,7 +111,7 @@ export async function startUntrustedHashTransactionInput(
           scriptBlocks.push(
             Buffer.concat([
               input.script.slice(offset, offset + blockSize),
-              input.sequence
+              input.sequence,
             ])
           );
         }

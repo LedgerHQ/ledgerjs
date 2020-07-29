@@ -12,7 +12,7 @@ export async function requestLedgerDevice(): Promise<USBDevice> {
 export async function getLedgerDevices(): Promise<USBDevice[]> {
   // $FlowFixMe
   const devices = await navigator.usb.getDevices();
-  return devices.filter(d => d.vendorId === ledgerUSBVendorId);
+  return devices.filter((d) => d.vendorId === ledgerUSBVendorId);
 }
 
 export async function getFirstLedgerDevice(): Promise<USBDevice> {

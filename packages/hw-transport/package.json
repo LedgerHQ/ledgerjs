@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-transport",
-  "version": "5.9.0",
+  "version": "5.19.1",
   "description": "Ledger Hardware Wallet common interface of the communication layer",
   "keywords": [
     "Ledger",
@@ -24,12 +24,12 @@
   "module": "lib-es/Transport.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/devices": "^5.9.0",
-    "@ledgerhq/errors": "^5.9.0",
+    "@ledgerhq/devices": "^5.19.1",
+    "@ledgerhq/errors": "^5.19.1",
     "events": "^3.1.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.118.0"
+    "flow-bin": "^0.129.0"
   },
   "scripts": {
     "flow": "flow",

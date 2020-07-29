@@ -5,11 +5,11 @@ import Transport from "@ledgerhq/hw-transport";
 import {
   BleManager,
   ConnectionPriority,
-  BleErrorCode
+  BleErrorCode,
 } from "react-native-ble-plx";
 import {
   getBluetoothServiceUuids,
-  getInfosForServiceUuid
+  getInfosForServiceUuid,
 } from "@ledgerhq/devices";
 import type { DeviceModel } from "@ledgerhq/devices";
 
@@ -21,7 +21,7 @@ import { share, ignoreElements, first, map, tap } from "rxjs/operators";
 import {
   CantOpenDevice,
   TransportError,
-  DisconnectedDeviceDuringOperation
+  DisconnectedDeviceDuringOperation,
 } from "@ledgerhq/errors";
 import type { Device, Characteristic } from "./types";
 import { monitorCharacteristic } from "./monitorCharacteristic";
@@ -29,13 +29,13 @@ import { awaitsBleOn } from "./awaitsBleOn";
 import { decoratePromiseErrors, remapError } from "./remapErrors";
 
 let connectOptions = {
-  requestMTU: 156
+  requestMTU: 156,
 };
 
 const transportsCache = {};
 const bleManager = new BleManager();
 
-const retrieveInfos = device => {
+const retrieveInfos = (device) => {
   if (!device || !device.serviceUUIDs) return;
   const [serviceUUID] = device.serviceUUIDs;
   if (!serviceUUID) return;
@@ -46,17 +46,17 @@ const retrieveInfos = device => {
 
 type ReconnectionConfig = {
   pairingThreshold: number,
-  delayAfterFirstPairing: number
+  delayAfterFirstPairing: number,
 };
 let reconnectionConfig: ?ReconnectionConfig = {
   pairingThreshold: 1000,
-  delayAfterFirstPairing: 4000
+  delayAfterFirstPairing: 4000,
 };
 export function setReconnectionConfig(config: ?ReconnectionConfig) {
   reconnectionConfig = config;
 }
 
-const delay = ms => new Promise(success => setTimeout(success, ms));
+const delay = (ms) => new Promise((success) => setTimeout(success, ms));
 
 async function open(deviceOrId: Device | string, needsReconnect: boolean) {
   let device;
@@ -82,7 +82,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
         getBluetoothServiceUuids()
       );
       const connectedDevicesFiltered = connectedDevices.filter(
-        d => d.id === deviceOrId
+        (d) => d.id === deviceOrId
       );
       log(
         "ble-verbose",
@@ -193,7 +193,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
   log("ble-verbose", `device.mtu=${device.mtu}`);
 
   const notifyObservable = monitorCharacteristic(notifyC).pipe(
-    tap(value => {
+    tap((value) => {
       log("ble-frame", "<= " + value.toString("hex"));
     }),
     share()
@@ -208,7 +208,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
     deviceModel
   );
 
-  const onDisconnect = e => {
+  const onDisconnect = (e) => {
     transport.notYetDisconnected = false;
     notif.unsubscribe();
     disconnectedSub.remove();
@@ -219,7 +219,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
 
   // eslint-disable-next-line require-atomic-updates
   transportsCache[transport.id] = transport;
-  const disconnectedSub = device.onDisconnected(e => {
+  const disconnectedSub = device.onDisconnected((e) => {
     if (!transport.notYetDisconnected) return;
     onDisconnect(e);
   });
@@ -281,12 +281,12 @@ export default class BluetoothTransport extends Transport<Device | string> {
    * an event is emit once and then listened
    */
   static observeState(observer: *) {
-    const emitFromState = type => {
+    const emitFromState = (type) => {
       observer.next({ type, available: type === "PoweredOn" });
     };
     bleManager.onStateChange(emitFromState, true);
     return {
-      unsubscribe: () => {}
+      unsubscribe: () => {},
     };
   }
 
@@ -301,7 +301,8 @@ export default class BluetoothTransport extends Transport<Device | string> {
     log("ble-verbose", "listen...");
     let unsubscribed;
 
-    const stateSub = bleManager.onStateChange(async state => {
+    // $FlowFixMe
+    const stateSub = bleManager.onStateChange(async (state) => {
       if (state === "PoweredOn") {
         stateSub.remove();
 
@@ -311,7 +312,9 @@ export default class BluetoothTransport extends Transport<Device | string> {
         if (unsubscribed) return;
 
         await Promise.all(
-          devices.map(d => BluetoothTransport.disconnect(d.id).catch(() => {}))
+          devices.map((d) =>
+            BluetoothTransport.disconnect(d.id).catch(() => {})
+          )
         );
         if (unsubscribed) return;
 
@@ -395,6 +398,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
         log("apdu", `=> ${msgIn}`);
 
         const data = await merge(
+          // $FlowFixMe
           this.notifyObservable.pipe(receiveAPDU),
           sendAPDU(this.write, apdu, this.mtuSize)
         ).toPromise();
@@ -421,8 +425,8 @@ export default class BluetoothTransport extends Transport<Device | string> {
         mtu =
           (await merge(
             this.notifyObservable.pipe(
-              first(buffer => buffer.readUInt8(0) === 0x08),
-              map(buffer => buffer.readUInt8(5))
+              first((buffer) => buffer.readUInt8(0) === 0x08),
+              map((buffer) => buffer.readUInt8(5))
             ),
             defer(() => from(this.write(Buffer.from([0x08, 0, 0, 0, 0])))).pipe(
               ignoreElements()

@@ -24,7 +24,7 @@ type SubproviderOptions = {
   // number of accounts to derivate
   accountsLength?: number,
   // offset index to use to start derivating the accounts
-  accountsOffset?: number
+  accountsOffset?: number,
 };
 
 const defaultOptions = {
@@ -32,7 +32,7 @@ const defaultOptions = {
   paths: ["44'/60'/x'/0/0", "44'/60'/0'/x"], // ledger live derivation path
   askConfirm: false,
   accountsLength: 1,
-  accountsOffset: 0
+  accountsOffset: 0,
 };
 
 /**
@@ -65,7 +65,7 @@ export default function createLedgerSubprovider(
   }
   const { networkId, paths, askConfirm, accountsLength, accountsOffset } = {
     ...defaultOptions,
-    ...options
+    ...options,
   };
 
   if (!paths.length) {
@@ -158,21 +158,21 @@ export default function createLedgerSubprovider(
   }
 
   const subprovider = new HookedWalletSubprovider({
-    getAccounts: callback => {
+    getAccounts: (callback) => {
       getAccounts()
-        .then(res => callback(null, Object.values(res)))
-        .catch(err => callback(err, null));
+        .then((res) => callback(null, Object.values(res)))
+        .catch((err) => callback(err, null));
     },
     signPersonalMessage: (txData, callback) => {
       signPersonalMessage(txData)
-        .then(res => callback(null, res))
-        .catch(err => callback(err, null));
+        .then((res) => callback(null, res))
+        .catch((err) => callback(err, null));
     },
     signTransaction: (txData, callback) => {
       signTransaction(txData)
-        .then(res => callback(null, res))
-        .catch(err => callback(err, null));
-    }
+        .then((res) => callback(null, res))
+        .catch((err) => callback(err, null));
+    },
   });
 
   return subprovider;

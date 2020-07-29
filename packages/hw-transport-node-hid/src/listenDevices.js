@@ -11,21 +11,21 @@ export default (
   listenDevicesPollingSkip: () => boolean
 ): ({
   events: EventEmitter,
-  stop: () => void
+  stop: () => void,
 }) => {
   const events = new EventEmitter();
   events.setMaxListeners(0);
 
   let listDevices = getDevices();
 
-  const flatDevice = d => d.path;
+  const flatDevice = (d) => d.path;
 
   const getFlatDevices = () => [
-    ...new Set(getDevices().map(d => flatDevice(d)))
+    ...new Set(getDevices().map((d) => flatDevice(d))),
   ];
 
-  const getDeviceByPaths = paths =>
-    listDevices.find(d => paths.includes(flatDevice(d)));
+  const getDeviceByPaths = (paths) =>
+    listDevices.find((d) => paths.includes(flatDevice(d)));
 
   let lastDevices = getFlatDevices();
 
@@ -35,7 +35,7 @@ export default (
 
       let changeFound = false;
       const currentDevices = getFlatDevices();
-      const newDevices = currentDevices.filter(d => !lastDevices.includes(d));
+      const newDevices = currentDevices.filter((d) => !lastDevices.includes(d));
 
       if (newDevices.length > 0) {
         log("hid-listen", "New device found:", newDevices);
@@ -49,7 +49,7 @@ export default (
       }
 
       const removeDevices = lastDevices.filter(
-        d => !currentDevices.includes(d)
+        (d) => !currentDevices.includes(d)
       );
 
       if (removeDevices.length > 0) {
@@ -57,7 +57,7 @@ export default (
 
         events.emit("remove", getDeviceByPaths(removeDevices));
         listDevices = listDevices.filter(
-          d => !removeDevices.includes(flatDevice(d))
+          (d) => !removeDevices.includes(flatDevice(d))
         );
 
         changeFound = true;
@@ -76,7 +76,7 @@ export default (
 
   const debouncedPoll = debounce(poll, delay);
 
-  const attachDetected = device => {
+  const attachDetected = (device) => {
     log("hid-listen", "Device add detected:", device);
 
     debouncedPoll();
@@ -84,7 +84,7 @@ export default (
   usb.on("attach", attachDetected);
   log("hid-listen", "attach listener added");
 
-  const detachDetected = device => {
+  const detachDetected = (device) => {
     log("hid-listen", "Device removal detected:", device);
 
     debouncedPoll();
@@ -102,6 +102,6 @@ export default (
       usb.removeListener("attach", attachDetected);
       usb.removeListener("detach", detachDetected);
     },
-    events
+    events,
   };
 };

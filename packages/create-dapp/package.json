@@ -1,6 +1,6 @@
 {
   "name": "create-dapp",
-  "version": "5.9.0",
+  "version": "5.19.1",
   "description": "Create React Ethereum apps, ready to use with Ledger and MetaMask",
   "keywords": [
     "dapp",
@@ -16,7 +16,7 @@
   "license": "Apache-2.0",
   "bin": "scripts/create-dapp",
   "devDependencies": {
-    "flow-bin": "^0.118.0"
+    "flow-bin": "^0.129.0"
   },
   "gitHead": "fca2c7ce74fdb88df4d59dca4cc0e668410d66af"
 }

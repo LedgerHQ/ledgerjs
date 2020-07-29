@@ -1,10 +1,11 @@
 //@flow
+import { Subject } from "rxjs";
 import net from "net";
 import Transport from "@ledgerhq/hw-transport";
 import {
   DisconnectedDevice,
   DisconnectedDeviceDuringOperation,
-  TransportError
+  TransportError,
 } from "@ledgerhq/errors";
 import { log } from "@ledgerhq/logs";
 
@@ -14,7 +15,8 @@ import { log } from "@ledgerhq/logs";
 export type SpeculosTransportOpts = {
   apduPort: number,
   buttonPort?: number,
-  host?: string
+  automationPort?: number,
+  host?: string,
 };
 
 /**
@@ -31,7 +33,7 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
   // this transport is not discoverable
   static list = (): * => Promise.resolve([]);
   static listen = (_observer: *) => ({
-    unsubscribe: () => {}
+    unsubscribe: () => {},
   });
 
   /**
@@ -40,7 +42,7 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
   static open = (opts: SpeculosTransportOpts): Promise<SpeculosTransport> =>
     new Promise((resolve, reject) => {
       const socket = new net.Socket();
-      socket.on("error", e => {
+      socket.on("error", (e) => {
         socket.destroy();
         reject(e);
       });
@@ -55,31 +57,55 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
       });
     });
 
-  socket: net.Socket;
+  apduSocket: net.Socket;
   opts: SpeculosTransportOpts;
-  rejectExchange: Error => void = _e => {};
-  resolveExchange: Buffer => void = _b => {};
+  rejectExchange: (Error) => void = (_e) => {};
+  resolveExchange: (Buffer) => void = (_b) => {};
 
-  constructor(socket: net.Socket, opts: SpeculosTransportOpts) {
+  automationSocket: ?net.Socket;
+  automationEvents: Subject<Object> = new Subject();
+
+  constructor(apduSocket: net.Socket, opts: SpeculosTransportOpts) {
     super();
     this.opts = opts;
-    this.socket = socket;
-    socket.on("error", e => {
+    this.apduSocket = apduSocket;
+    apduSocket.on("error", (e) => {
       this.emit("disconnect", new DisconnectedDevice(e.message));
       this.rejectExchange(e);
-      this.socket.destroy();
+      this.apduSocket.destroy();
     });
-    socket.on("end", () => {
+    apduSocket.on("end", () => {
       this.emit("disconnect", new DisconnectedDevice());
       this.rejectExchange(new DisconnectedDeviceDuringOperation());
     });
-    socket.on("data", data => {
+    apduSocket.on("data", (data) => {
       try {
         this.resolveExchange(decodeAPDUPayload(data));
       } catch (e) {
         this.rejectExchange(e);
       }
     });
+
+    const { automationPort } = opts;
+    if (automationPort) {
+      const socket = new net.Socket();
+      this.automationSocket = socket;
+      socket.on("error", (e) => {
+        log("speculos-automation-error", String(e));
+        socket.destroy();
+      });
+      socket.on("data", (data) => {
+        log("speculos-automation-data", data);
+        const split = data.toString("ascii").split("\n");
+        split
+          .filter((ascii) => !!ascii)
+          .forEach((ascii) => {
+            const json = JSON.parse(ascii);
+            this.automationEvents.next(json);
+          });
+      });
+      socket.connect(automationPort, opts.host || "127.0.0.1");
+    }
   }
 
   /**
@@ -90,10 +116,11 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
    */
   button = (command: string): Promise<void> =>
     new Promise((resolve, reject) => {
+      log("speculos-button", command);
       const { buttonPort, host } = this.opts;
       if (!buttonPort) throw new Error("buttonPort is missing");
       const socket = new net.Socket();
-      socket.on("error", e => {
+      socket.on("error", (e) => {
         socket.destroy();
         reject(e);
       });
@@ -111,7 +138,7 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
     const res = await new Promise((resolve, reject) => {
       this.rejectExchange = reject;
       this.resolveExchange = resolve;
-      this.socket.write(encoded);
+      this.apduSocket.write(encoded);
     });
     log("apdu", "<= " + res.toString("hex"));
     return res;
@@ -120,8 +147,9 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
   setScrambleKey() {}
 
   async close() {
-    this.socket.destroy();
-    return Promise.resolve(true);
+    if (this.automationSocket) this.automationSocket.destroy();
+    this.apduSocket.destroy();
+    return Promise.resolve();
   }
 }
 

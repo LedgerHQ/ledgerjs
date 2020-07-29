@@ -8,7 +8,7 @@ export type Log = {
   message?: string,
   data?: any,
   id: string, // unique amount all logs
-  date: Date // date of the log
+  date: Date, // date of the log
 };
 
 export type Unsubscribe = () => void;
@@ -33,7 +33,7 @@ export const log = (type: string, message?: string, data?: any) => {
  * @param cb that is called for each future log() with the Log object
  * @return a function that can be called to unsubscribe the listener
  */
-export const listen = (cb: Log => void): Unsubscribe => {
+export const listen = (cb: (Log) => void): Unsubscribe => {
   subscribers.push(cb);
   return () => {
     const i = subscribers.indexOf(cb);
@@ -56,4 +56,6 @@ function dispatch(log: Log) {
 }
 
 // for debug purpose
-global.__ledgerLogsListen = listen;
+if (typeof window !== "undefined") {
+  window.__ledgerLogsListen = listen;
+}
