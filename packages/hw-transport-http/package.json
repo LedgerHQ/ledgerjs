@@ -33,7 +33,7 @@
     "ws": "6"
   },
   "devDependencies": {
-    "flow-bin": "^0.129.0"
+    "flow-bin": "^0.130.0"
   },
   "scripts": {
     "flow": "flow",

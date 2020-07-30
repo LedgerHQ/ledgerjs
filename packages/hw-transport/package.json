@@ -26,10 +26,10 @@
   "dependencies": {
     "@ledgerhq/devices": "^5.19.1",
     "@ledgerhq/errors": "^5.19.1",
-    "events": "^3.1.0"
+    "events": "^3.2.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.129.0"
+    "flow-bin": "^0.130.0"
   },
   "scripts": {
     "flow": "flow",
