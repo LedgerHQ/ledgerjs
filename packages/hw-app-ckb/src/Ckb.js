@@ -57,6 +57,39 @@ export default class Ckb {
   }
 
   /**
+   * get extended public key for a given BIP 32 path.
+   *
+   * @param path a path in BIP 32 format
+   * @return an object with a publicKey
+   * @example
+   * const result = await ckb.getWalletPublicKey("44'/144'/0'/0/0");
+   * const publicKey = result;
+   */
+  async getWalletExtendedPublicKey(path: string): Promise<string> {
+    const bipPath = BIPPath.fromString(path).toPathArray();
+
+    const cla = 0x80;
+    const ins = 0x04;
+    const p1 = 0x00;
+    const p2 = 0x00;
+    const data = Buffer.alloc(1 + bipPath.length * 4);
+
+    data.writeUInt8(bipPath.length, 0);
+    bipPath.forEach((segment, index) => {
+      data.writeUInt32BE(segment, 1 + index * 4);
+    });
+
+    const response = await this.transport.send(cla, ins, p1, p2, data);
+    const publicKeyLength = response[0];
+    const chainCodeOffset = 2+publicKeyLength;
+    const chainCodeLength = response[1+publicKeyLength];
+    return {
+      public_key: response.slice(1, 1 + publicKeyLength).toString("hex"),
+      chain_code: response.slice(chainCodeOffset, chainCodeOffset+chainCodeLength)
+    };
+  }
+
+  /**
    * Sign a Nervos transaction with a given BIP 32 path
    *
    * @param signPath the path to sign with, in BIP 32 format
@@ -71,12 +104,12 @@ export default class Ckb {
 
   async signTransaction(
     signPath: string | BIPPath | [number],
-    rawTxHex: string | blockchain.RawTransactionJSON,
+    rawTx: string | blockchain.RawTransactionJSON,
     groupWitnessesHex?: [string],
-    rawContextsTxHex: [string | blockchain.RawTransactionJSON],
+    rawContextsTx: [string | blockchain.RawTransactionJSON],
     changePath: string | BIPPath | [number]
   ): Promise<string> {
-    return await this.signAnnotatedTransaction(this.buildAnnotatedTransaction(signPath, rawTxHex, groupWitnessesHex, rawContextsTxHex, changePath));
+    return await this.signAnnotatedTransaction(this.buildAnnotatedTransaction(signPath, rawTx, groupWitnessesHex, rawContextsTx, changePath));
   }
 
   /**
@@ -92,9 +125,9 @@ export default class Ckb {
   
   buildAnnotatedTransaction(
     signPath: string | BIPPath | [number],
-    rawTxHex: string | RawTransactionJSON,
+    rawTx: string | RawTransactionJSON,
     groupWitnesses?: [string],
-    rawContextsTxHex: [string | RawTransactionJSON],
+    rawContextsTx: [string | RawTransactionJSON],
     changePath: string | BIPPath | [number]
   ): AnnotatedTransactionJSON {
 
@@ -115,34 +148,34 @@ export default class Ckb {
     
     const getRawTransactionJSON = rawTrans => {
       if ( typeof rawTrans === "string" ) {
-	const rawTxBuffer = Buffer.from(rawTrans, "hex");
-	return (new blockchain.RawTransaction(rawTxBuffer.buffer)).toObject();
+        const rawTxBuffer = Buffer.from(rawTrans, "hex");
+        return (new blockchain.RawTransaction(rawTxBuffer.buffer)).toObject();
       } 
       return rawTrans;
     };
 
-    const contextTransactions = rawContextsTxHex.map(getRawTransactionJSON);
+    const contextTransactions = rawContextsTx.map(getRawTransactionJSON);
 
-    const rawTx = getRawTransactionJSON(rawTxHex);
+    const rawTxUnpacked = getRawTransactionJSON(rawTx);
 
-    const annotatedCellInputVec = rawTx.inputs.map((inpt, idx)=>({
+    const annotatedCellInputVec = rawTxUnpacked.inputs.map((inpt, idx)=>({
       input: inpt,
       source: contextTransactions[idx]
     }));
 
     const annotatedRawTransaction = {
-      version: rawTx.version,
-      cell_deps: rawTx.cell_deps,
-      header_deps: rawTx.header_deps,
+      version: rawTxUnpacked.version,
+      cell_deps: rawTxUnpacked.cell_deps,
+      header_deps: rawTxUnpacked.header_deps,
       inputs: annotatedCellInputVec,
-      outputs: rawTx.outputs,
-      outputs_data: rawTx.outputs_data
+      outputs: rawTxUnpacked.outputs,
+      outputs_data: rawTxUnpacked.outputs_data
     };
 
     return {
       signPath: signBipPath,
       changePath: changeBipPath,
-      inputCount: rawTx.inputs.length,
+      inputCount: rawTxUnpacked.inputs.length,
       raw: annotatedRawTransaction,
       witnesses: Array.isArray(groupWitnesses) && groupWitnesses.length > 0 ? groupWitnesses:[this.defaultSighashWitness]
     };
