@@ -25,7 +25,7 @@ Here is a sample app for Node:
       contexts = [ "010000000d0200001c000000200000006e00000092000000ee000000f10100000000000002000000a563884b3686078ec7e7677a5f86449b15cf2693f3c1241766c6996f206cc5410200000000ace5ea83c478bb866edf122ff862085789158f5cbff155b7bb5f13058555b708000000000101000000327f1fc62c53530c6c27018f1e8cee27c35c0370c3b4d3376daf8fe110e7d8cb020000000000000000000000c399495011b912999dbc72cf54982924e328ae170654ef76c8aba190ca376307000000000000000000000000c317d0b0b2a513ab1206e6d454c1960de7d7b4b80d0748a3e1f9cb197b74b8a501000000030100000c000000a20000009600000010000000180000006100000000e8764817000000490000001000000030000000310000009bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce80114000000e5260d839a786ac2a909181df9a423f1efbe863d3500000010000000300000003100000082d76d1b75fe2fd9a27dfbaa65a039221a380d76c926f378d3f81cf3e7e13f2e01000000006100000010000000180000006100000064e5b27317000000490000001000000030000000310000009bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce80114000000e5260d839a786ac2a909181df9a423f1efbe863d1c0000000c0000001800000008000000520700000000000000000000"
                  , "00000000570100001c000000200000006e000000b2000000e20000004b0100000000000002000000a563884b3686078ec7e7677a5f86449b15cf2693f3c1241766c6996f206cc5410200000000ace5ea83c478bb866edf122ff862085789158f5cbff155b7bb5f13058555b708000000000102000000327f1fc62c53530c6c27018f1e8cee27c35c0370c3b4d3376daf8fe110e7d8cb4930ba433e606a53f4f283f02dddeb6d51b0dc3e463629b14a27995de9c71eca01000000ba08000000010020b1b547956a0dfb7ea618231563b3acd23607586e939f88e5a6db5f392b2e78d500000000690000000800000061000000100000001800000061000000c561436317000000490000001000000030000000310000009bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce80114000000e5260d839a786ac2a909181df9a423f1efbe863d0c0000000800000000000000" ];
       transaction = "d00100000c000000bc010000b00100001c000000200000006e00000072000000ce0000009c0100000000000002000000a563884b3686078ec7e7677a5f86449b15cf2693f3c1241766c6996f206cc5410200000000ace5ea83c478bb866edf122ff862085789158f5cbff155b7bb5f13058555b708000000000100000000020000000000000000000000b1b547956a0dfb7ea618231563b3acd23607586e939f88e5a6db5f392b2e78d5010000000000000000000000258e82bab2af21fd8899fc872742f4acea831f5e4c232297816b9bf4a19597a900000000ce0000000c0000006d0000006100000010000000180000006100000000e8764817000000490000001000000030000000310000009bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce80114000000e5260d839a786ac2a909181df9a423f1efbe863d61000000100000001800000061000000e91c708e17000000490000001000000030000000310000009bd7e06f3ecf4be0f2fcd2188b23f1b9fcc88e5d4b65a8637b17723bbda3cce80114000000e5260d839a786ac2a909181df9a423f1efbe863d140000000c000000100000000000000000000000140000000c000000100000000000000000000000"
-      const result = await ckb.signTransaction("44'/309'/0'/1/0", transaction, contexts);
+      const result = await ckb.signTransaction("44'/309'/0'/1/0", transaction, null, contexts, "44'/309'/0'/1/0");
       return result;
     };
 
@@ -68,13 +68,21 @@ Here is a sample app for Node:
     -   [getWalletPublicKey](#getwalletpublickey)
         -   [Parameters](#parameters-1)
         -   [Examples](#examples-1)
-    -   [signTransaction](#signtransaction)
+    -   [getWalletExtendedPublicKey](#getwalletextendedpublickey)
         -   [Parameters](#parameters-2)
         -   [Examples](#examples-2)
-    -   [getAppConfiguration](#getappconfiguration)
+    -   [signTransaction](#signtransaction)
+        -   [Parameters](#parameters-3)
         -   [Examples](#examples-3)
-    -   [getWalletId](#getwalletid)
+    -   [buildAnnotatedTransaction](#buildannotatedtransaction)
+        -   [Parameters](#parameters-4)
+    -   [signAnnotatedTransaction](#signannotatedtransaction)
+        -   [Parameters](#parameters-5)
+    -   [defaultSighashWitness](#defaultsighashwitness)
+    -   [getAppConfiguration](#getappconfiguration)
         -   [Examples](#examples-4)
+    -   [getWalletId](#getwalletid)
+        -   [Examples](#examples-5)
 
 ### Ckb
 
@@ -109,24 +117,79 @@ const publicKey = result;
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** an object with a publicKey
 
+#### getWalletExtendedPublicKey
+
+get extended public key for a given BIP 32 path.
+
+##### Parameters
+
+-   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
+
+##### Examples
+
+```javascript
+const result = await ckb.getWalletPublicKey("44'/144'/0'/0/0");
+const publicKey = result;
+```
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** an object with a publicKey
+
 #### signTransaction
 
 Sign a Nervos transaction with a given BIP 32 path
 
 ##### Parameters
 
--   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
--   `rawTxHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** transaction to sign
--   `rawContextsTxHex` **\[[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)]** 
--   `contextTransaction`  list of transaction context to use in parsing (optional)
+-   `signPath` **([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | BIPPath | \[[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)])** the path to sign with, in BIP 32 format
+-   `rawTx` **([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | blockchain.RawTransactionJSON)** 
+-   `groupWitnessesHex` **\[[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)]?** hex of in-group and extra witnesses to include in signature
+-   `rawContextsTx` **\[([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | blockchain.RawTransactionJSON)]** 
+-   `changePath` **([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | BIPPath | \[[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)])** the path the transaction sends change to, in BIP 32 format (optional, defaults to signPath)
+-   `rawTxHex`  transaction to sign
+-   `contextTransaction`  list of transaction contexts for parsing
 
 ##### Examples
 
 ```javascript
-const signature = await ckb.signTransaction("44'/144'/0'/0/0", "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+TODO
 ```
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** a signature as hex string
+
+#### buildAnnotatedTransaction
+
+Construct an AnnotatedTransaction for a given collection of signing data
+
+Parameters are the same as for signTransaction, but no ledger interaction is attempted.
+
+AnnotatedTransaction is a type defined for the ledger app that collects
+all of the information needed to securely confirm a transaction on-screen
+and a few bits of duplicative information to allow it to be processed as a
+stream.
+
+##### Parameters
+
+-   `signPath` **([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | BIPPath | \[[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)])** 
+-   `rawTx` **([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | RawTransactionJSON)** 
+-   `groupWitnesses` **\[[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)]?** 
+-   `rawContextsTx` **\[([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | RawTransactionJSON)]** 
+-   `changePath` **([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | BIPPath | \[[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)])** 
+
+Returns **AnnotatedTransactionJSON** 
+
+#### signAnnotatedTransaction
+
+Sign an already constructed AnnotatedTransaction.
+
+##### Parameters
+
+-   `tx` **(AnnotatedTransaction | AnnotatedTransactionJSON)** 
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** 
+
+#### defaultSighashWitness
+
+An empty WitnessArgs with enough space to fit a sighash signature into.
 
 #### getAppConfiguration
 
