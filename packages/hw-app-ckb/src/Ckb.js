@@ -266,7 +266,7 @@ export default class Ckb {
 
     //Init apdu
     let rawPath = Buffer.alloc(1 + 1 + bipPath.length * 4);
-    rawPath.writeInt8(displayMsg, 0);
+    rawPath.writeInt8(displayHex, 0);
     rawPath.writeInt8(bipPath.length, 1);
     bipPath.forEach((segment, index) => {
       rawPath.writeUInt32BE(segment, 2 + index * 4);
