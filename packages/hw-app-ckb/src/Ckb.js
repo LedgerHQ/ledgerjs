@@ -85,7 +85,7 @@ export default class Ckb {
     const chainCodeLength = response[1+publicKeyLength];
     return {
       public_key: response.slice(1, 1 + publicKeyLength).toString("hex"),
-      chain_code: response.slice(chainCodeOffset, chainCodeOffset+chainCodeLength)
+      chain_code: response.slice(chainCodeOffset, chainCodeOffset+chainCodeLength).toString("hex")
     };
   }
 

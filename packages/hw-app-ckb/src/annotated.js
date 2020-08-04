@@ -8,8 +8,11 @@ function assertDataLength(actual, required) {
   }
 }
 
-function assertArrayBuffer(reader) {
+function assertArrayBuffer(reader, padTo) {
   if (typeof reader === "string") {
+	  reader = reader.replace(/^0x/,"")
+	  if(reader.length % 2 == 1) reader = reader.padStart(reader.length+1, "0");
+	  if(padTo !== undefined) reader = reader.padEnd(padTo*2, "0");
 	  reader = Buffer.from(reader, 'hex');
 	  reader = reader.buffer.slice(reader.byteOffset,reader.byteOffset+reader.byteLength);
   }
@@ -59,6 +62,26 @@ function verifyAndExtractOffsets(view, expectedFieldCount, compatible) {
     }
   }
   return offsets;
+}
+
+function fromStringEnum(val) {
+  switch(typeof val) {
+  case "string":
+    switch(val.toLowerCase()) {
+    case "code":
+    case "data":
+      return 0;
+    case "dep_group":
+    case "type":
+      return 1;
+    default:
+    throw new Error("Not a valid byte representation: "+val);
+    }
+  case "number":
+    return val;
+  default:
+    throw new Error("Not a valid byte representation: "+val);
+  }
 }
 
 function serializeTable(buffers) {
@@ -432,7 +455,7 @@ export function SerializeUint32(value) {
     return tmp;
     break;
   default:
-    const buffer = assertArrayBuffer(value);
+    const buffer = assertArrayBuffer(value, 4);
     assertDataLength(buffer.byteLength, 4);
     return buffer;
   }
@@ -460,7 +483,7 @@ export class Uint64 {
   }
 
   toObject() {
-    return new Buffer(this.raw()).toString('hex');
+    return Buffer.from(this.raw()).toString('hex');
   }
   static size() {
     return 8;
@@ -505,7 +528,7 @@ export class Uint128 {
   }
 
   toObject() {
-    return new Buffer(this.raw()).toString('hex');
+    return Buffer.from(this.raw()).toString('hex');
   }
   static size() {
     return 16;
@@ -550,7 +573,7 @@ export class Byte32 {
   }
 
   toObject() {
-    return new Buffer(this.raw()).toString('hex');
+    return Buffer.from(this.raw()).toString('hex');
   }
   static size() {
     return 32;
@@ -595,7 +618,7 @@ export class Uint256 {
   }
 
   toObject() {
-    return new Buffer(this.raw()).toString('hex');
+    return Buffer.from(this.raw()).toString('hex');
   }
   static size() {
     return 32;
@@ -644,7 +667,7 @@ export class Bytes {
   }
 
   toObject() {
-    return new Buffer(this.raw()).toString('hex');
+    return Buffer.from(this.raw()).toString('hex');
   }
   length() {
     return this.view.getUint32(0, true);
@@ -795,379 +818,6 @@ export function SerializeByte32Vec(value) {
 }
 
 
-export class ScriptOpt {
-  constructor(reader, { validate = true } = {}) {
-    this.view = new DataView(assertArrayBuffer(reader));
-    if (validate) {
-      this.validate();
-    }
-  }
-
-  validate(compatible = false) {
-    if (this.hasValue()) {
-      this.value().validate(compatible);
-    }
-  }
-
-  value() {
-    return new Script(this.view.buffer, { validate: false });
-  }
-
-  toObject() {
-    if(this.hasValue()) return this.value().toObject();
-    return null;
-  }
-  hasValue() {
-    return this.view.byteLength > 0;
-  }
-}
-
-export function SerializeScriptOpt(value) {
-  if(typeof value === "object" && value !== null && "view" in value) return value.view.buffer;
-  if (value) {
-    return SerializeScript(value);
-  } else {
-    return new ArrayBuffer(0);
-  }
-}
-
-
-export class ProposalShortId {
-  constructor(reader, { validate = true } = {}) {
-    this.view = new DataView(assertArrayBuffer(reader));
-    if (validate) {
-      this.validate();
-    }
-  }
-
-  validate(compatible = false) {
-    assertDataLength(this.view.byteLength, 10);
-  }
-
-  indexAt(i) {
-    return this.view.getUint8(i);
-  }
-
-  raw() {
-    return this.view.buffer;
-  }
-
-  toObject() {
-    return new Buffer(this.raw()).toString('hex');
-  }
-  static size() {
-    return 10;
-  }
-}
-
-export function SerializeProposalShortId(value) {
-  if(typeof value === "object" && value !== null && "view" in value) return value.view.buffer;
-  switch(typeof value) {
-  case "number":
-    var tmp = new ArrayBuffer(10);
-    var tmpDV = new DataView(tmp);
-    throw new Error("Can't accept numbers for unusual byte arrays");
-    return tmp;
-    break;
-  default:
-    const buffer = assertArrayBuffer(value);
-    assertDataLength(buffer.byteLength, 10);
-    return buffer;
-  }
-}
-
-
-export class UncleBlockVec {
-  constructor(reader, { validate = true } = {}) {
-    this.view = new DataView(assertArrayBuffer(reader));
-    if (validate) {
-      this.validate();
-    }
-  }
-
-  validate(compatible = false) {
-    const offsets = verifyAndExtractOffsets(this.view, 0, true);
-    for (let i = 0; i < offsets.length - 1; i++) {
-      new UncleBlock(this.view.buffer.slice(offsets[i], offsets[i + 1]), { validate: false }).validate();
-    }
-  }
-
-  length() {
-    if (this.view.byteLength < 8) {
-      return 0;
-    } else {
-      return this.view.getUint32(4, true) / 4 - 1;
-    }
-  }
-
-  indexAt(i) {
-    const start = 4 + i * 4;
-    const offset = this.view.getUint32(start, true);
-    let offset_end = this.view.byteLength;
-    if (i + 1 < this.length()) {
-      offset_end = this.view.getUint32(start + 4, true);
-    }
-    return new UncleBlock(this.view.buffer.slice(offset, offset_end), { validate: false });
-  }
-  toObject() {
-    const len=this.length();
-    var rv=[];
-    for(var i=0;i<len;i++) {
-      rv.push(this.indexAt(i).toObject());
-    }
-    return rv;
-  }
-}
-
-export function SerializeUncleBlockVec(value) {
-  if(typeof value === "object" && value !== null && "view" in value) return value.view.buffer;
-  return serializeTable(value.map(item => SerializeUncleBlock(item)));
-}
-
-
-export class TransactionVec {
-  constructor(reader, { validate = true } = {}) {
-    this.view = new DataView(assertArrayBuffer(reader));
-    if (validate) {
-      this.validate();
-    }
-  }
-
-  validate(compatible = false) {
-    const offsets = verifyAndExtractOffsets(this.view, 0, true);
-    for (let i = 0; i < offsets.length - 1; i++) {
-      new Transaction(this.view.buffer.slice(offsets[i], offsets[i + 1]), { validate: false }).validate();
-    }
-  }
-
-  length() {
-    if (this.view.byteLength < 8) {
-      return 0;
-    } else {
-      return this.view.getUint32(4, true) / 4 - 1;
-    }
-  }
-
-  indexAt(i) {
-    const start = 4 + i * 4;
-    const offset = this.view.getUint32(start, true);
-    let offset_end = this.view.byteLength;
-    if (i + 1 < this.length()) {
-      offset_end = this.view.getUint32(start + 4, true);
-    }
-    return new Transaction(this.view.buffer.slice(offset, offset_end), { validate: false });
-  }
-  toObject() {
-    const len=this.length();
-    var rv=[];
-    for(var i=0;i<len;i++) {
-      rv.push(this.indexAt(i).toObject());
-    }
-    return rv;
-  }
-}
-
-export function SerializeTransactionVec(value) {
-  if(typeof value === "object" && value !== null && "view" in value) return value.view.buffer;
-  return serializeTable(value.map(item => SerializeTransaction(item)));
-}
-
-
-export class ProposalShortIdVec {
-  constructor(reader, { validate = true } = {}) {
-    this.view = new DataView(assertArrayBuffer(reader));
-    if (validate) {
-      this.validate();
-    }
-  }
-
-  validate(compatible = false) {
-    if (this.view.byteLength < 4) {
-      dataLengthError(this.view.byteLength, ">4");
-    }
-    const requiredByteLength = this.length() * ProposalShortId.size() + 4;
-    assertDataLength(this.view.byteLength, requiredByteLength);
-    for (let i = 0; i < 0; i++) {
-      const item = this.indexAt(i);
-      item.validate(compatible);
-    }
-  }
-
-  indexAt(i) {
-    return new ProposalShortId(this.view.buffer.slice(4 + i * ProposalShortId.size(), 4 + (i + 1) * ProposalShortId.size()), { validate: false });
-  }
-
-  toObject() {
-    const len=this.length();
-    var rv=[];
-    for(var i=0;i<len;i++) {
-      rv.push(this.indexAt(i).toObject());
-    }
-    return rv;
-  }
-  length() {
-    return this.view.getUint32(0, true);
-  }
-}
-
-export function SerializeProposalShortIdVec(value) {
-  if(typeof value === "object" && value !== null && "view" in value) return value.view.buffer;
-  const array = new Uint8Array(4 + ProposalShortId.size() * value.length);
-  (new DataView(array.buffer)).setUint32(0, value.length, true);
-  for (let i = 0; i < value.length; i++) {
-    const itemBuffer = SerializeProposalShortId(value[i]);
-    array.set(new Uint8Array(itemBuffer), 4 + i * ProposalShortId.size());
-  }
-  return array.buffer;
-}
-
-
-export class CellDepVec {
-  constructor(reader, { validate = true } = {}) {
-    this.view = new DataView(assertArrayBuffer(reader));
-    if (validate) {
-      this.validate();
-    }
-  }
-
-  validate(compatible = false) {
-    if (this.view.byteLength < 4) {
-      dataLengthError(this.view.byteLength, ">4");
-    }
-    const requiredByteLength = this.length() * CellDep.size() + 4;
-    assertDataLength(this.view.byteLength, requiredByteLength);
-    for (let i = 0; i < 0; i++) {
-      const item = this.indexAt(i);
-      item.validate(compatible);
-    }
-  }
-
-  indexAt(i) {
-    return new CellDep(this.view.buffer.slice(4 + i * CellDep.size(), 4 + (i + 1) * CellDep.size()), { validate: false });
-  }
-
-  toObject() {
-    const len=this.length();
-    var rv=[];
-    for(var i=0;i<len;i++) {
-      rv.push(this.indexAt(i).toObject());
-    }
-    return rv;
-  }
-  length() {
-    return this.view.getUint32(0, true);
-  }
-}
-
-export function SerializeCellDepVec(value) {
-  if(typeof value === "object" && value !== null && "view" in value) return value.view.buffer;
-  const array = new Uint8Array(4 + CellDep.size() * value.length);
-  (new DataView(array.buffer)).setUint32(0, value.length, true);
-  for (let i = 0; i < value.length; i++) {
-    const itemBuffer = SerializeCellDep(value[i]);
-    array.set(new Uint8Array(itemBuffer), 4 + i * CellDep.size());
-  }
-  return array.buffer;
-}
-
-
-export class CellInputVec {
-  constructor(reader, { validate = true } = {}) {
-    this.view = new DataView(assertArrayBuffer(reader));
-    if (validate) {
-      this.validate();
-    }
-  }
-
-  validate(compatible = false) {
-    if (this.view.byteLength < 4) {
-      dataLengthError(this.view.byteLength, ">4");
-    }
-    const requiredByteLength = this.length() * CellInput.size() + 4;
-    assertDataLength(this.view.byteLength, requiredByteLength);
-    for (let i = 0; i < 0; i++) {
-      const item = this.indexAt(i);
-      item.validate(compatible);
-    }
-  }
-
-  indexAt(i) {
-    return new CellInput(this.view.buffer.slice(4 + i * CellInput.size(), 4 + (i + 1) * CellInput.size()), { validate: false });
-  }
-
-  toObject() {
-    const len=this.length();
-    var rv=[];
-    for(var i=0;i<len;i++) {
-      rv.push(this.indexAt(i).toObject());
-    }
-    return rv;
-  }
-  length() {
-    return this.view.getUint32(0, true);
-  }
-}
-
-export function SerializeCellInputVec(value) {
-  if(typeof value === "object" && value !== null && "view" in value) return value.view.buffer;
-  const array = new Uint8Array(4 + CellInput.size() * value.length);
-  (new DataView(array.buffer)).setUint32(0, value.length, true);
-  for (let i = 0; i < value.length; i++) {
-    const itemBuffer = SerializeCellInput(value[i]);
-    array.set(new Uint8Array(itemBuffer), 4 + i * CellInput.size());
-  }
-  return array.buffer;
-}
-
-
-export class CellOutputVec {
-  constructor(reader, { validate = true } = {}) {
-    this.view = new DataView(assertArrayBuffer(reader));
-    if (validate) {
-      this.validate();
-    }
-  }
-
-  validate(compatible = false) {
-    const offsets = verifyAndExtractOffsets(this.view, 0, true);
-    for (let i = 0; i < offsets.length - 1; i++) {
-      new CellOutput(this.view.buffer.slice(offsets[i], offsets[i + 1]), { validate: false }).validate();
-    }
-  }
-
-  length() {
-    if (this.view.byteLength < 8) {
-      return 0;
-    } else {
-      return this.view.getUint32(4, true) / 4 - 1;
-    }
-  }
-
-  indexAt(i) {
-    const start = 4 + i * 4;
-    const offset = this.view.getUint32(start, true);
-    let offset_end = this.view.byteLength;
-    if (i + 1 < this.length()) {
-      offset_end = this.view.getUint32(start + 4, true);
-    }
-    return new CellOutput(this.view.buffer.slice(offset, offset_end), { validate: false });
-  }
-  toObject() {
-    const len=this.length();
-    var rv=[];
-    for(var i=0;i<len;i++) {
-      rv.push(this.indexAt(i).toObject());
-    }
-    return rv;
-  }
-}
-
-export function SerializeCellOutputVec(value) {
-  if(typeof value === "object" && value !== null && "view" in value) return value.view.buffer;
-  return serializeTable(value.map(item => SerializeCellOutput(item)));
-}
-
-
 export class Script {
   constructor(reader, { validate = true } = {}) {
     this.view = new DataView(assertArrayBuffer(reader));
@@ -1219,10 +869,47 @@ export function SerializeScript(value) {
   const buffers = [];
   buffers.push(SerializeByte32(value.code_hash));
   const hashTypeView = new DataView(new ArrayBuffer(1));
-  hashTypeView.setUint8(0, value.hash_type);
+  hashTypeView.setUint8(0, fromStringEnum(value.hash_type));
   buffers.push(hashTypeView.buffer)
   buffers.push(SerializeBytes(value.args));
   return serializeTable(buffers);
+}
+
+
+export class ScriptOpt {
+  constructor(reader, { validate = true } = {}) {
+    this.view = new DataView(assertArrayBuffer(reader));
+    if (validate) {
+      this.validate();
+    }
+  }
+
+  validate(compatible = false) {
+    if (this.hasValue()) {
+      this.value().validate(compatible);
+    }
+  }
+
+  value() {
+    return new Script(this.view.buffer, { validate: false });
+  }
+
+  toObject() {
+    if(this.hasValue()) return this.value().toObject();
+    return null;
+  }
+  hasValue() {
+    return this.view.byteLength > 0;
+  }
+}
+
+export function SerializeScriptOpt(value) {
+  if(typeof value === "object" && value !== null && "view" in value) return value.view.buffer;
+  if (value) {
+    return SerializeScript(value);
+  } else {
+    return new ArrayBuffer(0);
+  }
 }
 
 
@@ -1310,6 +997,55 @@ export function SerializeCellInput(value) {
 }
 
 
+export class CellInputVec {
+  constructor(reader, { validate = true } = {}) {
+    this.view = new DataView(assertArrayBuffer(reader));
+    if (validate) {
+      this.validate();
+    }
+  }
+
+  validate(compatible = false) {
+    if (this.view.byteLength < 4) {
+      dataLengthError(this.view.byteLength, ">4");
+    }
+    const requiredByteLength = this.length() * CellInput.size() + 4;
+    assertDataLength(this.view.byteLength, requiredByteLength);
+    for (let i = 0; i < 0; i++) {
+      const item = this.indexAt(i);
+      item.validate(compatible);
+    }
+  }
+
+  indexAt(i) {
+    return new CellInput(this.view.buffer.slice(4 + i * CellInput.size(), 4 + (i + 1) * CellInput.size()), { validate: false });
+  }
+
+  toObject() {
+    const len=this.length();
+    var rv=[];
+    for(var i=0;i<len;i++) {
+      rv.push(this.indexAt(i).toObject());
+    }
+    return rv;
+  }
+  length() {
+    return this.view.getUint32(0, true);
+  }
+}
+
+export function SerializeCellInputVec(value) {
+  if(typeof value === "object" && value !== null && "view" in value) return value.view.buffer;
+  const array = new Uint8Array(4 + CellInput.size() * value.length);
+  (new DataView(array.buffer)).setUint32(0, value.length, true);
+  for (let i = 0; i < value.length; i++) {
+    const itemBuffer = SerializeCellInput(value[i]);
+    array.set(new Uint8Array(itemBuffer), 4 + i * CellInput.size());
+  }
+  return array.buffer;
+}
+
+
 export class CellOutput {
   constructor(reader, { validate = true } = {}) {
     this.view = new DataView(assertArrayBuffer(reader));
@@ -1364,6 +1100,54 @@ export function SerializeCellOutput(value) {
 }
 
 
+export class CellOutputVec {
+  constructor(reader, { validate = true } = {}) {
+    this.view = new DataView(assertArrayBuffer(reader));
+    if (validate) {
+      this.validate();
+    }
+  }
+
+  validate(compatible = false) {
+    const offsets = verifyAndExtractOffsets(this.view, 0, true);
+    for (let i = 0; i < offsets.length - 1; i++) {
+      new CellOutput(this.view.buffer.slice(offsets[i], offsets[i + 1]), { validate: false }).validate();
+    }
+  }
+
+  length() {
+    if (this.view.byteLength < 8) {
+      return 0;
+    } else {
+      return this.view.getUint32(4, true) / 4 - 1;
+    }
+  }
+
+  indexAt(i) {
+    const start = 4 + i * 4;
+    const offset = this.view.getUint32(start, true);
+    let offset_end = this.view.byteLength;
+    if (i + 1 < this.length()) {
+      offset_end = this.view.getUint32(start + 4, true);
+    }
+    return new CellOutput(this.view.buffer.slice(offset, offset_end), { validate: false });
+  }
+  toObject() {
+    const len=this.length();
+    var rv=[];
+    for(var i=0;i<len;i++) {
+      rv.push(this.indexAt(i).toObject());
+    }
+    return rv;
+  }
+}
+
+export function SerializeCellOutputVec(value) {
+  if(typeof value === "object" && value !== null && "view" in value) return value.view.buffer;
+  return serializeTable(value.map(item => SerializeCellOutput(item)));
+}
+
+
 export class CellDep {
   constructor(reader, { validate = true } = {}) {
     this.view = new DataView(assertArrayBuffer(reader));
@@ -1400,7 +1184,56 @@ export function SerializeCellDep(value) {
   const array = new Uint8Array(0 + OutPoint.size() + 1);
   const view = new DataView(array.buffer);
   array.set(new Uint8Array(SerializeOutPoint(value.out_point)), 0);
-  view.setUint8(0 + OutPoint.size(), value.dep_type);
+  view.setUint8(0 + OutPoint.size(), fromStringEnum(value.dep_type));
+  return array.buffer;
+}
+
+
+export class CellDepVec {
+  constructor(reader, { validate = true } = {}) {
+    this.view = new DataView(assertArrayBuffer(reader));
+    if (validate) {
+      this.validate();
+    }
+  }
+
+  validate(compatible = false) {
+    if (this.view.byteLength < 4) {
+      dataLengthError(this.view.byteLength, ">4");
+    }
+    const requiredByteLength = this.length() * CellDep.size() + 4;
+    assertDataLength(this.view.byteLength, requiredByteLength);
+    for (let i = 0; i < 0; i++) {
+      const item = this.indexAt(i);
+      item.validate(compatible);
+    }
+  }
+
+  indexAt(i) {
+    return new CellDep(this.view.buffer.slice(4 + i * CellDep.size(), 4 + (i + 1) * CellDep.size()), { validate: false });
+  }
+
+  toObject() {
+    const len=this.length();
+    var rv=[];
+    for(var i=0;i<len;i++) {
+      rv.push(this.indexAt(i).toObject());
+    }
+    return rv;
+  }
+  length() {
+    return this.view.getUint32(0, true);
+  }
+}
+
+export function SerializeCellDepVec(value) {
+  if(typeof value === "object" && value !== null && "view" in value) return value.view.buffer;
+  const array = new Uint8Array(4 + CellDep.size() * value.length);
+  (new DataView(array.buffer)).setUint32(0, value.length, true);
+  for (let i = 0; i < value.length; i++) {
+    const itemBuffer = SerializeCellDep(value[i]);
+    array.set(new Uint8Array(itemBuffer), 4 + i * CellDep.size());
+  }
   return array.buffer;
 }
 
@@ -1529,298 +1362,6 @@ export function SerializeTransaction(value) {
   const buffers = [];
   buffers.push(SerializeRawTransaction(value.raw));
   buffers.push(SerializeBytesVec(value.witnesses));
-  return serializeTable(buffers);
-}
-
-
-export class RawHeader {
-  constructor(reader, { validate = true } = {}) {
-    this.view = new DataView(assertArrayBuffer(reader));
-    if (validate) {
-      this.validate();
-    }
-  }
-
-  getVersion() {
-    return new Uint32(this.view.buffer.slice(0, 0 + Uint32.size()), { validate: false });
-  }
-
-  getCompactTarget() {
-    return new Uint32(this.view.buffer.slice(0 + Uint32.size(), 0 + Uint32.size() + Uint32.size()), { validate: false });
-  }
-
-  getTimestamp() {
-    return new Uint64(this.view.buffer.slice(0 + Uint32.size() + Uint32.size(), 0 + Uint32.size() + Uint32.size() + Uint64.size()), { validate: false });
-  }
-
-  getNumber() {
-    return new Uint64(this.view.buffer.slice(0 + Uint32.size() + Uint32.size() + Uint64.size(), 0 + Uint32.size() + Uint32.size() + Uint64.size() + Uint64.size()), { validate: false });
-  }
-
-  getEpoch() {
-    return new Uint64(this.view.buffer.slice(0 + Uint32.size() + Uint32.size() + Uint64.size() + Uint64.size(), 0 + Uint32.size() + Uint32.size() + Uint64.size() + Uint64.size() + Uint64.size()), { validate: false });
-  }
-
-  getParentHash() {
-    return new Byte32(this.view.buffer.slice(0 + Uint32.size() + Uint32.size() + Uint64.size() + Uint64.size() + Uint64.size(), 0 + Uint32.size() + Uint32.size() + Uint64.size() + Uint64.size() + Uint64.size() + Byte32.size()), { validate: false });
-  }
-
-  getTransactionsRoot() {
-    return new Byte32(this.view.buffer.slice(0 + Uint32.size() + Uint32.size() + Uint64.size() + Uint64.size() + Uint64.size() + Byte32.size(), 0 + Uint32.size() + Uint32.size() + Uint64.size() + Uint64.size() + Uint64.size() + Byte32.size() + Byte32.size()), { validate: false });
-  }
-
-  getProposalsHash() {
-    return new Byte32(this.view.buffer.slice(0 + Uint32.size() + Uint32.size() + Uint64.size() + Uint64.size() + Uint64.size() + Byte32.size() + Byte32.size(), 0 + Uint32.size() + Uint32.size() + Uint64.size() + Uint64.size() + Uint64.size() + Byte32.size() + Byte32.size() + Byte32.size()), { validate: false });
-  }
-
-  getUnclesHash() {
-    return new Byte32(this.view.buffer.slice(0 + Uint32.size() + Uint32.size() + Uint64.size() + Uint64.size() + Uint64.size() + Byte32.size() + Byte32.size() + Byte32.size(), 0 + Uint32.size() + Uint32.size() + Uint64.size() + Uint64.size() + Uint64.size() + Byte32.size() + Byte32.size() + Byte32.size() + Byte32.size()), { validate: false });
-  }
-
-  getDao() {
-    return new Byte32(this.view.buffer.slice(0 + Uint32.size() + Uint32.size() + Uint64.size() + Uint64.size() + Uint64.size() + Byte32.size() + Byte32.size() + Byte32.size() + Byte32.size(), 0 + Uint32.size() + Uint32.size() + Uint64.size() + Uint64.size() + Uint64.size() + Byte32.size() + Byte32.size() + Byte32.size() + Byte32.size() + Byte32.size()), { validate: false });
-  }
-
-  validate(compatible = false) {
-    assertDataLength(this.view.byteLength, RawHeader.size());
-    this.getVersion().validate(compatible);
-    this.getCompactTarget().validate(compatible);
-    this.getTimestamp().validate(compatible);
-    this.getNumber().validate(compatible);
-    this.getEpoch().validate(compatible);
-    this.getParentHash().validate(compatible);
-    this.getTransactionsRoot().validate(compatible);
-    this.getProposalsHash().validate(compatible);
-    this.getUnclesHash().validate(compatible);
-    this.getDao().validate(compatible);
-  }
-  static size() {
-    return 0 + Uint32.size() + Uint32.size() + Uint64.size() + Uint64.size() + Uint64.size() + Byte32.size() + Byte32.size() + Byte32.size() + Byte32.size() + Byte32.size();
-  }
-  toObject() {
-    let obj={};
-    obj["version"]=this.getVersion().toObject();
-    obj["compact_target"]=this.getCompactTarget().toObject();
-    obj["timestamp"]=this.getTimestamp().toObject();
-    obj["number"]=this.getNumber().toObject();
-    obj["epoch"]=this.getEpoch().toObject();
-    obj["parent_hash"]=this.getParentHash().toObject();
-    obj["transactions_root"]=this.getTransactionsRoot().toObject();
-    obj["proposals_hash"]=this.getProposalsHash().toObject();
-    obj["uncles_hash"]=this.getUnclesHash().toObject();
-    obj["dao"]=this.getDao().toObject();
-    return obj;
-  }
-}
-
-export function SerializeRawHeader(value) {
-  if(typeof value === "object" && value !== null && "view" in value) return value.view.buffer;
-  const array = new Uint8Array(0 + Uint32.size() + Uint32.size() + Uint64.size() + Uint64.size() + Uint64.size() + Byte32.size() + Byte32.size() + Byte32.size() + Byte32.size() + Byte32.size());
-  const view = new DataView(array.buffer);
-  array.set(new Uint8Array(SerializeUint32(value.version)), 0);
-  array.set(new Uint8Array(SerializeUint32(value.compact_target)), 0 + Uint32.size());
-  array.set(new Uint8Array(SerializeUint64(value.timestamp)), 0 + Uint32.size() + Uint32.size());
-  array.set(new Uint8Array(SerializeUint64(value.number)), 0 + Uint32.size() + Uint32.size() + Uint64.size());
-  array.set(new Uint8Array(SerializeUint64(value.epoch)), 0 + Uint32.size() + Uint32.size() + Uint64.size() + Uint64.size());
-  array.set(new Uint8Array(SerializeByte32(value.parent_hash)), 0 + Uint32.size() + Uint32.size() + Uint64.size() + Uint64.size() + Uint64.size());
-  array.set(new Uint8Array(SerializeByte32(value.transactions_root)), 0 + Uint32.size() + Uint32.size() + Uint64.size() + Uint64.size() + Uint64.size() + Byte32.size());
-  array.set(new Uint8Array(SerializeByte32(value.proposals_hash)), 0 + Uint32.size() + Uint32.size() + Uint64.size() + Uint64.size() + Uint64.size() + Byte32.size() + Byte32.size());
-  array.set(new Uint8Array(SerializeByte32(value.uncles_hash)), 0 + Uint32.size() + Uint32.size() + Uint64.size() + Uint64.size() + Uint64.size() + Byte32.size() + Byte32.size() + Byte32.size());
-  array.set(new Uint8Array(SerializeByte32(value.dao)), 0 + Uint32.size() + Uint32.size() + Uint64.size() + Uint64.size() + Uint64.size() + Byte32.size() + Byte32.size() + Byte32.size() + Byte32.size());
-  return array.buffer;
-}
-
-
-export class Header {
-  constructor(reader, { validate = true } = {}) {
-    this.view = new DataView(assertArrayBuffer(reader));
-    if (validate) {
-      this.validate();
-    }
-  }
-
-  getRaw() {
-    return new RawHeader(this.view.buffer.slice(0, 0 + RawHeader.size()), { validate: false });
-  }
-
-  getNonce() {
-    return new Uint128(this.view.buffer.slice(0 + RawHeader.size(), 0 + RawHeader.size() + Uint128.size()), { validate: false });
-  }
-
-  validate(compatible = false) {
-    assertDataLength(this.view.byteLength, Header.size());
-    this.getRaw().validate(compatible);
-    this.getNonce().validate(compatible);
-  }
-  static size() {
-    return 0 + RawHeader.size() + Uint128.size();
-  }
-  toObject() {
-    let obj={};
-    obj["raw"]=this.getRaw().toObject();
-    obj["nonce"]=this.getNonce().toObject();
-    return obj;
-  }
-}
-
-export function SerializeHeader(value) {
-  if(typeof value === "object" && value !== null && "view" in value) return value.view.buffer;
-  const array = new Uint8Array(0 + RawHeader.size() + Uint128.size());
-  const view = new DataView(array.buffer);
-  array.set(new Uint8Array(SerializeRawHeader(value.raw)), 0);
-  array.set(new Uint8Array(SerializeUint128(value.nonce)), 0 + RawHeader.size());
-  return array.buffer;
-}
-
-
-export class UncleBlock {
-  constructor(reader, { validate = true } = {}) {
-    this.view = new DataView(assertArrayBuffer(reader));
-    if (validate) {
-      this.validate();
-    }
-  }
-
-  validate(compatible = false) {
-    const offsets = verifyAndExtractOffsets(this.view, 0, true);
-    new Header(this.view.buffer.slice(offsets[0], offsets[1]), { validate: false }).validate();
-    new ProposalShortIdVec(this.view.buffer.slice(offsets[1], offsets[2]), { validate: false }).validate();
-  }
-
-  getHeader() {
-    const start = 4;
-    const offset = this.view.getUint32(start, true);
-    const offset_end = this.view.getUint32(start + 4, true);
-    return new Header(this.view.buffer.slice(offset, offset_end), { validate: false });
-  }
-
-  getProposals() {
-    const start = 8;
-    const offset = this.view.getUint32(start, true);
-    const offset_end = this.view.byteLength;
-    return new ProposalShortIdVec(this.view.buffer.slice(offset, offset_end), { validate: false });
-  }
-  toObject() {
-    let obj={};
-    obj["header"]=this.getHeader().toObject();
-    obj["proposals"]=this.getProposals().toObject();
-    return obj;
-  }
-}
-
-export function SerializeUncleBlock(value) {
-  if(typeof value === "object" && value !== null && "view" in value) return value.view.buffer;
-  const buffers = [];
-  buffers.push(SerializeHeader(value.header));
-  buffers.push(SerializeProposalShortIdVec(value.proposals));
-  return serializeTable(buffers);
-}
-
-
-export class Block {
-  constructor(reader, { validate = true } = {}) {
-    this.view = new DataView(assertArrayBuffer(reader));
-    if (validate) {
-      this.validate();
-    }
-  }
-
-  validate(compatible = false) {
-    const offsets = verifyAndExtractOffsets(this.view, 0, true);
-    new Header(this.view.buffer.slice(offsets[0], offsets[1]), { validate: false }).validate();
-    new UncleBlockVec(this.view.buffer.slice(offsets[1], offsets[2]), { validate: false }).validate();
-    new TransactionVec(this.view.buffer.slice(offsets[2], offsets[3]), { validate: false }).validate();
-    new ProposalShortIdVec(this.view.buffer.slice(offsets[3], offsets[4]), { validate: false }).validate();
-  }
-
-  getHeader() {
-    const start = 4;
-    const offset = this.view.getUint32(start, true);
-    const offset_end = this.view.getUint32(start + 4, true);
-    return new Header(this.view.buffer.slice(offset, offset_end), { validate: false });
-  }
-
-  getUncles() {
-    const start = 8;
-    const offset = this.view.getUint32(start, true);
-    const offset_end = this.view.getUint32(start + 4, true);
-    return new UncleBlockVec(this.view.buffer.slice(offset, offset_end), { validate: false });
-  }
-
-  getTransactions() {
-    const start = 12;
-    const offset = this.view.getUint32(start, true);
-    const offset_end = this.view.getUint32(start + 4, true);
-    return new TransactionVec(this.view.buffer.slice(offset, offset_end), { validate: false });
-  }
-
-  getProposals() {
-    const start = 16;
-    const offset = this.view.getUint32(start, true);
-    const offset_end = this.view.byteLength;
-    return new ProposalShortIdVec(this.view.buffer.slice(offset, offset_end), { validate: false });
-  }
-  toObject() {
-    let obj={};
-    obj["header"]=this.getHeader().toObject();
-    obj["uncles"]=this.getUncles().toObject();
-    obj["transactions"]=this.getTransactions().toObject();
-    obj["proposals"]=this.getProposals().toObject();
-    return obj;
-  }
-}
-
-export function SerializeBlock(value) {
-  if(typeof value === "object" && value !== null && "view" in value) return value.view.buffer;
-  const buffers = [];
-  buffers.push(SerializeHeader(value.header));
-  buffers.push(SerializeUncleBlockVec(value.uncles));
-  buffers.push(SerializeTransactionVec(value.transactions));
-  buffers.push(SerializeProposalShortIdVec(value.proposals));
-  return serializeTable(buffers);
-}
-
-
-export class CellbaseWitness {
-  constructor(reader, { validate = true } = {}) {
-    this.view = new DataView(assertArrayBuffer(reader));
-    if (validate) {
-      this.validate();
-    }
-  }
-
-  validate(compatible = false) {
-    const offsets = verifyAndExtractOffsets(this.view, 0, true);
-    new Script(this.view.buffer.slice(offsets[0], offsets[1]), { validate: false }).validate();
-    new Bytes(this.view.buffer.slice(offsets[1], offsets[2]), { validate: false }).validate();
-  }
-
-  getLock() {
-    const start = 4;
-    const offset = this.view.getUint32(start, true);
-    const offset_end = this.view.getUint32(start + 4, true);
-    return new Script(this.view.buffer.slice(offset, offset_end), { validate: false });
-  }
-
-  getMessage() {
-    const start = 8;
-    const offset = this.view.getUint32(start, true);
-    const offset_end = this.view.byteLength;
-    return new Bytes(this.view.buffer.slice(offset, offset_end), { validate: false });
-  }
-  toObject() {
-    let obj={};
-    obj["lock"]=this.getLock().toObject();
-    obj["message"]=this.getMessage().toObject();
-    return obj;
-  }
-}
-
-export function SerializeCellbaseWitness(value) {
-  if(typeof value === "object" && value !== null && "view" in value) return value.view.buffer;
-  const buffers = [];
-  buffers.push(SerializeScript(value.lock));
-  buffers.push(SerializeBytes(value.message));
   return serializeTable(buffers);
 }
 
