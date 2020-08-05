@@ -3,6 +3,8 @@
 import type Transport from "@ledgerhq/hw-transport";
 import BIPPath from "bip32-path";
 import * as blockchain from "./annotated";
+import Blake2b from "blake2b-wasm";
+import * as bech32 from "bech32";
 
 /**
  * Nervos API
@@ -32,12 +34,14 @@ export default class Ckb {
    * get CKB address for a given BIP 32 path.
    *
    * @param path a path in BIP 32 format
-   * @return an object with a publicKey
+   * @return an object with a publicKey, lockArg, and (secp256k1+blake160) address.
    * @example
    * const result = await ckb.getWalletPublicKey("44'/144'/0'/0/0");
-   * const publicKey = result;
+   * const publicKey = result.publicKey;
+   * const lockArg = result.lockArg;
+   * const address = result.address;
    */
-  async getWalletPublicKey(path: string): Promise<string> {
+  async getWalletPublicKey(path: string, testnet: boolean): Promise<string> {
     const bipPath = BIPPath.fromString(path).toPathArray();
 
     const cla = 0x80;
@@ -52,8 +56,26 @@ export default class Ckb {
     });
 
     const response = await this.transport.send(cla, ins, p1, p2, data);
+
     const publicKeyLength = response[0];
-    return response.slice(1, 1 + publicKeyLength).toString("hex");
+    const publicKey = response.slice(1, 1 + publicKeyLength);
+
+    const compressedPublicKey = Buffer.alloc(33);
+    compressedPublicKey.fill((publicKey[64]&1)?"03":"02", 0, 1, 'hex');
+    compressedPublicKey.fill(publicKey.subarray(1,33), 1, 33);
+    const lockArg = Buffer.from(Blake2b(32, null, null, Uint8Array.from("ckb-default-hash"))
+	    .update(compressedPublicKey).digest('binary').subarray(0,20));
+
+    const addr_contents = Buffer.alloc(22);
+    addr_contents.fill("0100", 0, 2, 'hex');
+    addr_contents.fill(lockArg, 2, 22);
+    const addr = bech32.encode(testnet?'ckt':'ckb', bech32.toWords(addr_contents));
+
+    return {
+      publicKey: publicKey.toString("hex"),
+      lockArg: lockArg.toString("hex"),
+      address: addr
+    };
   }
 
   /**

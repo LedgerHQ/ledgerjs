@@ -107,15 +107,18 @@ get CKB address for a given BIP 32 path.
 ##### Parameters
 
 -   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
+-   `testnet` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** 
 
 ##### Examples
 
 ```javascript
 const result = await ckb.getWalletPublicKey("44'/144'/0'/0/0");
-const publicKey = result;
+const publicKey = result.publicKey;
+const lockArg = result.lockArg;
+const address = result.address;
 ```
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** an object with a publicKey
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** an object with a publicKey, lockArg, and (secp256k1+blake160) address.
 
 #### getWalletExtendedPublicKey
 

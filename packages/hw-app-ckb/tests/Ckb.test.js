@@ -1,3 +1,8 @@
+/**
+ * @jest-environment node
+ */
+// Need to use node for tests because jest breaks Buffer inheritance in jsdom.
+
 import {
   createTransportReplayer,
   RecordStore
