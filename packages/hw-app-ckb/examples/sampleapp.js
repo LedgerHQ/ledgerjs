@@ -289,6 +289,13 @@ const getAddress = async () => {
   return result;
 };
 
+const getPublicKey = async () => {
+  const transport = await tp;
+  const ckb = new Ckb(transport);
+  const result = await ckb.getWalletPublicKey("44'/309'/0'/1/0");
+  return result;
+};
+
 const getExtendedPublicKey = async () => {
   const transport = await tp;
   const ckb = new Ckb(transport);
@@ -301,6 +308,8 @@ const doAll = async () => {
     console.log(walletId);
     version = await getVersion();
     console.log(version);
+    publicKey = await getPublicKey();;
+    console.log(publicKey);
     extendedPublicKey = await getExtendedPublicKey();;
     console.log(extendedPublicKey);
     signature = await signTransaction();
