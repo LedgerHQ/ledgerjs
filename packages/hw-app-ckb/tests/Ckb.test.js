@@ -256,3 +256,22 @@ test("ckb.signTransaction", async () => {
 
   expect(result).toEqual("ffa4127d531b7d22bc5f6cfd0cdf23431eb510ab36def53898d156abe7d869b764274c4417ff2342a80c78e8e645a59b20ccac702202d5f2cd2b822a02241272009000");
 });
+
+test("ckb.signMessage", async () => {
+  const Transport = createTransportReplayer(
+    RecordStore.fromString(`
+    => 800600001600058000002c80000135800000000000000100000000
+    <= 00009000
+    => 800681001a4e6572766f73204d6573736167653a48656c6c6f20776f726c64
+    <= be13155a7f6815c715f7dcdc797038e1d5e03621a716ce9aafa2265408ab36833b262855b79e28c99a43ed8dc046577e3cd7445e0f5a8c2a8ebcb7092c53141d029000
+    `)
+  );
+
+  const transport = await Transport.open();
+
+  const ckb = new Ckb(transport);
+
+  const result = await ckb.signMessage("m/44'/309'/0'/1/0", "48656c6c6f20776f726c64", false);
+
+  expect(result).toEqual("be13155a7f6815c715f7dcdc797038e1d5e03621a716ce9aafa2265408ab36833b262855b79e28c99a43ed8dc046577e3cd7445e0f5a8c2a8ebcb7092c53141d029000");
+});

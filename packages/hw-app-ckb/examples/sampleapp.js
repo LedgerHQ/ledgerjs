@@ -50,7 +50,7 @@ const signTransaction = async () => {
    * as numbers, which will be written into the structure in little-endian
    * order.
    */
-  transaction = {
+  const transaction = {
     "version": "0x0",
     "cell_deps": [
       {
@@ -273,6 +273,22 @@ const signTransaction = async () => {
   /* The result is represented in hexadecimal notation. */
   const result = await ckb.signTransaction(sign_path, transaction, witnesses, contexts, change_path);
   return result;
+}
+
+const signMessage = async () => {
+  const transport = await tp;
+  const ckb = new Ckb(transport);
+	
+  sign_path = "44'/309'/1/0";
+
+  /* The result is represented in hexadecimal notation. If the last argument is
+   * true, show the literal hex; otherwise here we would show the string "hello
+   * world" on the ledger, which is what this hex is interpreted as ASCII or
+   * utf8.*/
+
+  const result = await ckb.signMessage(sign_path, "48656c6c6f20776f726c64", false);
+
+  return result;
 };
 
 const getVersion = async () => {
@@ -304,6 +320,8 @@ const doAll = async () => {
     extendedPublicKey = await getExtendedPublicKey();;
     console.log(extendedPublicKey);
     signature = await signTransaction();
+    console.log(signature);
+    signature = await signMessage();
     console.log(signature);
     process.exit(0);
 };

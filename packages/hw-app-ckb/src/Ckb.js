@@ -254,4 +254,38 @@ export default class Ckb {
 
     return result;
   }
+
+  async signMessage(
+    path: string,
+    rawMsgHex: string,
+    displayHex: bool
+  ): Promise<string> {
+    const bipPath = BIPPath.fromString(path).toPathArray();
+    const magicBytes = Buffer.from("Nervos Message:");
+    const rawMsg = Buffer.concat([magicBytes, Buffer.from(rawMsgHex, "hex")]);
+
+    //Init apdu
+    let rawPath = Buffer.alloc(1 + 1 + bipPath.length * 4);
+    rawPath.writeInt8(displayHex, 0);
+    rawPath.writeInt8(bipPath.length, 1);
+    bipPath.forEach((segment, index) => {
+      rawPath.writeUInt32BE(segment, 2 + index * 4);
+    });
+    await this.transport.send(0x80, 0x06, 0x00, 0x00, rawPath);
+
+    // Msg Chunking
+    const maxApduSize = 230;
+    let txFullChunks = Math.floor(rawMsg.length / maxApduSize);
+    for (let i = 0; i < txFullChunks; i++) {
+      let data = rawMsg.slice(i*maxApduSize, (i+1)*maxApduSize);
+      await this.transport.send(0x80, 0x06, 0x01, 0x00, data);
+    }
+
+    let lastOffset = Math.floor(rawMsg.length / maxApduSize) * maxApduSize;
+    let lastData = rawMsg.slice(lastOffset, lastOffset+maxApduSize);
+    let response = await this.transport.send(0x80, 0x06, 0x81, 0x00, lastData);
+    return response.toString("hex");
+  }
+
 }
+
