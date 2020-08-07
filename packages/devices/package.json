@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/devices",
-  "version": "5.19.1",
+  "version": "5.21.0",
   "description": "Ledger devices",
   "keywords": [
     "Ledger"
@@ -20,11 +20,11 @@
   "module": "lib-es/index.js",
   "license": "Apache-2.0",
   "devDependencies": {
-    "flow-bin": "^0.129.0"
+    "flow-bin": "^0.130.0"
   },
   "dependencies": {
-    "@ledgerhq/errors": "^5.19.1",
-    "@ledgerhq/logs": "^5.19.1",
+    "@ledgerhq/errors": "^5.21.0",
+    "@ledgerhq/logs": "^5.21.0",
     "rxjs": "^6.6.0"
   },
   "scripts": {

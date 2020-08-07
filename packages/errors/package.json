@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/errors",
-  "version": "5.19.1",
+  "version": "5.21.0",
   "description": "Ledger common errors",
   "keywords": [
     "Ledger"
@@ -20,7 +20,7 @@
   "module": "dist/index.js",
   "license": "Apache-2.0",
   "devDependencies": {
-    "flow-bin": "^0.129.0"
+    "flow-bin": "^0.130.0"
   },
   "scripts": {
     "flow": "flow",
