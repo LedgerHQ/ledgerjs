@@ -73,11 +73,13 @@ const btc = new Btc(transport)
 -   `opts` **([boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | {verify: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, format: [AddressFormat](#addressformat)?})?** 
 -   `options`  an object with optional these fields:-   verify (boolean) will ask user to confirm the address on the device
 
-    -   format ("legacy" | "p2sh" | "bech32") to use different bitcoin address formatter.NB The normal usage is to use:-   legacy format with 44' paths
+    -   format ("legacy" | "p2sh" | "bech32" | "cashaddr") to use different bitcoin address formatter.NB The normal usage is to use:-   legacy format with 44' paths
 
     -   p2sh format with 49' paths
 
     -   bech32 format with 173' paths
+
+    -   cashaddr in case of Bitcoin Cash
 
 ##### Examples
 
@@ -233,9 +235,9 @@ Type: {inputs: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Referen
 
 ### AddressFormat
 
-address format is one of legacy | p2sh | bech32
+address format is one of legacy | p2sh | bech32 | cashaddr
 
-Type: (`"legacy"` \| `"p2sh"` \| `"bech32"`)
+Type: (`"legacy"` \| `"p2sh"` \| `"bech32"` \| `"cashaddr"`)
 
 ### serializeTransactionOutputs
 

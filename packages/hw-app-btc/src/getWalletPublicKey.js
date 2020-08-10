@@ -3,14 +3,15 @@ import type Transport from "@ledgerhq/hw-transport";
 import { bip32asBuffer } from "./bip32";
 
 /**
- * address format is one of legacy | p2sh | bech32
+ * address format is one of legacy | p2sh | bech32 | cashaddr
  */
-export type AddressFormat = "legacy" | "p2sh" | "bech32";
+export type AddressFormat = "legacy" | "p2sh" | "bech32" | "cashaddr";
 
 const addressFormatMap = {
   legacy: 0,
   p2sh: 1,
   bech32: 2,
+  cashaddr: 3,
 };
 
 export async function getWalletPublicKey(

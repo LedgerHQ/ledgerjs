@@ -47,7 +47,7 @@ export default class Btc {
    *
    * - verify (boolean) will ask user to confirm the address on the device
    *
-   * - format ("legacy" | "p2sh" | "bech32") to use different bitcoin address formatter.
+   * - format ("legacy" | "p2sh" | "bech32" | "cashaddr") to use different bitcoin address formatter.
    *
    * NB The normal usage is to use:
    *
@@ -56,6 +56,8 @@ export default class Btc {
    * - p2sh format with 49' paths
    *
    * - bech32 format with 173' paths
+   *
+   * - cashaddr in case of Bitcoin Cash
    *
    * @example
    * btc.getWalletPublicKey("44'/0'/0'/0/0").then(o => o.bitcoinAddress)
