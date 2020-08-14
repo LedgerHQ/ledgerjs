@@ -1,4 +1,5 @@
 {
+  "private": true,
   "name": "@ledgerhq/hw-transport-u2f",
   "version": "5.22.0",
   "description": "Ledger Hardware Wallet Web implementation of the communication layer, using U2F api",
