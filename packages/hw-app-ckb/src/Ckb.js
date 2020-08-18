@@ -63,8 +63,9 @@ export default class Ckb {
     const compressedPublicKey = Buffer.alloc(33);
     compressedPublicKey.fill(publicKey[64] & 1 ? "03" : "02", 0, 1, "hex");
     compressedPublicKey.fill(publicKey.subarray(1, 33), 1, 33);
+    const hashPersonalization = Uint8Array.from([99, 107, 98, 45, 100, 101, 102, 97, 117, 108, 116, 45, 104, 97, 115, 104]);
     const lockArg = Buffer.from(
-      Blake2b(32, null, null, Uint8Array.from("ckb-default-hash"))
+      Blake2b(32, null, null, hashPersonalization)
         .update(compressedPublicKey)
         .digest("binary")
         .subarray(0, 20)
@@ -249,7 +250,7 @@ export default class Ckb {
       0x00,
       lastData
     );
-    return response.toString("hex");
+    return response.slice(0,65).toString("hex");
   }
 
   /**
@@ -331,7 +332,7 @@ export default class Ckb {
     let lastOffset = Math.floor(rawMsg.length / maxApduSize) * maxApduSize;
     let lastData = rawMsg.slice(lastOffset, lastOffset+maxApduSize);
     let response = await this.transport.send(0x80, 0x06, 0x81, 0x00, lastData);
-    return response.toString("hex");
+    return response.slice(0,65).toString("hex");
   }
 
 }
