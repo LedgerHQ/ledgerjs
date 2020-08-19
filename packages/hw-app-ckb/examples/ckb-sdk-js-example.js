@@ -3,7 +3,14 @@ const util = require('util')
 const CKB = require('../lib').default
 const formatter = require('../../ckb-sdk-rpc/lib/paramsFormatter').default
 
-const useSpeculos = true
+// Note: there is currently a speculos bug that appears not to have been
+// adequately addressed that prevents correctly generating the the last byte of
+// a recoverable signature. You can work around this by replacing the last byte
+// with 00, trying to send the signature, and if that fails trying again with
+// 01. This issue _ONLY_ occurs with Speculos, which has a different
+// implementation of cryptography primitives than the real hardware.
+const useSpeculos = false
+
 let Transport = null
 if ( useSpeculos ) {
 // For speculos:
