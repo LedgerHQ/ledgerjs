@@ -3,13 +3,16 @@ const util = require('util')
 const CKB = require('../lib').default
 const formatter = require('../../ckb-sdk-rpc/lib/paramsFormatter').default
 
-// Note: there is currently a speculos bug that appears not to have been
-// adequately addressed that prevents correctly generating the the last byte of
-// a recoverable signature. You can work around this by replacing the last byte
-// with 00, trying to send the signature, and if that fails trying again with
-// 01. This issue _ONLY_ occurs with Speculos, which has a different
-// implementation of cryptography primitives than the real hardware.
+// Whether to connect to a running instance of the Speculos simulator for
+// ledger apps or a real physical ledger
 const useSpeculos = false
+
+// Note: there is currently a bug in the speculos simulator that appears not to
+// have been adequately addressed that prevents correctly generating the the
+// last byte of a recoverable signature. You can work around this by replacing
+// the last byte with 00, trying to send the signature, and if that fails
+// trying again with 01. This issue _ONLY_ occurs with Speculos, which has a
+// different implementation of cryptography primitives than the real hardware.
 
 let Transport = null
 if ( useSpeculos ) {
