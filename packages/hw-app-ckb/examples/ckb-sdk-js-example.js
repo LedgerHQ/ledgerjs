@@ -1,4 +1,9 @@
 /* eslint-disable */
+
+/* NOTE: This file is meant to be run from https://github.com/nervosnetwork/ckb-sdk-js/tree/develop/packages/ckb-sdk-core/examples
+ * and works best when that repo exists as a package in ../../ (the ledgerjs/packages dir)
+ */
+
 const util = require('util')
 const CKB = require('../lib').default
 const formatter = require('../../ckb-sdk-rpc/lib/paramsFormatter').default

@@ -5,6 +5,13 @@
 
 Welcome to Ledger's JavaScript libraries.
 
+## To build with nixpkgs:
+```bash
+nix-shell
+yarn
+yarn run build
+```
+
 **See also:**
 
 - [Changelog](https://github.com/LedgerHQ/ledgerjs/releases)
