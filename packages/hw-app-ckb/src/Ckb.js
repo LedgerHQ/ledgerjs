@@ -178,7 +178,7 @@ export default class Ckb {
         return pathSrc.toPathArray();
       }
       if (typeof pathSrc === "string") {
-        return BIPPath.fromString(signPath).toPathArray();
+        return BIPPath.fromString(pathSrc).toPathArray();
       }
     };
 
