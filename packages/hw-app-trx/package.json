@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-app-trx",
-  "version": "5.22.0",
+  "version": "5.23.0",
   "description": "Ledger Hardware Wallet Tron Application API",
   "keywords": [
     "Ledger",
@@ -26,8 +26,8 @@
   "module": "lib-es/Trx.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/errors": "^5.22.0",
-    "@ledgerhq/hw-transport": "^5.22.0"
+    "@ledgerhq/errors": "^5.23.0",
+    "@ledgerhq/hw-transport": "^5.23.0"
   },
   "devDependencies": {
     "flow-bin": "^0.133.0"
