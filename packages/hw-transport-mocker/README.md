@@ -98,8 +98,6 @@ thrown by ensureQueueEmpty
 -   warning:
     allows to override the warning function (defaults to console.warn)
 
-Type: {autoSkipUnknownApdu: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean), warning: function ([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)): void}
-
 #### Properties
 
 -   `autoSkipUnknownApdu` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** 

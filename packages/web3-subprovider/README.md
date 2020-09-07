@@ -21,8 +21,6 @@ Library for Ledger Hardware Wallets.
 
 ### SubproviderOptions
 
-Type: {networkId: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), paths: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>?, askConfirm: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, accountsLength: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, accountsOffset: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?}
-
 #### Properties
 
 -   `networkId` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 

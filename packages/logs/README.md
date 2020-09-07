@@ -21,8 +21,6 @@ Utility library that is used by all Ledger libraries to dispatch logs so we can 
 
 A Log object
 
-Type: {type: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), message: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?, data: any?, id: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), date: [Date](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Date)}
-
 #### Properties
 
 -   `type` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 

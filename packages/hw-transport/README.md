@@ -51,8 +51,6 @@
 
 ### Subscription
 
-Type: {unsubscribe: function (): void}
-
 #### Properties
 
 -   `unsubscribe` **function (): void** 
@@ -67,8 +65,6 @@ type: add or remove event
 descriptor: a parameter that can be passed to open(descriptor)
 deviceModel: device info on the model (is it a nano s, nano x, ...)
 device: transport specific device info
-
-Type: {type: (`"add"` \| `"remove"`), descriptor: Descriptor, deviceModel: DeviceModel??, device: [Device](#device)?}
 
 #### Properties
 

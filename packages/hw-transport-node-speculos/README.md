@@ -71,8 +71,6 @@ $ ./speculos.py -m nanos ./apps/btc.elf --sdk 1.6 --seed "abandon abandon abando
 
 ### SpeculosTransportOpts
 
-Type: {apduPort: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), buttonPort: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, automationPort: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, host: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?}
-
 #### Properties
 
 -   `apduPort` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
