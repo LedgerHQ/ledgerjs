@@ -114,7 +114,6 @@ export async function createTransaction(
 
   const isDecred = additionals.includes("decred");
   const isXST = additionals.includes("stealthcoin");
-  const hasTimestamp = initialTimestamp !== undefined;
   let startTime = Date.now();
   const sapling = additionals.includes("sapling");
   const bech32 = segwit && additionals.includes("bech32");
@@ -234,7 +233,7 @@ export async function createTransaction(
     }
   }
 
-  if (hasTimestamp) {
+  if (initialTimestamp !== undefined) {
     targetTransaction.timestamp = Buffer.alloc(4);
     targetTransaction.timestamp.writeUInt32LE(
       Math.floor(initialTimestamp + (Date.now() - startTime) / 1000),
