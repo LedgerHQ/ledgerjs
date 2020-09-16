@@ -29,7 +29,7 @@
     "@ledgerhq/errors": "^5.23.0",
     "@ledgerhq/hw-transport": "^5.23.0",
     "@ledgerhq/logs": "^5.23.0",
-    "axios": "^0.19.0",
+    "axios": "^0.20.0",
     "ws": "6"
   },
   "devDependencies": {
