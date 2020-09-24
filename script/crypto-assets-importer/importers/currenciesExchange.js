@@ -8,7 +8,7 @@ module.exports = {
   path: "coins",
   output: "data/exchange/coins.js",
   outputTemplate: (data) =>
-    "export default [" +
+    "module.exports = [" +
     data.map((item) => JSON.stringify(item)).join(",\n\t") +
     "];\n",
 
