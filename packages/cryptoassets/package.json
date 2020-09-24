@@ -1,7 +1,7 @@
 {
     "name": "@ledgerhq/cryptoassets",
     "version": "5.23.0",
-    "description": "Ledger common errors",
+    "description": "Ledger crypto-assets list",
     "keywords": [
       "Ledger"
     ],

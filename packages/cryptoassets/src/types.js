@@ -1,5 +1,11 @@
 // @flow
 
+export type {
+  CryptoCurrencyConfig,
+  CryptoCurrencyIds,
+  CryptoCurrencyObjMap,
+} from "./currencies";
+
 /**
  *
  */
