@@ -1,6 +1,6 @@
 const fs = require("fs");
 
-exports.readFileJSON = path =>
+exports.readFileJSON = (path) =>
   new Promise((resolve, reject) => {
     fs.readFile(path, "utf-8", (err, data) => {
       if (err) reject(err);
@@ -13,3 +13,6 @@ exports.readFileJSON = path =>
       }
     });
   });
+
+exports.JSONstringifyReadableArray = (array) =>
+  "[\n" + array.map((item) => JSON.stringify(item)).join(",\n") + "\n]";
