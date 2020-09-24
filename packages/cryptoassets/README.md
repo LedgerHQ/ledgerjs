@@ -19,50 +19,54 @@ There are two modes of usage of this library.
 
 #### Table of Contents
 
+-   [getAbandonSeedAddress](#getabandonseedaddress)
+    -   [Parameters](#parameters)
 -   [CryptoCurrencyObjMap](#cryptocurrencyobjmap)
 -   [CryptoCurrencyConfig](#cryptocurrencyconfig)
 -   [CryptoCurrencyIds](#cryptocurrencyids)
 -   [listCryptoCurrencies](#listcryptocurrencies)
-    -   [Parameters](#parameters)
--   [findCryptoCurrency](#findcryptocurrency)
     -   [Parameters](#parameters-1)
--   [findCryptoCurrencyByScheme](#findcryptocurrencybyscheme)
+-   [findCryptoCurrency](#findcryptocurrency)
     -   [Parameters](#parameters-2)
--   [findCryptoCurrencyByTicker](#findcryptocurrencybyticker)
+-   [findCryptoCurrencyByScheme](#findcryptocurrencybyscheme)
     -   [Parameters](#parameters-3)
--   [findCryptoCurrencyById](#findcryptocurrencybyid)
+-   [findCryptoCurrencyByTicker](#findcryptocurrencybyticker)
     -   [Parameters](#parameters-4)
--   [findCryptoCurrencyByKeyword](#findcryptocurrencybykeyword)
+-   [findCryptoCurrencyById](#findcryptocurrencybyid)
     -   [Parameters](#parameters-5)
--   [hasCryptoCurrencyId](#hascryptocurrencyid)
+-   [findCryptoCurrencyByKeyword](#findcryptocurrencybykeyword)
     -   [Parameters](#parameters-6)
--   [getCryptoCurrencyById](#getcryptocurrencybyid)
+-   [hasCryptoCurrencyId](#hascryptocurrencyid)
     -   [Parameters](#parameters-7)
--   [hasFiatCurrencyTicker](#hasfiatcurrencyticker)
+-   [getCryptoCurrencyById](#getcryptocurrencybyid)
     -   [Parameters](#parameters-8)
--   [findFiatCurrencyByTicker](#findfiatcurrencybyticker)
+-   [findExchangeCurrencyConfig](#findexchangecurrencyconfig)
     -   [Parameters](#parameters-9)
--   [getFiatCurrencyByTicker](#getfiatcurrencybyticker)
+-   [hasFiatCurrencyTicker](#hasfiatcurrencyticker)
     -   [Parameters](#parameters-10)
+-   [findFiatCurrencyByTicker](#findfiatcurrencybyticker)
+    -   [Parameters](#parameters-11)
+-   [getFiatCurrencyByTicker](#getfiatcurrencybyticker)
+    -   [Parameters](#parameters-12)
 -   [listFiatCurrencies](#listfiatcurrencies)
 -   [listTokens](#listtokens)
-    -   [Parameters](#parameters-11)
--   [listTokensForCryptoCurrency](#listtokensforcryptocurrency)
-    -   [Parameters](#parameters-12)
--   [listTokenTypesForCryptoCurrency](#listtokentypesforcryptocurrency)
     -   [Parameters](#parameters-13)
--   [findTokenByTicker](#findtokenbyticker)
+-   [listTokensForCryptoCurrency](#listtokensforcryptocurrency)
     -   [Parameters](#parameters-14)
--   [findTokenById](#findtokenbyid)
+-   [listTokenTypesForCryptoCurrency](#listtokentypesforcryptocurrency)
     -   [Parameters](#parameters-15)
--   [findTokenByAddress](#findtokenbyaddress)
+-   [findTokenByTicker](#findtokenbyticker)
     -   [Parameters](#parameters-16)
--   [hasTokenId](#hastokenid)
+-   [findTokenById](#findtokenbyid)
     -   [Parameters](#parameters-17)
--   [getTokenById](#gettokenbyid)
+-   [findTokenByAddress](#findtokenbyaddress)
     -   [Parameters](#parameters-18)
--   [findCompoundToken](#findcompoundtoken)
+-   [hasTokenId](#hastokenid)
     -   [Parameters](#parameters-19)
+-   [getTokenById](#gettokenbyid)
+    -   [Parameters](#parameters-20)
+-   [findCompoundToken](#findcompoundtoken)
+    -   [Parameters](#parameters-21)
 -   [Unit](#unit)
     -   [Properties](#properties)
 -   [CurrencyCommon](#currencycommon)
@@ -73,6 +77,17 @@ There are two modes of usage of this library.
     -   [Properties](#properties-2)
 -   [CryptoCurrency](#cryptocurrency)
 -   [Currency](#currency)
+
+### getAbandonSeedAddress
+
+Returns a valid address for a given currency.
+These addresses are PUBLIC addresses
+We use them for tests and also for dry-run estimations
+DO NOT USE AS RECIPIENT OR SIGN TRANSACTIONS INTO THEM
+
+#### Parameters
+
+-   `currencyId` **any** 
 
 ### CryptoCurrencyObjMap
 
@@ -148,6 +163,14 @@ Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 -   `id` **any** 
 
 Returns **[CryptoCurrency](#cryptocurrency)** 
+
+### findExchangeCurrencyConfig
+
+#### Parameters
+
+-   `id` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+
+Returns **{config: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), signature: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}?** 
 
 ### hasFiatCurrencyTicker
 
