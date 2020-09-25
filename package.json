@@ -55,22 +55,22 @@
     "eslint-config-prettier": "^6.11.0",
     "eslint-plugin-flowtype": "^5.2.0",
     "eslint-plugin-prettier": "^3.1.4",
-    "eslint-plugin-react": "^7.20.6",
-    "flow-bin": "^0.133.0",
+    "eslint-plugin-react": "^7.21.2",
+    "flow-bin": "^0.134.0",
     "flow-copy-source": "^2.0.8",
     "flow-mono-cli": "^1.5.3",
     "flow-typed": "^2.6.1",
     "jest": "^26.4.2",
     "lerna": "3.22.1",
     "prettier": "^2.1.2",
-    "rollup": "^2.27.0",
+    "rollup": "^2.28.2",
     "rollup-plugin-typescript2": "^0.27.2",
-    "typescript": "^4.0.2",
+    "typescript": "^4.0.3",
     "uglify-js": "^3.10.4"
   },
   "dependencies": {
-    "@typescript-eslint/eslint-plugin": "^4.1.1",
-    "@typescript-eslint/parser": "^4.1.1",
+    "@typescript-eslint/eslint-plugin": "^4.2.0",
+    "@typescript-eslint/parser": "^4.2.0",
     "js-levenshtein": "^1.1.6"
   }
 }

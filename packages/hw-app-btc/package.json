@@ -35,7 +35,7 @@
     "sha.js": "2"
   },
   "devDependencies": {
-    "flow-bin": "^0.133.0"
+    "flow-bin": "^0.134.0"
   },
   "scripts": {
     "flow": "flow",
