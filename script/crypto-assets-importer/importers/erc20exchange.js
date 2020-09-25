@@ -8,7 +8,7 @@ module.exports = {
   path: "tokens/ethereum/erc20",
   output: "data/exchange/erc20.js",
   outputTemplate: (data) =>
-    "export default [" +
+    "module.exports = [" +
     data.map((item) => JSON.stringify(item)).join(",\n\t") +
     "];\n",
 
