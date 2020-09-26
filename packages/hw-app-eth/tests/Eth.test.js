@@ -102,6 +102,27 @@ test("signPersonalMessage", async () => {
   });
 });
 
+test("signEIP712HashedMessage", async () => {
+  const Transport = createTransportReplayer(
+    RecordStore.fromString(`
+    => e00c000055058000002c8000003c800000008000000000000000c24f499b8c957196651b13edd64aaccc3980009674b2aea0966c8a56ba81278e9d96be8a7cca396e711a3ba356bd9878df02a726d753ddb6cda3c507d888bc77
+    <= 1c47937d12e45197f2f4c47fe34e88944ee10c8e9ee1faf7aa4658f5aab8e0d2bb026c0d81290478fbc45d5bc1308c4b7119ab43d986805413e7f85da5d94597e79000
+    `)
+  );
+  const transport = await Transport.open();
+  const eth = new Eth(transport);
+  const result = await eth.signEIP712HashedMessage(
+    "44'/60'/0'/0'/0",
+    Buffer.from("c24f499b8c957196651b13edd64aaccc3980009674b2aea0966c8a56ba81278e", "hex").toString("hex"),
+    Buffer.from("9d96be8a7cca396e711a3ba356bd9878df02a726d753ddb6cda3c507d888bc77", "hex").toString("hex")
+  );
+  expect(result).toEqual({
+    r: "47937d12e45197f2f4c47fe34e88944ee10c8e9ee1faf7aa4658f5aab8e0d2bb",
+    s: "026c0d81290478fbc45d5bc1308c4b7119ab43d986805413e7f85da5d94597e7",
+    v: 28
+  });
+});
+
 test("provideERC20TokenInformation", async () => {
   const Transport = createTransportReplayer(
     RecordStore.fromString(`
