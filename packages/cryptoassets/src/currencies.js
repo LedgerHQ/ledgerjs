@@ -299,6 +299,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 0,
       P2SH: 5,
+      XPUBVersion: 0x0488b21e,
     },
     explorerViews: [
       {
@@ -326,6 +327,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 0,
       P2SH: 5,
+      XPUBVersion: 0x0488b21e,
     },
     units: [
       {
@@ -372,6 +374,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 38,
       P2SH: 23,
+      XPUBVersion: 0x0488b21e,
     },
     units: [
       {
@@ -615,6 +618,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 28,
       P2SH: 85,
+      XPUBVersion: 0x0488b21e,
       hasTimestamp: true,
     },
     units: [
@@ -680,6 +684,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 76,
       P2SH: 16,
+      XPUBVersion: 0x02fe52f8,
     },
     units: [
       {
@@ -731,6 +736,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 0x073f,
       P2SH: 0x071a,
+      XPUBVersion: 0x02fda926,
     },
     explorerViews: [
       {
@@ -782,6 +788,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 30,
       P2SH: 63,
+      XPUBVersion: 0x0488b21e,
     },
     units: [
       {
@@ -816,6 +823,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 30,
       P2SH: 22,
+      XPUBVersion: 0x02facafd,
     },
     symbol: "Ð",
     units: [
@@ -1133,6 +1141,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 40,
       P2SH: 100,
+      XPUBVersion: 0x0488c21e,
       hasTimestamp: true,
     },
     units: [
@@ -1282,6 +1291,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 60,
       P2SH: 85,
+      XPUBVersion: 0xf9eee48d,
     },
     units: [
       {
@@ -1318,6 +1328,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 48,
       P2SH: 50,
+      XPUBVersion: 0x019da462,
     },
     symbol: "Ł",
     units: [
@@ -1646,6 +1657,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 55,
       P2SH: 117,
+      XPUBVersion: 0xe6e8e9e5,
       hasTimestamp: true,
     },
     units: [
@@ -1704,6 +1716,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 30,
       P2SH: 13,
+      XPUBVersion: 0x022d2533,
     },
     units: [
       {
@@ -1761,6 +1774,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 55,
       P2SH: 85,
+      XPUBVersion: 0x0488b21e,
       hasTimestamp: true,
     },
     units: [
@@ -1820,6 +1834,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 58,
       P2SH: 50,
+      XPUBVersion: 0x0488b21e,
     },
     units: [
       {
@@ -1936,6 +1951,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 76,
       P2SH: 16,
+      XPUBVersion: 0x0488b21e,
     },
     units: [
       {
@@ -1970,6 +1986,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 63,
       P2SH: 125,
+      XPUBVersion: 0x0488c21e,
       hasTimestamp: true,
     },
     units: [
@@ -2005,6 +2022,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 62,
       P2SH: 85,
+      XPUBVersion: 0x8f624b66,
       hasTimestamp: false,
     },
     units: [
@@ -2216,6 +2234,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 71,
       P2SH: 5,
+      XPUBVersion: 0x0488b21e,
     },
     units: [
       {
@@ -2251,6 +2270,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 71,
       P2SH: 33,
+      XPUBVersion: 0x0488b21e,
     },
     units: [
       {
@@ -2327,6 +2347,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 0x1cb8,
       P2SH: 0x1cbd,
+      XPUBVersion: 0x0488b21e,
     },
     units: [
       {
@@ -2418,6 +2439,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 0x2089,
       P2SH: 0x2096,
+      XPUBVersion: 0x0488b21e,
     },
     units: [
       {
@@ -2460,6 +2482,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     bitcoinLikeInfo: {
       P2PKH: 111,
       P2SH: 196,
+      XPUBVersion: 0x043587cf,
     },
     explorerViews: [
       {
@@ -2554,7 +2577,9 @@ export function listCryptoCurrencies(
  *
  * @param {*} f
  */
-export function findCryptoCurrency(f: (CryptoCurrency) => boolean) {
+export function findCryptoCurrency(
+  f: (CryptoCurrency) => boolean
+): ?CryptoCurrency {
   return cryptocurrenciesArray.find(f);
 }
 

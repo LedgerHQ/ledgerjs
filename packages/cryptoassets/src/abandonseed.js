@@ -43,7 +43,7 @@ const abandonSeedAddresses: { [string]: string } = {
  * DO NOT USE AS RECIPIENT OR SIGN TRANSACTIONS INTO THEM
  * @param {*} currencyId
  */
-export const getAbandonSeedAddress = (currencyId: string) => {
+export const getAbandonSeedAddress = (currencyId: string): string => {
   invariant(
     abandonSeedAddresses[currencyId] !== undefined,
     `No abandonseed available for ${currencyId}`
