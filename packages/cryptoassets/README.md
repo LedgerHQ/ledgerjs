@@ -89,6 +89,8 @@ DO NOT USE AS RECIPIENT OR SIGN TRANSACTIONS INTO THEM
 
 -   `currencyId` **any** 
 
+Returns **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+
 ### CryptoCurrencyObjMap
 
 Type: $Exact&lt;$ObjMap&lt;any, F>>
@@ -115,6 +117,8 @@ Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Gl
 #### Parameters
 
 -   `f` **any** 
+
+Returns **[CryptoCurrency](#cryptocurrency)?** 
 
 ### findCryptoCurrencyByScheme
 
