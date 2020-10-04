@@ -125,7 +125,7 @@ We also provide libraries that help implementing the low level exchanges. These 
 
 ```js
 import Transport from "@ledgerhq/hw-transport-node-hid";
-// import Transport from "@ledgerhq/hw-transport-web-usb";
+// import Transport from "@ledgerhq/hw-transport-webusb";
 // import Transport from "@ledgerhq/react-native-hw-transport-ble";
 import AppBtc from "@ledgerhq/hw-app-btc";
 const getBtcAddress = async () => {
