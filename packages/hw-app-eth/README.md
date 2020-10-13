@@ -32,14 +32,17 @@ Ledger Hardware Wallet ETH JavaScript bindings.
     -   [signPersonalMessage](#signpersonalmessage)
         -   [Parameters](#parameters-5)
         -   [Examples](#examples-4)
-    -   [starkGetPublicKey](#starkgetpublickey)
+    -   [signEIP712HashedMessage](#signeip712hashedmessage)
         -   [Parameters](#parameters-6)
-    -   [starkSignOrder](#starksignorder)
+        -   [Examples](#examples-5)
+    -   [starkGetPublicKey](#starkgetpublickey)
         -   [Parameters](#parameters-7)
-    -   [starkSignTransfer](#starksigntransfer)
+    -   [starkSignOrder](#starksignorder)
         -   [Parameters](#parameters-8)
-    -   [starkProvideQuantum](#starkprovidequantum)
+    -   [starkSignTransfer](#starksigntransfer)
         -   [Parameters](#parameters-9)
+    -   [starkProvideQuantum](#starkprovidequantum)
+        -   [Parameters](#parameters-10)
 
 ### byContractAddress
 
@@ -149,6 +152,31 @@ You can sign a message according to eth_sign RPC call and retrieve v, r, s given
 
 ```javascript
 eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).then(result => {
+var v = result['v'] - 27;
+v = v.toString(16);
+if (v.length < 2) {
+v = "0" + v;
+}
+console.log("Signature 0x" + result['r'] + result['s'] + v);
+})
+```
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{v: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), s: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), r: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** 
+
+#### signEIP712HashedMessage
+
+Sign a prepared message following web3.eth.signTypedData specification. The host computes the domain separator and hashStruct(message)
+
+##### Parameters
+
+-   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `domainSeparatorHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `hashStructMessageHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+
+##### Examples
+
+```javascript
+eth.signEIP712HashedMessage("44'/60'/0'/0/0", Buffer.from("0101010101010101010101010101010101010101010101010101010101010101").toString("hex"), Buffer.from("0202020202020202020202020202020202020202020202020202020202020202").toString("hex")).then(result => {
 var v = result['v'] - 27;
 v = v.toString(16);
 if (v.length < 2) {
