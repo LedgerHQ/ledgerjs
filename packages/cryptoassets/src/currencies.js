@@ -1760,6 +1760,34 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
       },
     ],
   },
+  polkadot: {
+    type: "CryptoCurrency",
+    id: "polkadot",
+    coinType: 354,
+    name: "Polkadot",
+    managerAppName: "polkadot",
+    ticker: "DOT",
+    scheme: "polkadot",
+    color: "#E6007A",
+    family: "polkadot",
+    units: [
+      {
+        name: "DOT",
+        code: "DOT",
+        magnitude: 10,
+      },
+      {
+        name: "planck",
+        code: "PLANCK",
+        magnitude: 1,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://polkadot.subscan.io/extrinsic/$hash", // TODO
+      },
+    ],
+  },
   poswallet: {
     type: "CryptoCurrency",
     id: "poswallet",
