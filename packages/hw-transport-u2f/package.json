@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-transport-u2f",
-  "version": "5.26.0",
+  "version": "5.28.0",
   "description": "Ledger Hardware Wallet Web implementation of the communication layer, using U2F api",
   "keywords": [
     "Ledger",
@@ -27,9 +27,9 @@
   "module": "lib-es/TransportU2F.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/errors": "^5.26.0",
-    "@ledgerhq/hw-transport": "^5.26.0",
-    "@ledgerhq/logs": "^5.26.0",
+    "@ledgerhq/errors": "^5.28.0",
+    "@ledgerhq/hw-transport": "^5.28.0",
+    "@ledgerhq/logs": "^5.28.0",
     "u2f-api": "0.2.7"
   },
   "devDependencies": {
