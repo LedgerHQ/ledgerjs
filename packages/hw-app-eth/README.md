@@ -43,6 +43,11 @@ Ledger Hardware Wallet ETH JavaScript bindings.
         -   [Parameters](#parameters-9)
     -   [starkProvideQuantum](#starkprovidequantum)
         -   [Parameters](#parameters-10)
+    -   [eth2GetPublicKey](#eth2getpublickey)
+        -   [Parameters](#parameters-11)
+        -   [Examples](#examples-6)
+    -   [eth2SetWithdrawalIndex](#eth2setwithdrawalindex)
+        -   [Parameters](#parameters-12)
 
 ### byContractAddress
 
@@ -249,3 +254,32 @@ It shall be run following a provideERC20TokenInformation call for the given cont
 -   `operationQuantization` **BigNumber** quantization used for the token to be transferred
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** 
+
+#### eth2GetPublicKey
+
+get an Ethereum 2 BLS-12 381 public key for a given BIP 32 path.
+
+##### Parameters
+
+-   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
+-   `boolDisplay` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** 
+
+##### Examples
+
+```javascript
+eth.eth2GetPublicKey("12381/3600/0/0").then(o => o.publicKey)
+```
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{publicKey: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** an object with a publicKey
+
+#### eth2SetWithdrawalIndex
+
+Set the index of a Withdrawal key used as withdrawal credentials in an ETH 2 deposit contract call signature
+
+It shall be run before the ETH 2 deposit transaction is signed. If not called, the index is set to 0
+
+##### Parameters
+
+-   `withdrawalIndex` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** index path in the EIP 2334 path m/12381/3600/withdrawalIndex/0
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** True if the method was executed successfully

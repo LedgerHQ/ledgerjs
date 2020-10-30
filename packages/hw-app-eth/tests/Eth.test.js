@@ -530,3 +530,34 @@ test("starkEscapeVerify", async () => {
     v: "1b"
   });
 });
+
+test("eth2GetPublicKey", async () => {
+  const Transport = createTransportReplayer(
+    RecordStore.fromString(`
+    => e00e010011040000305d00000e100000000000000000
+    <= a0fcd39edaa082bdbf23a0c01568471b8a2bd998c9ae347f7e7690e420bd2f96e436c215422aa86f233f67cbbdfb9b2f9000
+    `)
+  );
+  const transport = await Transport.open();
+  const eth = new Eth(transport);
+  const result = await eth.eth2GetPublicKey(
+    "12381/3600/0/0",
+    true
+  );
+  expect(result).toEqual({                        
+    publicKey: "a0fcd39edaa082bdbf23a0c01568471b8a2bd998c9ae347f7e7690e420bd2f96e436c215422aa86f233f67cbbdfb9b2f"   
+  });
+});
+
+test("eth2SetWithdrawalIndex", async () => {
+  const Transport = createTransportReplayer(
+    RecordStore.fromString(`
+    => e01000000400000001
+    <= 9000
+    `)
+  );
+  const transport = await Transport.open();
+  const eth = new Eth(transport);
+  const result = await eth.eth2SetWithdrawalIndex(1);
+  expect(result).toEqual(true);
+});

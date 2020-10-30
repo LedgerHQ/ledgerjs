@@ -561,4 +561,56 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
       }
     );
   }
+
+  /**
+   * get an Ethereum 2 BLS-12 381 public key for a given BIP 32 path.
+   * @param path a path in BIP 32 format
+   * @option boolDisplay optionally enable or not the display
+   * @return an object with a publicKey
+   * @example
+   * eth.eth2GetPublicKey("12381/3600/0/0").then(o => o.publicKey)
+   */
+  eth2GetPublicKey(
+    path: string,
+    boolDisplay?: boolean
+  ): Promise<{
+    publicKey: string,
+  }> {
+    let paths = splitPath(path);
+    let buffer = Buffer.alloc(1 + paths.length * 4);
+    buffer[0] = paths.length;
+    paths.forEach((element, index) => {
+      buffer.writeUInt32BE(element, 1 + 4 * index);
+    });
+    return this.transport
+      .send(0xe0, 0x0e, boolDisplay ? 0x01 : 0x00, 0x00, buffer)
+      .then((response) => {
+        let result = {};
+        result.publicKey = response.slice(0, -2).toString("hex");
+        return result;
+      });
+  }
+
+  /**
+   * Set the index of a Withdrawal key used as withdrawal credentials in an ETH 2 deposit contract call signature
+   *
+   * It shall be run before the ETH 2 deposit transaction is signed. If not called, the index is set to 0
+   *
+   * @param withdrawalIndex index path in the EIP 2334 path m/12381/3600/withdrawalIndex/0
+   * @return True if the method was executed successfully
+   */
+  eth2SetWithdrawalIndex(withdrawalIndex: number): Promise<boolean> {
+    let buffer = Buffer.alloc(4, 0);
+    buffer.writeUInt32BE(withdrawalIndex, 0);
+    return this.transport.send(0xe0, 0x10, 0x00, 0x00, buffer).then(
+      () => true,
+      (e) => {
+        if (e && e.statusCode === 0x6d00) {
+          // this case happen for ETH application versions not supporting ETH 2
+          return false;
+        }
+        throw e;
+      }
+    );
+  }
 }
