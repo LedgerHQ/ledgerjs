@@ -1784,7 +1784,12 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     ],
     explorerViews: [
       {
-        tx: "https://polkadot.subscan.io/extrinsic/$hash", // TODO
+        address: "https://polkadot.subscan.io/account/$address",
+        tx: "https://polkadot.subscan.io/extrinsic/$hash",
+      },
+      {
+        address: "https://polkascan.io/polkadot/account/$address",
+        tx: "https://polkascan.io/polkadot/transaction/$hash",
       },
     ],
   },
