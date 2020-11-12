@@ -30,7 +30,7 @@
     "bip32-path": "0.4.2"
   },
   "devDependencies": {
-    "flow-bin": "^0.136.0"
+    "flow-bin": "^0.137.0"
   },
   "scripts": {
     "flow": "flow",
