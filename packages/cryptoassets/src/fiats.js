@@ -49,7 +49,7 @@ const byTicker: { [key: string]: FiatCurrency } = {
   KHR: fiat("Cambodian Riel", "KHR", "៛", 0),
   KRW: fiat("South Korean Won", "KRW", "₩", 0),
   MUR: fiat("Mauritian Rupee", "MUR", "₨", 2),
-  MXN: fiat("Mexico Peso", "MXN", "$", 2),
+  MXN: fiat("Mexico Peso", "MXN", "Mex$", 2),
   MYR: fiat("Malaysian Ringgit", "MYR", "RM", 2),
   NGN: fiat("Nigerian Naira", "NGN", "₦", 2),
   NOK: fiat("Norwegian Krone", "NOK", "kr", 2),
