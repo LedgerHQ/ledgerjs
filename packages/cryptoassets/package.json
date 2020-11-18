@@ -23,7 +23,7 @@
     "invariant": "2"
   },
   "devDependencies": {
-    "flow-bin": "^0.137.0"
+    "flow-bin": "^0.138.0"
   },
   "scripts": {
     "flow": "flow",
