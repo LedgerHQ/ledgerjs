@@ -16,7 +16,7 @@ test("getAppConfiguration", async () => {
   const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.getAppConfiguration();
-  expect(result).toEqual({ arbitraryDataEnabled: 1, erc20ProvisioningNecessary: 0, starkEnabled: 0, version: "1.1.6" });
+  expect(result).toEqual({ arbitraryDataEnabled: 1, erc20ProvisioningNecessary: 0, starkEnabled: 0, starkv2Supported: 0, version: "1.1.6" });
 });
 
 test("getAddress", async () => {
@@ -214,6 +214,22 @@ test("starkSignOrderEth", async () => {
   });
 });
 
+test("starkSignOrderEth_v2", async () => {
+  const Transport = createTransportReplayer(
+    RecordStore.fromString(`
+    => f0040300d3028000534b000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000010000000100000000000186a00000000000030d4000000d6a00001618
+    <= 00029526c310368e835a2a0ee412a3bf084e0f94d91b8265f88a0bee32488223c4012c34bef05a7b80ba22b0d58a18acd1a8198ee8fc9b525f85d2f4f843c5510f9000
+    `)
+  );
+  const transport = await Transport.open();
+  const eth = new Eth(transport);
+  const result = await eth.starkSignOrder_v2("21323'/0", null, "eth", new BigNumber(1), null, null, "eth", new BigNumber(1), null, 1, 1, new BigNumber(100000), new BigNumber(200000), 3434, 5656);
+  expect(result).toEqual({
+    r: "029526c310368e835a2a0ee412a3bf084e0f94d91b8265f88a0bee32488223c4",
+    s: "012c34bef05a7b80ba22b0d58a18acd1a8198ee8fc9b525f85d2f4f843c5510f",
+  });
+});
+
 test("starkSignOrderTokens", async () => {
   const Transport = createTransportReplayer(
     RecordStore.fromString(`
@@ -238,6 +254,30 @@ test("starkSignOrderTokens", async () => {
   });
 });
 
+test("starkSignOrderTokens_v2", async () => {
+  const Transport = createTransportReplayer(
+    RecordStore.fromString(`
+    => e00a000066035a5258e41d2489571d322189246dafa5ebde1f4699f4980000001200000001304402200ae8634c22762a8ba41d2acb1e068dcce947337c6dd984f13b820d396176952302203306a49d8a6c35b11a61088e1570b3928ca3a0db6bd36f577b5ef87628561ff7
+    <= 9000
+    => e00a0000670455534454dac17f958d2ee523a2206206994597c13d831ec700000006000000013044022078c66ccea3e4dedb15a24ec3c783d7b582cd260daf62fd36afe9a8212a344aed0220160ba8c1c4b6a8aa6565bed20632a091aeeeb7bfdac67fc6589a6031acbf511c
+    <= 9000
+    => f0040300d3028000534b0000000002e41d2489571d322189246dafa5ebde1f4699f4980000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000002dac17f958d2ee523a2206206994597c13d831ec700000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000010000000100000000000186a00000000000030d4000000d6a00001618
+    <= 0003c4a1aef46539c90eaad9a71eee8319586e2b749793335060a2431c42d0d48901faac9386aaaf9d8d2cc3229aecf9e202f4b83f63e3fff7426ca07725d10fb29000
+    `)
+  );
+  const transport = await Transport.open();
+  const eth = new Eth(transport);
+  const tokenInfo1 = byContractAddress("0xe41d2489571d322189246dafa5ebde1f4699f498");
+  await eth.provideERC20TokenInformation(tokenInfo1);
+  const tokenInfo2 = byContractAddress("0xdac17f958d2ee523a2206206994597c13d831ec7");
+  await eth.provideERC20TokenInformation(tokenInfo2);
+  const result = await eth.starkSignOrder_v2("21323'/0", "e41d2489571d322189246dafa5ebde1f4699f498", "erc20", new BigNumber(1), null, "dac17f958d2ee523a2206206994597c13d831ec7", "erc20", new BigNumber(1), null, 1, 1, new BigNumber(100000), new BigNumber(200000), 3434, 5656);
+  expect(result).toEqual({
+    r: "03c4a1aef46539c90eaad9a71eee8319586e2b749793335060a2431c42d0d489",
+    s: "01faac9386aaaf9d8d2cc3229aecf9e202f4b83f63e3fff7426ca07725d10fb2",
+  });
+});
+
 test("starkSignTransfer1", async () => {
   const Transport = createTransportReplayer(
     RecordStore.fromString(`
@@ -254,6 +294,22 @@ test("starkSignTransfer1", async () => {
   });
 });
 
+test("starkSignTransfer1_v2", async () => {
+  const Transport = createTransportReplayer(
+    RecordStore.fromString(`
+    => f004040096028000534b0000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000f1f789e47bb134082b2e901f779a0d188af7fbd7d97d10a9e121f22adadb5b05000000010000000100000000000186a000000d6a00001618
+    <= 00028c0e3b4d2e7b0c1055c7d40e8df12676bc90cf19d0006225d500baecd5e11c0305fe1782f050839619c3e9627121bacd3a8dc87859e1ba5376fbd1b3bee4d49000
+    `)
+  );
+  const transport = await Transport.open();
+  const eth = new Eth(transport);
+  const result = await eth.starkSignTransfer_v2("21323'/0", null, "eth", new BigNumber(1), null, "f1f789e47bb134082b2e901f779a0d188af7fbd7d97d10a9e121f22adadb5b05", 1, 1, new BigNumber(100000), 3434, 5656);
+  expect(result).toEqual({
+    r: "028c0e3b4d2e7b0c1055c7d40e8df12676bc90cf19d0006225d500baecd5e11c",
+    s: "0305fe1782f050839619c3e9627121bacd3a8dc87859e1ba5376fbd1b3bee4d4",
+  });
+});
+
 test("starkProvideQuantum", async () => {
   const Transport = createTransportReplayer(
     RecordStore.fromString(`
@@ -264,6 +320,19 @@ test("starkProvideQuantum", async () => {
   const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.starkProvideQuantum("e41d2489571d322189246dafa5ebde1f4699f498", new BigNumber(1));
+  expect(result).toEqual(true);
+});
+
+test("starkProvideQuantum_v2", async () => {
+  const Transport = createTransportReplayer(
+    RecordStore.fromString(`
+    => f008010054e41d2489571d322189246dafa5ebde1f4699f49800000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000
+    <= 9000
+    `)
+  );
+  const transport = await Transport.open();
+  const eth = new Eth(transport);
+  const result = await eth.starkProvideQuantum_v2("e41d2489571d322189246dafa5ebde1f4699f498", "eth", new BigNumber(1));
   expect(result).toEqual(true);
 });
 
