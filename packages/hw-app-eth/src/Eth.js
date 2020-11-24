@@ -792,7 +792,7 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     buffer.writeUInt32BE(nonce, offset);
     offset += 4;
     buffer.writeUInt32BE(timestamp, offset);
-    if (conditionalTransferAddressHex) {
+    if (conditionalTransferAddressHex && conditionalTransferFact) {
       offset += 4;
       Buffer.from(
         conditionalTransferFact.toString(16).padStart(64, "0"),
