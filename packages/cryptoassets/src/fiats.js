@@ -29,7 +29,7 @@ const byTicker: { [key: string]: FiatCurrency } = {
   BRL: fiat("Brazilian Real", "BRL", "R$", 2),
   CAD: fiat("Canadian Dollar", "CAD", "CA$", 2),
   CHF: fiat("Swiss Franc", "CHF", "CHF", 2),
-  CLP: fiat("Chilean Peso", "CLP", "$", 2),
+  CLP: fiat("Chilean Peso", "CLP", "CLP$", 2),
   CNY: fiat("Yuan or Chinese Renminbi", "CNY", "¥", 2),
   CRC: fiat("Costa Rican Colón", "CRC", "₡", 2),
   CZK: fiat("Czech Koruna", "CZK", "Kč", 2),
