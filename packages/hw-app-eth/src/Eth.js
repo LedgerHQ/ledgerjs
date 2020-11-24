@@ -23,6 +23,21 @@ import type Transport from "@ledgerhq/hw-transport";
 import { BigNumber } from "bignumber.js";
 import { encode, decode } from "rlp";
 
+export type StarkQuantizationType =
+  | "eth"
+  | "erc20"
+  | "erc721"
+  | "erc20mintable"
+  | "erc721mintable";
+
+const starkQuantizationTypeMap = {
+  eth: 1,
+  erc20: 2,
+  erc721: 3,
+  erc20mintable: 4,
+  erc721mintable: 5,
+};
+
 function hexBuffer(str: string): Buffer {
   return Buffer.from(str.startsWith("0x") ? str.slice(2) : str, "hex");
 }
@@ -63,8 +78,12 @@ export default class Eth {
         "getAppConfiguration",
         "starkGetPublicKey",
         "starkSignOrder",
+        "starkSignOrder_v2",
         "starkSignTransfer",
+        "starkSignTransfer_v2",
         "starkProvideQuantum",
+        "starkProvideQuantum_v2",
+        "starkUnsafeSign",
       ],
       scrambleKey
     );
@@ -233,6 +252,7 @@ export default class Eth {
     arbitraryDataEnabled: number,
     erc20ProvisioningNecessary: number,
     starkEnabled: number,
+    starkv2Supported: number,
     version: string,
   }> {
     return this.transport.send(0xe0, 0x06, 0x00, 0x00).then((response) => {
@@ -240,6 +260,7 @@ export default class Eth {
       result.arbitraryDataEnabled = response[0] & 0x01;
       result.erc20ProvisioningNecessary = response[0] & 0x02;
       result.starkEnabled = response[0] & 0x04;
+      result.starkv2Supported = response[0] & 0x08;
       result.version = "" + response[1] + "." + response[2] + "." + response[3];
       return result;
     });
@@ -461,6 +482,148 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
   }
 
   /**
+   * sign a Stark order using the Starkex V2 protocol
+   * @param path a path in BIP 32 format
+   * @option sourceTokenAddress contract address of the source token (not present for ETH)
+   * @param sourceQuantizationType quantization type used for the source token
+   * @option sourceQuantization quantization used for the source token (not present for erc 721 or mintable erc 721)
+   * @option sourceMintableBlobOrTokenId mintable blob (mintable erc 20 / mintable erc 721) or token id (erc 721) associated to the source token
+   * @option destinationTokenAddress contract address of the destination token (not present for ETH)
+   * @param destinationQuantizationType quantization type used for the destination token
+   * @option destinationQuantization quantization used for the destination token (not present for erc 721 or mintable erc 721)
+   * @option destinationMintableBlobOrTokenId mintable blob (mintable erc 20 / mintable erc 721) or token id (erc 721) associated to the destination token
+   * @param sourceVault ID of the source vault
+   * @param destinationVault ID of the destination vault
+   * @param amountSell amount to sell
+   * @param amountBuy amount to buy
+   * @param nonce transaction nonce
+   * @param timestamp transaction validity timestamp
+   * @return the signature
+   */
+  starkSignOrder_v2(
+    path: string,
+    sourceTokenAddress?: string,
+    sourceQuantizationType: StarkQuantizationType,
+    sourceQuantization?: BigNumber,
+    sourceMintableBlobOrTokenId?: BigNumber,
+    destinationTokenAddress?: string,
+    destinationQuantizationType: StarkQuantizationType,
+    destinationQuantization?: BigNumber,
+    destinationMintableBlobOrTokenId?: BigNumber,
+    sourceVault: number,
+    destinationVault: number,
+    amountSell: BigNumber,
+    amountBuy: BigNumber,
+    nonce: number,
+    timestamp: number
+  ): Promise<Buffer> {
+    const sourceTokenAddressHex = maybeHexBuffer(sourceTokenAddress);
+    const destinationTokenAddressHex = maybeHexBuffer(destinationTokenAddress);
+    if (!(sourceQuantizationType in starkQuantizationTypeMap)) {
+      throw new Error(
+        "eth.starkSignOrderv2 invalid source quantization type=" +
+          sourceQuantizationType
+      );
+    }
+    if (!(destinationQuantizationType in starkQuantizationTypeMap)) {
+      throw new Error(
+        "eth.starkSignOrderv2 invalid destination quantization type=" +
+          destinationQuantizationType
+      );
+    }
+    let paths = splitPath(path);
+    let buffer = Buffer.alloc(
+      1 +
+        paths.length * 4 +
+        1 +
+        20 +
+        32 +
+        32 +
+        1 +
+        20 +
+        32 +
+        32 +
+        4 +
+        4 +
+        8 +
+        8 +
+        4 +
+        4,
+      0
+    );
+    let offset = 0;
+    buffer[0] = paths.length;
+    paths.forEach((element, index) => {
+      buffer.writeUInt32BE(element, 1 + 4 * index);
+    });
+    offset = 1 + 4 * paths.length;
+    buffer[offset] = starkQuantizationTypeMap[sourceQuantizationType];
+    offset++;
+    if (sourceTokenAddressHex) {
+      sourceTokenAddressHex.copy(buffer, offset);
+    }
+    offset += 20;
+    if (sourceQuantization) {
+      Buffer.from(
+        sourceQuantization.toString(16).padStart(64, "0"),
+        "hex"
+      ).copy(buffer, offset);
+    }
+    offset += 32;
+    if (sourceMintableBlobOrTokenId) {
+      Buffer.from(
+        sourceMintableBlobOrTokenId.toString(16).padStart(64, "0"),
+        "hex"
+      ).copy(buffer, offset);
+    }
+    offset += 32;
+    buffer[offset] = starkQuantizationTypeMap[destinationQuantizationType];
+    offset++;
+    if (destinationTokenAddressHex) {
+      destinationTokenAddressHex.copy(buffer, offset);
+    }
+    offset += 20;
+    if (destinationQuantization) {
+      Buffer.from(
+        destinationQuantization.toString(16).padStart(64, "0"),
+        "hex"
+      ).copy(buffer, offset);
+    }
+    offset += 32;
+    if (destinationMintableBlobOrTokenId) {
+      Buffer.from(
+        destinationMintableBlobOrTokenId.toString(16).padStart(64, "0"),
+        "hex"
+      ).copy(buffer, offset);
+    }
+    offset += 32;
+    buffer.writeUInt32BE(sourceVault, offset);
+    offset += 4;
+    buffer.writeUInt32BE(destinationVault, offset);
+    offset += 4;
+    Buffer.from(amountSell.toString(16).padStart(16, "0"), "hex").copy(
+      buffer,
+      offset
+    );
+    offset += 8;
+    Buffer.from(amountBuy.toString(16).padStart(16, "0"), "hex").copy(
+      buffer,
+      offset
+    );
+    offset += 8;
+    buffer.writeUInt32BE(nonce, offset);
+    offset += 4;
+    buffer.writeUInt32BE(timestamp, offset);
+    return this.transport
+      .send(0xf0, 0x04, 0x03, 0x00, buffer)
+      .then((response) => {
+        const r = response.slice(1, 1 + 32).toString("hex");
+        const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
+        return { r, s };
+      });
+  }
+
+  /**
    * sign a Stark transfer
    * @param path a path in BIP 32 format
    * @option transferTokenAddress contract address of the token to be transferred (not present for ETH)
@@ -530,6 +693,130 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
   }
 
   /**
+   * sign a Stark transfer or conditional transfer using the Starkex V2 protocol
+   * @param path a path in BIP 32 format
+   * @option transferTokenAddress contract address of the token to be transferred (not present for ETH)
+   * @param transferQuantizationType quantization type used for the token to be transferred
+   * @option transferQuantization quantization used for the token to be transferred (not present for erc 721 or mintable erc 721)
+   * @option transferMintableBlobOrTokenId mintable blob (mintable erc 20 / mintable erc 721) or token id (erc 721) associated to the token to be transferred
+   * @param targetPublicKey target Stark public key
+   * @param sourceVault ID of the source vault
+   * @param destinationVault ID of the destination vault
+   * @param amountTransfer amount to transfer
+   * @param nonce transaction nonce
+   * @param timestamp transaction validity timestamp
+   * @option conditionalTransferAddress onchain address of the condition for a conditional transfer
+   * @option conditionalTransferFact fact associated to the condition for a conditional transfer
+   * @return the signature
+   */
+  starkSignTransfer_v2(
+    path: string,
+    transferTokenAddress?: string,
+    transferQuantizationType: StarkQuantizationType,
+    transferQuantization?: BigNumber,
+    transferMintableBlobOrTokenId?: BigNumber,
+    targetPublicKey: string,
+    sourceVault: number,
+    destinationVault: number,
+    amountTransfer: BigNumber,
+    nonce: number,
+    timestamp: number,
+    conditionalTransferAddress?: string,
+    conditionalTransferFact?: BigNumber
+  ): Promise<Buffer> {
+    const transferTokenAddressHex = maybeHexBuffer(transferTokenAddress);
+    const targetPublicKeyHex = hexBuffer(targetPublicKey);
+    const conditionalTransferAddressHex = maybeHexBuffer(
+      conditionalTransferAddress
+    );
+    if (!(transferQuantizationType in starkQuantizationTypeMap)) {
+      throw new Error(
+        "eth.starkSignTransferv2 invalid quantization type=" +
+          transferQuantizationType
+      );
+    }
+    let paths = splitPath(path);
+    let buffer = Buffer.alloc(
+      1 +
+        paths.length * 4 +
+        1 +
+        20 +
+        32 +
+        32 +
+        32 +
+        4 +
+        4 +
+        8 +
+        4 +
+        4 +
+        (conditionalTransferAddressHex ? 32 + 20 : 0),
+      0
+    );
+    let offset = 0;
+    buffer[0] = paths.length;
+    paths.forEach((element, index) => {
+      buffer.writeUInt32BE(element, 1 + 4 * index);
+    });
+    offset = 1 + 4 * paths.length;
+    buffer[offset] = starkQuantizationTypeMap[transferQuantizationType];
+    offset++;
+    if (transferTokenAddressHex) {
+      transferTokenAddressHex.copy(buffer, offset);
+    }
+    offset += 20;
+    if (transferQuantization) {
+      Buffer.from(
+        transferQuantization.toString(16).padStart(64, "0"),
+        "hex"
+      ).copy(buffer, offset);
+    }
+    offset += 32;
+    if (transferMintableBlobOrTokenId) {
+      Buffer.from(
+        transferMintableBlobOrTokenId.toString(16).padStart(64, "0"),
+        "hex"
+      ).copy(buffer, offset);
+    }
+    offset += 32;
+    targetPublicKeyHex.copy(buffer, offset);
+    offset += 32;
+    buffer.writeUInt32BE(sourceVault, offset);
+    offset += 4;
+    buffer.writeUInt32BE(destinationVault, offset);
+    offset += 4;
+    Buffer.from(amountTransfer.toString(16).padStart(16, "0"), "hex").copy(
+      buffer,
+      offset
+    );
+    offset += 8;
+    buffer.writeUInt32BE(nonce, offset);
+    offset += 4;
+    buffer.writeUInt32BE(timestamp, offset);
+    if (conditionalTransferAddressHex) {
+      offset += 4;
+      Buffer.from(
+        conditionalTransferFact.toString(16).padStart(64, "0"),
+        "hex"
+      ).copy(buffer, offset);
+      offset += 32;
+      conditionalTransferAddressHex.copy(buffer, offset);
+    }
+    return this.transport
+      .send(
+        0xf0,
+        0x04,
+        conditionalTransferAddressHex ? 0x05 : 0x04,
+        0x00,
+        buffer
+      )
+      .then((response) => {
+        const r = response.slice(1, 1 + 32).toString("hex");
+        const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
+        return { r, s };
+      });
+  }
+
+  /**
    * provide quantization information before singing a deposit or withdrawal Stark powered contract call
    *
    * It shall be run following a provideERC20TokenInformation call for the given contract
@@ -560,6 +847,95 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
         throw e;
       }
     );
+  }
+
+  /**
+   * provide quantization information before singing a deposit or withdrawal Stark powered contract call using the Starkex V2 protocol
+   *
+   * It shall be run following a provideERC20TokenInformation call for the given contract
+   *
+   * @param operationContract contract address of the token to be transferred (not present for ETH)
+   * @param operationQuantizationType quantization type of the token to be transferred
+   * @option operationQuantization quantization used for the token to be transferred (not present for erc 721 or mintable erc 721)
+   * @option operationMintableBlobOrTokenId mintable blob (mintable erc 20 / mintable erc 721) or token id (erc 721) of the token to be transferred
+   */
+  starkProvideQuantum_v2(
+    operationContract?: string,
+    operationQuantizationType: StarkQuantizationType,
+    operationQuantization?: BigNumber,
+    operationMintableBlobOrTokenId?: BigNumber
+  ): Promise<boolean> {
+    const operationContractHex = maybeHexBuffer(operationContract);
+    if (!(operationQuantizationType in starkQuantizationTypeMap)) {
+      throw new Error(
+        "eth.starkProvideQuantumV2 invalid quantization type=" +
+          operationQuantizationType
+      );
+    }
+    let buffer = Buffer.alloc(20 + 32 + 32, 0);
+    let offset = 0;
+    if (operationContractHex) {
+      operationContractHex.copy(buffer, offset);
+    }
+    offset += 20;
+    if (operationQuantization) {
+      Buffer.from(
+        operationQuantization.toString(16).padStart(64, "0"),
+        "hex"
+      ).copy(buffer, offset);
+    }
+    offset += 32;
+    if (operationMintableBlobOrTokenId) {
+      Buffer.from(
+        operationMintableBlobOrTokenId.toString(16).padStart(64, "0"),
+        "hex"
+      ).copy(buffer, offset);
+    }
+    return this.transport
+      .send(
+        0xf0,
+        0x08,
+        starkQuantizationTypeMap[operationQuantizationType],
+        0x00,
+        buffer
+      )
+      .then(
+        () => true,
+        (e) => {
+          if (e && e.statusCode === 0x6d00) {
+            // this case happen for ETH application versions not supporting Stark extensions
+            return false;
+          }
+          throw e;
+        }
+      );
+  }
+
+  /**
+   * sign the given hash over the Stark curve
+   * It is intended for speed of execution in case an unknown Stark model is pushed and should be avoided as much as possible.
+   * @param path a path in BIP 32 format
+   * @param hash hexadecimal hash to sign
+   * @return the signature
+   */
+  starkUnsafeSign(path: string, hash: string): Promise<Buffer> {
+    const hashHex = hexBuffer(hash);
+    let paths = splitPath(path);
+    let buffer = Buffer.alloc(1 + paths.length * 4 + 32);
+    let offset = 0;
+    buffer[0] = paths.length;
+    paths.forEach((element, index) => {
+      buffer.writeUInt32BE(element, 1 + 4 * index);
+    });
+    offset = 1 + 4 * paths.length;
+    hashHex.copy(buffer, offset);
+    return this.transport
+      .send(0xf0, 0x0a, 0x00, 0x00, buffer)
+      .then((response) => {
+        const r = response.slice(1, 1 + 32).toString("hex");
+        const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
+        return { r, s };
+      });
   }
 
   /**
