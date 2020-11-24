@@ -76,6 +76,7 @@ export default class Eth {
         "signTransaction",
         "signPersonalMessage",
         "getAppConfiguration",
+        "signEIP712HashedMessage",
         "starkGetPublicKey",
         "starkSignOrder",
         "starkSignOrder_v2",
@@ -84,6 +85,8 @@ export default class Eth {
         "starkProvideQuantum",
         "starkProvideQuantum_v2",
         "starkUnsafeSign",
+        "eth2GetPublicKey",
+        "eth2SetWithdrawalIndex",
       ],
       scrambleKey
     );
