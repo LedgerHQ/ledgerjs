@@ -1767,6 +1767,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     name: "Polkadot",
     managerAppName: "Polkadot",
     ticker: "DOT",
+    countervalueTicker: "PDOT",
     scheme: "polkadot",
     color: "#E6007A",
     family: "polkadot",
