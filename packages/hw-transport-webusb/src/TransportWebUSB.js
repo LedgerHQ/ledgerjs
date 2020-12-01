@@ -118,7 +118,7 @@ export default class TransportWebUSB extends Transport<USBDevice> {
     if (device.configuration === null) {
       await device.selectConfiguration(configurationValue);
     }
-    await device.reset();
+    await gracefullyResetDevice(device);
     const iface = device.configurations[0].interfaces.find(({ alternates }) =>
       alternates.some((a) => a.interfaceClass === 255)
     );
@@ -160,7 +160,7 @@ export default class TransportWebUSB extends Transport<USBDevice> {
   async close(): Promise<void> {
     await this.exchangeBusyPromise;
     await this.device.releaseInterface(this.interfaceNumber);
-    await this.device.reset();
+    await gracefullyResetDevice(this.device);
     await this.device.close();
   }
 
@@ -202,4 +202,12 @@ export default class TransportWebUSB extends Transport<USBDevice> {
     });
 
   setScrambleKey() {}
+}
+
+async function gracefullyResetDevice(device: USBDevice) {
+  try {
+    await device.reset();
+  } catch (err) {
+    console.warn(err);
+  }
 }
