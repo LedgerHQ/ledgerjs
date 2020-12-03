@@ -67,7 +67,7 @@ const byTicker: { [key: string]: FiatCurrency } = {
   UAH: fiat("Ukrainian Hryvnia", "UAH", "₴", 2),
   UGX: fiat("Ugandan Shilling", "UGX", "USh", 2),
   USD: fiat("US Dollar", "USD", "$", 2),
-  VEF: fiat("Venezuelan Bolivar", "VES", "Bs. S.", 2),
+  VES: fiat("Venezuelan Bolivar", "VES", "Bs. S.", 2),
   VND: fiat("Vietnamese Dong", "VND", "₫", 1),
   VUV: fiat("Ni-Vanuatu Vatu", "VUV", "VT", 0),
   ZAR: fiat("South African Rand", "ZAR", "R", 2),
