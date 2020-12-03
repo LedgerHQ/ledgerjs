@@ -31,7 +31,7 @@
     "bip32-path": "^0.4.2",
     "invariant": "^2.2.4",
     "ripemd160": "2",
-    "semver": "^7.3.2",
+    "semver": "^7.3.4",
     "sha.js": "2"
   },
   "devDependencies": {
