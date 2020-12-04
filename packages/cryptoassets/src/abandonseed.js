@@ -24,6 +24,7 @@ const abandonSeedAddresses: { [string]: string } = {
   nix: "GRpn2DPiQxAczMrQFt2sK1CS8EYdnvSHxo",
   peercoin: "PFinP8Tm5hFJKfVnSMFfiNibPNfHgXzTDZ",
   pivx: "DDBxSas734KhMp1Btga3LdwWAc1igSER8o",
+  polkadot: "111111111111111111111111111111111HC1",
   qtum: "QPvRe2C17qk24K6v5gTg7CPghZ8b4WMxZP",
   stakenet: "XhPU3ZrghEh387nqgQ1Fi16JvtkSeYdP4g",
   stealthcoin: "SKsLkKVeMtPNZQuNfUNXi3Bk1TwP1QPqJG",
