@@ -12,6 +12,7 @@ Welcome to Ledger's JavaScript libraries.
 - [Ledger Live Desktop](https://github.com/ledgerhq/ledger-live-desktop)
 - [Ledger Live Mobile](https://github.com/ledgerhq/ledger-live-mobile)
 - [live-common](https://github.com/ledgerhq/ledger-live-common)
+- Deprecated libraries are archived in https://github.com/LedgerHQ/ledgerjs-legacy
 
 ## `@ledgerhq/hw-transport-*`
 
@@ -21,9 +22,11 @@ Welcome to Ledger's JavaScript libraries.
 
 | Channels | U2F/WebAuthn | HID | WebUSB | Bluetooth |
 |----------|--------------|-----|--------|-----------|
-| Blue     | YES          | YES | NO     | NO        |
-| Nano S   | YES          | YES | YES    | NO        |
-| Nano X   | YES          | YES | YES    | YES       |
+| Blue     | DEPRECATED<sup>1</sup> | YES | NO     | NO        |
+| Nano S   | DEPRECATED<sup>1</sup> | YES | YES    | NO        |
+| Nano X   | DEPRECATED<sup>1</sup> | YES | YES    | YES       |
+
+1. U2F is deprecated. See https://github.com/LedgerHQ/ledgerjs/blob/master/docs/migrate_webusb.md
 
 Summary of implementations available per platform
 
@@ -43,15 +46,16 @@ Summary of implementations available per platform
 
 | Channels | U2F               | WebHID.         | WebUSB             | WebBluetooth |
 |----------|-------------------|-----------------|--------------------|--------------|
-| Windows  | ISSUE<sup>1</sup> | YES             | OK BUT<sup>2</sup> | YES          |
-| Mac      | YES               | YES             | YES                | YES          |
-| Linux    | YES               | YES             | YES                | YES          |
-| Chrome   | YES               | YES<sup>3</sup> | YES                | YES          |
-| Safari   | YES               | NO              | NO                 | NO           |
-| Firefox  | YES               | NO              | NO                 | NO           |
-| IE.      | YES               | NO              | NO                 | NO           |
+| Windows  | DEPRECATED<sup>1</sup> | YES             | OK BUT<sup>2</sup> | YES          |
+| Mac      | DEPRECATED<sup>1</sup> | YES             | YES                | YES          |
+| Linux    | DEPRECATED<sup>1</sup> | YES             | YES                | YES          |
+| Chrome   | DEPRECATED<sup>1</sup> | YES<sup>3</sup> | YES                | YES          |
+| Safari   | DEPRECATED<sup>1</sup> | NO              | NO                 | NO           |
+| Firefox  | DEPRECATED<sup>1</sup> | NO              | NO                 | NO           |
+| IE.      | DEPRECATED<sup>1</sup> | NO              | NO                 | NO           |
 
-1. problem with undesired windows popup that happens during device exchanges.
+
+1. U2F is deprecated. See https://github.com/LedgerHQ/ledgerjs/blob/master/docs/migrate_webusb.md
 2. instabilities has been reported
 3. WebHID supported under _Chrome experimental flags_
 
