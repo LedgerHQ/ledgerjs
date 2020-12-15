@@ -201,9 +201,16 @@ export default class Eth {
     // Check if the TX is encoded following EIP 155
     let rlpTx = decode(rawTx);
     let rlpOffset = 0;
+    let chainIdPrefix = "";
     if (rlpTx.length > 6) {
       let rlpVrs = encode(rlpTx.slice(-3));
       rlpOffset = rawTx.length - (rlpVrs.length - 1);
+      const chainIdSrc = rlpTx[6];
+      const chainIdBuf = Buffer.alloc(4);
+      chainIdSrc.copy(chainIdBuf, 4 - chainIdSrc.length);
+      chainIdPrefix = (chainIdBuf.readUInt32BE(0) * 2)
+        .toString(16)
+        .slice(0, -2); // Drop the low byte, that comes from the ledger.
     }
     while (offset !== rawTx.length) {
       let maxChunkSize = offset === 0 ? 150 - 1 - paths.length * 4 : 150;
@@ -238,7 +245,7 @@ export default class Eth {
         })
     ).then(
       () => {
-        const v = response.slice(0, 1).toString("hex");
+        const v = chainIdPrefix + response.slice(0, 1).toString("hex");
         const r = response.slice(1, 1 + 32).toString("hex");
         const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
         return { v, r, s };
