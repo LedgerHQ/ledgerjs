@@ -32,11 +32,11 @@
     "@ledgerhq/hw-transport-node-hid-noevents": "^5.34.0",
     "@ledgerhq/logs": "^5.30.0",
     "lodash": "^4.17.20",
-    "node-hid": "2.0.0-0",
+    "node-hid": "2.1.1",
     "usb": "^1.6.3"
   },
   "devDependencies": {
-    "flow-bin": "^0.138.0"
+    "flow-bin": "^0.140.0"
   },
   "scripts": {
     "flow": "flow",
