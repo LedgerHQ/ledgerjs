@@ -1780,7 +1780,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
       {
         name: "planck",
         code: "PLANCK",
-        magnitude: 1,
+        magnitude: 0,
       },
     ],
     explorerViews: [
