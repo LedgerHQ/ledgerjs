@@ -709,6 +709,8 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     managerAppName: "Cosmos",
     ticker: "MUON",
     scheme: "cosmos_stargate_testnet",
+    isTestnetFor: "cosmos_stargate",
+    disableCountervalue: true,
     color: "#16192f",
     family: "cosmos",
     // FIXME: enable it back when confirmation number is fixed
@@ -2573,6 +2575,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     supportsSegwit: true,
     supportsNativeSegwit: true,
     isTestnetFor: "bitcoin",
+    disableCountervalue: true,
     family: "bitcoin",
     blockAvgTime: 15 * 60,
     bitcoinLikeInfo: {
@@ -2599,6 +2602,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     color: "#00ff00",
     units: ethereumUnits("ether", "ETH").map(makeTestnetUnit),
     isTestnetFor: "ethereum",
+    disableCountervalue: true,
     family: "ethereum",
     blockAvgTime: 15,
     ethereumLikeInfo: {
