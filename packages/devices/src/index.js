@@ -1,5 +1,7 @@
 // @flow
 
+import semver from "semver";
+
 /**
  * The USB product IDs will be defined as MMII, encoding a model (MM) and an interface bitfield (II)
  *
@@ -31,6 +33,7 @@ const devices = {
     usbOnly: true,
     memorySize: 480 * 1024,
     blockSize: 4 * 1024,
+    getBlockSize: (_firwareVersion: string): number => 4 * 1024,
   },
   nanoS: {
     id: "nanoS",
@@ -40,6 +43,8 @@ const devices = {
     usbOnly: true,
     memorySize: 320 * 1024,
     blockSize: 4 * 1024,
+    getBlockSize: (firmwareVersion: string): number =>
+      semver.lt(semver.coerce(firmwareVersion), "2.0.0") ? 4 * 1024 : 2 * 1024,
   },
   nanoX: {
     id: "nanoX",
@@ -49,6 +54,7 @@ const devices = {
     usbOnly: false,
     memorySize: 2 * 1024 * 1024,
     blockSize: 4 * 1024,
+    getBlockSize: (_firwareVersion: string): number => 4 * 1024,
     bluetoothSpec: [
       {
         // this is the legacy one (prototype version). we will eventually drop it.
@@ -152,7 +158,8 @@ export type DeviceModel = {
   legacyUsbProductId: number,
   usbOnly: boolean,
   memorySize: number,
-  blockSize: number,
+  // blockSize: number, // THIS FIELD IS DEPRECATED, use getBlockSize
+  getBlockSize: (firmwareVersion: string) => number,
   bluetoothSpec?: Array<{
     serviceUuid: string,
     writeUuid: string,
