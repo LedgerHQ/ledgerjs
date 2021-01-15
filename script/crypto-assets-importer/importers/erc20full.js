@@ -23,6 +23,8 @@ const withoutExtraComma = (str) => {
 
 const WARN_IF_COUNTERVALUES = true;
 
+const lenseTicker = (a) => a[9] || a[2];
+
 module.exports = {
   path: "tokens/ethereum/erc20",
   output: "data/erc20.js",
@@ -30,15 +32,19 @@ module.exports = {
   validate: (all, countervaluesTickers) => {
     const fiatCollisions = all.filter(
       (a) =>
-        findFiatCurrencyByTicker(a[2]) &&
+        findFiatCurrencyByTicker(lenseTicker(a)) &&
         !a[7] &&
-        (WARN_IF_COUNTERVALUES ? countervaluesTickers.includes(a[2]) : true)
+        (WARN_IF_COUNTERVALUES
+          ? countervaluesTickers.includes(lenseTicker(a))
+          : true)
     );
     const cryptoCollisions = all.filter(
       (a) =>
-        findCryptoCurrencyByTicker(a[2]) &&
+        findCryptoCurrencyByTicker(lenseTicker(a)) &&
         !a[7] &&
-        (WARN_IF_COUNTERVALUES ? countervaluesTickers.includes(a[2]) : true)
+        (WARN_IF_COUNTERVALUES
+          ? countervaluesTickers.includes(lenseTicker(a))
+          : true)
     );
     const contractGroup = {};
     all.forEach((a) => {
@@ -50,7 +56,7 @@ module.exports = {
     const groups = {};
     all.forEach((a) => {
       if (a[7]) return;
-      groups[a[2]] = (groups[a[2]] || []).concat([a]);
+      groups[lenseTicker(a)] = (groups[lenseTicker(a)] || []).concat([a]);
     });
     const dupTickers = Object.keys(groups).filter(
       (a) =>
@@ -63,7 +69,7 @@ module.exports = {
         console.warn(
           key +
             " contract used in erc20: " +
-            contractGroup[key].map((a) => a[2]).join(", ")
+            contractGroup[key].map((a) => lenseTicker(a)).join(", ")
         );
       });
     }
@@ -71,14 +77,14 @@ module.exports = {
     if (fiatCollisions.length > 0) {
       console.warn("\nERC20 THAT COLLIDES WITH FIAT TICKERS:\n");
       fiatCollisions.forEach((t) => {
-        console.warn(t[2] + " ticker used by erc20: " + t[1]);
+        console.warn(lenseTicker(t) + " ticker used by erc20: " + t[1]);
       });
     }
 
     if (cryptoCollisions.length > 0) {
       console.warn("\nERC20 THAT COLLIDES WITH OTHER CRYPTO ASSETS TICKERS:\n");
       cryptoCollisions.forEach((t) => {
-        console.warn(t[2] + " ticker used by erc20: " + t[1]);
+        console.warn(lenseTicker(t) + " ticker used by erc20: " + t[1]);
       });
     }
 
