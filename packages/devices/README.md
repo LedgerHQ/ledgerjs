@@ -96,7 +96,7 @@ Type: $Keys&lt;any>
 -   `legacyUsbProductId` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 -   `usbOnly` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** 
 -   `memorySize` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
--   `blockSize` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+-   `getBlockSize` **function (firmwareVersion: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)): [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 -   `bluetoothSpec` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;{serviceUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), writeUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), notifyUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>?** 
 
 ### BluetoothInfos
