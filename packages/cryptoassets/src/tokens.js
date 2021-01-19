@@ -194,6 +194,7 @@ function convertAlgorandASATokens([
   name,
   contractAddress,
   precision,
+  enableCountervalues,
 ]): TokenCurrency {
   return {
     type: "TokenCurrency",
@@ -203,7 +204,7 @@ function convertAlgorandASATokens([
     tokenType: "asa",
     name,
     ticker: abbr,
-    disableCountervalue: true,
+    disableCountervalue: !enableCountervalues,
     units: [
       {
         name,
@@ -222,6 +223,7 @@ function convertTRONTokens(type: "trc10" | "trc20") {
     precision,
     delisted,
     ledgerSignature,
+    enableCountervalues,
   ]): TokenCurrency => ({
     type: "TokenCurrency",
     id: `tron/${type}/${id}`,
@@ -231,7 +233,7 @@ function convertTRONTokens(type: "trc10" | "trc20") {
     name,
     ticker: abbr,
     delisted,
-    disableCountervalue: true,
+    disableCountervalue: !enableCountervalues,
     ledgerSignature,
     units: [
       {

@@ -129,3 +129,9 @@ test("can get fiat by coin type", () => {
   expect(hasFiatCurrencyTicker("USD")).toBe(true);
   expect(hasFiatCurrencyTicker("USDT")).toBe(false);
 });
+
+test("all USDT are countervalue enabled", () => {
+  const tokens = listTokens().filter((t) => t.ticker === "USDT");
+  expect(tokens.map((t) => t.id).sort()).toMatchSnapshot();
+  expect(tokens.every((t) => t.disableCountervalue === false)).toBe(true);
+});
