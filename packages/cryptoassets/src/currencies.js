@@ -238,49 +238,6 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     ],
     explorerViews: [],
   },
-  bitcloud: {
-    type: "CryptoCurrency",
-    id: "bitcloud",
-    coinType: 218,
-    name: "BitCloud",
-    managerAppName: "BitCloud",
-    ticker: "BTDX",
-    scheme: "bitcloud",
-    color: "#00d2ff",
-    family: "bitcoin",
-    blockAvgTime: 300,
-    bitcoinLikeInfo: {
-      P2PKH: 25,
-      P2SH: 5,
-    },
-    units: [
-      {
-        name: "BTDX",
-        code: "BTDX",
-        magnitude: 8,
-      },
-      {
-        name: "Milli-BTDX",
-        code: "mBTDX",
-        magnitude: 5,
-      },
-      {
-        name: "Micro-BTDX",
-        code: "uBTDX",
-        magnitude: 2,
-      },
-      {
-        name: "satoshi",
-        code: "sat",
-        magnitude: 0,
-      },
-    ],
-    explorerViews: [
-      {
-        tx: "https://chainz.cryptoid.info/btdx/tx.dws?$hash.htm",
-      },
-    ],
-  },
   bitcoin: {
     type: "CryptoCurrency",
     id: "bitcoin",
@@ -443,93 +400,6 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
       {
         tx: "https://explorer.btcprivate.org/tx/$hash",
         address: "https://explorer.btcprivate.org/address/$address",
-      },
-    ],
-  },
-  bitcore: {
-    type: "CryptoCurrency",
-    id: "bitcore",
-    forkedFrom: "bitcoin",
-    coinType: 160,
-    name: "BitCore",
-    managerAppName: "BitCore",
-    ticker: "BTX",
-    scheme: "btx",
-    color: "#fb2d84",
-    family: "bitcoin",
-    blockAvgTime: 2.5 * 60,
-    bitcoinLikeInfo: {
-      P2PKH: 3,
-      P2SH: 125,
-    },
-    units: [
-      {
-        name: "bitcore",
-        code: "BTX",
-        magnitude: 8,
-      },
-      {
-        name: "mBTX",
-        code: "mBTX",
-        magnitude: 5,
-      },
-      {
-        name: "uBTX",
-        code: "uBTX",
-        magnitude: 2,
-      },
-      {
-        name: "satoshi",
-        code: "sat",
-        magnitude: 0,
-      },
-    ],
-    explorerViews: [
-      {
-        tx: "https://insight.bitcore.cc/tx/$hash",
-      },
-    ],
-  },
-  bitsend: {
-    type: "CryptoCurrency",
-    id: "bitsend",
-    coinType: 91,
-    name: "BitSend",
-    managerAppName: "BitSend",
-    ticker: "BSD",
-    scheme: "bitsend",
-    color: "#5fb7ff",
-    family: "bitcoin",
-    blockAvgTime: 200,
-    bitcoinLikeInfo: {
-      P2PKH: 102,
-      P2SH: 5,
-    },
-    units: [
-      {
-        name: "Bitsend",
-        code: "BSD",
-        magnitude: 8,
-      },
-      {
-        name: "Milli-Bitsend",
-        code: "mBSD",
-        magnitude: 5,
-      },
-      {
-        name: "Micro-Bitsend",
-        code: "uBSD",
-        magnitude: 2,
-      },
-      {
-        name: "satoshi",
-        code: "sat",
-        magnitude: 0,
-      },
-    ],
-    explorerViews: [
-      {
-        tx: "https://chainz.cryptoid.info/bsd/tx.dws?$hash.htm",
       },
     ],
   },
@@ -911,25 +781,6 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
       {
         name: "EOS",
         code: "EOS",
-        magnitude: 2,
-      },
-    ],
-    explorerViews: [],
-  },
-  eos_classic: {
-    type: "CryptoCurrency",
-    id: "eos_classic",
-    coinType: 2018,
-    name: "EOSC",
-    managerAppName: "EOSC",
-    ticker: "EOSC",
-    scheme: "eosclassic",
-    color: "#000000",
-    family: "eosclassic",
-    units: [
-      {
-        name: "EOSC",
-        code: "EOSC",
         magnitude: 2,
       },
     ],
@@ -1428,40 +1279,6 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
       },
     ],
     explorerViews: [],
-  },
-  megacoin: {
-    type: "CryptoCurrency",
-    id: "megacoin",
-    forkedFrom: "bitcoin",
-    coinType: 217,
-    name: "Megacoin",
-    managerAppName: "Megacoin",
-    ticker: "MEC",
-    scheme: "mec",
-    color: "#ed0012",
-    family: "bitcoin",
-    blockAvgTime: 2.5 * 60,
-    bitcoinLikeInfo: {
-      P2PKH: 50,
-      P2SH: 5,
-    },
-    units: [
-      {
-        name: "Megacoin",
-        code: "MEC",
-        magnitude: 8,
-      },
-      {
-        name: "satoshi",
-        code: "sat",
-        magnitude: 0,
-      },
-    ],
-    explorerViews: [
-      {
-        tx: "https://chainz.cryptoid.info/mec/tx.dws?$hash.htm",
-      },
-    ],
   },
   monero: {
     type: "CryptoCurrency",
