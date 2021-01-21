@@ -238,49 +238,6 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     ],
     explorerViews: [],
   },
-  bitcloud: {
-    type: "CryptoCurrency",
-    id: "bitcloud",
-    coinType: 218,
-    name: "BitCloud",
-    managerAppName: "BitCloud",
-    ticker: "BTDX",
-    scheme: "bitcloud",
-    color: "#00d2ff",
-    family: "bitcoin",
-    blockAvgTime: 300,
-    bitcoinLikeInfo: {
-      P2PKH: 25,
-      P2SH: 5,
-    },
-    units: [
-      {
-        name: "BTDX",
-        code: "BTDX",
-        magnitude: 8,
-      },
-      {
-        name: "Milli-BTDX",
-        code: "mBTDX",
-        magnitude: 5,
-      },
-      {
-        name: "Micro-BTDX",
-        code: "uBTDX",
-        magnitude: 2,
-      },
-      {
-        name: "satoshi",
-        code: "sat",
-        magnitude: 0,
-      },
-    ],
-    explorerViews: [
-      {
-        tx: "https://chainz.cryptoid.info/btdx/tx.dws?$hash.htm",
-      },
-    ],
-  },
   bitcoin: {
     type: "CryptoCurrency",
     id: "bitcoin",
@@ -443,93 +400,6 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
       {
         tx: "https://explorer.btcprivate.org/tx/$hash",
         address: "https://explorer.btcprivate.org/address/$address",
-      },
-    ],
-  },
-  bitcore: {
-    type: "CryptoCurrency",
-    id: "bitcore",
-    forkedFrom: "bitcoin",
-    coinType: 160,
-    name: "BitCore",
-    managerAppName: "BitCore",
-    ticker: "BTX",
-    scheme: "btx",
-    color: "#fb2d84",
-    family: "bitcoin",
-    blockAvgTime: 2.5 * 60,
-    bitcoinLikeInfo: {
-      P2PKH: 3,
-      P2SH: 125,
-    },
-    units: [
-      {
-        name: "bitcore",
-        code: "BTX",
-        magnitude: 8,
-      },
-      {
-        name: "mBTX",
-        code: "mBTX",
-        magnitude: 5,
-      },
-      {
-        name: "uBTX",
-        code: "uBTX",
-        magnitude: 2,
-      },
-      {
-        name: "satoshi",
-        code: "sat",
-        magnitude: 0,
-      },
-    ],
-    explorerViews: [
-      {
-        tx: "https://insight.bitcore.cc/tx/$hash",
-      },
-    ],
-  },
-  bitsend: {
-    type: "CryptoCurrency",
-    id: "bitsend",
-    coinType: 91,
-    name: "BitSend",
-    managerAppName: "BitSend",
-    ticker: "BSD",
-    scheme: "bitsend",
-    color: "#5fb7ff",
-    family: "bitcoin",
-    blockAvgTime: 200,
-    bitcoinLikeInfo: {
-      P2PKH: 102,
-      P2SH: 5,
-    },
-    units: [
-      {
-        name: "Bitsend",
-        code: "BSD",
-        magnitude: 8,
-      },
-      {
-        name: "Milli-Bitsend",
-        code: "mBSD",
-        magnitude: 5,
-      },
-      {
-        name: "Micro-Bitsend",
-        code: "uBSD",
-        magnitude: 2,
-      },
-      {
-        name: "satoshi",
-        code: "sat",
-        magnitude: 0,
-      },
-    ],
-    explorerViews: [
-      {
-        tx: "https://chainz.cryptoid.info/bsd/tx.dws?$hash.htm",
       },
     ],
   },
@@ -878,6 +748,25 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
       },
     ],
   },
+  elastos: {
+    type: "CryptoCurrency",
+    id: "elastos",
+    coinType: 2305,
+    name: "Elastos",
+    managerAppName: "Elastos",
+    ticker: "ELA",
+    scheme: "elastos",
+    color: "#000",
+    family: "elastos",
+    units: [
+      {
+        name: "ELA",
+        code: "ELA",
+        magnitude: 8,
+      },
+    ],
+    explorerViews: [],
+  },
   ellaism: {
     type: "CryptoCurrency",
     id: "ellaism",
@@ -897,6 +786,47 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     ],
     explorerViews: [],
   },
+  elrond: {
+    type: "CryptoCurrency",
+    id: "elrond",
+    coinType: 508,
+    name: "Elrond",
+    managerAppName: "Elrond",
+    ticker: "eGLD",
+    scheme: "elrond",
+    color: "#000",
+    family: "elrond",
+    units: [
+      {
+        name: "eGLD",
+        code: "eGLD",
+        magnitude: 18,
+      },
+    ],
+    explorerViews: [],
+  },
+  energywebchain: {
+    type: "CryptoCurrency",
+    id: "energywebchain",
+    coinType: 246,
+    name: "EnergyWebChain",
+    managerAppName: "EnergyWebChain",
+    ticker: "EWT",
+    scheme: "energywebchain",
+    color: "#000",
+    family: "ethereum",
+    ethereumLikeInfo: {
+      chainId: 246,
+    },
+    units: [
+      {
+        name: "EWT",
+        code: "EWT",
+        magnitude: 18,
+      },
+    ],
+    explorerViews: [],
+  },
   eos: {
     type: "CryptoCurrency",
     id: "eos",
@@ -911,25 +841,6 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
       {
         name: "EOS",
         code: "EOS",
-        magnitude: 2,
-      },
-    ],
-    explorerViews: [],
-  },
-  eos_classic: {
-    type: "CryptoCurrency",
-    id: "eos_classic",
-    coinType: 2018,
-    name: "EOSC",
-    managerAppName: "EOSC",
-    ticker: "EOSC",
-    scheme: "eosclassic",
-    color: "#000000",
-    family: "eosclassic",
-    units: [
-      {
-        name: "EOSC",
-        code: "EOSC",
         magnitude: 2,
       },
     ],
@@ -976,7 +887,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     },
     explorerViews: [
       {
-        tx: "https://blockscout.com/etc/mainnet/tx/$hash/internal_transactions",
+        tx: "https://blockscout.com/etc/mainnet/tx/$hash/internal-transactions",
         address:
           "https://blockscout.com/etc/mainnet/address/$address/transactions",
       },
@@ -1094,6 +1005,25 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     ],
     explorerViews: [],
   },
+  flow: {
+    type: "CryptoCurrency",
+    id: "flow",
+    coinType: 539,
+    name: "Flow",
+    managerAppName: "Flow",
+    ticker: "FLOW",
+    scheme: "flow",
+    color: "#000",
+    family: "flow",
+    units: [
+      {
+        name: "FLOW",
+        code: "FLOW",
+        magnitude: 8,
+      },
+    ],
+    explorerViews: [],
+  },
   game_credits: {
     type: "CryptoCurrency",
     id: "game_credits",
@@ -1194,6 +1124,25 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
       link: "https://support.ledger.com/hc/en-us/articles/115003917133",
     },
   },
+  hedera: {
+    type: "CryptoCurrency",
+    id: "hedera",
+    coinType: 3030,
+    name: "Hedera",
+    managerAppName: "Hedera",
+    ticker: "HBAR",
+    scheme: "hedera",
+    color: "#000",
+    family: "hedera",
+    units: [
+      {
+        name: "HBAR",
+        code: "HBAR",
+        magnitude: 8,
+      },
+    ],
+    explorerViews: [],
+  },
   hpb: {
     type: "CryptoCurrency",
     id: "hpb",
@@ -1284,6 +1233,25 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     ],
     explorerViews: [],
   },
+  iov: {
+    type: "CryptoCurrency",
+    id: "iov",
+    coinType: 234,
+    name: "IOV",
+    managerAppName: "IOV",
+    ticker: "IOV",
+    scheme: "iov",
+    color: "#000",
+    family: "iov",
+    units: [
+      {
+        name: "IOV",
+        code: "IOV",
+        magnitude: 6,
+      },
+    ],
+    explorerViews: [],
+  },
   kin: {
     type: "CryptoCurrency",
     id: "kin",
@@ -1344,6 +1312,44 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
         address: "https://kmdexplorer.io/address/$address",
       },
     ],
+  },
+  kusama: {
+    type: "CryptoCurrency",
+    id: "kusama",
+    coinType: 434,
+    name: "Kusama",
+    managerAppName: "Kusama",
+    ticker: "KSM",
+    scheme: "kusama",
+    color: "#000",
+    family: "kusama",
+    units: [
+      {
+        name: "KSM",
+        code: "KSM",
+        magnitude: 12,
+      },
+    ],
+    explorerViews: [],
+  },
+  lbry: {
+    type: "CryptoCurrency",
+    id: "LBRY",
+    coinType: 140,
+    name: "LBRY",
+    managerAppName: "LBRY",
+    ticker: "LBRY",
+    scheme: "LBRY",
+    color: "#000",
+    family: "bitcoin",
+    units: [
+      {
+        name: "LBRY",
+        code: "LBRY",
+        magnitude: 8,
+      },
+    ],
+    explorerViews: [],
   },
   litecoin: {
     type: "CryptoCurrency",
@@ -1428,40 +1434,6 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
       },
     ],
     explorerViews: [],
-  },
-  megacoin: {
-    type: "CryptoCurrency",
-    id: "megacoin",
-    forkedFrom: "bitcoin",
-    coinType: 217,
-    name: "Megacoin",
-    managerAppName: "Megacoin",
-    ticker: "MEC",
-    scheme: "mec",
-    color: "#ed0012",
-    family: "bitcoin",
-    blockAvgTime: 2.5 * 60,
-    bitcoinLikeInfo: {
-      P2PKH: 50,
-      P2SH: 5,
-    },
-    units: [
-      {
-        name: "Megacoin",
-        code: "MEC",
-        magnitude: 8,
-      },
-      {
-        name: "satoshi",
-        code: "sat",
-        magnitude: 0,
-      },
-    ],
-    explorerViews: [
-      {
-        tx: "https://chainz.cryptoid.info/mec/tx.dws?$hash.htm",
-      },
-    ],
   },
   monero: {
     type: "CryptoCurrency",
@@ -1922,6 +1894,44 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
       },
     ],
   },
+  nem: {
+    type: "CryptoCurrency",
+    id: "nem",
+    coinType: 43,
+    name: "NEM",
+    managerAppName: "NEM",
+    ticker: "XEM",
+    scheme: "nem",
+    color: "#000",
+    family: "nem",
+    units: [
+      {
+        name: "XEM",
+        code: "XEM",
+        magnitude: 6,
+      },
+    ],
+    explorerViews: [],
+  },
+  ravencoin: {
+    type: "CryptoCurrency",
+    id: "ravencoin",
+    coinType: 175,
+    name: "Ravencoin",
+    managerAppName: "Ravencoin",
+    ticker: "RVN",
+    scheme: "ravencoin",
+    color: "#000",
+    family: "bitcoin",
+    units: [
+      {
+        name: "RVN",
+        code: "RVN",
+        magnitude: 8,
+      },
+    ],
+    explorerViews: [],
+  },
   ripple: {
     type: "CryptoCurrency",
     id: "ripple",
@@ -2002,6 +2012,44 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
         address: "https://explorer.reosc.io/addr/$address",
       },
     ],
+  },
+  resistance: {
+    type: "CryptoCurrency",
+    id: "resistance",
+    coinType: 356,
+    name: "Resistance",
+    managerAppName: "Resistance",
+    ticker: "RES",
+    scheme: "resistance",
+    color: "#000",
+    family: "bitcoin",
+    units: [
+      {
+        name: "RES",
+        code: "RES",
+        magnitude: 8,
+      },
+    ],
+    explorerViews: [],
+  },
+  solana: {
+    type: "CryptoCurrency",
+    id: "solana",
+    coinType: 501,
+    name: "Solana",
+    managerAppName: "Solana",
+    ticker: "SOL",
+    scheme: "solana",
+    color: "#000",
+    family: "solana",
+    units: [
+      {
+        name: "SOL",
+        code: "SOL",
+        magnitude: 8,
+      },
+    ],
+    explorerViews: [],
   },
   stakenet: {
     type: "CryptoCurrency",
@@ -2163,6 +2211,28 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
         address: "https://tzstats.com/account/$address",
       },
     ],
+  },
+  thundercore: {
+    type: "CryptoCurrency",
+    id: "thundercore",
+    coinType: 1001,
+    name: "Thundercore",
+    managerAppName: "Thundercore",
+    ticker: "TT",
+    scheme: "thundercore",
+    color: "#000",
+    family: "ethereum",
+    ethereumLikeInfo: {
+      chainId: 108,
+    },
+    units: [
+      {
+        name: "TT",
+        code: "TT",
+        magnitude: 18,
+      },
+    ],
+    explorerViews: [],
   },
   tomo: {
     type: "CryptoCurrency",
@@ -2526,6 +2596,25 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
         address: "https://explorer.zensystem.io/address/$address",
       },
     ],
+  },
+  zilliqa: {
+    type: "CryptoCurrency",
+    id: "zilliqa",
+    coinType: 313,
+    name: "Zilliqa",
+    managerAppName: "Zilliqa",
+    ticker: "ZIL",
+    scheme: "zilliqa",
+    color: "#000",
+    family: "zilliqa",
+    units: [
+      {
+        name: "ZIL",
+        code: "ZIL",
+        magnitude: 12,
+      },
+    ],
+    explorerViews: [],
   },
 
   // Testnets
