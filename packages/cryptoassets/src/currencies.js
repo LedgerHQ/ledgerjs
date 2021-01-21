@@ -670,46 +670,15 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
       },
     ],
   },
-  cosmos_stargate: {
+  cosmos_testnet: {
     type: "CryptoCurrency",
-    id: "cosmos_stargate",
-    coinType: 118,
-    name: "Cosmos",
-    managerAppName: "Cosmos",
-    ticker: "ATOM",
-    scheme: "cosmos_stargate",
-    color: "#16192f",
-    family: "cosmos",
-    // FIXME: enable it back when confirmation number is fixed
-    // blockAvgTime: 8,
-    units: [
-      {
-        name: "Atom",
-        code: "ATOM",
-        magnitude: 6,
-      },
-      {
-        name: "microAtom",
-        code: "uatom",
-        magnitude: 0,
-      },
-    ],
-    explorerViews: [
-      {
-        tx: "https://www.mintscan.io/txs/$hash",
-        address: "https://www.mintscan.io/validators/$address",
-      },
-    ],
-  },
-  cosmos_stargate_testnet: {
-    type: "CryptoCurrency",
-    id: "cosmos_stargate_testnet",
+    id: "cosmos_testnet",
     coinType: 118,
     name: "Cosmos (Testnet)",
     managerAppName: "Cosmos",
     ticker: "MUON",
-    scheme: "cosmos_stargate_testnet",
-    isTestnetFor: "cosmos_stargate",
+    scheme: "cosmos_testnet",
+    isTestnetFor: "cosmos",
     disableCountervalue: true,
     color: "#16192f",
     family: "cosmos",
