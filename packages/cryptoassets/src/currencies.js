@@ -976,7 +976,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     },
     explorerViews: [
       {
-        tx: "https://blockscout.com/etc/mainnet/tx/$hash/internal_transactions",
+        tx: "https://blockscout.com/etc/mainnet/tx/$hash/internal-transactions",
         address:
           "https://blockscout.com/etc/mainnet/address/$address/transactions",
       },
