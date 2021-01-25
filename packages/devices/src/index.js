@@ -1,6 +1,6 @@
 // @flow
 
-// import semver from "semver";
+import semver from "semver";
 
 /**
  * The USB product IDs will be defined as MMII, encoding a model (MM) and an interface bitfield (II)
@@ -43,9 +43,8 @@ const devices = {
     usbOnly: true,
     memorySize: 320 * 1024,
     blockSize: 4 * 1024,
-    getBlockSize: (_firmwareVersion: string): number => 2 * 1024,
-    // TODO (LL-4332)
-    // semver.lt(semver.coerce(firmwareVersion), "2.0.0") ? 4 * 1024 : 2 * 1024,
+    getBlockSize: (firmwareVersion: string): number =>
+      semver.lt(semver.coerce(firmwareVersion), "2.0.0") ? 4 * 1024 : 2 * 1024,
   },
   nanoX: {
     id: "nanoX",
