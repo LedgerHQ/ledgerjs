@@ -33,7 +33,7 @@
     "node-hid": "2.1.1"
   },
   "devDependencies": {
-    "flow-bin": "^0.143.0"
+    "flow-bin": "^0.143.1"
   },
   "scripts": {
     "flow": "flow",
