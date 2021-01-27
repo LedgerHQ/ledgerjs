@@ -2673,6 +2673,30 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
       },
     ],
   },
+  stacks: {
+    type: "CryptoCurrency",
+    id: "stacks",
+    coinType: 5757,
+    name: "stacks",
+    managerAppName: "Stacks",
+    ticker: "STX",
+    scheme: "stacks",
+    color: "#000",
+    family: "stacks",
+    units: [
+      {
+        name: "STX",
+        code: "STX",
+        magnitude: 6,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://explorer.stacks.co/txid/$hash",
+        address: "https://explorer.stacks.co/address/$address",
+      },
+    ],
+  },
 };
 
 /**
