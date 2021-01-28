@@ -27,7 +27,7 @@
   "module": "lib-es/TransportNodeBle.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@abandonware/noble": "1.9.2-10",
+    "@abandonware/noble": "1.9.2-11",
     "@ledgerhq/devices": "^5.41.0",
     "@ledgerhq/errors": "^5.41.0",
     "@ledgerhq/hw-transport": "^5.41.0",
