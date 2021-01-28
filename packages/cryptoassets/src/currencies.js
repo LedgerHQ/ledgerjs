@@ -2683,6 +2683,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     scheme: "stacks",
     color: "#000",
     family: "stacks",
+    disableCountervalue: true, // currently not available as countervalue and ticker collides with token Stox(STX)
     units: [
       {
         name: "STX",

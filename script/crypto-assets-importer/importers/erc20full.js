@@ -38,14 +38,17 @@ module.exports = {
           ? countervaluesTickers.includes(lenseTicker(a))
           : true)
     );
-    const cryptoCollisions = all.filter(
-      (a) =>
-        findCryptoCurrencyByTicker(lenseTicker(a)) &&
+    const cryptoCollisions = all.filter((a) => {
+      const cur = findCryptoCurrencyByTicker(lenseTicker(a));
+      return (
+        cur &&
+        !cur.disableCountervalue &&
         !a[7] &&
         (WARN_IF_COUNTERVALUES
           ? countervaluesTickers.includes(lenseTicker(a))
           : true)
-    );
+      );
+    });
     const contractGroup = {};
     all.forEach((a) => {
       const matches = all.filter((b) => a[6] && b[6] && a[6] === b[6]);
