@@ -1,10 +1,10 @@
 import {
   createTransportReplayer,
-  RecordStore
+  RecordStore,
 } from "@ledgerhq/hw-transport-mocker";
 import Eth from "../src/Eth";
 import { BigNumber } from "bignumber.js";
-import { byContractAddress } from "../src/erc20"
+import { byContractAddress } from "../src/erc20";
 
 test("getAppConfiguration", async () => {
   const Transport = createTransportReplayer(
@@ -16,7 +16,13 @@ test("getAppConfiguration", async () => {
   const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.getAppConfiguration();
-  expect(result).toEqual({ arbitraryDataEnabled: 1, erc20ProvisioningNecessary: 0, starkEnabled: 0, starkv2Supported: 0, version: "1.1.6" });
+  expect(result).toEqual({
+    arbitraryDataEnabled: 1,
+    erc20ProvisioningNecessary: 0,
+    starkEnabled: 0,
+    starkv2Supported: 0,
+    version: "1.1.6",
+  });
 });
 
 test("getAddress", async () => {
@@ -32,7 +38,7 @@ test("getAddress", async () => {
   expect(result).toEqual({
     address: "0xCbA98362e199c41E1864D0923AF9646d3A648451",
     publicKey:
-      "04df00ad3869baad7ce54f4d560ba7f268d542df8f2679a5898d78a690c3db8f9833d2973671cb14b088e91bdf7c0ab00029a576473c0e12f84d252e630bb3809b"
+      "04df00ad3869baad7ce54f4d560ba7f268d542df8f2679a5898d78a690c3db8f9833d2973671cb14b088e91bdf7c0ab00029a576473c0e12f84d252e630bb3809b",
   });
 });
 
@@ -52,7 +58,7 @@ test("signTransaction", async () => {
   expect(result).toEqual({
     r: "3694583045a85ada8d15d5e01b373b00e86a405c9c52f7835691dcc522b7353b",
     s: "30392e638a591c65ed307809825ca48346980f52d004ab7a5f93657f7e62a400",
-    v: "1b"
+    v: "1b",
   });
 });
 
@@ -72,7 +78,7 @@ test("signTransactionLargeChainID", async () => {
   expect(result).toEqual({
     r: "3694583045a85ada8d15d5e01b373b00e86a405c9c52f7835691dcc522b7353b",
     s: "30392e638a591c65ed307809825ca48346980f52d004ab7a5f93657f7e62a400",
-    v: "1541b"
+    v: "01541b",
   });
 });
 
@@ -98,7 +104,7 @@ test("signTransactionChunkedLimit", async () => {
   expect(result).toEqual({
     r: "dc6ad1d9d847defdffde2f3b70004c89a1a8a6c614fec484891ae8f1ebc46f99",
     s: "66159ca542f5cf36d64278218bfcce24ba96d7495dec25b10a7609346ca063ec",
-    v: "1b"
+    v: "1b",
   });
 });
 
@@ -118,7 +124,7 @@ test("signPersonalMessage", async () => {
   expect(result).toEqual({
     r: "8beafdd56521af1213d6d668a2aed262cc840e7174b642215aec013a1c88b2bd",
     s: "3a407b9125f1bfc015df6983ae8b87a34d54be367b4275834c3039622a73ee00",
-    v: 27
+    v: 27,
   });
 });
 
@@ -133,13 +139,19 @@ test("signEIP712HashedMessage", async () => {
   const eth = new Eth(transport);
   const result = await eth.signEIP712HashedMessage(
     "44'/60'/0'/0'/0",
-    Buffer.from("c24f499b8c957196651b13edd64aaccc3980009674b2aea0966c8a56ba81278e", "hex").toString("hex"),
-    Buffer.from("9d96be8a7cca396e711a3ba356bd9878df02a726d753ddb6cda3c507d888bc77", "hex").toString("hex")
+    Buffer.from(
+      "c24f499b8c957196651b13edd64aaccc3980009674b2aea0966c8a56ba81278e",
+      "hex"
+    ).toString("hex"),
+    Buffer.from(
+      "9d96be8a7cca396e711a3ba356bd9878df02a726d753ddb6cda3c507d888bc77",
+      "hex"
+    ).toString("hex")
   );
   expect(result).toEqual({
     r: "47937d12e45197f2f4c47fe34e88944ee10c8e9ee1faf7aa4658f5aab8e0d2bb",
     s: "026c0d81290478fbc45d5bc1308c4b7119ab43d986805413e7f85da5d94597e7",
-    v: 28
+    v: 28,
   });
 });
 
@@ -152,7 +164,9 @@ test("provideERC20TokenInformation", async () => {
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
-  const zrxInfo = byContractAddress("0xe41d2489571d322189246dafa5ebde1f4699f498");
+  const zrxInfo = byContractAddress(
+    "0xe41d2489571d322189246dafa5ebde1f4699f498"
+  );
   const result = await eth.provideERC20TokenInformation(zrxInfo);
   expect(result).toEqual(true);
 });
@@ -168,8 +182,10 @@ test("signAllowance", async () => {
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
-  const tokenInfo = byContractAddress("0xdac17f958d2ee523a2206206994597c13d831ec7");
-  await eth.provideERC20TokenInformation(tokenInfo);  
+  const tokenInfo = byContractAddress(
+    "0xdac17f958d2ee523a2206206994597c13d831ec7"
+  );
+  await eth.provideERC20TokenInformation(tokenInfo);
   const result = await eth.signTransaction(
     "44'/60'/0'/0/0",
     "f86d018504e3b2920082520894dac17f958d2ee523a2206206994597c13d831ec7872bd72a24874000b844095ea7b30000000000000000000000000102030405060708090a0b0c0d0e0f101112131400000000000000000000000000000000000000000000000000000000000186a0"
@@ -177,7 +193,7 @@ test("signAllowance", async () => {
   expect(result).toEqual({
     r: "0a5a7a8732d95ee05e6dd11b28500c0482fd9ef24028eb5448b5c9c713f13bbb",
     s: "1ef940556853fc8b3883e6ef810d18566f13019e6bea70f340cbfde36947408b",
-    v: "1b"
+    v: "1b",
   });
 });
 
@@ -192,8 +208,10 @@ test("signAllowanceUnlimited", async () => {
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
-  const tokenInfo = byContractAddress("0xdac17f958d2ee523a2206206994597c13d831ec7");
-  await eth.provideERC20TokenInformation(tokenInfo);  
+  const tokenInfo = byContractAddress(
+    "0xdac17f958d2ee523a2206206994597c13d831ec7"
+  );
+  await eth.provideERC20TokenInformation(tokenInfo);
   const result = await eth.signTransaction(
     "44'/60'/0'/0/0",
     "f86d018504e3b2920082520894dac17f958d2ee523a2206206994597c13d831ec7872bd72a24874000b844095ea7b30000000000000000000000000102030405060708090a0b0c0d0e0f1011121314ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
@@ -201,7 +219,7 @@ test("signAllowanceUnlimited", async () => {
   expect(result).toEqual({
     r: "3fa6a78fb25f87f063fc8db5cb4efc1794e01c973994e26a6fa1603c3ac3db9d",
     s: "3dc98795b5f99ba1eeae84ef01ecbfad188f00446d56b6e9a0eb9ec6f4bae7fe",
-    v: "1b"
+    v: "1b",
   });
 });
 
@@ -215,7 +233,12 @@ test("starkGetPublicKey", async () => {
   const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.starkGetPublicKey("21323'/0");
-  expect(result).toEqual(Buffer.from("05e8330615774c27af37530e34aa17e279eb1ac8ac91709932e0a1929bba54ac", "hex"));
+  expect(result).toEqual(
+    Buffer.from(
+      "05e8330615774c27af37530e34aa17e279eb1ac8ac91709932e0a1929bba54ac",
+      "hex"
+    )
+  );
 });
 
 test("starkSignOrderEth", async () => {
@@ -227,7 +250,19 @@ test("starkSignOrderEth", async () => {
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
-  const result = await eth.starkSignOrder("21323'/0", null, new BigNumber(1), null, new BigNumber(1), 1, 1, new BigNumber(100000), new BigNumber(200000), 3434, 5656);
+  const result = await eth.starkSignOrder(
+    "21323'/0",
+    null,
+    new BigNumber(1),
+    null,
+    new BigNumber(1),
+    1,
+    1,
+    new BigNumber(100000),
+    new BigNumber(200000),
+    3434,
+    5656
+  );
   expect(result).toEqual({
     r: "029526c310368e835a2a0ee412a3bf084e0f94d91b8265f88a0bee32488223c4",
     s: "012c34bef05a7b80ba22b0d58a18acd1a8198ee8fc9b525f85d2f4f843c5510f",
@@ -243,7 +278,23 @@ test("starkSignOrderEth_v2", async () => {
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
-  const result = await eth.starkSignOrder_v2("21323'/0", null, "eth", new BigNumber(1), null, null, "eth", new BigNumber(1), null, 1, 1, new BigNumber(100000), new BigNumber(200000), 3434, 5656);
+  const result = await eth.starkSignOrder_v2(
+    "21323'/0",
+    null,
+    "eth",
+    new BigNumber(1),
+    null,
+    null,
+    "eth",
+    new BigNumber(1),
+    null,
+    1,
+    1,
+    new BigNumber(100000),
+    new BigNumber(200000),
+    3434,
+    5656
+  );
   expect(result).toEqual({
     r: "029526c310368e835a2a0ee412a3bf084e0f94d91b8265f88a0bee32488223c4",
     s: "012c34bef05a7b80ba22b0d58a18acd1a8198ee8fc9b525f85d2f4f843c5510f",
@@ -263,11 +314,27 @@ test("starkSignOrderTokens", async () => {
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
-  const tokenInfo1 = byContractAddress("0xe41d2489571d322189246dafa5ebde1f4699f498");
+  const tokenInfo1 = byContractAddress(
+    "0xe41d2489571d322189246dafa5ebde1f4699f498"
+  );
   await eth.provideERC20TokenInformation(tokenInfo1);
-  const tokenInfo2 = byContractAddress("0xdac17f958d2ee523a2206206994597c13d831ec7");
+  const tokenInfo2 = byContractAddress(
+    "0xdac17f958d2ee523a2206206994597c13d831ec7"
+  );
   await eth.provideERC20TokenInformation(tokenInfo2);
-  const result = await eth.starkSignOrder("21323'/0", "e41d2489571d322189246dafa5ebde1f4699f498", new BigNumber(1), "dac17f958d2ee523a2206206994597c13d831ec7", new BigNumber(1), 1, 1, new BigNumber(100000), new BigNumber(200000), 3434, 5656);
+  const result = await eth.starkSignOrder(
+    "21323'/0",
+    "e41d2489571d322189246dafa5ebde1f4699f498",
+    new BigNumber(1),
+    "dac17f958d2ee523a2206206994597c13d831ec7",
+    new BigNumber(1),
+    1,
+    1,
+    new BigNumber(100000),
+    new BigNumber(200000),
+    3434,
+    5656
+  );
   expect(result).toEqual({
     r: "03c4a1aef46539c90eaad9a71eee8319586e2b749793335060a2431c42d0d489",
     s: "01faac9386aaaf9d8d2cc3229aecf9e202f4b83f63e3fff7426ca07725d10fb2",
@@ -287,11 +354,31 @@ test("starkSignOrderTokens_v2", async () => {
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
-  const tokenInfo1 = byContractAddress("0xe41d2489571d322189246dafa5ebde1f4699f498");
+  const tokenInfo1 = byContractAddress(
+    "0xe41d2489571d322189246dafa5ebde1f4699f498"
+  );
   await eth.provideERC20TokenInformation(tokenInfo1);
-  const tokenInfo2 = byContractAddress("0xdac17f958d2ee523a2206206994597c13d831ec7");
+  const tokenInfo2 = byContractAddress(
+    "0xdac17f958d2ee523a2206206994597c13d831ec7"
+  );
   await eth.provideERC20TokenInformation(tokenInfo2);
-  const result = await eth.starkSignOrder_v2("21323'/0", "e41d2489571d322189246dafa5ebde1f4699f498", "erc20", new BigNumber(1), null, "dac17f958d2ee523a2206206994597c13d831ec7", "erc20", new BigNumber(1), null, 1, 1, new BigNumber(100000), new BigNumber(200000), 3434, 5656);
+  const result = await eth.starkSignOrder_v2(
+    "21323'/0",
+    "e41d2489571d322189246dafa5ebde1f4699f498",
+    "erc20",
+    new BigNumber(1),
+    null,
+    "dac17f958d2ee523a2206206994597c13d831ec7",
+    "erc20",
+    new BigNumber(1),
+    null,
+    1,
+    1,
+    new BigNumber(100000),
+    new BigNumber(200000),
+    3434,
+    5656
+  );
   expect(result).toEqual({
     r: "03c4a1aef46539c90eaad9a71eee8319586e2b749793335060a2431c42d0d489",
     s: "01faac9386aaaf9d8d2cc3229aecf9e202f4b83f63e3fff7426ca07725d10fb2",
@@ -307,7 +394,17 @@ test("starkSignTransfer1", async () => {
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
-  const result = await eth.starkSignTransfer("21323'/0", null, new BigNumber(1), "f1f789e47bb134082b2e901f779a0d188af7fbd7d97d10a9e121f22adadb5b05", 1, 1, new BigNumber(100000), 3434, 5656);
+  const result = await eth.starkSignTransfer(
+    "21323'/0",
+    null,
+    new BigNumber(1),
+    "f1f789e47bb134082b2e901f779a0d188af7fbd7d97d10a9e121f22adadb5b05",
+    1,
+    1,
+    new BigNumber(100000),
+    3434,
+    5656
+  );
   expect(result).toEqual({
     r: "028c0e3b4d2e7b0c1055c7d40e8df12676bc90cf19d0006225d500baecd5e11c",
     s: "0305fe1782f050839619c3e9627121bacd3a8dc87859e1ba5376fbd1b3bee4d4",
@@ -323,7 +420,19 @@ test("starkSignTransfer1_v2", async () => {
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
-  const result = await eth.starkSignTransfer_v2("21323'/0", null, "eth", new BigNumber(1), null, "f1f789e47bb134082b2e901f779a0d188af7fbd7d97d10a9e121f22adadb5b05", 1, 1, new BigNumber(100000), 3434, 5656);
+  const result = await eth.starkSignTransfer_v2(
+    "21323'/0",
+    null,
+    "eth",
+    new BigNumber(1),
+    null,
+    "f1f789e47bb134082b2e901f779a0d188af7fbd7d97d10a9e121f22adadb5b05",
+    1,
+    1,
+    new BigNumber(100000),
+    3434,
+    5656
+  );
   expect(result).toEqual({
     r: "028c0e3b4d2e7b0c1055c7d40e8df12676bc90cf19d0006225d500baecd5e11c",
     s: "0305fe1782f050839619c3e9627121bacd3a8dc87859e1ba5376fbd1b3bee4d4",
@@ -339,7 +448,10 @@ test("starkProvideQuantum", async () => {
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
-  const result = await eth.starkProvideQuantum("e41d2489571d322189246dafa5ebde1f4699f498", new BigNumber(1));
+  const result = await eth.starkProvideQuantum(
+    "e41d2489571d322189246dafa5ebde1f4699f498",
+    new BigNumber(1)
+  );
   expect(result).toEqual(true);
 });
 
@@ -352,7 +464,11 @@ test("starkProvideQuantum_v2", async () => {
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
-  const result = await eth.starkProvideQuantum_v2("e41d2489571d322189246dafa5ebde1f4699f498", "eth", new BigNumber(1));
+  const result = await eth.starkProvideQuantum_v2(
+    "e41d2489571d322189246dafa5ebde1f4699f498",
+    "eth",
+    new BigNumber(1)
+  );
   expect(result).toEqual(true);
 });
 
@@ -367,7 +483,7 @@ test("starkDepositEth", async () => {
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
-  await eth.starkProvideQuantum(null, new BigNumber(1))
+  await eth.starkProvideQuantum(null, new BigNumber(1));
   const result = await eth.signTransaction(
     "44'/60'/0'/0/0",
     "f86d018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000b844e2bbb15801142460171646987f20c714eda4b92812b22b811f56f27130937c267e29bd9e0000000000000000000000000000000000000000000000000000000000000001"
@@ -375,7 +491,7 @@ test("starkDepositEth", async () => {
   expect(result).toEqual({
     r: "e263d5b15fb088411683ac652f5429173e78bd3f6934a905fbb67f302874d491",
     s: "22b175206744fe898c0f7ed21520e06c919fd9ef61fc5368e62def1f86b99143",
-    v: "1b"
+    v: "1b",
   });
 });
 
@@ -394,9 +510,14 @@ test("starkDepositToken", async () => {
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
-  const tokenInfo = byContractAddress("0xdac17f958d2ee523a2206206994597c13d831ec7");
+  const tokenInfo = byContractAddress(
+    "0xdac17f958d2ee523a2206206994597c13d831ec7"
+  );
   await eth.provideERC20TokenInformation(tokenInfo);
-  await eth.starkProvideQuantum("0xdac17f958d2ee523a2206206994597c13d831ec7", new BigNumber(1));    
+  await eth.starkProvideQuantum(
+    "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    new BigNumber(1)
+  );
   const result = await eth.signTransaction(
     "44'/60'/0'/0/0",
     "f88d018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000b86400aeef8a02ce625e94458d39dd0bf3b45a843544dd4a14b8169045a3a3d15aa564b936c500000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000030d40"
@@ -404,7 +525,7 @@ test("starkDepositToken", async () => {
   expect(result).toEqual({
     r: "294214de6341a0a63609f5643700c58be4b7aa46a5f56dea8c9ff5ecf4d52286",
     s: "62a3a4c8a6a0714d147b2a98071cfb892ed3f3edd5da049a2608605970b63dc2",
-    v: "1b"
+    v: "1b",
   });
 });
 
@@ -419,7 +540,7 @@ test("starkWithdrawEth", async () => {
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
-  await eth.starkProvideQuantum(null, new BigNumber(1))
+  await eth.starkProvideQuantum(null, new BigNumber(1));
   const result = await eth.signTransaction(
     "44'/60'/0'/0/0",
     "f84c018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000a42e1a7d4d01142460171646987f20c714eda4b92812b22b811f56f27130937c267e29bd9e"
@@ -427,7 +548,7 @@ test("starkWithdrawEth", async () => {
   expect(result).toEqual({
     r: "27839551fb3d8b7717ebb02a81308740a6d4b719afa12159b4c41308edc3d82c",
     s: "07c40a39ea0aa3c5114b05f1441de594467e152e7b267a25433236da78d201ee",
-    v: "1b"
+    v: "1b",
   });
 });
 
@@ -444,9 +565,14 @@ test("starkWithdrawToken", async () => {
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
-  const tokenInfo = byContractAddress("0xdac17f958d2ee523a2206206994597c13d831ec7");
+  const tokenInfo = byContractAddress(
+    "0xdac17f958d2ee523a2206206994597c13d831ec7"
+  );
   await eth.provideERC20TokenInformation(tokenInfo);
-  await eth.starkProvideQuantum("0xdac17f958d2ee523a2206206994597c13d831ec7", new BigNumber(1));    
+  await eth.starkProvideQuantum(
+    "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    new BigNumber(1)
+  );
   const result = await eth.signTransaction(
     "44'/60'/0'/0/0",
     "f84c018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000a42e1a7d4d02ce625e94458d39dd0bf3b45a843544dd4a14b8169045a3a3d15aa564b936c5"
@@ -454,7 +580,7 @@ test("starkWithdrawToken", async () => {
   expect(result).toEqual({
     r: "ad0d49ea55b2fd57523ad94698e16acb8b151fa57afd4ae37bb457e9200aac1b",
     s: "53162e87514d7a0ebc383a69f9c27a6abc4ee038f1360b4ffe9cd3f63b4c7f42",
-    v: "1b"
+    v: "1b",
   });
 });
 
@@ -469,7 +595,7 @@ test("starkDepositCancel", async () => {
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
-  await eth.starkProvideQuantum(null, new BigNumber(1))
+  await eth.starkProvideQuantum(null, new BigNumber(1));
   const result = await eth.signTransaction(
     "44'/60'/0'/0/0",
     "f86d018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000b844c7fb117c01142460171646987f20c714eda4b92812b22b811f56f27130937c267e29bd9e0000000000000000000000000000000000000000000000000000000000000001"
@@ -477,7 +603,7 @@ test("starkDepositCancel", async () => {
   expect(result).toEqual({
     r: "b8c4260b5cc4a960f7957806fe4d4f52733b2c0f221ff5a0c09cd0af98471952",
     s: "724ea6b3c70ab0d8c3104ab740c5c7ae6d1a6451f87b3bf7504741136b212eba",
-    v: "1c"
+    v: "1c",
   });
 });
 
@@ -492,15 +618,15 @@ test("starkDepositReclaim", async () => {
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
-  await eth.starkProvideQuantum(null, new BigNumber(1))
+  await eth.starkProvideQuantum(null, new BigNumber(1));
   const result = await eth.signTransaction(
     "44'/60'/0'/0/0",
     "f86d018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000b8444eab38f401142460171646987f20c714eda4b92812b22b811f56f27130937c267e29bd9e0000000000000000000000000000000000000000000000000000000000000001"
   );
   expect(result).toEqual({
-    r: "f80742e1ced6770d846a03b557d37a522c1afe96dcbec24406772d49194c4cba",        
+    r: "f80742e1ced6770d846a03b557d37a522c1afe96dcbec24406772d49194c4cba",
     s: "26b3fb49df1d8ac54eda7d5fde3bbe2912fabee6fd535210cb1f08f113e8e5f4",
-    v: "1b"
+    v: "1b",
   });
 });
 
@@ -517,10 +643,10 @@ test("starkFullWithdrawal", async () => {
     "44'/60'/0'/0/0",
     "f84c018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000a4276dd1de0000000000000000000000000000000000000000000000000000000000000001"
   );
-  expect(result).toEqual({        
-    r: "6e1947ab2c9ec22e44af515a24a7453a8431fb2d38ab88fa8971aa0522ec0fa7",        
+  expect(result).toEqual({
+    r: "6e1947ab2c9ec22e44af515a24a7453a8431fb2d38ab88fa8971aa0522ec0fa7",
     s: "09933014df3bde62ece53e7e7ee8a76d374d6218bd81cb4d1e16ecba29100a6b",
-    v: "1b"
+    v: "1b",
   });
 });
 
@@ -537,10 +663,10 @@ test("starkFreeze", async () => {
     "44'/60'/0'/0/0",
     "f84c018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000a4b91072090000000000000000000000000000000000000000000000000000000000000001"
   );
-  expect(result).toEqual({                
-    r: "4035b138d55f5be5dab88988ce179e41547412a66b170acd2130d7c851537d71",        
+  expect(result).toEqual({
+    r: "4035b138d55f5be5dab88988ce179e41547412a66b170acd2130d7c851537d71",
     s: "7959162e3b8ae5f0ca1869e5887b8886fe71d31be0745c284bf0fdde56d28769",
-    v: "1b"
+    v: "1b",
   });
 });
 
@@ -557,15 +683,15 @@ test("starkEscapeEth", async () => {
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
-  await eth.starkProvideQuantum(null, new BigNumber(1))
+  await eth.starkProvideQuantum(null, new BigNumber(1));
   const result = await eth.signTransaction(
     "44'/60'/0'/0/0",
     "f8ad018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000b8849e3adac40000000000000000000000000000000000000000000000000000000000000001010101010101010101010101010101010101010101010101010101010101010101142460171646987f20c714eda4b92812b22b811f56f27130937c267e29bd9e00000000000000000000000000000000000000000000000000000000000186a0"
   );
-  expect(result).toEqual({                        
-    r: "77220f9513431ecb2eeb53edee025eb78f1fd3c194d75f4988462b78bacd88b4",        
+  expect(result).toEqual({
+    r: "77220f9513431ecb2eeb53edee025eb78f1fd3c194d75f4988462b78bacd88b4",
     s: "3e74b88584f9091a4bdb2605ec128e2bda7eaa262891bf83bb7b34acf22c6a9c",
-    v: "1c"
+    v: "1c",
   });
 });
 
@@ -584,17 +710,22 @@ test("starkEscapeTokens", async () => {
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
-  const tokenInfo = byContractAddress("0xdac17f958d2ee523a2206206994597c13d831ec7");
-  await eth.provideERC20TokenInformation(tokenInfo);  
-  await eth.starkProvideQuantum("0xdac17f958d2ee523a2206206994597c13d831ec7", new BigNumber(1));    
+  const tokenInfo = byContractAddress(
+    "0xdac17f958d2ee523a2206206994597c13d831ec7"
+  );
+  await eth.provideERC20TokenInformation(tokenInfo);
+  await eth.starkProvideQuantum(
+    "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    new BigNumber(1)
+  );
   const result = await eth.signTransaction(
     "44'/60'/0'/0/0",
     "f8ad018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000b8849e3adac40000000000000000000000000000000000000000000000000000000000000001010101010101010101010101010101010101010101010101010101010101010102ce625e94458d39dd0bf3b45a843544dd4a14b8169045a3a3d15aa564b936c50000000000000000000000000000000000000000000000000000000000030d40"
   );
-  expect(result).toEqual({                                
-    r: "56846c1ec5ce862f0abb59054ae9a5279ddac47953907902a0dada43b9a0e06b",        
+  expect(result).toEqual({
+    r: "56846c1ec5ce862f0abb59054ae9a5279ddac47953907902a0dada43b9a0e06b",
     s: "35ad5523cf0b01efa3a369c24b80cd003f87a2f725cf40ecc2354290fc8369a2",
-    v: "1c"
+    v: "1c",
   });
 });
 
@@ -613,10 +744,10 @@ test("starkEscapeVerify", async () => {
     "44'/60'/0'/0/0",
     "f88d018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000b8642dd5300602ce625e94458d39dd0bf3b45a843544dd4a14b8169045a3a3d15aa564b936c500000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000030d40"
   );
-  expect(result).toEqual({                        
-    r: "372586695f148927a74b6ef4b2e40f42b3a6e44afbd16cb4d3dcec6859aec1d2",        
+  expect(result).toEqual({
+    r: "372586695f148927a74b6ef4b2e40f42b3a6e44afbd16cb4d3dcec6859aec1d2",
     s: "736da27ba0a716492e96ebd6cbbaec894af5cad24a2c6c3f683ade376f9fdc4f",
-    v: "1b"
+    v: "1b",
   });
 });
 
@@ -629,12 +760,10 @@ test("eth2GetPublicKey", async () => {
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
-  const result = await eth.eth2GetPublicKey(
-    "12381/3600/0/0",
-    true
-  );
-  expect(result).toEqual({                        
-    publicKey: "a0fcd39edaa082bdbf23a0c01568471b8a2bd998c9ae347f7e7690e420bd2f96e436c215422aa86f233f67cbbdfb9b2f"   
+  const result = await eth.eth2GetPublicKey("12381/3600/0/0", true);
+  expect(result).toEqual({
+    publicKey:
+      "a0fcd39edaa082bdbf23a0c01568471b8a2bd998c9ae347f7e7690e420bd2f96e436c215422aa86f233f67cbbdfb9b2f",
   });
 });
 
