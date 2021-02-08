@@ -36,7 +36,7 @@
     "usb-detection": "^4.10.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.143.1"
+    "flow-bin": "^0.144.0"
   },
   "scripts": {
     "flow": "flow",

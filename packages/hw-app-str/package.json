@@ -32,7 +32,7 @@
     "tweetnacl": "^1.0.3"
   },
   "devDependencies": {
-    "flow-bin": "^0.143.1"
+    "flow-bin": "^0.144.0"
   },
   "scripts": {
     "flow": "flow",
