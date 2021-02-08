@@ -211,6 +211,9 @@ export default class Eth {
       chainIdPrefix = (chainIdBuf.readUInt32BE(0) * 2)
         .toString(16)
         .slice(0, -2); // Drop the low byte, that comes from the ledger.
+      if (chainIdPrefix.length % 2 === 1) {
+        chainIdPrefix = "0" + chainIdPrefix;
+      }
     }
     while (offset !== rawTx.length) {
       let maxChunkSize = offset === 0 ? 150 - 1 - paths.length * 4 : 150;
