@@ -1,6 +1,6 @@
 `@ledgerhq/hw-transport-u2f` and `@ledgerhq/hw-transport-webauthn` have been deprecated.
 
-**We strongly advise to migrate to [`@ledgerhq/hw-transport-webusb`](../packages/hw-transport-webusb) or [`@ledgerhq/hw-transport-webhid`](../packages/hw-transport-webusb).**
+**We strongly advise to migrate to [`@ledgerhq/hw-transport-webusb`](../packages/hw-transport-webusb) or [`@ledgerhq/hw-transport-webhid`](../packages/hw-transport-webhid).**
 
 ## Why is it deprecated?
 
