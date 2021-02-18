@@ -208,7 +208,7 @@ export default class Eth {
       const chainIdSrc = rlpTx[6];
       const chainIdBuf = Buffer.alloc(4);
       chainIdSrc.copy(chainIdBuf, 4 - chainIdSrc.length);
-      chainIdPrefix = (chainIdBuf.readUInt32BE(0) * 2)
+      chainIdPrefix = (chainIdBuf.readUInt32BE(0) * 2 + 35)
         .toString(16)
         .slice(0, -2); // Drop the low byte, that comes from the ledger.
       if (chainIdPrefix.length % 2 === 1) {
