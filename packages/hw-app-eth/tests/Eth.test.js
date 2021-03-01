@@ -82,6 +82,27 @@ test("signTransactionLargeChainID", async () => {
   });
 });
 
+test("signTransactionLargeChainID2", async () => {
+  const Transport = createTransportReplayer(
+    RecordStore.fromString(`
+    => e004000042058000002c8000003c800000008000000000000000ed018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a248740008081fa8080
+    <= 173694583045a85ada8d15d5e01b373b00e86a405c9c52f7835691dcc522b7353b30392e638a591c65ed307809825ca48346980f52d004ab7a5f93657f7e62a4009000
+    `)
+  );
+  const transport = await Transport.open();
+  const eth = new Eth(transport);
+  const result = await eth.signTransaction(
+    "44'/60'/0'/0'/0",
+    "ed018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a248740008081fa8080"
+  );
+  expect(result).toEqual({
+    r: "3694583045a85ada8d15d5e01b373b00e86a405c9c52f7835691dcc522b7353b",
+    s: "30392e638a591c65ed307809825ca48346980f52d004ab7a5f93657f7e62a400",
+    v: "0217",
+  });
+});
+
+
 test("signTransactionChunkedLimit", async () => {
   const Transport = createTransportReplayer(
     RecordStore.fromString(`
