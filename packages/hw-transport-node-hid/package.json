@@ -31,7 +31,7 @@
     "@ledgerhq/hw-transport": "^5.43.0",
     "@ledgerhq/hw-transport-node-hid-noevents": "^5.43.0",
     "@ledgerhq/logs": "^5.43.0",
-    "lodash": "^4.17.20",
+    "lodash": "^4.17.21",
     "node-hid": "2.1.1",
     "usb": "^1.6.5"
   },

@@ -25,7 +25,7 @@
   "dependencies": {
     "@ledgerhq/errors": "^5.43.0",
     "@ledgerhq/logs": "^5.43.0",
-    "rxjs": "^6.6.3",
+    "rxjs": "^6.6.6",
     "semver": "^7.3.4"
   },
   "scripts": {
