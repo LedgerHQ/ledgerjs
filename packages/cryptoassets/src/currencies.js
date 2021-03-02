@@ -2700,6 +2700,18 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
   },
 };
 
+const cryptocurrenciesByScheme: { [_: string]: CryptoCurrency } = {};
+const cryptocurrenciesByTicker: { [_: string]: CryptoCurrency } = {};
+const cryptocurrenciesArray = [];
+const prodCryptoArray = [];
+const cryptocurrenciesArrayWithoutTerminated = [];
+const prodCryptoArrayWithoutTerminated = [];
+
+for (const id in cryptocurrenciesById) {
+  const definition = cryptocurrenciesById[id];
+  registerCryptoCurrency(id, definition);
+}
+
 /**
  *
  */
@@ -2717,26 +2729,26 @@ export type CryptoCurrencyConfig<C> = CryptoCurrencyObjMap<(*) => C>;
  */
 export type CryptoCurrencyIds = $Keys<typeof cryptocurrenciesById>;
 
-const cryptocurrenciesByScheme: { [_: string]: CryptoCurrency } = {};
-const cryptocurrenciesByTicker: { [_: string]: CryptoCurrency } = {};
-const cryptocurrenciesArray = [];
-const prodCryptoArray = [];
-for (const id in cryptocurrenciesById) {
-  const c = cryptocurrenciesById[id];
-  cryptocurrenciesById[c.id] = c;
-  cryptocurrenciesByScheme[c.scheme] = c;
-  if (!c.isTestnetFor) {
-    cryptocurrenciesByTicker[c.ticker] = c;
-    prodCryptoArray.push(c);
+/**
+ *
+ * @param {string} id
+ * @param {CryptoCurrency} currency
+ */
+export function registerCryptoCurrency(id: string, currency: CryptoCurrency) {
+  cryptocurrenciesById[currency.id] = currency;
+  cryptocurrenciesByScheme[currency.scheme] = currency;
+  if (!currency.isTestnetFor) {
+    cryptocurrenciesByTicker[currency.ticker] = currency;
+    prodCryptoArray.push(currency);
+    if (!currency.terminated) {
+      prodCryptoArrayWithoutTerminated.push(currency);
+    }
   }
-  cryptocurrenciesArray.push(c);
+  cryptocurrenciesArray.push(currency);
+  if (!currency.terminated) {
+    cryptocurrenciesArrayWithoutTerminated.push(currency);
+  }
 }
-const cryptocurrenciesArrayWithoutTerminated = cryptocurrenciesArray.filter(
-  (c) => !c.terminated
-);
-const prodCryptoArrayWithoutTerminated = prodCryptoArray.filter(
-  (c) => !c.terminated
-);
 
 /**
  *
