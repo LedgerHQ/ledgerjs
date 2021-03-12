@@ -49,7 +49,7 @@ export type GetVersionResult = {|
  * Tezos API
  *
  * @example
- * import Tezos from "@ledgerhq/hw-app-xtz";
+ * import Tezos from "@ledgerhq/hw-app-tezos";
  * const tez = new Tezos(transport)
  */
 export default class Tezos {

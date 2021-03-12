@@ -43,6 +43,13 @@ const SW_CANCEL = 0x6986;
 const SW_ERROR_DATA_INVALID = 0x6984;
 const SW_ERROR_BAD_KEY_HANDLE = 0x6a80;
 
+/**
+ * Polkadot API
+ *
+ * @example
+ * import Polkadot from "@ledgerhq/hw-app-polkadot";
+ * const polkadot = new Polkadot(transport)
+ */
 export default class Polkadot {
   transport: Transport<*>;
 

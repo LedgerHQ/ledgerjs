@@ -41,8 +41,8 @@ const INS_SIGN_MSGPACK = 0x08;
  * Cosmos API
  *
  * @example
- * import Cosmos from "@ledgerhq/hw-app-cosmos";
- * const cosmos = new Cosmos(transport)
+ * import Algorand from "@ledgerhq/hw-app-algorand";
+ * const algo = new Algorand(transport)
  */
 export default class Algorand {
   transport: Transport<*>;
