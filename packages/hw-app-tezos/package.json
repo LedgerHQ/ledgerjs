@@ -26,7 +26,7 @@
   "module": "lib-es/Tezos.js",
   "license": "Apache-2.0",
   "devDependencies": {
-    "flow-bin": "^0.144.0"
+    "flow-bin": "^0.146.0"
   },
   "dependencies": {
     "@ledgerhq/hw-transport": "^5.45.0",
