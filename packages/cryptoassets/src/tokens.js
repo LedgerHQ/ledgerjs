@@ -166,7 +166,7 @@ function convertERC20([
 ]): TokenCurrency {
   return {
     type: "TokenCurrency",
-    id: "ethereum/erc20/" + token,
+    id: parentCurrencyId + "/erc20/" + token,
     ledgerSignature,
     contractAddress,
     parentCurrency: getCryptoCurrencyById(parentCurrencyId),
@@ -177,7 +177,9 @@ function convertERC20([
     disableCountervalue:
       !!disableCountervalue || !!findCryptoCurrencyByTicker(ticker), // if it collides, disable
     countervalueTicker,
-    compoundFor: compoundFor ? "ethereum/erc20/" + compoundFor : undefined,
+    compoundFor: compoundFor
+      ? parentCurrencyId + "/erc20/" + compoundFor
+      : undefined,
     units: [
       {
         name,
