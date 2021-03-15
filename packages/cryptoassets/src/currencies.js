@@ -2651,7 +2651,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
   ethereum_ropsten: {
     type: "CryptoCurrency",
     id: "ethereum_ropsten",
-    coinType: 1,
+    coinType: 60,
     name: "Ethereum Ropsten",
     managerAppName: "Ethereum",
     ticker: "ETH",
