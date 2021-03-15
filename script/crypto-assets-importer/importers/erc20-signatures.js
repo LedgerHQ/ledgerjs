@@ -16,7 +16,7 @@ const asUint4be = (n) => {
 };
 
 module.exports = {
-  path: "tokens/ethereum/erc20",
+  paths: ["tokens/ethereum/erc20", "tokens/ethereum_ropsten/erc20"],
   id: "erc20",
   output: "data/erc20-signatures.js",
 

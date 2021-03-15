@@ -26,85 +26,88 @@ const WARN_IF_COUNTERVALUES = true;
 const lenseTicker = (a) => a[9] || a[2];
 
 module.exports = {
-  path: "tokens/ethereum/erc20",
+  paths: ["tokens/ethereum/erc20", "tokens/ethereum_ropsten/erc20"],
   output: "data/erc20.js",
 
-  validate: (all, countervaluesTickers) => {
-    const fiatCollisions = all.filter(
-      (a) =>
-        findFiatCurrencyByTicker(lenseTicker(a)) &&
-        !a[7] &&
-        (WARN_IF_COUNTERVALUES
-          ? countervaluesTickers.includes(lenseTicker(a))
-          : true)
-    );
-    const cryptoCollisions = all.filter((a) => {
-      const cur = findCryptoCurrencyByTicker(lenseTicker(a));
-      return (
-        cur &&
-        !cur.disableCountervalue &&
-        !a[7] &&
-        (WARN_IF_COUNTERVALUES
-          ? countervaluesTickers.includes(lenseTicker(a))
-          : true)
+  validate: (everything, countervaluesTickers) =>
+    ["ethereum", "ethereum_ropsten"].flatMap((cid) => {
+      const all = everything.filter((a) => a[0] === cid);
+      const fiatCollisions = all.filter(
+        (a) =>
+          findFiatCurrencyByTicker(lenseTicker(a)) &&
+          !a[7] &&
+          (WARN_IF_COUNTERVALUES
+            ? countervaluesTickers.includes(lenseTicker(a))
+            : true)
       );
-    });
-    const contractGroup = {};
-    all.forEach((a) => {
-      const matches = all.filter((b) => a[6] && b[6] && a[6] === b[6]);
-      if (matches.length > 1 && !contractGroup[a[6]]) {
-        contractGroup[a[6]] = matches;
+      const cryptoCollisions = all.filter((a) => {
+        const cur = findCryptoCurrencyByTicker(lenseTicker(a));
+        return (
+          cur &&
+          !cur.disableCountervalue &&
+          !a[7] &&
+          (WARN_IF_COUNTERVALUES
+            ? countervaluesTickers.includes(lenseTicker(a))
+            : true)
+        );
+      });
+      const contractGroup = {};
+      all.forEach((a) => {
+        const matches = all.filter((b) => a[6] && b[6] && a[6] === b[6]);
+        if (matches.length > 1 && !contractGroup[a[6]]) {
+          contractGroup[a[6]] = matches;
+        }
+      });
+      const groups = {};
+      all.forEach((a) => {
+        if (a[7]) return;
+        groups[lenseTicker(a)] = (groups[lenseTicker(a)] || []).concat([a]);
+      });
+      const dupTickers = Object.keys(groups).filter(
+        (a) =>
+          groups[a].length > 1 &&
+          (WARN_IF_COUNTERVALUES ? countervaluesTickers.includes(a) : true)
+      );
+
+      if (Object.keys(contractGroup).length > 0) {
+        Object.keys(contractGroup).forEach((key) => {
+          console.warn(
+            key +
+              " contract used in erc20: " +
+              contractGroup[key].map((a) => lenseTicker(a)).join(", ")
+          );
+        });
       }
-    });
-    const groups = {};
-    all.forEach((a) => {
-      if (a[7]) return;
-      groups[lenseTicker(a)] = (groups[lenseTicker(a)] || []).concat([a]);
-    });
-    const dupTickers = Object.keys(groups).filter(
-      (a) =>
-        groups[a].length > 1 &&
-        (WARN_IF_COUNTERVALUES ? countervaluesTickers.includes(a) : true)
-    );
 
-    if (Object.keys(contractGroup).length > 0) {
-      Object.keys(contractGroup).forEach((key) => {
+      if (fiatCollisions.length > 0) {
+        console.warn("\nERC20 THAT COLLIDES WITH FIAT TICKERS:\n");
+        fiatCollisions.forEach((t) => {
+          console.warn(lenseTicker(t) + " ticker used by erc20: " + t[1]);
+        });
+      }
+
+      if (cryptoCollisions.length > 0) {
         console.warn(
-          key +
-            " contract used in erc20: " +
-            contractGroup[key].map((a) => lenseTicker(a)).join(", ")
+          "\nERC20 THAT COLLIDES WITH OTHER CRYPTO ASSETS TICKERS:\n"
         );
-      });
-    }
+        cryptoCollisions.forEach((t) => {
+          console.warn(lenseTicker(t) + " ticker used by erc20: " + t[1]);
+        });
+      }
 
-    if (fiatCollisions.length > 0) {
-      console.warn("\nERC20 THAT COLLIDES WITH FIAT TICKERS:\n");
-      fiatCollisions.forEach((t) => {
-        console.warn(lenseTicker(t) + " ticker used by erc20: " + t[1]);
-      });
-    }
+      if (dupTickers.length > 0) {
+        console.warn("\nERC20 TICKER COLLISIONS:\n");
+        dupTickers.forEach((ticker) => {
+          console.warn(
+            ticker +
+              " ticker is used by erc20: " +
+              groups[ticker].map((a) => a[1]).join(", ")
+          );
+        });
+      }
 
-    if (cryptoCollisions.length > 0) {
-      console.warn("\nERC20 THAT COLLIDES WITH OTHER CRYPTO ASSETS TICKERS:\n");
-      cryptoCollisions.forEach((t) => {
-        console.warn(lenseTicker(t) + " ticker used by erc20: " + t[1]);
-      });
-    }
-
-    if (dupTickers.length > 0) {
-      console.warn("\nERC20 TICKER COLLISIONS:\n");
-      dupTickers.forEach((ticker) => {
-        console.warn(
-          ticker +
-            " ticker is used by erc20: " +
-            groups[ticker].map((a) => a[1]).join(", ")
-        );
-      });
-    }
-
-    return all.filter((a) => !contractGroup[a[6]]);
-  },
-
+      return all.filter((a) => !contractGroup[a[6]]);
+    }),
   outputTemplate: (data) =>
     `module.exports = [
 ${data

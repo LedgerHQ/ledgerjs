@@ -5,7 +5,7 @@ const idFromFolderAndFile = (folder, id) =>
   folder.includes("tokens/") ? `${folder.split("tokens/")[1]}/${id}` : "" + id;
 
 module.exports = {
-  path: "tokens/ethereum/erc20",
+  paths: ["tokens/ethereum/erc20"],
   output: "data/exchange/erc20.js",
   outputTemplate: (data) =>
     "module.exports = [" +
