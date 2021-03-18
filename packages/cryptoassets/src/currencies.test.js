@@ -170,7 +170,9 @@ test("can get fiat by coin type", () => {
 });
 
 test("all USDT are countervalue enabled", () => {
-  const tokens = listTokens().filter((t) => t.ticker === "USDT");
+  const tokens = listTokens().filter(
+    (t) => t.ticker === "USDT" && !t.parentCurrency.isTestnetFor
+  );
   expect(tokens.map((t) => t.id).sort()).toMatchSnapshot();
   expect(tokens.every((t) => t.disableCountervalue === false)).toBe(true);
 });

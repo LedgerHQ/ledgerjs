@@ -1,9 +1,6 @@
 // @flow
 import type { TokenCurrency, CryptoCurrency } from "./types";
-import {
-  getCryptoCurrencyById,
-  findCryptoCurrencyByTicker,
-} from "./currencies";
+import { getCryptoCurrencyById } from "./currencies";
 
 import erc20tokens from "../data/erc20";
 import trc10tokens from "../data/trc10";
