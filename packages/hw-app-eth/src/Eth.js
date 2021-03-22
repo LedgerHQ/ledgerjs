@@ -22,6 +22,9 @@ import { EthAppPleaseEnableContractData } from "@ledgerhq/errors";
 import type Transport from "@ledgerhq/hw-transport";
 import { BigNumber } from "bignumber.js";
 import { encode, decode } from "rlp";
+import { decodeTx } from "ethereum-tx-decoder";
+import { byContractAddress } from "./erc20";
+import { getPluginForContractMethod } from "./plugins";
 
 export type StarkQuantizationType =
   | "eth"
@@ -65,6 +68,7 @@ const remapTransactionRelatedErrors = (e) => {
  */
 export default class Eth {
   transport: Transport<*>;
+  contractBindings: Object;
 
   constructor(transport: Transport<*>, scrambleKey: string = "w0w") {
     this.transport = transport;
@@ -72,7 +76,7 @@ export default class Eth {
       this,
       [
         "getAddress",
-        "provideERC20TokenInformation",
+        // "provideERC20TokenInformation",
         "signTransaction",
         "signPersonalMessage",
         "getAppConfiguration",
@@ -87,6 +91,7 @@ export default class Eth {
         "starkUnsafeSign",
         "eth2GetPublicKey",
         "eth2SetWithdrawalIndex",
+        // "setExternalPlugin"
       ],
       scrambleKey
     );
@@ -240,6 +245,22 @@ export default class Eth {
       toSend.push(buffer);
       offset += chunkSize;
     }
+
+    let decodedTx = decodeTx("0x" + rawTxHex);
+    if (decodedTx.data.length >= 10) {
+      const erc20Info = byContractAddress(decodedTx.to);
+      console.log(erc20Info);
+      if (erc20Info) {
+        this.provideERC20TokenInformation(erc20Info);
+      }
+      let selector = decodedTx.data.substring(0, 10);
+      let plugin = getPluginForContractMethod(decodedTx.to, selector);
+      console.log(plugin);
+      if (plugin) {
+        this.setExternalPlugin(plugin, decodedTx.to, selector);
+      }
+    }
+
     return foreach(toSend, (data, i) =>
       this.transport
         .send(0xe0, 0x04, i === 0 ? 0x00 : 0x80, 0x00, data)
@@ -996,6 +1017,43 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
       (e) => {
         if (e && e.statusCode === 0x6d00) {
           // this case happen for ETH application versions not supporting ETH 2
+          return false;
+        }
+        throw e;
+      }
+    );
+  }
+
+  /**
+   * Set the name of the plugin that should be used to parse the next transaction
+   *
+   * @param pluginName string containing the name of the plugin, must have length between 1 and 30 bytes
+   * @return True if the method was executed successfully
+   */
+  setExternalPlugin(
+    pluginName: string,
+    contractAddress: string,
+    selector: string
+  ): Promise<boolean> {
+    let pluginNameLengthBuffer = Buffer.allocUnsafe(1);
+    pluginNameLengthBuffer.writeUInt8(pluginName.length);
+    let pluginNameBuffer = Buffer.from(pluginName, "ascii");
+    let contractAddressBuffer = Buffer.from(contractAddress.slice(2), "hex");
+    let selectorBuffer = Buffer.from(selector.slice(2), "hex");
+    let buffer = Buffer.concat([
+      pluginNameLengthBuffer,
+      pluginNameBuffer,
+      contractAddressBuffer,
+      selectorBuffer,
+    ]);
+    return this.transport.send(0xe0, 0x12, 0x00, 0x00, buffer).then(
+      () => true,
+      (e) => {
+        if (e && e.statusCode === 0x6a80) {
+          // this case happen when the plugin name is too short or too long
+          return false;
+        } else if (e && e.statusCode === 0x6984) {
+          // this case happen when the plugin requested is not installed on the device
           return false;
         }
         throw e;

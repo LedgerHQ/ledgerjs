@@ -30,6 +30,7 @@
     "@ledgerhq/errors": "^5.48.0",
     "@ledgerhq/hw-transport": "^5.48.0",
     "bignumber.js": "^9.0.1",
+    "ethereum-tx-decoder": "^3.0.0",
     "rlp": "^2.2.6"
   },
   "devDependencies": {
