@@ -32,11 +32,11 @@
     "@ledgerhq/hw-transport": "^5.46.0",
     "@ledgerhq/logs": "^5.46.0",
     "invariant": "^2.2.4",
-    "rxjs": "^6.6.6",
+    "rxjs": "^6.6.7",
     "uuid": "^3.4.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.146.0"
+    "flow-bin": "^0.147.0"
   },
   "scripts": {
     "flow": "flow",
