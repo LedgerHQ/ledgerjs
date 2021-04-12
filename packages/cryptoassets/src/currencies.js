@@ -2616,7 +2616,35 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     ],
     explorerViews: [],
   },
-
+  cryptocom: {
+    type: "CryptoCurrency",
+    id: "cryptocom",
+    coinType: 394,
+    name: "Crypto.org",
+    managerAppName: "Crypto.org",
+    ticker: "CRO",
+    scheme: "cryptocom",
+    color: "#0e1c37",
+    family: "Cosmos",
+    units: [
+      {
+        name: "cro",
+        code: "CRO",
+        magnitude: 8,
+      },
+      {
+        name: "basecro",
+        code: "BCRO",
+        magnitude: 0,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://crypto.org/explorer/tx/$hash",
+        address: "https://crypto.org/explorer/account/$address",
+      },
+    ],
+  },
   // Testnets
   bitcoin_testnet: {
     type: "CryptoCurrency",
@@ -2695,6 +2723,36 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
       {
         tx: "https://explorer.stacks.co/txid/$hash",
         address: "https://explorer.stacks.co/address/$address",
+      },
+    ],
+  },
+  cryptocom_croeseid: {
+    type: "CryptoCurrency",
+    id: "cryptocom_croeseid",
+    coinType: 1,
+    name: "Crypto.org Croeseid",
+    managerAppName: "Crypto.org Croeseid",
+    ticker: "CRO",
+    scheme: "cryptocom_croeseid",
+    color: "#0e1c37",
+    family: "Cosmos",
+    units: [
+      {
+        name: "tcro",
+        code: "TCRO",
+        magnitude: 8,
+      },
+      {
+        name: "basetcro",
+        code: "BTCRO",
+        magnitude: 0,
+      },
+    ],
+    isTestnetFor: "cryptocom",
+    explorerViews: [
+      {
+        tx: "https://crypto.org/explorer/croeseid/tx/$hash",
+        address: "https://crypto.org/explorer/croeseid/account/$address",
       },
     ],
   },
