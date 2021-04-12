@@ -26,7 +26,7 @@
   "module": "lib-es/Polkadot.js",
   "license": "Apache-2.0",
   "devDependencies": {
-    "flow-bin": "^0.147.0"
+    "flow-bin": "^0.148.0"
   },
   "dependencies": {
     "@ledgerhq/errors": "^5.48.0",
