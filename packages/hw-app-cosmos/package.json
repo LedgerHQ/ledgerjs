@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-app-cosmos",
-  "version": "5.48.0",
+  "version": "5.49.0",
   "description": "Ledger Hardware Wallet Cosmos Application API",
   "keywords": [
     "Ledger",
@@ -29,8 +29,8 @@
     "flow-bin": "^0.148.0"
   },
   "dependencies": {
-    "@ledgerhq/errors": "^5.48.0",
-    "@ledgerhq/hw-transport": "^5.48.0",
+    "@ledgerhq/errors": "^5.49.0",
+    "@ledgerhq/hw-transport": "^5.49.0",
     "bip32-path": "^0.4.2"
   },
   "scripts": {

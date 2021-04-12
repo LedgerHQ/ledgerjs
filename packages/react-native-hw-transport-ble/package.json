@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/react-native-hw-transport-ble",
-  "version": "5.48.0",
+  "version": "5.49.0",
   "description": "Ledger Hardware Wallet Bluetooth BLE transport for React Native",
   "keywords": [
     "Ledger",
@@ -27,10 +27,10 @@
     "react-native-ble-plx": "^1.0.1"
   },
   "dependencies": {
-    "@ledgerhq/devices": "^5.48.0",
-    "@ledgerhq/errors": "^5.48.0",
-    "@ledgerhq/hw-transport": "^5.48.0",
-    "@ledgerhq/logs": "^5.48.0",
+    "@ledgerhq/devices": "^5.49.0",
+    "@ledgerhq/errors": "^5.49.0",
+    "@ledgerhq/hw-transport": "^5.49.0",
+    "@ledgerhq/logs": "^5.49.0",
     "invariant": "^2.2.4",
     "rxjs": "^6.6.7",
     "uuid": "^3.4.0"
