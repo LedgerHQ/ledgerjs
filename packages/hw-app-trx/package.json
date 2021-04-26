@@ -30,7 +30,7 @@
     "@ledgerhq/hw-transport": "^5.49.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.148.0"
+    "flow-bin": "^0.149.0"
   },
   "scripts": {
     "flow": "flow",
