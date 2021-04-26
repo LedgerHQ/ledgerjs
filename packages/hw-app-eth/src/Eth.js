@@ -76,7 +76,7 @@ export default class Eth {
       this,
       [
         "getAddress",
-        // "provideERC20TokenInformation",
+        "provideERC20TokenInformation",
         "signTransaction",
         "signPersonalMessage",
         "getAppConfiguration",
@@ -91,7 +91,6 @@ export default class Eth {
         "starkUnsafeSign",
         "eth2GetPublicKey",
         "eth2SetWithdrawalIndex",
-        // "setExternalPlugin"
       ],
       scrambleKey
     );
@@ -168,10 +167,10 @@ export default class Eth {
    * @example
    * import { byContractAddress } from "@ledgerhq/hw-app-eth/erc20"
    * const zrxInfo = byContractAddress("0xe41d2489571d322189246dafa5ebde1f4699f498")
-   * if (zrxInfo) await appEth.provideERC20TokenInformation(zrxInfo)
+   * if (zrxInfo) await appEth._provideERC20TokenInformation(zrxInfo)
    * const signed = await appEth.signTransaction(path, rawTxHex)
    */
-  provideERC20TokenInformation({ data }: { data: Buffer }): Promise<boolean> {
+  _provideERC20TokenInformation({ data }: { data: Buffer }): Promise<boolean> {
     return this.transport.send(0xe0, 0x0a, 0x00, 0x00, data).then(
       () => true,
       (e) => {
@@ -183,6 +182,10 @@ export default class Eth {
         throw e;
       }
     );
+  }
+
+  provideERC20TokenInformation({ data }: { data: Buffer }): Promise<boolean> {
+    return this._provideERC20TokenInformation({ data });
   }
 
   /**
@@ -251,7 +254,7 @@ export default class Eth {
       const erc20Info = byContractAddress(decodedTx.to);
       console.log(erc20Info);
       if (erc20Info) {
-        this.provideERC20TokenInformation(erc20Info);
+        this._provideERC20TokenInformation(erc20Info);
       }
       let selector = decodedTx.data.substring(0, 10);
       let plugin = getPluginForContractMethod(decodedTx.to, selector);
@@ -1053,6 +1056,9 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
           // this case happen when the plugin name is too short or too long
           return false;
         } else if (e && e.statusCode === 0x6984) {
+          // this case happen when the plugin requested is not installed on the device
+          return false;
+        } else if (e && e.statusCode === 0x6d00) {
           // this case happen when the plugin requested is not installed on the device
           return false;
         }
