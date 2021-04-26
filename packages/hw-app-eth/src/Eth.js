@@ -91,6 +91,7 @@ export default class Eth {
         "starkUnsafeSign",
         "eth2GetPublicKey",
         "eth2SetWithdrawalIndex",
+        "setExternalPlugin",
       ],
       scrambleKey
     );
@@ -260,7 +261,7 @@ export default class Eth {
       let plugin = getPluginForContractMethod(decodedTx.to, selector);
       console.log(plugin);
       if (plugin) {
-        this.setExternalPlugin(plugin, decodedTx.to, selector);
+        this._setExternalPlugin(plugin, decodedTx.to, selector);
       }
     }
 
@@ -1033,7 +1034,7 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
    * @param pluginName string containing the name of the plugin, must have length between 1 and 30 bytes
    * @return True if the method was executed successfully
    */
-  setExternalPlugin(
+  _setExternalPlugin(
     pluginName: string,
     contractAddress: string,
     selector: string
@@ -1065,5 +1066,13 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
         throw e;
       }
     );
+  }
+
+  setExternalPlugin(
+    pluginName: string,
+    contractAddress: string,
+    selector: string
+  ): Promise<boolean> {
+    return this._setExternalPlugin(pluginName, contractAddress, selector);
   }
 }
