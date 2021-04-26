@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-app-btc",
-  "version": "5.49.0",
+  "version": "5.50.0",
   "description": "Ledger Hardware Wallet Bitcoin Application API",
   "keywords": [
     "Ledger",
@@ -26,8 +26,8 @@
   "module": "lib-es/Btc.js",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^5.49.0",
-    "@ledgerhq/logs": "^5.49.0",
+    "@ledgerhq/hw-transport": "^5.50.0",
+    "@ledgerhq/logs": "^5.50.0",
     "bip32-path": "^0.4.2",
     "invariant": "^2.2.4",
     "ripemd160": "2",
