@@ -1,8 +1,3 @@
-/* eslint-disable no-continue */
-/* eslint-disable no-unused-vars */
-/* eslint-disable no-param-reassign */
-/* eslint-disable no-prototype-builtins */
-
 const errorClasses = {};
 const deserializers = {};
 

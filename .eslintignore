@@ -1,2 +1,7 @@
 packages/cryptoassets/data
 
+**/node_modules
+
+**/coverage
+
+**/dist
