@@ -791,19 +791,25 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     id: "elrond",
     coinType: 508,
     name: "Elrond",
-    managerAppName: "Elrond",
-    ticker: "eGLD",
+    managerAppName: "Elrond (eGLD)",
+    ticker: "EGLD",
     scheme: "elrond",
-    color: "#000",
+    color: "#1b46c2",
     family: "elrond",
+    blockAvgTime: 6,
     units: [
       {
-        name: "eGLD",
-        code: "eGLD",
+        name: "EGLD",
+        code: "egld",
         magnitude: 18,
       },
     ],
-    explorerViews: [],
+    explorerViews: [
+      {
+        tx: "https://explorer.elrond.com/transactions/$hash",
+        address: "https://explorer.elrond.com/accounts/$address",
+      },
+    ],
   },
   energywebchain: {
     type: "CryptoCurrency",
