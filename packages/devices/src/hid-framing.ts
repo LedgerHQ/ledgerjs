@@ -1,13 +1,12 @@
-// @flow
-
 import { TransportError } from "@ledgerhq/errors";
-
-export type ResponseAcc = ?{
-  data: Buffer,
-  dataLength: number,
-  sequence: number,
-};
-
+export type ResponseAcc =
+  | {
+      data: Buffer;
+      dataLength: number;
+      sequence: number;
+    }
+  | null
+  | undefined;
 const Tag = 0x05;
 
 function asUInt16BE(value) {
@@ -35,8 +34,8 @@ const createHIDframing = (channel: number, packetSize: number) => {
         data, // fill data with padding
         Buffer.alloc(nbBlocks * blockSize - data.length + 1).fill(0),
       ]);
+      const blocks: Buffer[] = [];
 
-      const blocks = [];
       for (let i = 0; i < nbBlocks; i++) {
         const head = Buffer.alloc(5);
         head.writeUInt16BE(channel, 0);
@@ -45,6 +44,7 @@ const createHIDframing = (channel: number, packetSize: number) => {
         const chunk = data.slice(i * blockSize, (i + 1) * blockSize);
         blocks.push(Buffer.concat([head, chunk]));
       }
+
       return blocks;
     },
 
@@ -54,9 +54,11 @@ const createHIDframing = (channel: number, packetSize: number) => {
       if (chunk.readUInt16BE(0) !== channel) {
         throw new TransportError("Invalid channel", "InvalidChannel");
       }
+
       if (chunk.readUInt8(2) !== Tag) {
         throw new TransportError("Invalid tag", "InvalidTag");
       }
+
       if (chunk.readUInt16BE(3) !== sequence) {
         throw new TransportError("Invalid sequence", "InvalidSequence");
       }
@@ -64,9 +66,11 @@ const createHIDframing = (channel: number, packetSize: number) => {
       if (!acc) {
         dataLength = chunk.readUInt16BE(5);
       }
+
       sequence++;
       const chunkData = chunk.slice(acc ? 5 : 7);
       data = Buffer.concat([data, chunkData]);
+
       if (data.length > dataLength) {
         data = data.slice(0, dataLength);
       }
@@ -78,7 +82,7 @@ const createHIDframing = (channel: number, packetSize: number) => {
       };
     },
 
-    getReducedResult(acc: ResponseAcc): ?Buffer {
+    getReducedResult(acc: ResponseAcc): Buffer | null | undefined {
       if (acc && acc.dataLength === acc.data.length) {
         return acc.data;
       }

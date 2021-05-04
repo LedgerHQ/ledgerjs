@@ -1,15 +1,13 @@
-// @flow
-
 import { Observable } from "rxjs";
 import { log } from "@ledgerhq/logs";
-
 const TagId = 0x05;
 
 function chunkBuffer(
   buffer: Buffer,
-  sizeForIndex: (number) => number
+  sizeForIndex: (arg0: number) => number
 ): Array<Buffer> {
-  const chunks = [];
+  const chunks: Buffer[] = [];
+
   for (
     let i = 0, size = sizeForIndex(0);
     i < buffer.length;
@@ -17,11 +15,12 @@ function chunkBuffer(
   ) {
     chunks.push(buffer.slice(i, i + size));
   }
+
   return chunks;
 }
 
 export const sendAPDU = (
-  write: (Buffer) => Promise<void>,
+  write: (arg0: Buffer) => Promise<void>,
   apdu: Buffer,
   mtuSize: number
 ): Observable<void> => {
@@ -30,13 +29,14 @@ export const sendAPDU = (
       const head = Buffer.alloc(i === 0 ? 5 : 3);
       head.writeUInt8(TagId, 0);
       head.writeUInt16BE(i, 1);
+
       if (i === 0) {
         head.writeUInt16BE(apdu.length, 3);
       }
+
       return Buffer.concat([head, buffer]);
     }
   );
-
   return Observable.create((o) => {
     let terminated = false;
 

@@ -1,35 +1,19 @@
 {
-  "parser": "babel-eslint",
-  "env": {
-    "browser": true,
-    "commonjs": true,
-    "es6": true,
-    "jest": true,
-    "node": true
-  },
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint", "react", "prettier"],
   "extends": [
     "eslint:recommended",
-    "plugin:react/recommended",
-    "plugin:flowtype/recommended",
-    "prettier"
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended",
+    "prettier",
   ],
-  "plugins": ["flowtype", "react", "prettier"],
   "rules": {
     "no-console": 0,
     "no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "linebreak-style": ["error", "unix"],
     "quotes": ["error", "double"],
     "semi": ["error", "always"],
-    "flowtype/space-after-type-colon": [
-      2,
-      "always",
-      { "allowLineBreak": true }
-    ],
-    "prettier/prettier": "error"
-  },
-  "settings": {
-    "flowtype": {
-      "onlyFilesWithFlowAnnotation": true
-    }
+    "prettier/prettier": "error",
+    "@typescript-eslint/no-use-before-define": "off"
   }
-}
+};
