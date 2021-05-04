@@ -1,7 +1,5 @@
-// @flow
 import invariant from "invariant";
-
-const abandonSeedAddresses: { [string]: string } = {
+const abandonSeedAddresses: Record<string, string> = {
   algorand: "PSHLIWQKDEETIIBQEOTLGCT5IF7BTTOKCUULONOGVGF2HYDT2IHW3H4CCI",
   cosmos: "cosmos19rl4cm2hmr8afy4kldpxz3fka4jguq0auqdal4",
   cosmos_testnet: "cosmos19rl4cm2hmr8afy4kldpxz3fka4jguq0auqdal4",
@@ -16,7 +14,8 @@ const abandonSeedAddresses: { [string]: string } = {
   bitcoin_private: "b1SGV7U5kGAMHtGbkAR3mjaZqVn57SHFbiR",
   bitcoin_testnet: "mkpZhYtJu2r87Js3pDiWJDmPte2NRZ8bJV",
   dash: "XoJA8qE3N2Y3jMLEtZ3vcN42qseZ8LvFf5",
-  decred: "", // FIXME need to derivate decred abandon
+  decred: "",
+  // FIXME need to derivate decred abandon
   digibyte: "DG1KhhBKpsyWXTakHNezaDQ34focsXjN1i",
   dogecoin: "DBus3bamQjgJULBJtYXpEzDWQRwF5iwxgC",
   game_credits: "GJgbzWpGhrZmSvc2V5Npqf57Kg9xfB79tj",
