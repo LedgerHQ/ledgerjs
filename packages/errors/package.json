@@ -19,9 +19,7 @@
   "main": "lib/index.js",
   "module": "lib-es/index.js",
   "license": "Apache-2.0",
-  "devDependencies": {
-    "flow-bin": "^0.149.0"
-  },
+  "devDependencies": {},
   "scripts": {
     "clean": "bash ../../script/clean.sh",
     "build": "tsc && tsc -m ES6 --outDir lib-es",
