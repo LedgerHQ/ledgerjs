@@ -258,10 +258,10 @@ export default class Eth {
         this._provideERC20TokenInformation(erc20Info);
       }
       let selector = decodedTx.data.substring(0, 10);
-      let plugin = getPluginForContractMethod(decodedTx.to, selector);
-      console.log(plugin);
-      if (plugin) {
-        this._setExternalPlugin(plugin, decodedTx.to, selector);
+      let {payload, signature} = getPluginForContractMethod(decodedTx.to, selector);
+      console.log(payload);
+      if (payload && signature) {
+        this._setExternalPlugin(payload, signature);
       }
     }
 
@@ -1035,20 +1035,14 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
    * @return True if the method was executed successfully
    */
   _setExternalPlugin(
-    pluginName: string,
-    contractAddress: string,
-    selector: string
+    payload: string,
+    signature: string
   ): Promise<boolean> {
-    let pluginNameLengthBuffer = Buffer.allocUnsafe(1);
-    pluginNameLengthBuffer.writeUInt8(pluginName.length);
-    let pluginNameBuffer = Buffer.from(pluginName, "ascii");
-    let contractAddressBuffer = Buffer.from(contractAddress.slice(2), "hex");
-    let selectorBuffer = Buffer.from(selector.slice(2), "hex");
+    let payloadBuffer = Buffer.from(payload, "hex");
+    let signatureBuffer = Buffer.from(signature, "hex");
     let buffer = Buffer.concat([
-      pluginNameLengthBuffer,
-      pluginNameBuffer,
-      contractAddressBuffer,
-      selectorBuffer,
+      payloadBuffer,
+      signatureBuffer
     ]);
     return this.transport.send(0xe0, 0x12, 0x00, 0x00, buffer).then(
       () => true,
