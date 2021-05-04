@@ -1,20 +1,18 @@
-// @flow
-
 /**
  * A Log object
  */
-export type Log = {
-  type: string,
-  message?: string,
-  data?: any,
-  id: string, // unique amount all logs
-  date: Date, // date of the log
-};
-
+export interface Log {
+  type: string;
+  message?: string;
+  data?: any;
+  id: string;
+  // unique amount all logs
+  date: Date; // date of the log
+}
 export type Unsubscribe = () => void;
-
+export type Subscriber = (arg0: Log) => void;
 let id = 0;
-const subscribers = [];
+const subscribers: Subscriber[] = [];
 
 /**
  * log something
@@ -22,7 +20,11 @@ const subscribers = [];
  * @param message a clear message of the log associated to the type
  */
 export const log = (type: string, message?: string, data?: any) => {
-  const obj: Log = { type, id: String(++id), date: new Date() };
+  const obj: Log = {
+    type,
+    id: String(++id),
+    date: new Date(),
+  };
   if (message) obj.message = message;
   if (data) obj.data = data;
   dispatch(obj);
@@ -33,10 +35,11 @@ export const log = (type: string, message?: string, data?: any) => {
  * @param cb that is called for each future log() with the Log object
  * @return a function that can be called to unsubscribe the listener
  */
-export const listen = (cb: (Log) => void): Unsubscribe => {
+export const listen = (cb: Subscriber): Unsubscribe => {
   subscribers.push(cb);
   return () => {
     const i = subscribers.indexOf(cb);
+
     if (i !== -1) {
       // equivalent of subscribers.splice(i, 1) // https://twitter.com/Rich_Harris/status/1125850391155965952
       subscribers[i] = subscribers[subscribers.length - 1];
@@ -56,6 +59,13 @@ function dispatch(log: Log) {
 }
 
 // for debug purpose
+
+declare global {
+  interface Window {
+    __ledgerLogsListen: any;
+  }
+}
+
 if (typeof window !== "undefined") {
   window.__ledgerLogsListen = listen;
 }
