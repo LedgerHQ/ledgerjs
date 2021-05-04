@@ -791,19 +791,25 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     id: "elrond",
     coinType: 508,
     name: "Elrond",
-    managerAppName: "Elrond",
-    ticker: "eGLD",
+    managerAppName: "Elrond (eGLD)",
+    ticker: "EGLD",
     scheme: "elrond",
-    color: "#000",
+    color: "#1b46c2",
     family: "elrond",
+    blockAvgTime: 6,
     units: [
       {
-        name: "eGLD",
-        code: "eGLD",
+        name: "EGLD",
+        code: "egld",
         magnitude: 18,
       },
     ],
-    explorerViews: [],
+    explorerViews: [
+      {
+        tx: "https://explorer.elrond.com/transactions/$hash",
+        address: "https://explorer.elrond.com/accounts/$address",
+      },
+    ],
   },
   energywebchain: {
     type: "CryptoCurrency",
@@ -2616,7 +2622,35 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     ],
     explorerViews: [],
   },
-
+  crypto_org: {
+    type: "CryptoCurrency",
+    id: "crypto_org",
+    coinType: 394,
+    name: "Crypto.org Coin",
+    managerAppName: "Crypto.org Chain",
+    ticker: "CRO",
+    scheme: "crypto_org",
+    color: "#0e1c37",
+    family: "crypto_org",
+    units: [
+      {
+        name: "CRO",
+        code: "cro",
+        magnitude: 8,
+      },
+      {
+        name: "baseCRO",
+        code: "basecro",
+        magnitude: 0,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://crypto.org/explorer/tx/$hash",
+        address: "https://crypto.org/explorer/account/$address",
+      },
+    ],
+  },
   // Testnets
   bitcoin_testnet: {
     type: "CryptoCurrency",
@@ -2695,6 +2729,36 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
       {
         tx: "https://explorer.stacks.co/txid/$hash",
         address: "https://explorer.stacks.co/address/$address",
+      },
+    ],
+  },
+  crypto_org_croeseid: {
+    type: "CryptoCurrency",
+    id: "crypto_org_croeseid",
+    coinType: 394,
+    name: "Crypto.org Croeseid Coin",
+    managerAppName: "Crypto.org Chain",
+    ticker: "CRO",
+    scheme: "crypto_org_croeseid",
+    color: "#0e1c37",
+    family: "crypto_org",
+    units: [
+      {
+        name: "TCRO",
+        code: "tcro",
+        magnitude: 8,
+      },
+      {
+        name: "baseTCRO",
+        code: "basetcro",
+        magnitude: 0,
+      },
+    ],
+    isTestnetFor: "crypto_org",
+    explorerViews: [
+      {
+        tx: "https://crypto.org/explorer/croeseid/tx/$hash",
+        address: "https://crypto.org/explorer/croeseid/account/$address",
       },
     ],
   },
