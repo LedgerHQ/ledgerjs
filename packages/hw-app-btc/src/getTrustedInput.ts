@@ -1,17 +1,16 @@
-// @flow
 import invariant from "invariant";
 import type Transport from "@ledgerhq/hw-transport";
 import type { Transaction } from "./types";
 import { MAX_SCRIPT_BLOCK } from "./constants";
 import { createVarint } from "./varint";
-
 export async function getTrustedInputRaw(
-  transport: Transport<*>,
+  transport: Transport<any>,
   transactionData: Buffer,
-  indexLookup: ?number
+  indexLookup?: number | null | undefined
 ): Promise<string> {
   let data;
   let firstRound = false;
+
   if (typeof indexLookup === "number") {
     firstRound = true;
     const prefix = Buffer.alloc(4);
@@ -20,6 +19,7 @@ export async function getTrustedInputRaw(
   } else {
     data = transactionData;
   }
+
   const trustedInput = await transport.send(
     0xe0,
     0x42,
@@ -27,13 +27,11 @@ export async function getTrustedInputRaw(
     0x00,
     data
   );
-
   const res = trustedInput.slice(0, trustedInput.length - 2).toString("hex");
   return res;
 }
-
 export async function getTrustedInput(
-  transport: Transport<*>,
+  transport: Transport<any>,
   indexLookup: number,
   transaction: Transaction,
   additionals: Array<string> = []
@@ -46,21 +44,25 @@ export async function getTrustedInput(
     nExpiryHeight,
     extraData,
   } = transaction;
+
   if (!outputs || !locktime) {
     throw new Error("getTrustedInput: locktime & outputs is expected");
   }
+
   const isDecred = additionals.includes("decred");
   const isXST = additionals.includes("stealthcoin");
 
-  const processScriptBlocks = async (script, sequence) => {
+  const processScriptBlocks = async (script, sequence?: Buffer) => {
     const seq = sequence || Buffer.alloc(0);
-    const scriptBlocks = [];
+    const scriptBlocks: Buffer[] = [];
     let offset = 0;
+
     while (offset !== script.length) {
-      let blockSize =
+      const blockSize =
         script.length - offset > MAX_SCRIPT_BLOCK
           ? MAX_SCRIPT_BLOCK
           : script.length - offset;
+
       if (offset + blockSize !== script.length) {
         scriptBlocks.push(script.slice(offset, offset + blockSize));
       } else {
@@ -68,6 +70,7 @@ export async function getTrustedInput(
           Buffer.concat([script.slice(offset, offset + blockSize), seq])
         );
       }
+
       offset += blockSize;
     }
 
@@ -78,9 +81,11 @@ export async function getTrustedInput(
     }
 
     let res;
-    for (let scriptBlock of scriptBlocks) {
+
+    for (const scriptBlock of scriptBlocks) {
       res = await getTrustedInputRaw(transport, scriptBlock);
     }
+
     return res;
   };
 
@@ -98,7 +103,7 @@ export async function getTrustedInput(
     indexLookup
   );
 
-  for (let input of inputs) {
+  for (const input of inputs) {
     const isXSTV2 =
       isXST &&
       Buffer.compare(version, Buffer.from([0x02, 0x00, 0x00, 0x00])) === 0;
@@ -111,7 +116,6 @@ export async function getTrustedInput(
       isXSTV2 ? Buffer.from([0x00]) : createVarint(input.script.length),
     ]);
     await getTrustedInputRaw(transport, data);
-
     // iteration (eachSeries) ended
     // TODO notify progress
     // deferred.notify("input");
@@ -125,7 +129,7 @@ export async function getTrustedInput(
 
   await getTrustedInputRaw(transport, createVarint(outputs.length));
 
-  for (let output of outputs) {
+  for (const output of outputs) {
     const data = Buffer.concat([
       output.amount,
       isDecred ? Buffer.from([0x00, 0x00]) : Buffer.alloc(0), //Version script
@@ -135,7 +139,7 @@ export async function getTrustedInput(
     await getTrustedInputRaw(transport, data);
   }
 
-  const endData = [];
+  const endData: Buffer[] = [];
 
   if (nExpiryHeight && nExpiryHeight.length > 0) {
     endData.push(nExpiryHeight);
@@ -146,6 +150,7 @@ export async function getTrustedInput(
   }
 
   let extraPart;
+
   if (endData.length) {
     const data = Buffer.concat(endData);
     extraPart = isDecred
@@ -156,8 +161,6 @@ export async function getTrustedInput(
   const res = await processScriptBlocks(
     Buffer.concat([locktime, extraPart || Buffer.alloc(0)])
   );
-
   invariant(res, "missing result in processScriptBlocks");
-
   return res;
 }

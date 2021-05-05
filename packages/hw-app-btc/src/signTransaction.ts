@@ -1,9 +1,7 @@
-// @flow
 import type Transport from "@ledgerhq/hw-transport";
 import { bip32asBuffer } from "./bip32";
-
 export function signTransaction(
-  transport: Transport<*>,
+  transport: Transport<any>,
   path: string,
   lockTime: number,
   sigHashType: number,
@@ -27,14 +25,17 @@ export function signTransaction(
         lockTimeBuffer,
         Buffer.from([sigHashType]),
       ]);
+
   if (expiryHeight && !isDecred) {
     buffer = Buffer.concat([buffer, expiryHeight]);
   }
+
   return transport.send(0xe0, 0x48, 0x00, 0x00, buffer).then((result) => {
     if (result.length > 0) {
       result[0] = 0x30;
       return result.slice(0, result.length - 2);
     }
+
     return result;
   });
 }

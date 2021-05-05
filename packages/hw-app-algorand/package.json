@@ -35,7 +35,6 @@
     "bip32-path": "^0.4.2"
   },
   "scripts": {
-    "flow": "flow",
     "clean": "bash ../../script/clean.sh",
     "build": "tsc && tsc -m ES6 --outDir lib-es",
     "watch": "bash ../../script/watch.sh",

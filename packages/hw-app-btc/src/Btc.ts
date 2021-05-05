@@ -1,4 +1,3 @@
-//@flow
 import type Transport from "@ledgerhq/hw-transport";
 import { signMessage } from "./signMessage";
 import { getWalletPublicKey } from "./getWalletPublicKey";
@@ -12,9 +11,7 @@ import type { CreateTransactionArg } from "./createTransaction";
 import { signP2SHTransaction } from "./signP2SHTransaction";
 import type { SignP2SHTransactionArg } from "./signP2SHTransaction";
 import { serializeTransactionOutputs } from "./serializeTransaction";
-
 export type { AddressFormat };
-
 /**
  * Bitcoin API.
  *
@@ -22,10 +19,11 @@ export type { AddressFormat };
  * import Btc from "@ledgerhq/hw-app-btc";
  * const btc = new Btc(transport)
  */
-export default class Btc {
-  transport: Transport<*>;
 
-  constructor(transport: Transport<*>, scrambleKey: string = "BTC") {
+export default class Btc {
+  transport: Transport<any>;
+
+  constructor(transport: Transport<any>, scrambleKey = "BTC") {
     this.transport = transport;
     transport.decorateAppAPIMethods(
       this,
@@ -65,24 +63,32 @@ export default class Btc {
    */
   getWalletPublicKey(
     path: string,
-    opts?: boolean | { verify?: boolean, format?: AddressFormat }
+    opts?:
+      | boolean
+      | {
+          verify?: boolean;
+          format?: AddressFormat;
+        },
+    ...rest: any[]
   ): Promise<{
-    publicKey: string,
-    bitcoinAddress: string,
-    chainCode: string,
+    publicKey: string;
+    bitcoinAddress: string;
+    chainCode: string;
   }> {
     let options;
-    if (arguments.length > 2 || typeof opts === "boolean") {
+
+    if (rest.length > 0 || typeof opts === "boolean") {
       console.warn(
         "btc.getWalletPublicKey deprecated signature used. Please switch to getWalletPublicKey(path, { format, verify })"
       );
       options = {
         verify: !!opts,
-        format: arguments[2] ? "p2sh" : "legacy",
+        format: rest[0] ? "p2sh" : "legacy",
       };
     } else {
       options = opts || {};
     }
+
     return getWalletPublicKey(this.transport, { ...options, path });
   }
 
@@ -98,8 +104,15 @@ export default class Btc {
   signMessageNew(
     path: string,
     messageHex: string
-  ): Promise<{ v: number, r: string, s: string }> {
-    return signMessage(this.transport, { path, messageHex });
+  ): Promise<{
+    v: number;
+    r: string;
+    s: string;
+  }> {
+    return signMessage(this.transport, {
+      path,
+      messageHex,
+    });
   }
 
   /**
@@ -128,32 +141,51 @@ export default class Btc {
    * @param useTrustedInputForSegwit trust inputs for segwit transactions
    * @return the signed transaction ready to be broadcast
    * @example
-btc.createTransaction({
+  btc.createTransaction({
    inputs: [ [tx1, 1] ],
    associatedKeysets: ["0'/0/0"],
    outputScriptHex: "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac"
-}).then(res => ...);
+  }).then(res => ...);
    */
-  createPaymentTransactionNew(arg: CreateTransactionArg) {
-    if (arguments.length > 1) {
+  createPaymentTransactionNew(...arg: [CreateTransactionArg] | any[]) {
+    let res: CreateTransactionArg | undefined = undefined;
+    if (arg.length > 1) {
       console.warn(
         "@ledgerhq/hw-app-btc: createPaymentTransactionNew multi argument signature is deprecated. please switch to named parameters."
       );
-      arg = fromDeprecateArguments(arguments, [
-        "inputs",
-        "associatedKeysets",
-        "changePath",
-        "outputScriptHex",
-        "lockTime",
-        "sigHashType",
-        "segwit",
-        "initialTimestamp",
-        "additionals",
-        "expiryHeight",
-        "useTrustedInputForSegwit",
-      ]);
+      const [
+        inputs,
+        associatedKeysets,
+        changePath,
+        outputScriptHex,
+        lockTime,
+        sigHashType,
+        segwit,
+        initialTimestamp,
+        additionals,
+        expiryHeight,
+        useTrustedInputForSegwit,
+      ] = arg;
+      res = {
+        inputs,
+        associatedKeysets,
+        changePath,
+        outputScriptHex,
+        lockTime,
+        sigHashType,
+        segwit,
+        initialTimestamp,
+        additionals,
+        expiryHeight,
+        useTrustedInputForSegwit,
+      };
+    } else {
+      res = arg[0];
     }
-    return createTransaction(this.transport, arg);
+
+    if (res) {
+      return createTransaction(this.transport, res);
+    }
   }
 
   /**
@@ -169,14 +201,15 @@ btc.createTransaction({
    * @param sigHashType is the hash type of the transaction to sign, or default (all)
    * @return the signed transaction ready to be broadcast
    * @example
-btc.signP2SHTransaction({
- inputs: [ [tx, 1, "52210289b4a3ad52a919abd2bdd6920d8a6879b1e788c38aa76f0440a6f32a9f1996d02103a3393b1439d1693b063482c04bd40142db97bdf139eedd1b51ffb7070a37eac321030b9a409a1e476b0d5d17b804fcdb81cf30f9b99c6f3ae1178206e08bc500639853ae"] ],
- associatedKeysets: ["0'/0/0"],
- outputScriptHex: "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac"
-}).then(result => ...);
+  btc.signP2SHTransaction({
+  inputs: [ [tx, 1, "52210289b4a3ad52a919abd2bdd6920d8a6879b1e788c38aa76f0440a6f32a9f1996d02103a3393b1439d1693b063482c04bd40142db97bdf139eedd1b51ffb7070a37eac321030b9a409a1e476b0d5d17b804fcdb81cf30f9b99c6f3ae1178206e08bc500639853ae"] ],
+  associatedKeysets: ["0'/0/0"],
+  outputScriptHex: "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac"
+  }).then(result => ...);
    */
-  signP2SHTransaction(arg: SignP2SHTransactionArg) {
-    if (arguments.length > 1) {
+  signP2SHTransaction(...arg: [SignP2SHTransactionArg] | any[]) {
+    let res: SignP2SHTransactionArg | undefined = undefined;
+    if (arg.length > 1) {
       console.warn(
         "@ledgerhq/hw-app-btc: signP2SHTransaction multi argument signature is deprecated. please switch to named parameters."
       );
@@ -188,8 +221,9 @@ btc.signP2SHTransaction({
         sigHashType,
         segwit,
         transactionVersion,
-      ] = arguments;
-      arg = {
+      ] = arg;
+
+      res = {
         inputs,
         associatedKeysets,
         outputScriptHex,
@@ -198,29 +232,25 @@ btc.signP2SHTransaction({
         segwit,
         transactionVersion,
       };
-      arg = fromDeprecateArguments(arguments, [
-        "inputs",
-        "associatedKeysets",
-        "outputScriptHex",
-        "lockTime",
-        "sigHashType",
-        "segwit",
-        "transactionVersion",
-      ]);
+    } else {
+      res = arg[0];
     }
-    return signP2SHTransaction(this.transport, arg);
+
+    if (res) {
+      return signP2SHTransaction(this.transport, res);
+    }
   }
 
   /**
    * For each UTXO included in your transaction, create a transaction object from the raw serialized version of the transaction used in this UTXO.
    * @example
-const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc4af009f4d4dc57ae597ed0420b71010000008a47304402201f36a12c240dbf9e566bc04321050b1984cd6eaf6caee8f02bb0bfec08e3354b022012ee2aeadcbbfd1e92959f57c15c1c6debb757b798451b104665aa3010569b49014104090b15bde569386734abf2a2b99f9ca6a50656627e77de663ca7325702769986cf26cc9dd7fdea0af432c8e2becc867c932e1b9dd742f2a108997c2252e2bdebffffffff0281b72e00000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88aca0860100000000001976a9144533f5fb9b4817f713c48f0bfe96b9f50c476c9b88ac00000000");
+  const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc4af009f4d4dc57ae597ed0420b71010000008a47304402201f36a12c240dbf9e566bc04321050b1984cd6eaf6caee8f02bb0bfec08e3354b022012ee2aeadcbbfd1e92959f57c15c1c6debb757b798451b104665aa3010569b49014104090b15bde569386734abf2a2b99f9ca6a50656627e77de663ca7325702769986cf26cc9dd7fdea0af432c8e2becc867c932e1b9dd742f2a108997c2252e2bdebffffffff0281b72e00000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88aca0860100000000001976a9144533f5fb9b4817f713c48f0bfe96b9f50c476c9b88ac00000000");
    */
   splitTransaction(
     transactionHex: string,
-    isSegwitSupported: ?boolean = false,
-    hasTimestamp?: boolean = false,
-    hasExtraData?: boolean = false,
+    isSegwitSupported: boolean | null | undefined = false,
+    hasTimestamp = false,
+    hasExtraData = false,
     additionals: Array<string> = []
   ): Transaction {
     return splitTransaction(
@@ -234,8 +264,8 @@ const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc
 
   /**
   @example
-const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc4af009f4d4dc57ae597ed0420b71010000008a47304402201f36a12c240dbf9e566bc04321050b1984cd6eaf6caee8f02bb0bfec08e3354b022012ee2aeadcbbfd1e92959f57c15c1c6debb757b798451b104665aa3010569b49014104090b15bde569386734abf2a2b99f9ca6a50656627e77de663ca7325702769986cf26cc9dd7fdea0af432c8e2becc867c932e1b9dd742f2a108997c2252e2bdebffffffff0281b72e00000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88aca0860100000000001976a9144533f5fb9b4817f713c48f0bfe96b9f50c476c9b88ac00000000");
-const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
+  const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc4af009f4d4dc57ae597ed0420b71010000008a47304402201f36a12c240dbf9e566bc04321050b1984cd6eaf6caee8f02bb0bfec08e3354b022012ee2aeadcbbfd1e92959f57c15c1c6debb757b798451b104665aa3010569b49014104090b15bde569386734abf2a2b99f9ca6a50656627e77de663ca7325702769986cf26cc9dd7fdea0af432c8e2becc867c932e1b9dd742f2a108997c2252e2bdebffffffff0281b72e00000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88aca0860100000000001976a9144533f5fb9b4817f713c48f0bfe96b9f50c476c9b88ac00000000");
+  const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
   */
   serializeTransactionOutputs(t: Transaction): Buffer {
     return serializeTransactionOutputs(t);
@@ -266,15 +296,4 @@ const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
       additionals
     );
   }
-}
-
-function fromDeprecateArguments(args, keys) {
-  const obj = {};
-  keys.forEach((key, i) => {
-    const value = args[i];
-    if (value !== undefined) {
-      obj[key] = value;
-    }
-  });
-  return obj;
 }

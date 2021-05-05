@@ -1,18 +1,16 @@
-// @flow
 import type Transport from "@ledgerhq/hw-transport";
 import type { Transaction } from "./types";
 import { createVarint } from "./varint";
 import { MAX_SCRIPT_BLOCK } from "./constants";
-
 export function startUntrustedHashTransactionInputRaw(
-  transport: Transport<*>,
+  transport: Transport<any>,
   newTransaction: boolean,
   firstRound: boolean,
   transactionData: Buffer,
-  bip143?: boolean = false,
-  overwinter?: boolean = false,
+  bip143 = false,
+  overwinter = false,
   additionals: Array<string> = []
-) {
+): Promise<Buffer> {
   const p2 = additionals.includes("cashaddr")
     ? 0x03
     : bip143
@@ -30,24 +28,25 @@ export function startUntrustedHashTransactionInputRaw(
     transactionData
   );
 }
-
 export async function startUntrustedHashTransactionInput(
-  transport: Transport<*>,
+  transport: Transport<any>,
   newTransaction: boolean,
   transaction: Transaction,
-  inputs: Array<{ trustedInput: boolean, value: Buffer }>,
-  bip143?: boolean = false,
-  overwinter?: boolean = false,
+  inputs: Array<{
+    trustedInput: boolean;
+    value: Buffer;
+  }>,
+  bip143 = false,
+  overwinter = false,
   additionals: Array<string> = [],
-  useTrustedInputForSegwit?: boolean = false
-) {
+  useTrustedInputForSegwit = false
+): Promise<any> {
   let data = Buffer.concat([
     transaction.version,
     transaction.timestamp || Buffer.alloc(0),
     transaction.nVersionGroupId || Buffer.alloc(0),
     createVarint(transaction.inputs.length),
   ]);
-
   await startUntrustedHashTransactionInputRaw(
     transport,
     newTransaction,
@@ -57,13 +56,13 @@ export async function startUntrustedHashTransactionInput(
     overwinter,
     additionals
   );
-
   let i = 0;
   const isDecred = additionals.includes("decred");
 
-  for (let input of transaction.inputs) {
+  for (const input of transaction.inputs) {
     let prefix;
-    let inputValue = inputs[i].value;
+    const inputValue = inputs[i].value;
+
     if (bip143) {
       if (useTrustedInputForSegwit && inputs[i].trustedInput) {
         prefix = Buffer.from([0x01, inputValue.length]);
@@ -77,13 +76,13 @@ export async function startUntrustedHashTransactionInput(
         prefix = Buffer.from([0x00]);
       }
     }
+
     data = Buffer.concat([
       prefix,
       inputValue,
       isDecred ? Buffer.from([0x00]) : Buffer.alloc(0),
       createVarint(input.script.length),
     ]);
-
     await startUntrustedHashTransactionInputRaw(
       transport,
       newTransaction,
@@ -93,18 +92,18 @@ export async function startUntrustedHashTransactionInput(
       overwinter,
       additionals
     );
-
-    let scriptBlocks = [];
+    const scriptBlocks: Buffer[] = [];
     let offset = 0;
 
     if (input.script.length === 0) {
       scriptBlocks.push(input.sequence);
     } else {
       while (offset !== input.script.length) {
-        let blockSize =
+        const blockSize =
           input.script.length - offset > MAX_SCRIPT_BLOCK
             ? MAX_SCRIPT_BLOCK
             : input.script.length - offset;
+
         if (offset + blockSize !== input.script.length) {
           scriptBlocks.push(input.script.slice(offset, offset + blockSize));
         } else {
@@ -115,11 +114,12 @@ export async function startUntrustedHashTransactionInput(
             ])
           );
         }
+
         offset += blockSize;
       }
     }
 
-    for (let scriptBlock of scriptBlocks) {
+    for (const scriptBlock of scriptBlocks) {
       await startUntrustedHashTransactionInputRaw(
         transport,
         newTransaction,

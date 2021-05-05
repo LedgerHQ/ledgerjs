@@ -1,5 +1,4 @@
 // flow
-
 export const MAX_SCRIPT_BLOCK = 50;
 export const DEFAULT_VERSION = 1;
 export const DEFAULT_LOCKTIME = 0;

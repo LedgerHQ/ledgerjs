@@ -1,10 +1,12 @@
-// @flow
 import invariant from "invariant";
 import Transport from "@ledgerhq/hw-transport";
-
 export const getAppAndVersion = async (
-  transport: Transport<*>
-): Promise<{ name: string, version: string, flags: number }> => {
+  transport: Transport<any>
+): Promise<{
+  name: string;
+  version: string;
+  flags: number | Buffer;
+}> => {
   const r = await transport.send(0xb0, 0x01, 0x00, 0x00);
   let i = 0;
   const format = r[i++];
@@ -15,5 +17,9 @@ export const getAppAndVersion = async (
   const version = r.slice(i, (i += versionLength)).toString("ascii");
   const flagLength = r[i++];
   const flags = r.slice(i, (i += flagLength));
-  return { name, version, flags };
+  return {
+    name,
+    version,
+    flags,
+  };
 };

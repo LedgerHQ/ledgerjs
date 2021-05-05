@@ -1,19 +1,17 @@
-// @flow
 import { log } from "@ledgerhq/logs";
-import type { Transaction } from "./types";
+import type { Transaction, TransactionInput, TransactionOutput } from "./types";
 import { getVarint } from "./varint";
 import { formatTransactionDebug } from "./debug";
-
 export function splitTransaction(
   transactionHex: string,
-  isSegwitSupported: ?boolean = false,
-  hasTimestamp?: boolean = false,
-  hasExtraData?: boolean = false,
+  isSegwitSupported: boolean | null | undefined = false,
+  hasTimestamp = false,
+  hasExtraData = false,
   additionals: Array<string> = []
 ): Transaction {
-  const inputs = [];
-  const outputs = [];
-  var witness = false;
+  const inputs: TransactionInput[] = [];
+  const outputs: TransactionOutput[] = [];
+  let witness = false;
   let offset = 0;
   let timestamp = Buffer.alloc(0);
   let nExpiryHeight = Buffer.alloc(0);
@@ -26,6 +24,7 @@ export function splitTransaction(
     version.equals(Buffer.from([0x03, 0x00, 0x00, 0x80])) ||
     version.equals(Buffer.from([0x04, 0x00, 0x00, 0x80]));
   offset += 4;
+
   if (
     !hasTimestamp &&
     isSegwitSupported &&
@@ -35,22 +34,27 @@ export function splitTransaction(
     offset += 2;
     witness = true;
   }
+
   if (hasTimestamp) {
     timestamp = transaction.slice(offset, 4 + offset);
     offset += 4;
   }
+
   if (overwinter) {
     nVersionGroupId = transaction.slice(offset, 4 + offset);
     offset += 4;
   }
+
   let varint = getVarint(transaction, offset);
   const numberInputs = varint[0];
   offset += varint[1];
+
   for (let i = 0; i < numberInputs; i++) {
     const prevout = transaction.slice(offset, offset + 36);
     offset += 36;
     let script = Buffer.alloc(0);
     let tree = Buffer.alloc(0);
+
     //No script for decred, it has a witness
     if (!isDecred) {
       varint = getVarint(transaction, offset);
@@ -65,11 +69,18 @@ export function splitTransaction(
 
     const sequence = transaction.slice(offset, offset + 4);
     offset += 4;
-    inputs.push({ prevout, script, sequence, tree });
+    inputs.push({
+      prevout,
+      script,
+      sequence,
+      tree,
+    });
   }
+
   varint = getVarint(transaction, offset);
   const numberOutputs = varint[0];
   offset += varint[1];
+
   for (let i = 0; i < numberOutputs; i++) {
     const amount = transaction.slice(offset, offset + 8);
     offset += 8;
@@ -83,20 +94,28 @@ export function splitTransaction(
     offset += varint[1];
     const script = transaction.slice(offset, offset + varint[0]);
     offset += varint[0];
-    outputs.push({ amount, script });
+    outputs.push({
+      amount,
+      script,
+    });
   }
+
   let witnessScript, locktime;
+
   if (witness) {
     witnessScript = transaction.slice(offset, -4);
     locktime = transaction.slice(transaction.length - 4);
   } else {
     locktime = transaction.slice(offset, offset + 4);
   }
+
   offset += 4;
+
   if (overwinter || isDecred) {
     nExpiryHeight = transaction.slice(offset, offset + 4);
     offset += 4;
   }
+
   if (hasExtraData) {
     extraData = transaction.slice(offset);
   }
@@ -105,9 +124,11 @@ export function splitTransaction(
   if (isDecred) {
     varint = getVarint(transaction, offset);
     offset += varint[1];
+
     if (varint[0] !== numberInputs) {
       throw new Error("splitTransaction: incoherent number of witnesses");
     }
+
     for (let i = 0; i < numberInputs; i++) {
       //amount
       offset += 8;
@@ -135,11 +156,9 @@ export function splitTransaction(
     nExpiryHeight,
     extraData,
   };
-
   log(
     "btc",
     `splitTransaction ${transactionHex}:\n${formatTransactionDebug(t)}`
   );
-
   return t;
 }

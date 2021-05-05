@@ -1,4 +1,3 @@
-// @flow
 import type { Transaction } from "./types";
 import { createVarint } from "./varint";
 
@@ -9,6 +8,7 @@ const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
   */
 export function serializeTransactionOutputs({ outputs }: Transaction): Buffer {
   let outputBuffer = Buffer.alloc(0);
+
   if (typeof outputs !== "undefined") {
     outputBuffer = Buffer.concat([outputBuffer, createVarint(outputs.length)]);
     outputs.forEach((output) => {
@@ -20,9 +20,9 @@ export function serializeTransactionOutputs({ outputs }: Transaction): Buffer {
       ]);
     });
   }
+
   return outputBuffer;
 }
-
 export function serializeTransaction(
   transaction: Transaction,
   skipWitness: boolean,
@@ -32,7 +32,8 @@ export function serializeTransaction(
   const isDecred = additionals.includes("decred");
   const isBech32 = additionals.includes("bech32");
   let inputBuffer = Buffer.alloc(0);
-  let useWitness = typeof transaction["witness"] != "undefined" && !skipWitness;
+  const useWitness =
+    typeof transaction["witness"] != "undefined" && !skipWitness;
   transaction.inputs.forEach((input) => {
     inputBuffer =
       isDecred || isBech32
@@ -50,8 +51,8 @@ export function serializeTransaction(
             input.sequence,
           ]);
   });
-
   let outputBuffer = serializeTransactionOutputs(transaction);
+
   if (
     typeof transaction.outputs !== "undefined" &&
     typeof transaction.locktime !== "undefined"

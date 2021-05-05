@@ -1,18 +1,16 @@
-//@flow
 import type Transport from "@ledgerhq/hw-transport";
 import { getTrustedInput } from "./getTrustedInput";
 import { startUntrustedHashTransactionInput } from "./startUntrustedHashTransactionInput";
 import { getTrustedInputBIP143 } from "./getTrustedInputBIP143";
 import { signTransaction } from "./signTransaction";
 import { hashOutputFull } from "./finalizeInput";
-import type { TransactionOutput, Transaction } from "./types";
+import type { TransactionOutput, Transaction, TrustedInput } from "./types";
 import {
   DEFAULT_LOCKTIME,
   DEFAULT_VERSION,
   DEFAULT_SEQUENCE,
   SIGHASH_ALL,
 } from "./constants";
-
 const defaultArg = {
   lockTime: DEFAULT_LOCKTIME,
   sigHashType: SIGHASH_ALL,
@@ -24,17 +22,18 @@ const defaultArg = {
  *
  */
 export type SignP2SHTransactionArg = {
-  inputs: Array<[Transaction, number, ?string, ?number]>,
-  associatedKeysets: string[],
-  outputScriptHex: string,
-  lockTime?: number,
-  sigHashType?: number,
-  segwit?: boolean,
-  transactionVersion?: number,
+  inputs: Array<
+    [Transaction, number, string | null | undefined, number | null | undefined]
+  >;
+  associatedKeysets: string[];
+  outputScriptHex: string;
+  lockTime?: number;
+  sigHashType?: number;
+  segwit?: boolean;
+  transactionVersion?: number;
 };
-
 export async function signP2SHTransaction(
-  transport: Transport<*>,
+  transport: Transport<any>,
   arg: SignP2SHTransactionArg
 ) {
   const {
@@ -52,28 +51,26 @@ export async function signP2SHTransaction(
   const nullPrevout = Buffer.alloc(0);
   const defaultVersion = Buffer.alloc(4);
   defaultVersion.writeUInt32LE(transactionVersion, 0);
-  const trustedInputs = [];
+  const trustedInputs: TrustedInput[] = [];
   const regularOutputs: Array<TransactionOutput> = [];
-  const signatures = [];
+  const signatures: string[] = [];
   let firstRun = true;
   const resuming = false;
-  let targetTransaction: Transaction = {
+  const targetTransaction: Transaction = {
     inputs: [],
     version: defaultVersion,
   };
-
   const getTrustedInputCall = segwit ? getTrustedInputBIP143 : getTrustedInput;
   const outputScript = Buffer.from(outputScriptHex, "hex");
 
-  for (let input of inputs) {
+  for (const input of inputs) {
     if (!resuming) {
       const trustedInput = await getTrustedInputCall(
         transport,
         input[1],
         input[0]
       );
-
-      let sequence = Buffer.alloc(4);
+      const sequence = Buffer.alloc(4);
       sequence.writeUInt32LE(
         input.length >= 4 && typeof input[3] === "number"
           ? input[3]
@@ -91,6 +88,7 @@ export async function signP2SHTransaction(
 
     const { outputs } = input[0];
     const index = input[1];
+
     if (outputs && index <= outputs.length - 1) {
       regularOutputs.push(outputs[index]);
     }
@@ -98,10 +96,10 @@ export async function signP2SHTransaction(
 
   // Pre-build the target transaction
   for (let i = 0; i < inputs.length; i++) {
-    let sequence = Buffer.alloc(4);
+    const sequence = Buffer.alloc(4);
     sequence.writeUInt32LE(
       inputs[i].length >= 4 && typeof inputs[i][3] === "number"
-        ? inputs[i][3]
+        ? (inputs[i][3] as number)
         : DEFAULT_SEQUENCE,
       0
     );
@@ -125,17 +123,19 @@ export async function signP2SHTransaction(
 
   for (let i = 0; i < inputs.length; i++) {
     const input = inputs[i];
-    let script =
+    const script =
       inputs[i].length >= 3 && typeof input[2] === "string"
         ? Buffer.from(input[2], "hex")
         : regularOutputs[i].script;
-    let pseudoTX = Object.assign({}, targetTransaction);
-    let pseudoTrustedInputs = segwit ? [trustedInputs[i]] : trustedInputs;
+    const pseudoTX = Object.assign({}, targetTransaction);
+    const pseudoTrustedInputs = segwit ? [trustedInputs[i]] : trustedInputs;
+
     if (segwit) {
       pseudoTX.inputs = [{ ...pseudoTX.inputs[i], script }];
     } else {
       pseudoTX.inputs[i].script = script;
     }
+
     await startUntrustedHashTransactionInput(
       transport,
       !segwit && firstRun,
@@ -154,13 +154,13 @@ export async function signP2SHTransaction(
       lockTime,
       sigHashType
     );
-
     signatures.push(
       segwit
         ? signature.toString("hex")
         : signature.slice(0, signature.length - 1).toString("hex")
     );
     targetTransaction.inputs[i].script = nullScript;
+
     if (firstRun) {
       firstRun = false;
     }

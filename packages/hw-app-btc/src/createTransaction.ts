@@ -1,5 +1,3 @@
-// @flow
-
 import { log } from "@ledgerhq/logs";
 import type Transport from "@ledgerhq/hw-transport";
 import { hashPublicKey } from "./hashPublicKey";
@@ -25,9 +23,7 @@ import {
   OP_CHECKSIG,
 } from "./constants";
 import { shouldUseTrustedInputForSegwit } from "./shouldUseTrustedInputForSegwit";
-
 export type { AddressFormat };
-
 const defaultsSignTransaction = {
   lockTime: DEFAULT_LOCKTIME,
   sigHashType: SIGHASH_ALL,
@@ -42,31 +38,32 @@ const defaultsSignTransaction = {
  *
  */
 export type CreateTransactionArg = {
-  inputs: Array<[Transaction, number, ?string, ?number]>,
-  associatedKeysets: string[],
-  changePath?: string,
-  outputScriptHex: string,
-  lockTime?: number,
-  sigHashType?: number,
-  segwit?: boolean,
-  initialTimestamp?: number,
-  additionals: Array<string>,
-  expiryHeight?: Buffer,
-  useTrustedInputForSegwit?: boolean,
-  onDeviceStreaming?: ({
-    progress: number,
-    total: number,
-    index: number,
-  }) => void,
-  onDeviceSignatureRequested?: () => void,
-  onDeviceSignatureGranted?: () => void,
+  inputs: Array<
+    [Transaction, number, string | null | undefined, number | null | undefined]
+  >;
+  associatedKeysets: string[];
+  changePath?: string;
+  outputScriptHex: string;
+  lockTime?: number;
+  sigHashType?: number;
+  segwit?: boolean;
+  initialTimestamp?: number;
+  additionals: Array<string>;
+  expiryHeight?: Buffer;
+  useTrustedInputForSegwit?: boolean;
+  onDeviceStreaming?: (arg0: {
+    progress: number;
+    total: number;
+    index: number;
+  }) => void;
+  onDeviceSignatureRequested?: () => void;
+  onDeviceSignatureGranted?: () => void;
 };
-
 export async function createTransaction(
-  transport: Transport<*>,
+  transport: Transport<any>,
   arg: CreateTransactionArg
 ) {
-  let {
+  const {
     inputs,
     associatedKeysets,
     changePath,
@@ -77,14 +74,11 @@ export async function createTransaction(
     initialTimestamp,
     additionals,
     expiryHeight,
-    useTrustedInputForSegwit,
     onDeviceStreaming,
     onDeviceSignatureGranted,
     onDeviceSignatureRequested,
-  } = {
-    ...defaultsSignTransaction,
-    ...arg,
-  };
+  } = { ...defaultsSignTransaction, ...arg };
+  let { useTrustedInputForSegwit } = { ...defaultsSignTransaction, ...arg };
 
   if (useTrustedInputForSegwit === undefined) {
     try {
@@ -106,18 +100,23 @@ export async function createTransaction(
   const notify = (loop, i) => {
     const { length } = inputs;
     if (length < 3) return; // there is not enough significant event to worth notifying (aka just use a spinner)
+
     const index = length * loop + i;
     const total = 2 * length;
     const progress = index / total;
-    onDeviceStreaming({ progress, total, index });
+    onDeviceStreaming({
+      progress,
+      total,
+      index,
+    });
   };
 
   const isDecred = additionals.includes("decred");
   const isXST = additionals.includes("stealthcoin");
-  let startTime = Date.now();
+  const startTime = Date.now();
   const sapling = additionals.includes("sapling");
   const bech32 = segwit && additionals.includes("bech32");
-  let useBip143 =
+  const useBip143 =
     segwit ||
     (!!additionals &&
       (additionals.includes("abc") ||
@@ -133,11 +132,12 @@ export async function createTransaction(
     ? defaultVersion.writeUInt32LE(sapling ? 0x80000004 : 0x80000003, 0)
     : isXST
     ? defaultVersion.writeUInt32LE(2, 0)
-    : defaultVersion.writeUInt32LE(1, 0); // Default version to 2 for XST not to have timestamp
-  const trustedInputs: Array<*> = [];
+    : defaultVersion.writeUInt32LE(1, 0);
+  // Default version to 2 for XST not to have timestamp
+  const trustedInputs: Array<any> = [];
   const regularOutputs: Array<TransactionOutput> = [];
-  const signatures = [];
-  const publicKeys = [];
+  const signatures: Buffer[] = [];
+  const publicKeys: Buffer[] = [];
   let firstRun = true;
   const resuming = false;
   const targetTransaction: Transaction = {
@@ -145,17 +145,15 @@ export async function createTransaction(
     version: defaultVersion,
     timestamp: Buffer.alloc(0),
   };
-
   const getTrustedInputCall =
     useBip143 && !useTrustedInputForSegwit
       ? getTrustedInputBIP143
       : getTrustedInput;
   const outputScript = Buffer.from(outputScriptHex, "hex");
-
   notify(0, 0);
 
   // first pass on inputs to get trusted inputs
-  for (let input of inputs) {
+  for (const input of inputs) {
     if (!resuming) {
       const trustedInput = await getTrustedInputCall(
         transport,
@@ -164,7 +162,7 @@ export async function createTransaction(
         additionals
       );
       log("hw", "got trustedInput=" + trustedInput);
-      let sequence = Buffer.alloc(4);
+      const sequence = Buffer.alloc(4);
       sequence.writeUInt32LE(
         input.length >= 4 && typeof input[3] === "number"
           ? input[3]
@@ -180,6 +178,7 @@ export async function createTransaction(
 
     const { outputs } = input[0];
     const index = input[1];
+
     if (outputs && index <= outputs.length - 1) {
       regularOutputs.push(outputs[index]);
     }
@@ -202,7 +201,7 @@ export async function createTransaction(
   }
 
   targetTransaction.inputs = inputs.map((input) => {
-    let sequence = Buffer.alloc(4);
+    const sequence = Buffer.alloc(4);
     sequence.writeUInt32LE(
       input.length >= 4 && typeof input[3] === "number"
         ? input[3]
@@ -218,7 +217,12 @@ export async function createTransaction(
 
   if (!resuming) {
     // Collect public keys
-    const result = [];
+    const result: {
+      publicKey: string;
+      bitcoinAddress: string;
+      chainCode: string;
+    }[] = [];
+
     for (let i = 0; i < inputs.length; i++) {
       const r = await getWalletPublicKey(transport, {
         path: associatedKeysets[i],
@@ -226,6 +230,7 @@ export async function createTransaction(
       notify(0, i + 1);
       result.push(r);
     }
+
     for (let i = 0; i < result.length; i++) {
       publicKeys.push(
         compressPublicKey(Buffer.from(result[i].publicKey, "hex"))
@@ -270,7 +275,7 @@ export async function createTransaction(
   // Do the second run with the individual transaction
   for (let i = 0; i < inputs.length; i++) {
     const input = inputs[i];
-    let script =
+    const script =
       inputs[i].length >= 3 && typeof input[2] === "string"
         ? Buffer.from(input[2], "hex")
         : !segwit
@@ -280,8 +285,9 @@ export async function createTransaction(
             hashPublicKey(publicKeys[i]),
             Buffer.from([OP_EQUALVERIFY, OP_CHECKSIG]),
           ]);
-    let pseudoTX = Object.assign({}, targetTransaction);
-    let pseudoTrustedInputs = useBip143 ? [trustedInputs[i]] : trustedInputs;
+    const pseudoTX = Object.assign({}, targetTransaction);
+    const pseudoTrustedInputs = useBip143 ? [trustedInputs[i]] : trustedInputs;
+
     if (useBip143) {
       pseudoTX.inputs = [{ ...pseudoTX.inputs[i], script }];
     } else {
@@ -303,6 +309,7 @@ export async function createTransaction(
       if (!resuming && changePath) {
         await provideOutputFullChangePath(transport, changePath);
       }
+
       await hashOutputFull(transport, outputScript, additionals);
     }
 
@@ -320,9 +327,9 @@ export async function createTransaction(
       additionals
     );
     notify(1, i + 1);
-
     signatures.push(signature);
     targetTransaction.inputs[i].script = nullScript;
+
     if (firstRun) {
       firstRun = false;
     }
@@ -332,6 +339,7 @@ export async function createTransaction(
   for (let i = 0; i < inputs.length; i++) {
     if (segwit) {
       targetTransaction.witness = Buffer.alloc(0);
+
       if (!bech32) {
         targetTransaction.inputs[i].script = Buffer.concat([
           Buffer.from("160014", "hex"),
@@ -350,7 +358,8 @@ export async function createTransaction(
         publicKeys[i],
       ]);
     }
-    let offset = useBip143 && !useTrustedInputForSegwit ? 0 : 4;
+
+    const offset = useBip143 && !useTrustedInputForSegwit ? 0 : 4;
     targetTransaction.inputs[i].prevout = trustedInputs[i].value.slice(
       offset,
       offset + 0x24
@@ -359,8 +368,7 @@ export async function createTransaction(
 
   const lockTimeBuffer = Buffer.alloc(4);
   lockTimeBuffer.writeUInt32LE(lockTime, 0);
-
-  var result = Buffer.concat([
+  let result = Buffer.concat([
     serializeTransaction(
       targetTransaction,
       false,
@@ -371,9 +379,10 @@ export async function createTransaction(
   ]);
 
   if (segwit && !isDecred) {
-    var witness = Buffer.alloc(0);
-    for (var i = 0; i < inputs.length; i++) {
-      var tmpScriptData = Buffer.concat([
+    let witness = Buffer.alloc(0);
+
+    for (let i = 0; i < inputs.length; i++) {
+      const tmpScriptData = Buffer.concat([
         Buffer.from("02", "hex"),
         Buffer.from([signatures[i].length]),
         signatures[i],
@@ -382,6 +391,7 @@ export async function createTransaction(
       ]);
       witness = Buffer.concat([witness, tmpScriptData]);
     }
+
     result = Buffer.concat([result, witness]);
   }
 
@@ -411,7 +421,6 @@ export async function createTransaction(
         targetTransaction.inputs[inputIndex].script,
       ]);
     });
-
     result = Buffer.concat([result, decredWitness]);
   }
 
