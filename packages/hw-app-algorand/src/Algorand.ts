@@ -14,29 +14,22 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-//@flow
-
 import type Transport from "@ledgerhq/hw-transport";
 import BIPPath from "bip32-path";
 import { UserRefusedOnDevice } from "@ledgerhq/errors";
 const CHUNK_SIZE = 250;
-
 // const P1_FIRST = 0x00;
 const P1_MORE = 0x80;
 const P1_WITH_ACCOUNT_ID = 0x01;
 const P2_LAST = 0x00;
 const P2_MORE = 0x80;
-
 const SW_OK = 0x9000;
 const SW_CANCEL = 0x6986;
-
 const P1_WITH_REQUEST_USER_APPROVAL = 0x80;
-
 // algo spec
 const CLA = 0x80;
 const INS_GET_PUBLIC_KEY = 0x03;
 const INS_SIGN_MSGPACK = 0x08;
-
 /**
  * Cosmos API
  *
@@ -44,10 +37,11 @@ const INS_SIGN_MSGPACK = 0x08;
  * import Algorand from "@ledgerhq/hw-app-algorand";
  * const algo = new Algorand(transport)
  */
-export default class Algorand {
-  transport: Transport<*>;
 
-  constructor(transport: Transport<*>) {
+export default class Algorand {
+  transport: Transport<any>;
+
+  constructor(transport: Transport<any>) {
     this.transport = transport;
     transport.decorateAppAPIMethods(this, ["getAddress", "sign"], "ALGO");
   }
@@ -63,12 +57,13 @@ export default class Algorand {
   getAddress(
     path: string,
     boolDisplay?: boolean
-  ): Promise<{ publicKey: string, address: string }> {
+  ): Promise<{
+    publicKey: string;
+    address?: string;
+  }> {
     const bipPath = BIPPath.fromString(path).toPathArray();
-
     const buf = Buffer.alloc(4);
     buf.writeUInt32BE(bipPath[2], 0);
-
     return this.transport
       .send(
         CLA,
@@ -86,7 +81,10 @@ export default class Algorand {
       });
   }
 
-  foreach<T, A>(arr: T[], callback: (T, number) => Promise<A>): Promise<A[]> {
+  foreach<T, A>(
+    arr: T[],
+    callback: (arg0: T, arg1: number) => Promise<A>
+  ): Promise<A[]> {
     function iterate(index, array, result) {
       if (index >= array.length) {
         return result;
@@ -96,31 +94,33 @@ export default class Algorand {
           return iterate(index + 1, array, result);
         });
     }
+
     return Promise.resolve().then(() => iterate(0, arr, []));
   }
 
   async sign(
     path: string,
     message: string
-  ): Promise<{ signature: null | Buffer }> {
+  ): Promise<{
+    signature: null | Buffer;
+  }> {
     const bipPath = BIPPath.fromString(path).toPathArray();
-
     const buf = Buffer.alloc(4);
     buf.writeUInt32BE(bipPath[2], 0);
-
-    const chunks = [];
+    const chunks: Buffer[] = [];
     const buffer = Buffer.concat([buf, Buffer.from(message, "hex")]);
 
     for (let i = 0; i < buffer.length; i += CHUNK_SIZE) {
       let end = i + CHUNK_SIZE;
+
       if (i > buffer.length) {
         end = buffer.length;
       }
+
       chunks.push(buffer.slice(i, end));
     }
 
-    let response = {};
-
+    let response: any = null;
     return this.foreach(chunks, (data, j) =>
       this.transport
         .send(
@@ -134,11 +134,13 @@ export default class Algorand {
         .then((apduResponse) => (response = apduResponse))
     ).then(() => {
       const errorCodeData = response;
+
       if (errorCodeData === 0x6986) {
         throw new UserRefusedOnDevice();
       }
 
       let signature = null;
+
       if (response.length > 0) {
         signature = response.slice(0, response.length);
       }
