@@ -14,8 +14,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-//@flow
-
 import type Transport from "@ledgerhq/hw-transport";
 import BIPPath from "bip32-path";
 import { UserRefusedOnDevice } from "@ledgerhq/errors";
@@ -25,14 +23,11 @@ const APP_KEY = "CSM";
 const INS_GET_VERSION = 0x00;
 const INS_SIGN_SECP256K1 = 0x02;
 const INS_GET_ADDR_SECP256K1 = 0x04;
-
 const PAYLOAD_TYPE_INIT = 0x00;
 const PAYLOAD_TYPE_ADD = 0x01;
 const PAYLOAD_TYPE_LAST = 0x02;
-
 const SW_OK = 0x9000;
 const SW_CANCEL = 0x6986;
-
 /**
  * Cosmos API
  *
@@ -40,10 +35,11 @@ const SW_CANCEL = 0x6986;
  * import Cosmos from "@ledgerhq/hw-app-cosmos";
  * const cosmos = new Cosmos(transport)
  */
-export default class Cosmos {
-  transport: Transport<*>;
 
-  constructor(transport: Transport<*>, scrambleKey: string = APP_KEY) {
+export default class Cosmos {
+  transport: Transport<any>;
+
+  constructor(transport: Transport<any>, scrambleKey: string = APP_KEY) {
     this.transport = transport;
     transport.decorateAppAPIMethods(
       this,
@@ -52,19 +48,23 @@ export default class Cosmos {
     );
   }
 
-  getAppConfiguration(): {
-    test_mode: boolean,
-    version: string,
-    device_locked: boolean,
-    major: string,
-  } {
+  // FIXME: understand what is going on with the return type here
+  // ReturnType: {
+  //   test_mode: boolean;
+  //   version: string;
+  //   device_locked: boolean;
+  //   major: string;
+  // }
+  getAppConfiguration() {
     return this.transport.send(CLA, INS_GET_VERSION, 0, 0).then((response) => {
-      return {
+      const res = {
         test_mode: response[0] !== 0,
         version: "" + response[1] + "." + response[2] + "." + response[3],
         device_locked: response[4] === 1,
         major: response[1],
       };
+
+      return res;
     });
   }
 
@@ -78,7 +78,6 @@ export default class Cosmos {
     buf.writeUInt32LE((0x80000000 | path[2]) >>> 0, 8);
     buf.writeUInt32LE(path[3], 12);
     buf.writeUInt32LE(path[4], 16);
-
     return buf;
   }
 
@@ -86,6 +85,7 @@ export default class Cosmos {
     if (hrp == null || hrp.length < 3 || hrp.length > 83) {
       throw new Error("Invalid HRP");
     }
+
     const buf = Buffer.alloc(1 + hrp.length);
     buf.writeUInt8(hrp.length, 0);
     buf.write(hrp, 1);
@@ -105,17 +105,18 @@ export default class Cosmos {
     path: string,
     hrp: string,
     boolDisplay?: boolean
-  ): Promise<{ publicKey: string, address: string }> {
+  ): Promise<{
+    publicKey: string;
+    address: string;
+  }> {
     const bipPath = BIPPath.fromString(path).toPathArray();
     const serializedPath = this.serializePath(bipPath);
     const data = Buffer.concat([this.serializeHRP(hrp), serializedPath]);
-
     return this.transport
       .send(CLA, INS_GET_ADDR_SECP256K1, boolDisplay ? 1 : 0, 0, data, [SW_OK])
       .then((response) => {
         const address = Buffer.from(response.slice(33, -2)).toString();
         const publicKey = Buffer.from(response.slice(0, 33)).toString("hex");
-
         return {
           address,
           publicKey,
@@ -123,7 +124,10 @@ export default class Cosmos {
       });
   }
 
-  foreach<T, A>(arr: T[], callback: (T, number) => Promise<A>): Promise<A[]> {
+  foreach<T, A>(
+    arr: T[],
+    callback: (arg0: T, arg1: number) => Promise<A>
+  ): Promise<A[]> {
     function iterate(index, array, result) {
       if (index >= array.length) {
         return result;
@@ -133,30 +137,34 @@ export default class Cosmos {
           return iterate(index + 1, array, result);
         });
     }
+
     return Promise.resolve().then(() => iterate(0, arr, []));
   }
 
   async sign(
     path: string,
     message: string
-  ): Promise<{ signature: null | Buffer, return_code: number }> {
+  ): Promise<{
+    signature: null | Buffer;
+    return_code: number | string;
+  }> {
     const bipPath = BIPPath.fromString(path).toPathArray();
     const serializedPath = this.serializePath(bipPath);
-
-    const chunks = [];
+    const chunks: Buffer[] = [];
     chunks.push(serializedPath);
     const buffer = Buffer.from(message);
 
     for (let i = 0; i < buffer.length; i += CHUNK_SIZE) {
       let end = i + CHUNK_SIZE;
+
       if (i > buffer.length) {
         end = buffer.length;
       }
+
       chunks.push(buffer.slice(i, end));
     }
 
-    let response = {};
-
+    let response: Buffer;
     return this.foreach(chunks, (data, j) =>
       this.transport
         .send(
@@ -175,8 +183,8 @@ export default class Cosmos {
     ).then(() => {
       const errorCodeData = response.slice(-2);
       const returnCode = errorCodeData[0] * 256 + errorCodeData[1];
+      let signature: Buffer | null = null;
 
-      let signature = null;
       if (response.length > 2) {
         signature = response.slice(0, response.length - 2);
       }
@@ -186,7 +194,7 @@ export default class Cosmos {
       }
 
       return {
-        signature: signature,
+        signature,
         return_code: returnCode,
       };
     });
