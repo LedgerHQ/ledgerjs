@@ -11,7 +11,7 @@
     "test": "yarn run build && yarn run lint && yarn run doc && jest",
     "test-no-git-diff": "git diff --exit-code || exit 1",
     "doc": "lerna run doc",
-    "lint": "eslint packages/**/src --no-error-on-unmatched-pattern --ext .js,jsx && eslint packages/**/src --no-error-on-unmatched-pattern --ext .ts,.tsx -c .eslintrc.ts.js",
+    "lint": "eslint packages/**/src --no-error-on-unmatched-pattern --ext .ts,.tsx -c .eslintrc.json",
     "flow-install": "flow-mono create-symlinks packages/hw-transport/.flowconfig && flow-mono install-types --ignoreDeps=peer || echo 'failed to setup flow-typed'",
     "flow": "lerna --ignore @ledgerhq/test --concurrency 1 run flow",
     "build": "BABEL_ENV=production && lerna run build",
