@@ -126,11 +126,11 @@ for (const id in devices) {
   }
 }
 
-export const getBluetoothServiceUuids = () => bluetoothServices;
+export const getBluetoothServiceUuids = (): string[] => bluetoothServices;
 
 export const getInfosForServiceUuid = (
   uuid: string
-): BluetoothInfos | null | undefined => serviceUuidToInfos[uuid.toLowerCase()];
+): BluetoothInfos | undefined => serviceUuidToInfos[uuid.toLowerCase()];
 
 export interface DeviceModel {
   id: DeviceModelId;

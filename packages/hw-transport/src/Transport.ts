@@ -1,5 +1,3 @@
-//@flow
-
 import EventEmitter from "events";
 import type { DeviceModel } from "@ledgerhq/devices";
 import {
@@ -9,7 +7,6 @@ import {
   getAltStatusMessage,
   TransportStatusError,
 } from "@ledgerhq/errors";
-
 export {
   TransportError,
   TransportStatusError,
@@ -19,11 +16,13 @@ export {
 
 /**
  */
-export type Subscription = { unsubscribe: () => void };
+export type Subscription = {
+  unsubscribe: () => void;
+};
 
 /**
  */
-export type Device = Object;
+export type Device = Record<string, unknown>;
 
 /**
  * type: add or remove event
@@ -31,34 +30,36 @@ export type Device = Object;
  * deviceModel: device info on the model (is it a nano s, nano x, ...)
  * device: transport specific device info
  */
-export type DescriptorEvent<Descriptor> = {
-  type: "add" | "remove",
-  descriptor: Descriptor,
-  deviceModel?: ?DeviceModel,
-  device?: Device,
-};
+export interface DescriptorEvent<Descriptor> {
+  type: "add" | "remove";
+  descriptor: Descriptor;
+  deviceModel?: DeviceModel | null | undefined;
+  device?: Device;
+}
+
 /**
  */
-export type Observer<Ev> = $ReadOnly<{
-  next: (event: Ev) => mixed,
-  error: (e: any) => mixed,
-  complete: () => mixed,
+export type Observer<Ev> = Readonly<{
+  next: (event: Ev) => unknown;
+  error: (e: any) => unknown;
+  complete: () => unknown;
 }>;
-
 /**
  * Transport defines the generic interface to share between node/u2f impl
  * A **Descriptor** is a parametric type that is up to be determined for the implementation.
  * it can be for instance an ID, an file path, a URL,...
  */
+
 export default class Transport<Descriptor> {
-  exchangeTimeout: number = 30000;
-  unresponsiveTimeout: number = 15000;
-  deviceModel: ?DeviceModel = null;
+  private _value?: Descriptor;
+  exchangeTimeout = 30000;
+  unresponsiveTimeout = 15000;
+  deviceModel: DeviceModel | null | undefined = null;
 
   /**
    * Statically check if a transport is supported on the user's platform/browser.
    */
-  static +isSupported: () => Promise<boolean>;
+  static readonly isSupported: () => Promise<boolean>;
 
   /**
    * List once all available descriptors. For a better granularity, checkout `listen()`.
@@ -66,7 +67,7 @@ export default class Transport<Descriptor> {
    * @example
    * TransportFoo.list().then(descriptors => ...)
    */
-  static +list: () => Promise<Array<Descriptor>>;
+  static readonly list: <Descriptor>() => Promise<Array<Descriptor>>;
 
   /**
    * Listen all device events for a given Transport. The method takes an Obverver of DescriptorEvent and returns a Subscription (according to Observable paradigm https://github.com/tc39/proposal-observable )
@@ -76,7 +77,7 @@ export default class Transport<Descriptor> {
    * @param observer is an object with a next, error and complete function (compatible with observer pattern)
    * @return a Subscription object on which you can `.unsubscribe()` to stop listening descriptors.
    * @example
-const sub = TransportFoo.listen({
+  const sub = TransportFoo.listen({
   next: e => {
     if (e.type==="add") {
       sub.unsubscribe();
@@ -86,9 +87,9 @@ const sub = TransportFoo.listen({
   },
   error: error => {},
   complete: () => {}
-})
+  })
    */
-  static +listen: (
+  static readonly listen: <Descriptor>(
     observer: Observer<DescriptorEvent<Descriptor>>
   ) => Subscription;
 
@@ -98,9 +99,9 @@ const sub = TransportFoo.listen({
    * @param timeout: an optional timeout
    * @return a Promise of Transport instance
    * @example
-TransportFoo.open(descriptor).then(transport => ...)
+  TransportFoo.open(descriptor).then(transport => ...)
    */
-  static +open: (
+  static readonly open: <Descriptor>(
     descriptor: Descriptor,
     timeout?: number
   ) => Promise<Transport<Descriptor>>;
@@ -138,18 +139,18 @@ TransportFoo.open(descriptor).then(transport => ...)
    * Transport implementation can have specific events. Here is the common events:
    * * `"disconnect"` : triggered if Transport is disconnected
    */
-  on(eventName: string, cb: Function) {
+  on(eventName: string, cb: (...args: Array<any>) => any): void {
     this._events.on(eventName, cb);
   }
 
   /**
    * Stop listening to an event on an instance of transport.
    */
-  off(eventName: string, cb: Function) {
+  off(eventName: string, cb: (...args: Array<any>) => any): void {
     this._events.removeListener(eventName, cb);
   }
 
-  emit(event: string, ...args: *) {
+  emit(event: string, ...args: any): void {
     this._events.emit(event, ...args);
   }
 
@@ -165,14 +166,14 @@ TransportFoo.open(descriptor).then(transport => ...)
   /**
    * Set a timeout (in milliseconds) for the exchange call. Only some transport might implement it. (e.g. U2F)
    */
-  setExchangeTimeout(exchangeTimeout: number) {
+  setExchangeTimeout(exchangeTimeout: number): void {
     this.exchangeTimeout = exchangeTimeout;
   }
 
   /**
    * Define the delay before emitting "unresponsive" on an exchange that does not respond
    */
-  setExchangeUnresponsiveTimeout(unresponsiveTimeout: number) {
+  setExchangeUnresponsiveTimeout(unresponsiveTimeout: number): void {
     this.unresponsiveTimeout = unresponsiveTimeout;
   }
 
@@ -200,6 +201,7 @@ TransportFoo.open(descriptor).then(transport => ...)
         "DataLengthTooBig"
       );
     }
+
     const response = await this.exchange(
       Buffer.concat([
         Buffer.from([cla, ins, p1, p2]),
@@ -208,9 +210,11 @@ TransportFoo.open(descriptor).then(transport => ...)
       ])
     );
     const sw = response.readUInt16BE(response.length - 2);
+
     if (!statusList.some((s) => s === sw)) {
       throw new TransportStatusError(sw);
     }
+
     return response;
   };
 
@@ -219,12 +223,12 @@ TransportFoo.open(descriptor).then(transport => ...)
    * throw if there is none or if timeout is reached.
    * This is a light helper, alternative to using listen() and open() (that you may need for any more advanced usecase)
    * @example
-TransportFoo.create().then(transport => ...)
+  TransportFoo.create().then(transport => ...)
    */
   static create(
-    openTimeout?: number = 3000,
+    openTimeout = 3000,
     listenTimeout?: number
-  ): Promise<Transport<Descriptor>> {
+  ): Promise<Transport<any>> {
     return new Promise((resolve, reject) => {
       let found = false;
       const sub = this.listen({
@@ -240,6 +244,7 @@ TransportFoo.create().then(transport => ...)
         },
         complete: () => {
           if (listenTimeoutId) clearTimeout(listenTimeoutId);
+
           if (!found) {
             reject(
               new TransportError(
@@ -264,17 +269,17 @@ TransportFoo.create().then(transport => ...)
     });
   }
 
-  exchangeBusyPromise: ?Promise<void>;
-
+  exchangeBusyPromise: Promise<void> | null | undefined;
   // $FlowFixMe
-  exchangeAtomicImpl = async (f) => {
+  exchangeAtomicImpl = async (f: () => void): Promise<void> => {
     if (this.exchangeBusyPromise) {
       throw new TransportRaceCondition(
         "An action was already pending on the Ledger device. Please deny or reconnect."
       );
     }
+
     let resolveBusy;
-    const busyPromise = new Promise((r) => {
+    const busyPromise: Promise<void> = new Promise((r) => {
       resolveBusy = r;
     });
     this.exchangeBusyPromise = busyPromise;
@@ -283,11 +288,14 @@ TransportFoo.create().then(transport => ...)
       unresponsiveReached = true;
       this.emit("unresponsive");
     }, this.unresponsiveTimeout);
+
     try {
       const res = await f();
+
       if (unresponsiveReached) {
         this.emit("responsive");
       }
+
       return res;
     } finally {
       clearTimeout(timeout);
@@ -297,11 +305,11 @@ TransportFoo.create().then(transport => ...)
   };
 
   decorateAppAPIMethods(
-    self: Object,
+    self: Record<string, any>,
     methods: Array<string>,
     scrambleKey: string
   ) {
-    for (let methodName of methods) {
+    for (const methodName of methods) {
       self[methodName] = this.decorateAppAPIMethod(
         methodName,
         self[methodName],
@@ -311,15 +319,17 @@ TransportFoo.create().then(transport => ...)
     }
   }
 
-  _appAPIlock = null;
-  decorateAppAPIMethod<R, A: any[]>(
+  _appAPIlock: string | null = null;
+
+  decorateAppAPIMethod<R, A extends any[]>(
     methodName: string,
     f: (...args: A) => Promise<R>,
-    ctx: *,
+    ctx: any,
     scrambleKey: string
   ): (...args: A) => Promise<R> {
     return async (...args) => {
       const { _appAPIlock } = this;
+
       if (_appAPIlock) {
         return Promise.reject(
           new TransportError(
@@ -328,6 +338,7 @@ TransportFoo.create().then(transport => ...)
           )
         );
       }
+
       try {
         this._appAPIlock = methodName;
         this.setScrambleKey(scrambleKey);

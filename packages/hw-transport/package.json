@@ -22,19 +22,17 @@
   },
   "main": "lib/Transport.js",
   "module": "lib-es/Transport.js",
+  "types": "lib/Transport.d.ts",
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/devices": "^5.50.0",
     "@ledgerhq/errors": "^5.50.0",
     "events": "^3.3.0"
   },
-  "devDependencies": {
-    "flow-bin": "^0.149.0"
-  },
+  "devDependencies": {},
   "scripts": {
-    "flow": "flow",
     "clean": "bash ../../script/clean.sh",
-    "build": "bash ../../script/build.sh",
+    "build": "tsc && tsc -m ES6 --outDir lib-es",
     "watch": "bash ../../script/watch.sh",
     "doc": "bash ../../script/doc.sh"
   },
