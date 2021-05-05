@@ -108,7 +108,7 @@ export const identifyProductName = (
 const bluetoothServices: string[] = [];
 const serviceUuidToInfos: Record<string, BluetoothInfos> = {};
 
-for (let id in devices) {
+for (const id in devices) {
   const deviceModel = devices[id];
   const { bluetoothSpec } = deviceModel;
 
