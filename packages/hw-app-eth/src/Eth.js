@@ -253,13 +253,14 @@ export default class Eth {
     let decodedTx = decodeTx("0x" + rawTxHex);
     if (decodedTx.data.length >= 10) {
       const erc20Info = byContractAddress(decodedTx.to);
-      console.log(erc20Info);
       if (erc20Info) {
         this._provideERC20TokenInformation(erc20Info);
       }
       let selector = decodedTx.data.substring(0, 10);
-      let {payload, signature} = getPluginForContractMethod(decodedTx.to, selector);
-      console.log(payload);
+      let { payload, signature } = getPluginForContractMethod(
+        decodedTx.to,
+        selector
+      );
       if (payload && signature) {
         this._setExternalPlugin(payload, signature);
       }
