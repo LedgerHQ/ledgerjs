@@ -1,4 +1,4 @@
-import data from "../../cryptoassets/data/dapps/ethereum";
+import data from "@ledgerhq/cryptoassets/data/dapps/ethereum";
 
 /**
  * Retrieve the name of a plugin compatible with a given contract address and a method selector

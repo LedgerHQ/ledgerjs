@@ -1,5 +1,5 @@
 // @flow
-import blob from "../../cryptoassets/data/erc20-signatures";
+import blob from "@ledgerhq/cryptoassets/data/erc20-signatures";
 
 /**
  * Retrieve the token information by a given contract address if any
