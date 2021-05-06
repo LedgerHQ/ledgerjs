@@ -63,31 +63,16 @@ export default class Btc {
    */
   getWalletPublicKey(
     path: string,
-    opts?:
-      | boolean
-      | {
-          verify?: boolean;
-          format?: AddressFormat;
-        },
-    ...rest: any[]
+    opts?: {
+      verify?: boolean;
+      format?: AddressFormat;
+    }
   ): Promise<{
     publicKey: string;
     bitcoinAddress: string;
     chainCode: string;
   }> {
-    let options;
-
-    if (rest.length > 0 || typeof opts === "boolean") {
-      console.warn(
-        "btc.getWalletPublicKey deprecated signature used. Please switch to getWalletPublicKey(path, { format, verify })"
-      );
-      options = {
-        verify: !!opts,
-        format: rest[0] ? "p2sh" : "legacy",
-      };
-    } else {
-      options = opts || {};
-    }
+    const options = opts || {};
 
     return getWalletPublicKey(this.transport, { ...options, path });
   }
@@ -147,45 +132,8 @@ export default class Btc {
    outputScriptHex: "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac"
   }).then(res => ...);
    */
-  createPaymentTransactionNew(...arg: [CreateTransactionArg] | any[]) {
-    let res: CreateTransactionArg | undefined = undefined;
-    if (arg.length > 1) {
-      console.warn(
-        "@ledgerhq/hw-app-btc: createPaymentTransactionNew multi argument signature is deprecated. please switch to named parameters."
-      );
-      const [
-        inputs,
-        associatedKeysets,
-        changePath,
-        outputScriptHex,
-        lockTime,
-        sigHashType,
-        segwit,
-        initialTimestamp,
-        additionals,
-        expiryHeight,
-        useTrustedInputForSegwit,
-      ] = arg;
-      res = {
-        inputs,
-        associatedKeysets,
-        changePath,
-        outputScriptHex,
-        lockTime,
-        sigHashType,
-        segwit,
-        initialTimestamp,
-        additionals,
-        expiryHeight,
-        useTrustedInputForSegwit,
-      };
-    } else {
-      res = arg[0];
-    }
-
-    if (res) {
-      return createTransaction(this.transport, res);
-    }
+  createPaymentTransactionNew(arg: CreateTransactionArg): Promise<string> {
+    return createTransaction(this.transport, arg);
   }
 
   /**
@@ -207,38 +155,8 @@ export default class Btc {
   outputScriptHex: "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac"
   }).then(result => ...);
    */
-  signP2SHTransaction(...arg: [SignP2SHTransactionArg] | any[]) {
-    let res: SignP2SHTransactionArg | undefined = undefined;
-    if (arg.length > 1) {
-      console.warn(
-        "@ledgerhq/hw-app-btc: signP2SHTransaction multi argument signature is deprecated. please switch to named parameters."
-      );
-      const [
-        inputs,
-        associatedKeysets,
-        outputScriptHex,
-        lockTime,
-        sigHashType,
-        segwit,
-        transactionVersion,
-      ] = arg;
-
-      res = {
-        inputs,
-        associatedKeysets,
-        outputScriptHex,
-        lockTime,
-        sigHashType,
-        segwit,
-        transactionVersion,
-      };
-    } else {
-      res = arg[0];
-    }
-
-    if (res) {
-      return signP2SHTransaction(this.transport, res);
-    }
+  signP2SHTransaction(arg: SignP2SHTransactionArg): Promise<string[]> {
+    return signP2SHTransaction(this.transport, arg);
   }
 
   /**
