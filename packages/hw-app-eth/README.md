@@ -56,6 +56,10 @@ Ledger Hardware Wallet ETH JavaScript bindings.
         -   [Examples](#examples-6)
     -   [eth2SetWithdrawalIndex](#eth2setwithdrawalindex)
         -   [Parameters](#parameters-16)
+    -   [setExternalPlugin](#setexternalplugin)
+        -   [Parameters](#parameters-17)
+-   [getPluginForContractMethod](#getpluginforcontractmethod)
+    -   [Parameters](#parameters-18)
 
 ### byContractAddress
 
@@ -364,3 +368,24 @@ It shall be run before the ETH 2 deposit transaction is signed. If not called, t
 -   `withdrawalIndex` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** index path in the EIP 2334 path m/12381/3600/withdrawalIndex/0
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** True if the method was executed successfully
+
+#### setExternalPlugin
+
+Set the name of the plugin that should be used to parse the next transaction
+
+##### Parameters
+
+-   `pluginName` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** string containing the name of the plugin, must have length between 1 and 30 bytes
+-   `contractAddress` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `selector` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** True if the method was executed successfully
+
+### getPluginForContractMethod
+
+Retrieve the name of a plugin compatible with a given contract address and a method selector
+
+#### Parameters
+
+-   `contractAddress`  
+-   `selector`  

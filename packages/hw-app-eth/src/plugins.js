@@ -12,6 +12,8 @@ export const getPluginForContractMethod = (contractAddress, selector) => {
       return {
         payload: contractSelectors[selector]["serialized_data"],
         signature: contractSelectors[selector]["signature"],
+        erc20OfInterest: contractSelectors[selector]["erc20OfInterest"],
+        abi: contractSelectors[selector]["abi"],
       };
     }
   }
