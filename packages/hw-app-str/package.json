@@ -24,6 +24,7 @@
   },
   "main": "lib/Str.js",
   "module": "lib-es/Str.js",
+  "types": "lib/Str.d.ts",
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/hw-transport": "^5.50.0",
@@ -31,13 +32,10 @@
     "sha.js": "^2.3.6",
     "tweetnacl": "^1.0.3"
   },
-  "devDependencies": {
-    "flow-bin": "^0.149.0"
-  },
+  "devDependencies": {},
   "scripts": {
-    "flow": "flow",
     "clean": "bash ../../script/clean.sh",
-    "build": "bash ../../script/build.sh",
+    "build": "tsc && tsc -m ES6 --outDir lib-es",
     "watch": "bash ../../script/watch.sh"
   },
   "gitHead": "fca2c7ce74fdb88df4d59dca4cc0e668410d66af"

@@ -14,8 +14,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-//@flow
-
 import type Transport from "@ledgerhq/hw-transport";
 import {
   splitPath,
@@ -25,20 +23,17 @@ import {
   checkStellarBip32Path,
   hash,
 } from "./utils";
-
 const CLA = 0xe0;
 const INS_GET_PK = 0x02;
 const INS_SIGN_TX = 0x04;
 const INS_GET_CONF = 0x06;
 const INS_SIGN_TX_HASH = 0x08;
 const INS_KEEP_ALIVE = 0x10;
-
 const APDU_MAX_SIZE = 150;
 const P1_FIRST_APDU = 0x00;
 const P1_MORE_APDU = 0x80;
 const P2_LAST_APDU = 0x00;
 const P2_MORE_APDU = 0x80;
-
 const SW_OK = 0x9000;
 const SW_CANCEL = 0x6985;
 const SW_UNKNOWN_OP = 0x6c24;
@@ -46,9 +41,7 @@ const SW_MULTI_OP = 0x6c25;
 const SW_NOT_ALLOWED = 0x6c66;
 const SW_UNSUPPORTED = 0x6d00;
 const SW_KEEP_ALIVE = 0x6e02;
-
 const TX_MAX_SIZE = 1540;
-
 /**
  * Stellar API
  *
@@ -56,10 +49,11 @@ const TX_MAX_SIZE = 1540;
  * import Str from "@ledgerhq/hw-app-str";
  * const str = new Str(transport)
  */
-export default class Str {
-  transport: Transport<*>;
 
-  constructor(transport: Transport<*>, scrambleKey: string = "l0v") {
+export default class Str {
+  transport: Transport<any>;
+
+  constructor(transport: Transport<any>, scrambleKey = "l0v") {
     this.transport = transport;
     transport.decorateAppAPIMethods(
       this,
@@ -69,13 +63,14 @@ export default class Str {
   }
 
   getAppConfiguration(): Promise<{
-    version: string,
+    version: string;
   }> {
     return this.transport
       .send(CLA, INS_GET_CONF, 0x00, 0x00)
       .then((response) => {
-        let multiOpsEnabled = response[0] === 0x01 || response[1] < 0x02;
-        let version = "" + response[1] + "." + response[2] + "." + response[3];
+        const multiOpsEnabled = response[0] === 0x01 || response[1] < 0x02;
+        const version =
+          "" + response[1] + "." + response[2] + "." + response[3];
         return {
           version: version,
           multiOpsEnabled: multiOpsEnabled,
@@ -97,19 +92,20 @@ export default class Str {
     path: string,
     boolValidate?: boolean,
     boolDisplay?: boolean
-  ): Promise<{ publicKey: string, raw: Buffer }> {
+  ): Promise<{
+    publicKey: string;
+    raw: Buffer;
+  }> {
     checkStellarBip32Path(path);
-
-    let apdus = [];
+    const apdus: Buffer[] = [];
     let response;
-
-    let pathElts = splitPath(path);
-    let buffer = Buffer.alloc(1 + pathElts.length * 4);
+    const pathElts = splitPath(path);
+    const buffer = Buffer.alloc(1 + pathElts.length * 4);
     buffer[0] = pathElts.length;
     pathElts.forEach((element, index) => {
       buffer.writeUInt32BE(element, 1 + 4 * index);
     });
-    let verifyMsg = Buffer.from("via lumina", "ascii");
+    const verifyMsg = Buffer.from("via lumina", "ascii");
     apdus.push(Buffer.concat([buffer, verifyMsg]));
     let keepAlive = false;
     return foreach(apdus, (data) =>
@@ -123,29 +119,34 @@ export default class Str {
           [SW_OK, SW_KEEP_ALIVE]
         )
         .then((apduResponse) => {
-          let status = Buffer.from(
+          const status = Buffer.from(
             apduResponse.slice(apduResponse.length - 2)
           ).readUInt16BE(0);
+
           if (status === SW_KEEP_ALIVE) {
             keepAlive = true;
             apdus.push(Buffer.alloc(0));
           }
+
           response = apduResponse;
         })
     ).then(() => {
       // response = Buffer.from(response, 'hex');
       let offset = 0;
-      let rawPublicKey = response.slice(offset, offset + 32);
+      const rawPublicKey = response.slice(offset, offset + 32);
       offset += 32;
-      let publicKey = encodeEd25519PublicKey(rawPublicKey);
+      const publicKey = encodeEd25519PublicKey(rawPublicKey);
+
       if (boolValidate) {
-        let signature = response.slice(offset, offset + 64);
+        const signature = response.slice(offset, offset + 64);
+
         if (!verifyEd25519Signature(verifyMsg, signature, rawPublicKey)) {
           throw new Error(
             "Bad signature. Keypair is invalid. Please report this."
           );
         }
       }
+
       return {
         publicKey: publicKey,
         raw: rawPublicKey,
@@ -164,7 +165,9 @@ export default class Str {
   signTransaction(
     path: string,
     transaction: Buffer
-  ): Promise<{ signature: Buffer }> {
+  ): Promise<{
+    signature: Buffer;
+  }> {
     checkStellarBip32Path(path);
 
     if (transaction.length > TX_MAX_SIZE) {
@@ -176,17 +179,17 @@ export default class Str {
       );
     }
 
-    let apdus = [];
+    const apdus: Buffer[] = [];
     let response;
-
-    let pathElts = splitPath(path);
-    let bufferSize = 1 + pathElts.length * 4;
-    let buffer = Buffer.alloc(bufferSize);
+    const pathElts = splitPath(path);
+    const bufferSize = 1 + pathElts.length * 4;
+    const buffer = Buffer.alloc(bufferSize);
     buffer[0] = pathElts.length;
     pathElts.forEach(function (element, index) {
       buffer.writeUInt32BE(element, 1 + 4 * index);
     });
     let chunkSize = APDU_MAX_SIZE - bufferSize;
+
     if (transaction.length <= chunkSize) {
       // it fits in a single apdu
       apdus.push(Buffer.concat([buffer, transaction]));
@@ -197,8 +200,9 @@ export default class Str {
       transaction.copy(chunk, 0, offset, chunkSize);
       apdus.push(Buffer.concat([buffer, chunk]));
       offset += chunkSize;
+
       while (offset < transaction.length) {
-        let remaining = transaction.length - offset;
+        const remaining = transaction.length - offset;
         chunkSize = remaining < APDU_MAX_SIZE ? remaining : APDU_MAX_SIZE;
         chunk = Buffer.alloc(chunkSize);
         transaction.copy(chunk, 0, offset, offset + chunkSize);
@@ -206,6 +210,7 @@ export default class Str {
         apdus.push(chunk);
       }
     }
+
     let keepAlive = false;
     return foreach(apdus, (data, i) =>
       this.transport
@@ -218,21 +223,24 @@ export default class Str {
           [SW_OK, SW_CANCEL, SW_UNKNOWN_OP, SW_MULTI_OP, SW_KEEP_ALIVE]
         )
         .then((apduResponse) => {
-          let status = Buffer.from(
+          const status = Buffer.from(
             apduResponse.slice(apduResponse.length - 2)
           ).readUInt16BE(0);
+
           if (status === SW_KEEP_ALIVE) {
             keepAlive = true;
             apdus.push(Buffer.alloc(0));
           }
+
           response = apduResponse;
         })
     ).then(() => {
-      let status = Buffer.from(
+      const status = Buffer.from(
         response.slice(response.length - 2)
       ).readUInt16BE(0);
+
       if (status === SW_OK) {
-        let signature = Buffer.from(response.slice(0, response.length - 2));
+        const signature = Buffer.from(response.slice(0, response.length - 2));
         return {
           signature: signature,
         };
@@ -256,17 +264,26 @@ export default class Str {
    * @example
    * str.signHash("44'/148'/0'", hash).then(o => o.signature)
    */
-  signHash(path: string, hash: Buffer): Promise<{ signature: Buffer }> {
+  signHash(
+    path: string,
+    hash: Buffer
+  ): Promise<{
+    signature: Buffer;
+  }> {
     checkStellarBip32Path(path);
     return this.signHash_private(path, hash);
   }
 
-  signHash_private(path: string, hash: Buffer): Promise<{ signature: Buffer }> {
-    let apdus = [];
+  signHash_private(
+    path: string,
+    hash: Buffer
+  ): Promise<{
+    signature: Buffer;
+  }> {
+    const apdus: Buffer[] = [];
     let response;
-
-    let pathElts = splitPath(path);
-    let buffer = Buffer.alloc(1 + pathElts.length * 4);
+    const pathElts = splitPath(path);
+    const buffer = Buffer.alloc(1 + pathElts.length * 4);
     buffer[0] = pathElts.length;
     pathElts.forEach(function (element, index) {
       buffer.writeUInt32BE(element, 1 + 4 * index);
@@ -284,21 +301,24 @@ export default class Str {
           [SW_OK, SW_CANCEL, SW_NOT_ALLOWED, SW_UNSUPPORTED, SW_KEEP_ALIVE]
         )
         .then((apduResponse) => {
-          let status = Buffer.from(
+          const status = Buffer.from(
             apduResponse.slice(apduResponse.length - 2)
           ).readUInt16BE(0);
+
           if (status === SW_KEEP_ALIVE) {
             keepAlive = true;
             apdus.push(Buffer.alloc(0));
           }
+
           response = apduResponse;
         })
     ).then(() => {
-      let status = Buffer.from(
+      const status = Buffer.from(
         response.slice(response.length - 2)
       ).readUInt16BE(0);
+
       if (status === SW_OK) {
-        let signature = Buffer.from(response.slice(0, response.length - 2));
+        const signature = Buffer.from(response.slice(0, response.length - 2));
         return {
           signature: signature,
         };

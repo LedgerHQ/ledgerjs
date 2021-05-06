@@ -24,10 +24,9 @@
   },
   "main": "lib/Tezos.js",
   "module": "lib-es/Tezos.js",
+  "types": "lib/Tezos.d.ts",
   "license": "Apache-2.0",
-  "devDependencies": {
-    "flow-bin": "^0.149.0"
-  },
+  "devDependencies": {},
   "dependencies": {
     "@ledgerhq/hw-transport": "^5.50.0",
     "blake2b": "^2.1.3",
@@ -35,9 +34,8 @@
     "invariant": "^2.2.4"
   },
   "scripts": {
-    "flow": "flow",
     "clean": "bash ../../script/clean.sh",
-    "build": "bash ../../script/build.sh",
+    "build": "tsc && tsc -m ES6 --outDir lib-es",
     "watch": "bash ../../script/watch.sh",
     "doc": "bash ../../script/doc.sh"
   },

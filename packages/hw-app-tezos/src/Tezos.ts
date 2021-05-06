@@ -14,37 +14,29 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-//@flow
-
 import invariant from "invariant";
 import bs58check from "bs58check";
 import blake2b from "blake2b";
 import type Transport from "@ledgerhq/hw-transport";
-
 export const TezosCurves = {
   ED25519: 0x00,
   SECP256K1: 0x01,
   SECP256R1: 0x02,
 };
-
-export type Curve = $Values<typeof TezosCurves>;
-
-export type GetAddressResult = {|
-  address: string,
-  publicKey: string,
-|};
-
-export type SignOperationResult = {|
-  signature: string,
-|};
-
-export type GetVersionResult = {|
-  major: number,
-  minor: number,
-  patch: number,
-  bakingApp: boolean,
-|};
-
+export type Curve = typeof TezosCurves[keyof typeof TezosCurves];
+export type GetAddressResult = {
+  address: string;
+  publicKey: string;
+};
+export type SignOperationResult = {
+  signature: string;
+};
+export type GetVersionResult = {
+  major: number;
+  minor: number;
+  patch: number;
+  bakingApp: boolean;
+};
 /**
  * Tezos API
  *
@@ -52,10 +44,11 @@ export type GetVersionResult = {|
  * import Tezos from "@ledgerhq/hw-app-tezos";
  * const tez = new Tezos(transport)
  */
-export default class Tezos {
-  transport: Transport<*>;
 
-  constructor(transport: Transport<*>) {
+export default class Tezos {
+  transport: Transport<any>;
+
+  constructor(transport: Transport<any>) {
     this.transport = transport;
     transport.decorateAppAPIMethods(
       this,
@@ -80,13 +73,14 @@ export default class Tezos {
   async getAddress(
     path: string,
     options: {
-      verify?: boolean,
-      curve?: Curve,
-      ins?: number, // TODO specify
+      verify?: boolean;
+      curve?: Curve;
+      ins?: number; // TODO specify
     } = {}
   ): Promise<GetAddressResult> {
     const cla = 0x80;
     let ins = options.ins;
+
     if (!ins) {
       if (options.verify) {
         ins = 0x03;
@@ -94,20 +88,18 @@ export default class Tezos {
         ins = 0x02;
       }
     }
+
     const p1 = 0;
     const p2 = options.curve || 0;
-
-    let paths = splitPath(path);
-    let buffer = Buffer.alloc(1 + paths.length * 4);
+    const paths = splitPath(path);
+    const buffer = Buffer.alloc(1 + paths.length * 4);
     buffer[0] = paths.length;
     paths.forEach((element, index) => {
       buffer.writeUInt32BE(element, 1 + 4 * index);
     });
-
     const payload = await this.transport.send(cla, ins, p1, p2, buffer);
-
-    let publicKeyLength = payload[0];
-    let publicKey = payload.slice(1, 1 + publicKeyLength);
+    const publicKeyLength = payload[0];
+    const publicKey = payload.slice(1, 1 + publicKeyLength);
     const res: GetAddressResult = {
       publicKey: publicKey.toString("hex"),
       address: encodeAddress(publicKey, p2),
@@ -119,18 +111,17 @@ export default class Tezos {
     path: string,
     rawTxHex: string,
     options: {
-      curve?: Curve,
+      curve?: Curve;
     } = {}
   ): Promise<SignOperationResult> {
     const curve = options.curve || 0;
-    let paths = splitPath(path);
+    const paths = splitPath(path);
     let offset = 0;
-    let rawTx = Buffer.from(rawTxHex, "hex");
-    let toSend = [];
-
+    const rawTx = Buffer.from(rawTxHex, "hex");
+    const toSend: Buffer[] = [];
     // Initial key setting
     {
-      let buffer = Buffer.alloc(paths.length * 4 + 1);
+      const buffer = Buffer.alloc(paths.length * 4 + 1);
       buffer[0] = paths.length;
       paths.forEach((element, index) => {
         buffer.writeUInt32BE(element, 1 + 4 * index);
@@ -139,33 +130,41 @@ export default class Tezos {
     }
 
     while (offset !== rawTx.length) {
-      let maxChunkSize = 230;
+      const maxChunkSize = 230;
       let chunkSize;
+
       if (offset + maxChunkSize >= rawTx.length) {
         chunkSize = rawTx.length - offset;
       } else {
         chunkSize = maxChunkSize;
       }
-      let buffer = Buffer.alloc(chunkSize);
+
+      const buffer = Buffer.alloc(chunkSize);
       rawTx.copy(buffer, 0, offset, offset + chunkSize);
       toSend.push(buffer);
       offset += chunkSize;
     }
 
     let response;
+
     for (let i = 0; i < toSend.length; i++) {
       const data = toSend[i];
       let code = 0x01;
+
       if (i === 0) {
         code = 0x00;
       } else if (i === toSend.length - 1) {
         code = 0x81;
       }
+
       response = await this.transport.send(0x80, 0x04, code, curve, data);
     }
+
     invariant(response, "hw-app-xtz: response is set");
     const signature = response.slice(0, response.length - 2).toString("hex");
-    return { signature };
+    return {
+      signature,
+    };
   }
 
   async getVersion(): Promise<GetVersionResult> {
@@ -177,31 +176,38 @@ export default class Tezos {
       Buffer.alloc(0)
     );
     const bakingApp = appFlag === 1;
-    return { major, minor, patch, bakingApp };
+    return {
+      major,
+      minor,
+      patch,
+      bakingApp,
+    };
   }
-}
+} // TODO use bip32-path library
 
-// TODO use bip32-path library
 function splitPath(path: string): number[] {
-  let result = [];
-  let components = path.split("/");
+  const result: number[] = [];
+  const components = path.split("/");
   components.forEach((element) => {
     let number = parseInt(element, 10);
+
     if (isNaN(number)) {
       return; // FIXME shouldn't it throws instead?
     }
+
     if (element.length > 1 && element[element.length - 1] === "'") {
       number += 0x80000000;
     }
+
     result.push(number);
   });
   return result;
 }
 
 type CurveData = {
-  pkB58Prefix: Buffer,
-  pkhB58Prefix: Buffer,
-  compressPublicKey: (publicKey: Buffer, curve: Curve) => Buffer,
+  pkB58Prefix: Buffer;
+  pkhB58Prefix: Buffer;
+  compressPublicKey: (publicKey: Buffer, curve: Curve) => Buffer;
 };
 
 const compressPublicKeySECP256 = (publicKey: Buffer, curve: Curve) =>
@@ -235,10 +241,8 @@ const curves: Array<CurveData> = [
 const encodeAddress = (publicKey: Buffer, curve: Curve) => {
   const curveData = curves[curve];
   invariant(curveData, "%s curve not supported", curve);
-
   const publicKeyBuf = curveData.compressPublicKey(publicKey, curve);
   const key = publicKeyBuf.slice(1);
-
   const keyHashSize = 20;
   let hash = blake2b(keyHashSize);
   hash.update(key);
@@ -246,6 +250,5 @@ const encodeAddress = (publicKey: Buffer, curve: Curve) => {
   const address = bs58check.encode(
     Buffer.concat([curveData.pkhB58Prefix, hash])
   );
-
   return address;
 };
