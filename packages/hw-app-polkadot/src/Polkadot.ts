@@ -14,8 +14,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-//@flow
-
 import type Transport from "@ledgerhq/hw-transport";
 import BIPPath from "bip32-path";
 import {
@@ -23,26 +21,20 @@ import {
   UserRefusedAddress,
   TransportError,
 } from "@ledgerhq/errors";
-
 const CHUNK_SIZE = 250;
-
 const CLA = 0x90;
-
 const INS = {
   GET_VERSION: 0x00,
   GET_ADDR_ED25519: 0x01,
   SIGN_ED25519: 0x02,
 };
-
 const PAYLOAD_TYPE_INIT = 0x00;
 const PAYLOAD_TYPE_ADD = 0x01;
 const PAYLOAD_TYPE_LAST = 0x02;
-
 const SW_OK = 0x9000;
 const SW_CANCEL = 0x6986;
 const SW_ERROR_DATA_INVALID = 0x6984;
 const SW_ERROR_BAD_KEY_HANDLE = 0x6a80;
-
 /**
  * Polkadot API
  *
@@ -50,23 +42,22 @@ const SW_ERROR_BAD_KEY_HANDLE = 0x6a80;
  * import Polkadot from "@ledgerhq/hw-app-polkadot";
  * const polkadot = new Polkadot(transport)
  */
-export default class Polkadot {
-  transport: Transport<*>;
 
-  constructor(transport: Transport<*>) {
+export default class Polkadot {
+  transport: Transport<any>;
+
+  constructor(transport: Transport<any>) {
     this.transport = transport;
     transport.decorateAppAPIMethods(this, ["getAddress", "sign"], "DOT");
   }
 
-  serializePath(path: Array<number>) {
+  serializePath(path: Array<number>): Buffer {
     const buf = Buffer.alloc(20);
-
     buf.writeUInt32LE(path[0], 0);
     buf.writeUInt32LE(path[1], 4);
     buf.writeUInt32LE(path[2], 8);
     buf.writeUInt32LE(path[3], 12);
     buf.writeUInt32LE(path[4], 16);
-
     return buf;
   }
 
@@ -74,10 +65,16 @@ export default class Polkadot {
    * @param {string} path
    * @param {boolean} requireConfirmation - if true, user must valid if the address is correct on the device
    */
-  async getAddress(path: string, requireConfirmation: boolean = false) {
+  async getAddress(
+    path: string,
+    requireConfirmation = false
+  ): Promise<{
+    pubKey: string;
+    address: string;
+    return_code: number;
+  }> {
     const bipPath = BIPPath.fromString(path).toPathArray();
     const bip44Path = this.serializePath(bipPath);
-
     return this.transport
       .send(
         CLA,
@@ -103,7 +100,10 @@ export default class Polkadot {
       });
   }
 
-  foreach<T, A>(arr: T[], callback: (T, number) => Promise<A>): Promise<A[]> {
+  foreach<T, A>(
+    arr: T[],
+    callback: (arg0: T, arg1: number) => Promise<A>
+  ): Promise<A[]> {
     function iterate(index, array, result) {
       if (index >= array.length) {
         return result;
@@ -113,6 +113,7 @@ export default class Polkadot {
           return iterate(index + 1, array, result);
         });
     }
+
     return Promise.resolve().then(() => iterate(0, arr, []));
   }
 
@@ -122,24 +123,30 @@ export default class Polkadot {
    * @param {string} message - payload
    * @returns {string} - signed payload to be broadcasted
    */
-  async sign(path: string, message: string) {
+  async sign(
+    path: string,
+    message: string
+  ): Promise<{
+    signature: null | string;
+    return_code: number;
+  }> {
     const bipPath = BIPPath.fromString(path).toPathArray();
     const serializedPath = this.serializePath(bipPath);
-
-    const chunks = [];
+    const chunks: Buffer[] = [];
     chunks.push(serializedPath);
     const buffer = Buffer.from(message);
 
     for (let i = 0; i < buffer.length; i += CHUNK_SIZE) {
       let end = i + CHUNK_SIZE;
+
       if (i > buffer.length) {
         end = buffer.length;
       }
+
       chunks.push(buffer.slice(i, end));
     }
 
-    let response = {};
-
+    let response;
     return this.foreach(chunks, (data, j) =>
       this.transport
         .send(
@@ -162,6 +169,7 @@ export default class Polkadot {
       if (returnCode === SW_CANCEL) {
         throw new UserRefusedOnDevice();
       }
+
       if (
         returnCode === SW_ERROR_DATA_INVALID ||
         returnCode === SW_ERROR_BAD_KEY_HANDLE
@@ -169,7 +177,8 @@ export default class Polkadot {
         const errorMessage = response
           .slice(0, response.length - 2)
           .toString("ascii");
-        throw new TransportError(errorMessage);
+        // FIXME: add correct id to TransportError
+        throw new TransportError(errorMessage, "");
       }
 
       let signature = null;
@@ -179,7 +188,7 @@ export default class Polkadot {
       }
 
       return {
-        signature: signature,
+        signature,
         return_code: returnCode,
       };
     });
