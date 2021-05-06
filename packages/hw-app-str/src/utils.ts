@@ -14,32 +14,31 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-//@flow
-
 import base32 from "base32.js";
 import nacl from "tweetnacl";
 import { sha256 } from "sha.js";
-
 // TODO use bip32-path library
 export function splitPath(path: string): number[] {
-  let result = [];
-  let components = path.split("/");
+  const result: number[] = [];
+  const components = path.split("/");
   components.forEach((element) => {
     let number = parseInt(element, 10);
+
     if (isNaN(number)) {
       return; // FIXME shouldn't it throws instead?
     }
+
     if (element.length > 1 && element[element.length - 1] === "'") {
       number += 0x80000000;
     }
+
     result.push(number);
   });
   return result;
 }
-
 export function foreach<T, A>(
   arr: T[],
-  callback: (T, number) => Promise<A>
+  callback: (arg0: T, arg1: number) => Promise<A>
 ): Promise<A[]> {
   function iterate(index, array, result) {
     if (index >= array.length) {
@@ -51,16 +50,15 @@ export function foreach<T, A>(
       });
     }
   }
+
   return Promise.resolve().then(() => iterate(0, arr, []));
 }
-
 export function crc16xmodem(buf: Buffer, previous?: number): number {
   let crc = typeof previous !== "undefined" ? ~~previous : 0x0;
 
-  for (var index = 0; index < buf.length; index++) {
+  for (let index = 0; index < buf.length; index++) {
     const byte = buf[index];
     let code = (crc >>> 8) & 0xff;
-
     code ^= byte & 0xff;
     code ^= code >>> 4;
     crc = (crc << 8) & 0xffff;
@@ -73,18 +71,17 @@ export function crc16xmodem(buf: Buffer, previous?: number): number {
 
   return crc;
 }
-
 export function encodeEd25519PublicKey(rawPublicKey: Buffer): string {
-  let versionByte = 6 << 3; // 'G'
-  let data = Buffer.from(rawPublicKey);
-  let versionBuffer = Buffer.from([versionByte]);
-  let payload = Buffer.concat([versionBuffer, data]);
-  let checksum = Buffer.alloc(2);
+  const versionByte = 6 << 3; // 'G'
+
+  const data = Buffer.from(rawPublicKey);
+  const versionBuffer = Buffer.from([versionByte]);
+  const payload = Buffer.concat([versionBuffer, data]);
+  const checksum = Buffer.alloc(2);
   checksum.writeUInt16LE(crc16xmodem(payload), 0);
-  let unencoded = Buffer.concat([payload, checksum]);
+  const unencoded = Buffer.concat([payload, checksum]);
   return base32.encode(unencoded);
 }
-
 export function verifyEd25519Signature(
   data: Buffer,
   signature: Buffer,
@@ -96,13 +93,11 @@ export function verifyEd25519Signature(
     new Uint8Array(publicKey.toJSON().data)
   );
 }
-
 export function hash(data: Buffer) {
-  let hasher = new sha256();
+  const hasher = new sha256();
   hasher.update(data, "utf8");
   return hasher.digest();
 }
-
 export function checkStellarBip32Path(path: string): void {
   path.split("/").forEach(function (element) {
     if (!element.toString().endsWith("'")) {
