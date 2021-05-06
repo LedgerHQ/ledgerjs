@@ -30,7 +30,7 @@
     "@ledgerhq/errors": "^5.50.0",
     "@ledgerhq/hw-transport": "^5.50.0",
     "@ledgerhq/logs": "^5.50.0",
-    "rxjs": "^6.6.7"
+    "rxjs": "^7.0.0"
   },
   "devDependencies": {
     "flow-bin": "^0.149.0"
