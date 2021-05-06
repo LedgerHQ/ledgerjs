@@ -1,36 +1,44 @@
-//@flow
 import Transport from "@ledgerhq/hw-transport";
 import { TransportError } from "@ledgerhq/errors";
 import { log } from "@ledgerhq/logs";
 
-const WebSocket = global.WebSocket || require("ws");
+declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
+  namespace NodeJS {
+    interface Global {
+      WebSocket?: WebSocket;
+    }
+  }
+}
 
+const WebSocket = global.WebSocket || require("ws");
 /**
  * WebSocket transport implementation
  */
+
 export default class WebSocketTransport extends Transport<string> {
   static isSupported = (): Promise<boolean> =>
     Promise.resolve(typeof WebSocket === "function");
-
   // this transport is not discoverable
-  static list = (): * => Promise.resolve([]);
-  static listen = (_observer: *) => ({
+  static list = (): any => Promise.resolve([]);
+  static listen = (_observer: any) => ({
     unsubscribe: () => {},
   });
-
-  static check = async (url: string, timeout: number = 5000) =>
+  static check = async (url: string, timeout = 5000) =>
     new Promise((resolve, reject) => {
       const socket = new WebSocket(url);
       let success = false;
       setTimeout(() => {
         socket.close();
       }, timeout);
+
       socket.onopen = () => {
         success = true;
         socket.close();
       };
+
       socket.onclose = () => {
-        if (success) resolve();
+        if (success) resolve(undefined);
         else {
           reject(
             new TransportError(
@@ -40,6 +48,7 @@ export default class WebSocketTransport extends Transport<string> {
           );
         }
       };
+
       socket.onerror = () => {
         reject(
           new TransportError(
@@ -56,33 +65,40 @@ export default class WebSocketTransport extends Transport<string> {
         const socket = new WebSocket(url);
         const exchangeMethods = {
           resolveExchange: (_b: Buffer) => {},
-          rejectExchange: (_e: *) => {},
+          rejectExchange: (_e: any) => {},
           onDisconnect: () => {},
           close: () => socket.close(),
           send: (msg) => socket.send(msg),
         };
+
         socket.onopen = () => {
           socket.send("open");
         };
+
         socket.onerror = (e) => {
           exchangeMethods.onDisconnect();
           reject(e);
         };
+
         socket.onclose = () => {
           exchangeMethods.onDisconnect();
           reject(new TransportError("OpenFailed", "OpenFailed"));
         };
+
         socket.onmessage = (e) => {
           if (typeof e.data !== "string") return;
           const data = JSON.parse(e.data);
+
           switch (data.type) {
             case "opened":
               return resolve(exchangeMethods);
+
             case "error":
               reject(new Error(data.error));
               return exchangeMethods.rejectExchange(
                 new TransportError(data.error, "WSError")
               );
+
             case "response":
               return exchangeMethods.resolveExchange(
                 Buffer.from(data.data, "hex")
@@ -96,11 +112,12 @@ export default class WebSocketTransport extends Transport<string> {
     return new WebSocketTransport(exchangeMethods);
   }
 
-  hook: *;
+  hook: any;
 
-  constructor(hook: *) {
+  constructor(hook: any) {
     super();
     this.hook = hook;
+
     hook.onDisconnect = () => {
       this.emit("disconnect");
       this.hook.rejectExchange(
@@ -112,9 +129,11 @@ export default class WebSocketTransport extends Transport<string> {
   async exchange(apdu: Buffer): Promise<Buffer> {
     const hex = apdu.toString("hex");
     log("apdu", "=> " + hex);
-    const res = await new Promise((resolve, reject) => {
-      this.hook.rejectExchange = (e: *) => reject(e);
+    const res: Buffer = await new Promise((resolve, reject) => {
+      this.hook.rejectExchange = (e: any) => reject(e);
+
       this.hook.resolveExchange = (b: Buffer) => resolve(b);
+
       this.hook.send(hex);
     });
     log("apdu", "<= " + res.toString("hex"));
@@ -125,8 +144,10 @@ export default class WebSocketTransport extends Transport<string> {
 
   async close() {
     this.hook.close();
-    return new Promise((success) => {
-      setTimeout(success, 200);
+    return new Promise<void>((success) => {
+      setTimeout(() => {
+        success(undefined);
+      }, 200);
     });
   }
 }
