@@ -4,9 +4,6 @@ const { readFileJSON } = require("../utils");
 const {
   findFiatCurrencyByTicker,
 } = require("../../../packages/cryptoassets/lib/fiats");
-const {
-  findCryptoCurrencyByTicker,
-} = require("../../../packages/cryptoassets/lib/currencies");
 
 const inferParentCurrency = (common) =>
   common.blockchain_name === "foundation"
@@ -40,17 +37,6 @@ module.exports = {
             ? countervaluesTickers.includes(lenseTicker(a))
             : true)
       );
-      const cryptoCollisions = all.filter((a) => {
-        const cur = findCryptoCurrencyByTicker(lenseTicker(a));
-        return (
-          cur &&
-          !cur.disableCountervalue &&
-          !a[7] &&
-          (WARN_IF_COUNTERVALUES
-            ? countervaluesTickers.includes(lenseTicker(a))
-            : true)
-        );
-      });
       const contractGroup = {};
       all.forEach((a) => {
         const matches = all.filter((b) => a[6] && b[6] && a[6] === b[6]);
@@ -82,15 +68,6 @@ module.exports = {
       if (fiatCollisions.length > 0) {
         console.warn("\nERC20 THAT COLLIDES WITH FIAT TICKERS:\n");
         fiatCollisions.forEach((t) => {
-          console.warn(lenseTicker(t) + " ticker used by erc20: " + t[1]);
-        });
-      }
-
-      if (cryptoCollisions.length > 0) {
-        console.warn(
-          "\nERC20 THAT COLLIDES WITH OTHER CRYPTO ASSETS TICKERS:\n"
-        );
-        cryptoCollisions.forEach((t) => {
           console.warn(lenseTicker(t) + " ticker used by erc20: " + t[1]);
         });
       }
