@@ -14,8 +14,6 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-//@flow
-
 // FIXME drop:
 import { splitPath, foreach, decodeVarint } from "./utils";
 //import { StatusCodes, TransportStatusError } from "@ledgerhq/errors";
@@ -25,6 +23,7 @@ const remapTransactionRelatedErrors = (e) => {
   if (e && e.statusCode === 0x6a80) {
     // TODO:
   }
+
   return e;
 };
 
@@ -38,7 +37,6 @@ const SIGN_MESSAGE = 0x08;
 const ECDH_SECRET = 0x0a;
 const VERSION = 0x06;
 const CHUNK_SIZE = 250;
-
 /**
  * Tron API
  *
@@ -46,10 +44,11 @@ const CHUNK_SIZE = 250;
  * import Trx from "@ledgerhq/hw-app-trx";
  * const trx = new Trx(transport)
  */
-export default class Trx {
-  transport: Transport<*>;
 
-  constructor(transport: Transport<*>, scrambleKey: string = "TRX") {
+export default class Trx {
+  transport: Transport<any>;
+
+  constructor(transport: Transport<any>, scrambleKey = "TRX") {
     this.transport = transport;
     transport.decorateAppAPIMethods(
       this,
@@ -77,11 +76,11 @@ export default class Trx {
     path: string,
     boolDisplay?: boolean
   ): Promise<{
-    publicKey: string,
-    address: string,
+    publicKey: string;
+    address: string;
   }> {
-    let paths = splitPath(path);
-    let buffer = Buffer.alloc(PATHS_LENGTH_SIZE + paths.length * PATH_SIZE);
+    const paths = splitPath(path);
+    const buffer = Buffer.alloc(PATHS_LENGTH_SIZE + paths.length * PATH_SIZE);
     buffer[0] = paths.length;
     paths.forEach((element, index) => {
       buffer.writeUInt32BE(element, 1 + 4 * index);
@@ -89,23 +88,22 @@ export default class Trx {
     return this.transport
       .send(CLA, ADDRESS, boolDisplay ? 0x01 : 0x00, 0x00, buffer)
       .then((response) => {
-        let result = {};
-        let publicKeyLength = response[0];
-        let addressLength = response[1 + publicKeyLength];
-        result.publicKey = response
-          .slice(1, 1 + publicKeyLength)
-          .toString("hex");
-        result.address = response
-          .slice(
-            1 + publicKeyLength + 1,
-            1 + publicKeyLength + 1 + addressLength
-          )
-          .toString("ascii");
-        return result;
+        const publicKeyLength = response[0];
+        const addressLength = response[1 + publicKeyLength];
+
+        return {
+          publicKey: response.slice(1, 1 + publicKeyLength).toString("hex"),
+          address: response
+            .slice(
+              1 + publicKeyLength + 1,
+              1 + publicKeyLength + 1 + addressLength
+            )
+            .toString("ascii"),
+        };
       });
   }
 
-  getNextLength(tx: Buffer) {
+  getNextLength(tx: Buffer): number {
     const field = decodeVarint(tx, 0);
     const data = decodeVarint(tx, field.pos);
     if ((field.value & 0x07) === 0) return data.pos;
@@ -131,8 +129,7 @@ export default class Trx {
   ): Promise<string> {
     const paths = splitPath(path);
     let rawTx = Buffer.from(rawTxHex, "hex");
-    const toSend = [];
-
+    const toSend: Buffer[] = [];
     let data = Buffer.alloc(PATHS_LENGTH_SIZE + paths.length * PATH_SIZE);
     // write path for first chuck only
     data[0] = paths.length;
@@ -144,21 +141,23 @@ export default class Trx {
       // get next message field
       const newpos = this.getNextLength(rawTx);
       if (newpos > CHUNK_SIZE) throw new Error("Too many bytes to encode.");
+
       if (data.length + newpos > CHUNK_SIZE) {
         toSend.push(data);
         data = Buffer.alloc(0);
         continue;
       }
+
       // append data
       data = Buffer.concat([data, rawTx.slice(0, newpos)]);
       rawTx = rawTx.slice(newpos, rawTx.length);
     }
+
     toSend.push(data);
-
-    const startBytes = [];
+    const startBytes: number[] = [];
     let response;
-
     const tokenPos = toSend.length;
+
     if (tokenSignatures !== undefined) {
       for (let i = 0; i < tokenSignatures.length; i += 1) {
         const buffer = Buffer.from(tokenSignatures[i], "hex");
@@ -171,6 +170,7 @@ export default class Trx {
       startBytes.push(0x10);
     } else {
       startBytes.push(0x00);
+
       for (let i = 1; i < toSend.length - 1; i += 1) {
         if (i >= tokenPos) {
           startBytes.push(0xa0 | 0x00 | (i - tokenPos)); // eslint-disable-line no-bitwise
@@ -178,6 +178,7 @@ export default class Trx {
           startBytes.push(0x80);
         }
       }
+
       if (tokenSignatures !== undefined && tokenSignatures.length) {
         startBytes.push(0xa0 | 0x08 | (tokenSignatures.length - 1)); // eslint-disable-line no-bitwise
       } else {
@@ -218,7 +219,6 @@ export default class Trx {
       data.writeUInt32BE(element, 1 + 4 * index);
     });
     data = Buffer.concat([data, Buffer.from(rawTxHashHex, "hex")]);
-
     return this.transport
       .send(CLA, SIGN_HASH, 0x00, 0x00, data)
       .then((response) => {
@@ -242,29 +242,32 @@ export default class Trx {
    * }
    */
   getAppConfiguration(): Promise<{
-    allowContract: Boolean,
-    truncateAddress: Boolean,
-    allowData: Boolean,
-    signByHash: Boolean,
-    version: string,
-    versionN: number,
+    allowContract: boolean;
+    truncateAddress: boolean;
+    allowData: boolean;
+    signByHash: boolean;
+    version: string;
+    versionN: number;
   }> {
     return this.transport.send(CLA, VERSION, 0x00, 0x00).then((response) => {
       // eslint-disable-next-line no-bitwise
-      let signByHash = (response[0] & (1 << 3)) > 0;
+      const signByHash = (response[0] & (1 << 3)) > 0;
       // eslint-disable-next-line no-bitwise
       let truncateAddress = (response[0] & (1 << 2)) > 0;
       // eslint-disable-next-line no-bitwise
       let allowContract = (response[0] & (1 << 1)) > 0;
       // eslint-disable-next-line no-bitwise
       let allowData = (response[0] & (1 << 0)) > 0;
+
       if (response[1] === 0 && response[2] === 1 && response[3] < 2) {
         allowData = true;
         allowContract = false;
       }
+
       if (response[1] === 0 && response[2] === 1 && response[3] < 5) {
         truncateAddress = false;
       }
+
       const result = {
         version: `${response[1]}.${response[2]}.${response[3]}`,
         versionN: response[1] * 10000 + response[2] * 100 + response[3],
@@ -287,26 +290,26 @@ export default class Trx {
    * const signature = await tron.signPersonalMessage("44'/195'/0'/0/0", "43727970746f436861696e2d54726f6e5352204c6564676572205472616e73616374696f6e73205465737473");
    */
   signPersonalMessage(path: string, messageHex: string): Promise<string> {
-    let paths = splitPath(path);
+    const paths = splitPath(path);
     const message = Buffer.from(messageHex, "hex");
     let offset = 0;
-    let toSend = [];
-
+    const toSend: Buffer[] = [];
     const size = message.length.toString(16);
     const sizePack = "00000000".substr(size.length) + size;
     const packed = Buffer.concat([Buffer.from(sizePack, "hex"), message]);
 
     while (offset < packed.length) {
       // Use small buffer to be compatible with old and new protocol
-      let maxChunkSize =
+      const maxChunkSize =
         offset === 0 ? CHUNK_SIZE - 1 - paths.length * 4 : CHUNK_SIZE;
-      let chunkSize =
+      const chunkSize =
         offset + maxChunkSize > packed.length
           ? packed.length - offset
           : maxChunkSize;
-      let buffer = Buffer.alloc(
+      const buffer = Buffer.alloc(
         offset === 0 ? 1 + paths.length * 4 + chunkSize : chunkSize
       );
+
       if (offset === 0) {
         buffer[0] = paths.length;
         paths.forEach((element, index) => {
@@ -316,9 +319,11 @@ export default class Trx {
       } else {
         packed.copy(buffer, 0, offset, offset + chunkSize);
       }
+
       toSend.push(buffer);
       offset += chunkSize;
     }
+
     let response;
     return foreach(toSend, (data, i) => {
       return this.transport
@@ -339,13 +344,7 @@ export default class Trx {
    * @example
    * const signature = await tron.getECDHPairKey("44'/195'/0'/0/0", "04ff21f8e64d3a3c0198edfbb7afdc79be959432e92e2f8a1984bb436a414b8edcec0345aad0c1bf7da04fd036dd7f9f617e30669224283d950fab9dd84831dc83");
    */
-  getECDHPairKey(
-    path: string,
-    publicKey: string
-  ): Promise<{
-    publicKey: string,
-    address: string,
-  }> {
+  getECDHPairKey(path: string, publicKey: string): Promise<string> {
     const paths = splitPath(path);
     const data = Buffer.from(publicKey, "hex");
     const buffer = Buffer.alloc(1 + paths.length * 4 + data.length);
@@ -354,7 +353,6 @@ export default class Trx {
       buffer.writeUInt32BE(element, 1 + 4 * index);
     });
     data.copy(buffer, 1 + 4 * paths.length, 0, data.length);
-
     return this.transport
       .send(CLA, ECDH_SECRET, 0x00, 0x01, buffer)
       .then((response) => response.slice(0, 65).toString("hex"));
