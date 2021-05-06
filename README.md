@@ -241,7 +241,7 @@ deploy a canary release (beta, etc)
 ## VSCode settings 
 
 Here is a example config for a workspace file to handle the monorepo setup.  
-Just add this file to your `.vscode` folder
+Just add `project.code-workspace` to your `.vscode` folder
 
 ```json
 {
