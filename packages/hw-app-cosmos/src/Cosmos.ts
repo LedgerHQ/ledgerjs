@@ -49,22 +49,19 @@ export default class Cosmos {
   }
 
   // FIXME: understand what is going on with the return type here
-  // ReturnType: {
-  //   test_mode: boolean;
-  //   version: string;
-  //   device_locked: boolean;
-  //   major: string;
-  // }
-  getAppConfiguration() {
+  getAppConfiguration(): Promise<{
+    test_mode: boolean;
+    version: string;
+    device_locked: boolean;
+    major: number;
+  }> {
     return this.transport.send(CLA, INS_GET_VERSION, 0, 0).then((response) => {
-      const res = {
+      return {
         test_mode: response[0] !== 0,
         version: "" + response[1] + "." + response[2] + "." + response[3],
         device_locked: response[4] === 1,
         major: response[1],
       };
-
-      return res;
     });
   }
 
