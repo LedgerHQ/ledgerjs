@@ -24,15 +24,17 @@ module.exports = {
       readFileJSON(path.join(folder, id, "b2c.json")),
     ]);
 
+    const addresses = Object.keys(signatures);
+
     const abisList = await Promise.all(
-      Object.keys(signatures).map((address) =>
+      addresses.map((address) =>
         readFileJSON(
           path.join(folder, id, "abis", `${address}.abi.json`)
         ).catch(() => {})
       )
     );
 
-    const abis = Object.keys(signatures).reduce(
+    const abis = addresses.reduce(
       (acc, address, i) => ({
         ...acc,
         [address]: abisList[i],
