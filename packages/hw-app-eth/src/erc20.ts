@@ -1,29 +1,28 @@
-// @flow
 import blob from "@ledgerhq/cryptoassets/data/erc20-signatures";
 
 /**
  * Retrieve the token information by a given contract address if any
  */
-export const byContractAddress = (contract: string): ?TokenInfo =>
+export const byContractAddress = (
+  contract: string
+): TokenInfo | null | undefined =>
   get().byContract(asContractAddress(contract));
 
 /**
  * list all the ERC20 tokens informations
  */
 export const list = (): TokenInfo[] => get().list();
-
 export type TokenInfo = {
-  contractAddress: string,
-  ticker: string,
-  decimals: number,
-  chainId: number,
-  signature: Buffer,
-  data: Buffer,
+  contractAddress: string;
+  ticker: string;
+  decimals: number;
+  chainId: number;
+  signature: Buffer;
+  data: Buffer;
 };
-
 export type API = {
-  byContract: (string) => ?TokenInfo,
-  list: () => TokenInfo[],
+  byContract: (arg0: string) => TokenInfo | null | undefined;
+  list: () => TokenInfo[];
 };
 
 const asContractAddress = (addr: string) => {
@@ -38,8 +37,9 @@ const get: () => API = (() => {
     if (cache) return cache;
     const buf = Buffer.from(blob, "base64");
     const byContract = {};
-    const entries = [];
+    const entries: TokenInfo[] = [];
     let i = 0;
+
     while (i < buf.length) {
       const length = buf.readUInt32BE(i);
       i += 4;
@@ -58,7 +58,7 @@ const get: () => API = (() => {
       const chainId = item.readUInt32BE(j);
       j += 4;
       const signature = item.slice(j);
-      const entry: $Exact<TokenInfo> = {
+      const entry: TokenInfo = {
         ticker,
         contractAddress,
         decimals,
@@ -70,6 +70,7 @@ const get: () => API = (() => {
       byContract[contractAddress] = entry;
       i += length;
     }
+
     const api = {
       list: () => entries,
       byContract: (contractAddress) => byContract[contractAddress],

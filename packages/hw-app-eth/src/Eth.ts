@@ -14,22 +14,18 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-//@flow
-
 // FIXME drop:
 import { splitPath, foreach } from "./utils";
 import { EthAppPleaseEnableContractData } from "@ledgerhq/errors";
 import type Transport from "@ledgerhq/hw-transport";
 import { BigNumber } from "bignumber.js";
 import { encode, decode } from "rlp";
-
 export type StarkQuantizationType =
   | "eth"
   | "erc20"
   | "erc721"
   | "erc20mintable"
   | "erc721mintable";
-
 const starkQuantizationTypeMap = {
   eth: 1,
   erc20: 2,
@@ -42,7 +38,9 @@ function hexBuffer(str: string): Buffer {
   return Buffer.from(str.startsWith("0x") ? str.slice(2) : str, "hex");
 }
 
-function maybeHexBuffer(str: ?string): ?Buffer {
+function maybeHexBuffer(
+  str: string | null | undefined
+): Buffer | null | undefined {
   if (!str) return null;
   return hexBuffer(str);
 }
@@ -53,9 +51,9 @@ const remapTransactionRelatedErrors = (e) => {
       "Please enable Contract data on the Ethereum app Settings"
     );
   }
+
   return e;
 };
-
 /**
  * Ethereum API
  *
@@ -63,10 +61,11 @@ const remapTransactionRelatedErrors = (e) => {
  * import Eth from "@ledgerhq/hw-app-eth";
  * const eth = new Eth(transport)
  */
-export default class Eth {
-  transport: Transport<*>;
 
-  constructor(transport: Transport<*>, scrambleKey: string = "w0w") {
+export default class Eth {
+  transport: Transport<any>;
+
+  constructor(transport: Transport<any>, scrambleKey = "w0w") {
     this.transport = transport;
     transport.decorateAppAPIMethods(
       this,
@@ -106,12 +105,12 @@ export default class Eth {
     boolDisplay?: boolean,
     boolChaincode?: boolean
   ): Promise<{
-    publicKey: string,
-    address: string,
-    chainCode?: string,
+    publicKey: string;
+    address: string;
+    chainCode?: string;
   }> {
-    let paths = splitPath(path);
-    let buffer = Buffer.alloc(1 + paths.length * 4);
+    const paths = splitPath(path);
+    const buffer = Buffer.alloc(1 + paths.length * 4);
     buffer[0] = paths.length;
     paths.forEach((element, index) => {
       buffer.writeUInt32BE(element, 1 + 4 * index);
@@ -125,29 +124,28 @@ export default class Eth {
         buffer
       )
       .then((response) => {
-        let result = {};
-        let publicKeyLength = response[0];
-        let addressLength = response[1 + publicKeyLength];
-        result.publicKey = response
-          .slice(1, 1 + publicKeyLength)
-          .toString("hex");
-        result.address =
-          "0x" +
-          response
-            .slice(
-              1 + publicKeyLength + 1,
-              1 + publicKeyLength + 1 + addressLength
-            )
-            .toString("ascii");
-        if (boolChaincode) {
-          result.chainCode = response
-            .slice(
-              1 + publicKeyLength + 1 + addressLength,
-              1 + publicKeyLength + 1 + addressLength + 32
-            )
-            .toString("hex");
-        }
-        return result;
+        const publicKeyLength = response[0];
+        const addressLength = response[1 + publicKeyLength];
+
+        return {
+          publicKey: response.slice(1, 1 + publicKeyLength).toString("hex"),
+          address:
+            "0x" +
+            response
+              .slice(
+                1 + publicKeyLength + 1,
+                1 + publicKeyLength + 1 + addressLength
+              )
+              .toString("ascii"),
+          chainCode: boolChaincode
+            ? response
+                .slice(
+                  1 + publicKeyLength + 1 + addressLength,
+                  1 + publicKeyLength + 1 + addressLength + 32
+                )
+                .toString("hex")
+            : undefined,
+        };
       });
   }
 
@@ -175,6 +173,7 @@ export default class Eth {
           // we return a flag to know if the call was effective or not
           return false;
         }
+
         throw e;
       }
     );
@@ -189,45 +188,52 @@ export default class Eth {
     path: string,
     rawTxHex: string
   ): Promise<{
-    s: string,
-    v: string,
-    r: string,
+    s: string;
+    v: string;
+    r: string;
   }> {
-    let paths = splitPath(path);
+    const paths = splitPath(path);
     let offset = 0;
-    let rawTx = Buffer.from(rawTxHex, "hex");
-    let toSend = [];
+    const rawTx = Buffer.from(rawTxHex, "hex");
+    const toSend: Buffer[] = [];
     let response;
     // Check if the TX is encoded following EIP 155
-    let rlpTx = decode(rawTx);
+    const rlpTx = decode(rawTx);
     let rlpOffset = 0;
     let chainIdPrefix = "";
+
     if (rlpTx.length > 6) {
-      let rlpVrs = encode(rlpTx.slice(-3));
+      const rlpVrs = encode(rlpTx.slice(-3));
       rlpOffset = rawTx.length - (rlpVrs.length - 1);
-      const chainIdSrc = rlpTx[6];
+      const chainIdSrc: any = rlpTx[6];
       const chainIdBuf = Buffer.alloc(4);
       chainIdSrc.copy(chainIdBuf, 4 - chainIdSrc.length);
       chainIdPrefix = (chainIdBuf.readUInt32BE(0) * 2 + 35)
         .toString(16)
-        .slice(0, -2); // Drop the low byte, that comes from the ledger.
+        .slice(0, -2);
+
+      // Drop the low byte, that comes from the ledger.
       if (chainIdPrefix.length % 2 === 1) {
         chainIdPrefix = "0" + chainIdPrefix;
       }
     }
+
     while (offset !== rawTx.length) {
-      let maxChunkSize = offset === 0 ? 150 - 1 - paths.length * 4 : 150;
+      const maxChunkSize = offset === 0 ? 150 - 1 - paths.length * 4 : 150;
       let chunkSize =
         offset + maxChunkSize > rawTx.length
           ? rawTx.length - offset
           : maxChunkSize;
+
       if (rlpOffset != 0 && offset + chunkSize == rlpOffset) {
         // Make sure that the chunk doesn't end right on the EIP 155 marker if set
         chunkSize--;
       }
-      let buffer = Buffer.alloc(
+
+      const buffer = Buffer.alloc(
         offset === 0 ? 1 + paths.length * 4 + chunkSize : chunkSize
       );
+
       if (offset === 0) {
         buffer[0] = paths.length;
         paths.forEach((element, index) => {
@@ -237,9 +243,11 @@ export default class Eth {
       } else {
         rawTx.copy(buffer, 0, offset, offset + chunkSize);
       }
+
       toSend.push(buffer);
       offset += chunkSize;
     }
+
     return foreach(toSend, (data, i) =>
       this.transport
         .send(0xe0, 0x04, i === 0 ? 0x00 : 0x80, 0x00, data)
@@ -251,7 +259,11 @@ export default class Eth {
         const v = chainIdPrefix + response.slice(0, 1).toString("hex");
         const r = response.slice(1, 1 + 32).toString("hex");
         const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
-        return { v, r, s };
+        return {
+          v,
+          r,
+          s,
+        };
       },
       (e) => {
         throw remapTransactionRelatedErrors(e);
@@ -262,57 +274,59 @@ export default class Eth {
   /**
    */
   getAppConfiguration(): Promise<{
-    arbitraryDataEnabled: number,
-    erc20ProvisioningNecessary: number,
-    starkEnabled: number,
-    starkv2Supported: number,
-    version: string,
+    arbitraryDataEnabled: number;
+    erc20ProvisioningNecessary: number;
+    starkEnabled: number;
+    starkv2Supported: number;
+    version: string;
   }> {
     return this.transport.send(0xe0, 0x06, 0x00, 0x00).then((response) => {
-      let result = {};
-      result.arbitraryDataEnabled = response[0] & 0x01;
-      result.erc20ProvisioningNecessary = response[0] & 0x02;
-      result.starkEnabled = response[0] & 0x04;
-      result.starkv2Supported = response[0] & 0x08;
-      result.version = "" + response[1] + "." + response[2] + "." + response[3];
-      return result;
+      return {
+        arbitraryDataEnabled: response[0] & 0x01,
+        erc20ProvisioningNecessary: response[0] & 0x02,
+        starkEnabled: response[0] & 0x04,
+        starkv2Supported: response[0] & 0x08,
+        version: "" + response[1] + "." + response[2] + "." + response[3],
+      };
     });
   }
 
   /**
   * You can sign a message according to eth_sign RPC call and retrieve v, r, s given the message and the BIP 32 path of the account to sign.
   * @example
-eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).then(result => {
+  eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).then(result => {
   var v = result['v'] - 27;
   v = v.toString(16);
   if (v.length < 2) {
     v = "0" + v;
   }
   console.log("Signature 0x" + result['r'] + result['s'] + v);
-})
+  })
    */
   signPersonalMessage(
     path: string,
     messageHex: string
   ): Promise<{
-    v: number,
-    s: string,
-    r: string,
+    v: number;
+    s: string;
+    r: string;
   }> {
-    let paths = splitPath(path);
+    const paths = splitPath(path);
     let offset = 0;
-    let message = Buffer.from(messageHex, "hex");
-    let toSend = [];
+    const message = Buffer.from(messageHex, "hex");
+    const toSend: Buffer[] = [];
     let response;
+
     while (offset !== message.length) {
-      let maxChunkSize = offset === 0 ? 150 - 1 - paths.length * 4 - 4 : 150;
-      let chunkSize =
+      const maxChunkSize = offset === 0 ? 150 - 1 - paths.length * 4 - 4 : 150;
+      const chunkSize =
         offset + maxChunkSize > message.length
           ? message.length - offset
           : maxChunkSize;
-      let buffer = Buffer.alloc(
+      const buffer = Buffer.alloc(
         offset === 0 ? 1 + paths.length * 4 + 4 + chunkSize : chunkSize
       );
+
       if (offset === 0) {
         buffer[0] = paths.length;
         paths.forEach((element, index) => {
@@ -328,9 +342,11 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
       } else {
         message.copy(buffer, 0, offset, offset + chunkSize);
       }
+
       toSend.push(buffer);
       offset += chunkSize;
     }
+
     return foreach(toSend, (data, i) =>
       this.transport
         .send(0xe0, 0x08, i === 0 ? 0x00 : 0x80, 0x00, data)
@@ -341,7 +357,11 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
       const v = response[0];
       const r = response.slice(1, 1 + 32).toString("hex");
       const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
-      return { v, r, s };
+      return {
+        v,
+        r,
+        s,
+      };
     });
   }
 
@@ -355,21 +375,21 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     v = "0" + v;
   }
   console.log("Signature 0x" + result['r'] + result['s'] + v);
-})
+  })
    */
   signEIP712HashedMessage(
     path: string,
     domainSeparatorHex: string,
     hashStructMessageHex: string
   ): Promise<{
-    v: number,
-    s: string,
-    r: string,
+    v: number;
+    s: string;
+    r: string;
   }> {
     const domainSeparator = hexBuffer(domainSeparatorHex);
     const hashStruct = hexBuffer(hashStructMessageHex);
-    let paths = splitPath(path);
-    let buffer = Buffer.alloc(1 + paths.length * 4 + 32 + 32, 0);
+    const paths = splitPath(path);
+    const buffer = Buffer.alloc(1 + paths.length * 4 + 32 + 32, 0);
     let offset = 0;
     buffer[0] = paths.length;
     paths.forEach((element, index) => {
@@ -385,7 +405,11 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
         const v = response[0];
         const r = response.slice(1, 1 + 32).toString("hex");
         const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
-        return { v, r, s };
+        return {
+          v,
+          r,
+          s,
+        };
       });
   }
 
@@ -396,8 +420,8 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
    * @return the Stark public key
    */
   starkGetPublicKey(path: string, boolDisplay?: boolean): Promise<Buffer> {
-    let paths = splitPath(path);
-    let buffer = Buffer.alloc(1 + paths.length * 4);
+    const paths = splitPath(path);
+    const buffer = Buffer.alloc(1 + paths.length * 4);
     buffer[0] = paths.length;
     paths.forEach((element, index) => {
       buffer.writeUInt32BE(element, 1 + 4 * index);
@@ -426,9 +450,9 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
    */
   starkSignOrder(
     path: string,
-    sourceTokenAddress?: string,
+    sourceTokenAddress: string,
     sourceQuantization: BigNumber,
-    destinationTokenAddress?: string,
+    destinationTokenAddress: string,
     destinationQuantization: BigNumber,
     sourceVault: number,
     destinationVault: number,
@@ -436,11 +460,11 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     amountBuy: BigNumber,
     nonce: number,
     timestamp: number
-  ): Promise<Buffer> {
+  ): Promise<Buffer | { r: string; s: string }> {
     const sourceTokenAddressHex = maybeHexBuffer(sourceTokenAddress);
     const destinationTokenAddressHex = maybeHexBuffer(destinationTokenAddress);
-    let paths = splitPath(path);
-    let buffer = Buffer.alloc(
+    const paths = splitPath(path);
+    const buffer = Buffer.alloc(
       1 + paths.length * 4 + 20 + 32 + 20 + 32 + 4 + 4 + 8 + 8 + 4 + 4,
       0
     );
@@ -450,18 +474,22 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
       buffer.writeUInt32BE(element, 1 + 4 * index);
     });
     offset = 1 + 4 * paths.length;
+
     if (sourceTokenAddressHex) {
       sourceTokenAddressHex.copy(buffer, offset);
     }
+
     offset += 20;
     Buffer.from(sourceQuantization.toString(16).padStart(64, "0"), "hex").copy(
       buffer,
       offset
     );
     offset += 32;
+
     if (destinationTokenAddressHex) {
       destinationTokenAddressHex.copy(buffer, offset);
     }
+
     offset += 20;
     Buffer.from(
       destinationQuantization.toString(16).padStart(64, "0"),
@@ -490,7 +518,10 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
       .then((response) => {
         const r = response.slice(1, 1 + 32).toString("hex");
         const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
-        return { r, s };
+        return {
+          r,
+          s,
+        };
       });
   }
 
@@ -515,37 +546,40 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
    */
   starkSignOrder_v2(
     path: string,
-    sourceTokenAddress?: string,
+    sourceTokenAddress: string,
     sourceQuantizationType: StarkQuantizationType,
-    sourceQuantization?: BigNumber,
-    sourceMintableBlobOrTokenId?: BigNumber,
-    destinationTokenAddress?: string,
+    sourceQuantization: BigNumber,
+    sourceMintableBlobOrTokenId: BigNumber,
+    destinationTokenAddress: string,
     destinationQuantizationType: StarkQuantizationType,
-    destinationQuantization?: BigNumber,
-    destinationMintableBlobOrTokenId?: BigNumber,
+    destinationQuantization: BigNumber,
+    destinationMintableBlobOrTokenId: BigNumber,
     sourceVault: number,
     destinationVault: number,
     amountSell: BigNumber,
     amountBuy: BigNumber,
     nonce: number,
     timestamp: number
-  ): Promise<Buffer> {
+  ): Promise<Buffer | { r: string; s: string }> {
     const sourceTokenAddressHex = maybeHexBuffer(sourceTokenAddress);
     const destinationTokenAddressHex = maybeHexBuffer(destinationTokenAddress);
+
     if (!(sourceQuantizationType in starkQuantizationTypeMap)) {
       throw new Error(
         "eth.starkSignOrderv2 invalid source quantization type=" +
           sourceQuantizationType
       );
     }
+
     if (!(destinationQuantizationType in starkQuantizationTypeMap)) {
       throw new Error(
         "eth.starkSignOrderv2 invalid destination quantization type=" +
           destinationQuantizationType
       );
     }
-    let paths = splitPath(path);
-    let buffer = Buffer.alloc(
+
+    const paths = splitPath(path);
+    const buffer = Buffer.alloc(
       1 +
         paths.length * 4 +
         1 +
@@ -572,43 +606,55 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     offset = 1 + 4 * paths.length;
     buffer[offset] = starkQuantizationTypeMap[sourceQuantizationType];
     offset++;
+
     if (sourceTokenAddressHex) {
       sourceTokenAddressHex.copy(buffer, offset);
     }
+
     offset += 20;
+
     if (sourceQuantization) {
       Buffer.from(
         sourceQuantization.toString(16).padStart(64, "0"),
         "hex"
       ).copy(buffer, offset);
     }
+
     offset += 32;
+
     if (sourceMintableBlobOrTokenId) {
       Buffer.from(
         sourceMintableBlobOrTokenId.toString(16).padStart(64, "0"),
         "hex"
       ).copy(buffer, offset);
     }
+
     offset += 32;
     buffer[offset] = starkQuantizationTypeMap[destinationQuantizationType];
     offset++;
+
     if (destinationTokenAddressHex) {
       destinationTokenAddressHex.copy(buffer, offset);
     }
+
     offset += 20;
+
     if (destinationQuantization) {
       Buffer.from(
         destinationQuantization.toString(16).padStart(64, "0"),
         "hex"
       ).copy(buffer, offset);
     }
+
     offset += 32;
+
     if (destinationMintableBlobOrTokenId) {
       Buffer.from(
         destinationMintableBlobOrTokenId.toString(16).padStart(64, "0"),
         "hex"
       ).copy(buffer, offset);
     }
+
     offset += 32;
     buffer.writeUInt32BE(sourceVault, offset);
     offset += 4;
@@ -632,7 +678,10 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
       .then((response) => {
         const r = response.slice(1, 1 + 32).toString("hex");
         const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
-        return { r, s };
+        return {
+          r,
+          s,
+        };
       });
   }
 
@@ -651,7 +700,7 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
    */
   starkSignTransfer(
     path: string,
-    transferTokenAddress?: string,
+    transferTokenAddress: string,
     transferQuantization: BigNumber,
     targetPublicKey: string,
     sourceVault: number,
@@ -659,11 +708,11 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     amountTransfer: BigNumber,
     nonce: number,
     timestamp: number
-  ): Promise<Buffer> {
+  ): Promise<Buffer | { r: string; s: string }> {
     const transferTokenAddressHex = maybeHexBuffer(transferTokenAddress);
     const targetPublicKeyHex = hexBuffer(targetPublicKey);
-    let paths = splitPath(path);
-    let buffer = Buffer.alloc(
+    const paths = splitPath(path);
+    const buffer = Buffer.alloc(
       1 + paths.length * 4 + 20 + 32 + 32 + 4 + 4 + 8 + 4 + 4,
       0
     );
@@ -673,9 +722,11 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
       buffer.writeUInt32BE(element, 1 + 4 * index);
     });
     offset = 1 + 4 * paths.length;
+
     if (transferTokenAddressHex) {
       transferTokenAddressHex.copy(buffer, offset);
     }
+
     offset += 20;
     Buffer.from(
       transferQuantization.toString(16).padStart(64, "0"),
@@ -701,7 +752,10 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
       .then((response) => {
         const r = response.slice(1, 1 + 32).toString("hex");
         const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
-        return { r, s };
+        return {
+          r,
+          s,
+        };
       });
   }
 
@@ -724,10 +778,10 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
    */
   starkSignTransfer_v2(
     path: string,
-    transferTokenAddress?: string,
+    transferTokenAddress: string,
     transferQuantizationType: StarkQuantizationType,
-    transferQuantization?: BigNumber,
-    transferMintableBlobOrTokenId?: BigNumber,
+    transferQuantization: BigNumber,
+    transferMintableBlobOrTokenId: BigNumber,
     targetPublicKey: string,
     sourceVault: number,
     destinationVault: number,
@@ -736,20 +790,22 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     timestamp: number,
     conditionalTransferAddress?: string,
     conditionalTransferFact?: BigNumber
-  ): Promise<Buffer> {
+  ): Promise<Buffer | { r: string; s: string }> {
     const transferTokenAddressHex = maybeHexBuffer(transferTokenAddress);
     const targetPublicKeyHex = hexBuffer(targetPublicKey);
     const conditionalTransferAddressHex = maybeHexBuffer(
       conditionalTransferAddress
     );
+
     if (!(transferQuantizationType in starkQuantizationTypeMap)) {
       throw new Error(
         "eth.starkSignTransferv2 invalid quantization type=" +
           transferQuantizationType
       );
     }
-    let paths = splitPath(path);
-    let buffer = Buffer.alloc(
+
+    const paths = splitPath(path);
+    const buffer = Buffer.alloc(
       1 +
         paths.length * 4 +
         1 +
@@ -773,23 +829,29 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     offset = 1 + 4 * paths.length;
     buffer[offset] = starkQuantizationTypeMap[transferQuantizationType];
     offset++;
+
     if (transferTokenAddressHex) {
       transferTokenAddressHex.copy(buffer, offset);
     }
+
     offset += 20;
+
     if (transferQuantization) {
       Buffer.from(
         transferQuantization.toString(16).padStart(64, "0"),
         "hex"
       ).copy(buffer, offset);
     }
+
     offset += 32;
+
     if (transferMintableBlobOrTokenId) {
       Buffer.from(
         transferMintableBlobOrTokenId.toString(16).padStart(64, "0"),
         "hex"
       ).copy(buffer, offset);
     }
+
     offset += 32;
     targetPublicKeyHex.copy(buffer, offset);
     offset += 32;
@@ -805,6 +867,7 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     buffer.writeUInt32BE(nonce, offset);
     offset += 4;
     buffer.writeUInt32BE(timestamp, offset);
+
     if (conditionalTransferAddressHex && conditionalTransferFact) {
       offset += 4;
       Buffer.from(
@@ -814,6 +877,7 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
       offset += 32;
       conditionalTransferAddressHex.copy(buffer, offset);
     }
+
     return this.transport
       .send(
         0xf0,
@@ -825,7 +889,10 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
       .then((response) => {
         const r = response.slice(1, 1 + 32).toString("hex");
         const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
-        return { r, s };
+        return {
+          r,
+          s,
+        };
       });
   }
 
@@ -838,14 +905,16 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
    * @param operationQuantization quantization used for the token to be transferred
    */
   starkProvideQuantum(
-    operationContract?: string,
+    operationContract: string,
     operationQuantization: BigNumber
   ): Promise<boolean> {
     const operationContractHex = maybeHexBuffer(operationContract);
-    let buffer = Buffer.alloc(20 + 32, 0);
+    const buffer = Buffer.alloc(20 + 32, 0);
+
     if (operationContractHex) {
       operationContractHex.copy(buffer, 0);
     }
+
     Buffer.from(
       operationQuantization.toString(16).padStart(64, "0"),
       "hex"
@@ -857,6 +926,7 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
           // this case happen for ETH application versions not supporting Stark extensions
           return false;
         }
+
         throw e;
       }
     );
@@ -873,37 +943,45 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
    * @option operationMintableBlobOrTokenId mintable blob (mintable erc 20 / mintable erc 721) or token id (erc 721) of the token to be transferred
    */
   starkProvideQuantum_v2(
-    operationContract?: string,
+    operationContract: string,
     operationQuantizationType: StarkQuantizationType,
     operationQuantization?: BigNumber,
     operationMintableBlobOrTokenId?: BigNumber
   ): Promise<boolean> {
     const operationContractHex = maybeHexBuffer(operationContract);
+
     if (!(operationQuantizationType in starkQuantizationTypeMap)) {
       throw new Error(
         "eth.starkProvideQuantumV2 invalid quantization type=" +
           operationQuantizationType
       );
     }
-    let buffer = Buffer.alloc(20 + 32 + 32, 0);
+
+    const buffer = Buffer.alloc(20 + 32 + 32, 0);
     let offset = 0;
+
     if (operationContractHex) {
       operationContractHex.copy(buffer, offset);
     }
+
     offset += 20;
+
     if (operationQuantization) {
       Buffer.from(
         operationQuantization.toString(16).padStart(64, "0"),
         "hex"
       ).copy(buffer, offset);
     }
+
     offset += 32;
+
     if (operationMintableBlobOrTokenId) {
       Buffer.from(
         operationMintableBlobOrTokenId.toString(16).padStart(64, "0"),
         "hex"
       ).copy(buffer, offset);
     }
+
     return this.transport
       .send(
         0xf0,
@@ -919,6 +997,7 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
             // this case happen for ETH application versions not supporting Stark extensions
             return false;
           }
+
           throw e;
         }
       );
@@ -931,10 +1010,13 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
    * @param hash hexadecimal hash to sign
    * @return the signature
    */
-  starkUnsafeSign(path: string, hash: string): Promise<Buffer> {
+  starkUnsafeSign(
+    path: string,
+    hash: string
+  ): Promise<Buffer | { r: string; s: string }> {
     const hashHex = hexBuffer(hash);
-    let paths = splitPath(path);
-    let buffer = Buffer.alloc(1 + paths.length * 4 + 32);
+    const paths = splitPath(path);
+    const buffer = Buffer.alloc(1 + paths.length * 4 + 32);
     let offset = 0;
     buffer[0] = paths.length;
     paths.forEach((element, index) => {
@@ -947,7 +1029,10 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
       .then((response) => {
         const r = response.slice(1, 1 + 32).toString("hex");
         const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
-        return { r, s };
+        return {
+          r,
+          s,
+        };
       });
   }
 
@@ -963,10 +1048,10 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     path: string,
     boolDisplay?: boolean
   ): Promise<{
-    publicKey: string,
+    publicKey: string;
   }> {
-    let paths = splitPath(path);
-    let buffer = Buffer.alloc(1 + paths.length * 4);
+    const paths = splitPath(path);
+    const buffer = Buffer.alloc(1 + paths.length * 4);
     buffer[0] = paths.length;
     paths.forEach((element, index) => {
       buffer.writeUInt32BE(element, 1 + 4 * index);
@@ -974,9 +1059,9 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     return this.transport
       .send(0xe0, 0x0e, boolDisplay ? 0x01 : 0x00, 0x00, buffer)
       .then((response) => {
-        let result = {};
-        result.publicKey = response.slice(0, -2).toString("hex");
-        return result;
+        return {
+          publicKey: response.slice(0, -2).toString("hex"),
+        };
       });
   }
 
@@ -989,7 +1074,7 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
    * @return True if the method was executed successfully
    */
   eth2SetWithdrawalIndex(withdrawalIndex: number): Promise<boolean> {
-    let buffer = Buffer.alloc(4, 0);
+    const buffer = Buffer.alloc(4, 0);
     buffer.writeUInt32BE(withdrawalIndex, 0);
     return this.transport.send(0xe0, 0x10, 0x00, 0x00, buffer).then(
       () => true,
@@ -998,6 +1083,7 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
           // this case happen for ETH application versions not supporting ETH 2
           return false;
         }
+
         throw e;
       }
     );

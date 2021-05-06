@@ -14,50 +14,54 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-//@flow
-
 type Defer<T> = {
-  promise: Promise<T>,
-  resolve: (T) => void,
-  reject: (any) => void,
+  promise: Promise<T>;
+  resolve: (arg0: T) => void;
+  reject: (arg0: any) => void;
 };
-
 export function defer<T>(): Defer<T> {
   let resolve, reject;
-  let promise = new Promise(function (success, failure) {
+  const promise = new Promise<T>(function (success, failure) {
     resolve = success;
     reject = failure;
   });
   if (!resolve || !reject) throw "defer() error"; // this never happens and is just to make flow happy
-  return { promise, resolve, reject };
-}
 
+  return {
+    promise,
+    resolve,
+    reject,
+  };
+}
 // TODO use bip32-path library
 export function splitPath(path: string): number[] {
-  let result = [];
-  let components = path.split("/");
+  const result: number[] = [];
+  const components = path.split("/");
   components.forEach((element) => {
     let number = parseInt(element, 10);
+
     if (isNaN(number)) {
       return; // FIXME shouldn't it throws instead?
     }
+
     if (element.length > 1 && element[element.length - 1] === "'") {
       number += 0x80000000;
     }
+
     result.push(number);
   });
   return result;
 }
-
 // TODO use async await
-
-export function eachSeries<A>(arr: A[], fun: (A) => Promise<*>): Promise<*> {
+export function eachSeries<A>(
+  arr: A[],
+  fun: (arg0: A) => Promise<any>
+): Promise<any> {
   return arr.reduce((p, e) => p.then(() => fun(e)), Promise.resolve());
 }
-
 export function foreach<T, A>(
   arr: T[],
-  callback: (T, number) => Promise<A>
+  callback: (arg0: T, arg1: number) => Promise<A>
 ): Promise<A[]> {
   function iterate(index, array, result) {
     if (index >= array.length) {
@@ -68,9 +72,9 @@ export function foreach<T, A>(
         return iterate(index + 1, array, result);
       });
   }
+
   return Promise.resolve().then(() => iterate(0, arr, []));
 }
-
 export function doIf(
   condition: boolean,
   callback: () => any | Promise<any>
@@ -81,7 +85,6 @@ export function doIf(
     }
   });
 }
-
 export function asyncWhile<T>(
   predicate: () => boolean,
   callback: () => Promise<T>
@@ -96,5 +99,6 @@ export function asyncWhile<T>(
       });
     }
   }
+
   return Promise.resolve([]).then(iterate);
 }
