@@ -1,4 +1,3 @@
-// @flow
 import HttpTransport from "./HttpTransport";
 import WebSocketTransport from "./WebSocketTransport";
 import Transport from "@ledgerhq/hw-transport";
@@ -20,11 +19,12 @@ const inferURLs = async (urls: In): Promise<string[]> => {
   return typeof r === "string" ? [r] : r;
 };
 
-export default (urls: In): Class<Transport<string>> => {
+export default (urls: In): new () => Transport<string> => {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
   class StaticTransport extends Transport<string> {
     static isSupported = HttpTransport.isSupported;
-
-    static list = (): Promise<*[]> =>
+    static list = (): Promise<string[]> =>
       inferURLs(urls)
         .then((urls) =>
           Promise.all(
@@ -36,11 +36,13 @@ export default (urls: In): Class<Transport<string>> => {
             )
           )
         )
-        .then((arrs) => arrs.reduce((acc, a) => acc.concat(a), []));
-
-    static listen = (observer: Observer<DescriptorEvent<*>>): Subscription => {
+        .then((arrs) => arrs.reduce<string[]>((acc, a) => acc.concat(a), []));
+    static listen = (
+      observer: Observer<DescriptorEvent<any>>
+    ): Subscription => {
       let unsubscribed = false;
       const seen = {};
+
       function checkLoop() {
         if (unsubscribed) return;
         inferURLs(urls)
@@ -48,18 +50,26 @@ export default (urls: In): Class<Transport<string>> => {
             Promise.all(
               urls.map(async (url) => {
                 if (unsubscribed) return;
+
                 try {
                   await getTransport(url).check(url);
                   if (unsubscribed) return;
+
                   if (!seen[url]) {
                     seen[url] = 1;
-                    observer.next({ type: "add", descriptor: url });
+                    observer.next({
+                      type: "add",
+                      descriptor: url,
+                    });
                   }
                 } catch (e) {
                   // nothing
                   if (seen[url]) {
                     delete seen[url];
-                    observer.next({ type: "remove", descriptor: url });
+                    observer.next({
+                      type: "remove",
+                      descriptor: url,
+                    });
                   }
                 }
               })
@@ -68,6 +78,7 @@ export default (urls: In): Class<Transport<string>> => {
           .then(() => new Promise((success) => setTimeout(success, 5000)))
           .then(checkLoop);
       }
+
       checkLoop();
       return {
         unsubscribe: () => {
@@ -75,7 +86,6 @@ export default (urls: In): Class<Transport<string>> => {
         },
       };
     };
-
     static open = (url) => getTransport(url).open(url);
   }
 
