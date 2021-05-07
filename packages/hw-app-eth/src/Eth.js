@@ -254,11 +254,6 @@ export default class Eth {
       if (infos) {
         let { plugin, payload, signature, erc20OfInterest, abi } = infos;
 
-        // TODO
-        // use abi and erc20OfInterest to call _provideERC20TokenInformation
-        // with ethers
-        //
-
         if (erc20OfInterest?.length && abi) {
           const contract = new ethers.utils.Interface(abi);
           const args = contract.parseTransaction(decodedTx).args;
