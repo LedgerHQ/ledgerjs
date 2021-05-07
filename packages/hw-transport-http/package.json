@@ -24,6 +24,7 @@
   },
   "main": "lib/withStaticURLs.js",
   "module": "lib-es/withStaticURLs.js",
+  "types": "lib/withStaticURLs.d.ts",
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/errors": "^5.50.0",

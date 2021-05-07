@@ -1,4 +1,3 @@
-//@flow
 import Transport from "@ledgerhq/hw-transport";
 import { log } from "@ledgerhq/logs";
 import type { RecordStore } from "./RecordStore";
@@ -7,17 +6,18 @@ import type { RecordStore } from "./RecordStore";
  * create a transport replayer with a record store.
  * @param recordStore
  */
-const createTransportReplayer = (
-  recordStore: RecordStore
-): Class<Transport<*>> => {
-  class TransportReplayer extends Transport<*> {
+const createTransportReplayer = (recordStore: RecordStore): Transport<any> => {
+  class TransportReplayer extends Transport<any> {
     static isSupported = () => Promise.resolve(true);
     static list = () => Promise.resolve([null]);
     static listen = (o) => {
       let unsubscribed;
       setTimeout(() => {
         if (unsubscribed) return;
-        o.next({ type: "add", descriptor: null });
+        o.next({
+          type: "add",
+          descriptor: null,
+        });
         o.complete();
       }, 0);
       return {
@@ -36,6 +36,7 @@ const createTransportReplayer = (
 
     exchange(apdu: Buffer): Promise<Buffer> {
       log("apdu", apdu.toString("hex"));
+
       try {
         const buffer = recordStore.replayExchange(apdu);
         log("apdu", buffer.toString("hex"));
@@ -46,6 +47,7 @@ const createTransportReplayer = (
       }
     }
   }
+
   return TransportReplayer;
 };
 
