@@ -1,6 +1,4 @@
-// @flow
 /* eslint-disable prefer-template */
-
 import Transport from "@ledgerhq/hw-transport";
 import type { DeviceModel } from "@ledgerhq/devices";
 import { sendAPDU } from "@ledgerhq/devices/lib/ble/sendAPDU";
@@ -23,20 +21,19 @@ import {
   connectDevice,
   isDeviceDisconnected,
 } from "./platform";
-
-type Device = *;
-
+type Device = any;
 const transportsCache = {};
-
 type ReconnectionConfig = {
-  pairingThreshold: number,
-  delayAfterFirstPairing: number,
+  pairingThreshold: number;
+  delayAfterFirstPairing: number;
 };
-let reconnectionConfig: ?ReconnectionConfig = {
+let reconnectionConfig: ReconnectionConfig | null | undefined = {
   pairingThreshold: 1000,
   delayAfterFirstPairing: 4000,
 };
-export function setReconnectionConfig(config: ?ReconnectionConfig) {
+export function setReconnectionConfig(
+  config: ReconnectionConfig | null | undefined
+) {
   reconnectionConfig = config;
 }
 
@@ -44,6 +41,7 @@ const delay = (ms) => new Promise((success) => setTimeout(success, ms));
 
 async function open(deviceOrId: Device | string, needsReconnect: boolean) {
   let device;
+
   if (typeof deviceOrId === "string") {
     if (transportsCache[deviceOrId]) {
       log("ble-verbose", "Transport in cache, using that.");
@@ -69,18 +67,14 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
     writeC,
     deviceModel,
   } = await retrieveServiceAndCharacteristics(device);
-
   const [observable, monitoringReady] = monitorCharacteristic(notifyC);
-
   const notifyObservable = observable.pipe(
     tap((value) => {
       log("ble-frame", "<= " + value.toString("hex"));
     }),
     share()
   );
-
   const notif = notifyObservable.subscribe();
-
   const transport = new BluetoothTransport(
     device,
     writeC,
@@ -103,19 +97,18 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
     if (!transport.notYetDisconnected) return;
     onDisconnect(e);
   });
+  const beforeMTUTime = Date.now();
 
-  let beforeMTUTime = Date.now();
   try {
     await monitoringReady;
     await transport.inferMTU();
   } finally {
-    let afterMTUTime = Date.now();
+    const afterMTUTime = Date.now();
 
     if (reconnectionConfig) {
       // workaround for #279: we need to open() again if we come the first time here,
       // to make sure we do a disconnect() after the first pairing time
       // because of a firmware bug
-
       if (afterMTUTime - beforeMTUTime < reconnectionConfig.pairingThreshold) {
         needsReconnect = false; // (optim) there is likely no new pairing done because mtu answer was fast.
       }
@@ -136,12 +129,12 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
 
   return transport;
 }
-
 /**
  * TransportNodeBle bluetooth BLE implementation
  * @example
  * import BluetoothTransport from "@ledgerhq/hw-transport-node-ble";
  */
+
 export default class BluetoothTransport extends Transport<Device | string> {
   /**
    *
@@ -152,15 +145,14 @@ export default class BluetoothTransport extends Transport<Device | string> {
    *
    */
   static availability = availability;
-
-  static list = (): * => {
+  static list = (): any => {
     throw new Error("not implemented");
   };
 
   /**
    * Scan for bluetooth Ledger devices
    */
-  static listen(observer: *) {
+  static listen(observer: any) {
     log("ble-verbose", "listen...");
     return listen().subscribe(observer);
   }
@@ -176,30 +168,24 @@ export default class BluetoothTransport extends Transport<Device | string> {
   /**
    * Globally disconnect a BLE device by its ID
    */
-  static disconnect = async (id: *) => {
+  static disconnect = async (id: any) => {
     log("ble-verbose", `user disconnect(${id})`);
+
     if (id in transportsCache) {
       disconnectDevice(transportsCache[id].device);
     }
   };
-
   id: string;
-
   device: Device;
-
-  mtuSize: number = 20;
-
-  writeCharacteristic: *;
-
+  mtuSize = 20;
+  writeCharacteristic: any;
   notifyObservable: Observable<Buffer>;
-
   deviceModel: DeviceModel;
-
   notYetDisconnected = true;
 
   constructor(
     device: Device,
-    writeCharacteristic: *,
+    writeCharacteristic: any,
     notifyObservable: Observable<Buffer>,
     deviceModel: DeviceModel
   ) {
@@ -215,27 +201,26 @@ export default class BluetoothTransport extends Transport<Device | string> {
   /**
    * communicate with a BLE transport
    */
-  exchange = (apdu: Buffer): Promise<Buffer> =>
+  exchange = (apdu: Buffer): Promise<any> =>
     this.exchangeAtomicImpl(async () => {
       try {
         const msgIn = apdu.toString("hex");
         log("apdu", `=> ${msgIn}`);
-
         const data = await merge(
           this.notifyObservable.pipe(receiveAPDU),
           sendAPDU(this.write, apdu, this.mtuSize)
         ).toPromise();
-
         const msgOut = data.toString("hex");
         log("apdu", `<= ${msgOut}`);
-
         return data;
       } catch (e) {
         log("ble-error", "exchange got " + String(e));
+
         if (this.notYetDisconnected) {
           // in such case we will always disconnect because something is bad.
           await disconnectDevice(this.device).catch(() => {}); // but we ignore if disconnect worked.
         }
+
         throw e;
       }
     });
@@ -258,6 +243,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
       } catch (e) {
         log("ble-error", "inferMTU got " + String(e));
         await disconnectDevice(this.device).catch(() => {}); // but we ignore if disconnect worked.
+
         throw e;
       }
     });
@@ -278,6 +264,7 @@ export default class BluetoothTransport extends Transport<Device | string> {
 
   write = async (buffer: Buffer) => {
     log("ble-frame", "=> " + buffer.toString("hex"));
+
     try {
       await write(this.writeCharacteristic, buffer);
     } catch (e) {

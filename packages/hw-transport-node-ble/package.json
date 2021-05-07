@@ -25,6 +25,7 @@
   },
   "main": "lib/TransportNodeBle.js",
   "module": "lib-es/TransportNodeBle.js",
+  "types": "lib/TransportNodeBle.d.ts",
   "license": "Apache-2.0",
   "dependencies": {
     "@abandonware/noble": "1.9.2-12",
@@ -35,13 +36,10 @@
     "invariant": "^2.2.4",
     "rxjs": "^6.6.7"
   },
-  "devDependencies": {
-    "flow-bin": "^0.149.0"
-  },
+  "devDependencies": {},
   "scripts": {
-    "flow": "flow",
     "clean": "bash ../../script/clean.sh",
-    "build": "bash ../../script/build.sh",
+    "build": "tsc && tsc -m ES6 --outDir lib-es",
     "watch": "bash ../../script/watch.sh",
     "doc": "bash ../../script/doc.sh"
   },

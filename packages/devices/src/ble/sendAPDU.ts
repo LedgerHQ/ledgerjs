@@ -23,7 +23,7 @@ export const sendAPDU = (
   write: (arg0: Buffer) => Promise<void>,
   apdu: Buffer,
   mtuSize: number
-): Observable<void> => {
+): Observable<Buffer> => {
   const chunks = chunkBuffer(apdu, (i) => mtuSize - (i === 0 ? 5 : 3)).map(
     (buffer, i) => {
       const head = Buffer.alloc(i === 0 ? 5 : 3);
@@ -37,7 +37,7 @@ export const sendAPDU = (
       return Buffer.concat([head, buffer]);
     }
   );
-  return Observable.create((o) => {
+  return new Observable((o) => {
     let terminated = false;
 
     async function main() {

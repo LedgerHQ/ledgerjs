@@ -270,8 +270,7 @@ export default class Transport<Descriptor> {
   }
 
   exchangeBusyPromise: Promise<void> | null | undefined;
-  // $FlowFixMe
-  exchangeAtomicImpl = async (f: () => void): Promise<void> => {
+  exchangeAtomicImpl = async (f: () => Buffer): Promise<Buffer> => {
     if (this.exchangeBusyPromise) {
       throw new TransportRaceCondition(
         "An action was already pending on the Ledger device. Please deny or reconnect."
