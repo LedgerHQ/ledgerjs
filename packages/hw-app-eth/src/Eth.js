@@ -252,12 +252,31 @@ export default class Eth {
       const infos = getInfosForContractMethod(decodedTx.to, selector);
 
       if (infos) {
-        let { plugin, payload, signature /*, erc20OfInterest, abi*/ } = infos;
+        let { plugin, payload, signature, erc20OfInterest, abi } = infos;
 
         // TODO
         // use abi and erc20OfInterest to call _provideERC20TokenInformation
         // with ethers
         //
+
+        if (erc20OfInterest?.length && abi) {
+          const contract = new ethers.utils.Interface(abi);
+          const args = contract.parseTransaction(decodedTx).args;
+
+          erc20OfInterest.forEach((path) => {
+            const address = path.split(".").reduce((value, seg) => {
+              if (seg === "-1" && Array.isArray(value)) {
+                return value[value.length - 1];
+              }
+              return value[seg];
+            }, args);
+
+            const erc20Info = byContractAddress(address);
+            if (erc20Info) {
+              _provideERC20TokenInformation.call(this, erc20Info);
+            }
+          });
+        }
 
         if (plugin) {
           _setExternalPlugin.call(this, payload, signature);
