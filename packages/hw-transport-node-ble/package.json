@@ -33,7 +33,7 @@
     "@ledgerhq/hw-transport": "^5.51.0",
     "@ledgerhq/logs": "^5.50.0",
     "invariant": "^2.2.4",
-    "rxjs": "^7.0.0"
+    "rxjs": "6"
   },
   "devDependencies": {
     "flow-bin": "^0.149.0"
