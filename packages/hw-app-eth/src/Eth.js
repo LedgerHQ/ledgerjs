@@ -258,6 +258,8 @@ export default class Eth {
           const contract = new ethers.utils.Interface(abi);
           const args = contract.parseTransaction(decodedTx).args;
 
+          console.log(args);
+
           erc20OfInterest.forEach((path) => {
             const address = path.split(".").reduce((value, seg) => {
               if (seg === "-1" && Array.isArray(value)) {
@@ -267,6 +269,7 @@ export default class Eth {
             }, args);
 
             const erc20Info = byContractAddress(address);
+            console.log(path, address, erc20Info);
             if (erc20Info) {
               _provideERC20TokenInformation.call(this, erc20Info);
             }
@@ -274,6 +277,7 @@ export default class Eth {
         }
 
         if (plugin) {
+          console.log("set extenal plugin", plugin);
           _setExternalPlugin.call(this, payload, signature);
         }
       }
