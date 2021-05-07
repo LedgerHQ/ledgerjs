@@ -45,17 +45,16 @@ module.exports = {
     return bare.contracts.reduce(
       (acc, contract) => ({
         ...acc,
-        [contract.address]: mapObject(
-          contract.selectors,
-          ([selector, data]) => [
+        [contract.address]: {
+          ...mapObject(contract.selectors, ([selector, data]) => [
             selector,
             {
-              ...signatures[contract.address][selector],
+              ...(signatures[contract.address][selector] || {}),
               erc20OfInterest: data.erc20OfInterest,
-              abi: abis[contract.address],
             },
-          ]
-        ),
+          ]),
+          abi: abis[contract.address],
+        },
       }),
       {}
     );

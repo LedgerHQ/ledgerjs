@@ -24,7 +24,7 @@ import { BigNumber } from "bignumber.js";
 import { encode, decode } from "rlp";
 import { ethers } from "ethers";
 import { byContractAddress } from "./erc20";
-import { getPluginForContractMethod } from "./plugins";
+import { getInfosForContractMethod } from "./contracts";
 
 export type StarkQuantizationType =
   | "eth"
@@ -249,17 +249,19 @@ export default class Eth {
       }
 
       const selector = decodedTx.data.substring(0, 10);
-      const plugin = getPluginForContractMethod(decodedTx.to, selector);
+      const infos = getInfosForContractMethod(decodedTx.to, selector);
 
-      if (plugin) {
-        const { payload, signature /*, erc20OfInterest, abi*/ } = plugin;
+      if (infos) {
+        let { plugin, payload, signature /*, erc20OfInterest, abi*/ } = infos;
 
         // TODO
         // use abi and erc20OfInterest to call _provideERC20TokenInformation
         // with ethers
         //
 
-        _setExternalPlugin.call(this, payload, signature);
+        if (plugin) {
+          _setExternalPlugin.call(this, payload, signature);
+        }
       }
     }
 
