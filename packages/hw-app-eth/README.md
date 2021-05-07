@@ -63,7 +63,7 @@ Ledger Hardware Wallet ETH JavaScript bindings.
 
 ### getInfosForContractMethod
 
-Retrieve the name of a plugin compatible with a given contract address and a method selector
+Retrieve the metadatas a given contract address and a method selector
 
 #### Parameters
 
