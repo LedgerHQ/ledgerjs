@@ -6,7 +6,7 @@ export function RecordStoreInvalidSynthax(message: string) {
   this.message = message;
   this.stack = new Error().stack;
 }
-//@ts-expect-error
+
 RecordStoreInvalidSynthax.prototype = new Error();
 
 /**
@@ -17,7 +17,7 @@ export function RecordStoreQueueEmpty() {
   this.message = "EOF: no more APDU to replay";
   this.stack = new Error().stack;
 }
-//@ts-expect-error
+
 RecordStoreQueueEmpty.prototype = new Error();
 
 /**
@@ -34,7 +34,7 @@ export function RecordStoreWrongAPDU(
   this.gotAPDU = got;
   this.stack = new Error().stack;
 }
-//@ts-expect-error
+
 RecordStoreWrongAPDU.prototype = new Error();
 
 /**
@@ -45,7 +45,7 @@ export function RecordStoreRemainingAPDU(expected: string) {
   this.message = `replay expected more APDUs to come:\n${expected}`;
   this.stack = new Error().stack;
 }
-//@ts-expect-error
+
 RecordStoreRemainingAPDU.prototype = new Error();
 export type Queue = [string, string][];
 
@@ -163,7 +163,7 @@ export class RecordStore {
     opts?: Partial<RecordStoreOptions>
   ): RecordStore {
     const queue: Queue = [];
-    let value = [];
+    let value: string[] = [];
     str
       .split("\n")
       .map((line) => line.replace(/ /g, ""))

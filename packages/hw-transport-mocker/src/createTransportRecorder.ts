@@ -1,23 +1,25 @@
-import { Class } from "utility-types";
 import Transport from "@ledgerhq/hw-transport";
 import type { RecordStore } from "./RecordStore";
 
 /**
  * decorate a real transport and proxy it to record the APDUs.
- * @param {Class<Transport<*>>} DecoratedTransport: an actual transport class. Like @ledgerhq/hw-transport-webusb
+ * @param {Transport} DecoratedTransport: an actual transport class. Like @ledgerhq/hw-transport-webusb
  * @param {RecordStore} recordStore: a record store to record the apdu in.
  */
 const createTransportRecorder = (
-  DecoratedTransport: Class<Transport<any>>,
+  DecoratedTransport: Transport,
   recordStore: RecordStore
-): Class<Transport<any>> => {
-  class TransportRecorder extends Transport<any> {
+): new (T) => Transport => {
+  class TransportRecorder extends Transport {
     static recordStore = recordStore;
-    static isSupported = DecoratedTransport.isSupported;
-    static list = DecoratedTransport.list;
-    static listen = DecoratedTransport.listen;
-    static open = (...args) =>
-      DecoratedTransport.open(...args).then((t) => new TransportRecorder(t));
+    static isSupported = (DecoratedTransport.constructor as typeof Transport)
+      .isSupported;
+    static list = (DecoratedTransport.constructor as typeof Transport).list;
+    static listen = (DecoratedTransport.constructor as typeof Transport).listen;
+    static open = (descriptor: any, ...args) =>
+      (DecoratedTransport.constructor as typeof Transport)
+        .open(descriptor, ...args)
+        .then((t) => new TransportRecorder(t));
 
     setScrambleKey() {}
 
@@ -25,9 +27,9 @@ const createTransportRecorder = (
       return this.transport.close();
     }
 
-    transport: Transport<any>;
+    transport: Transport;
 
-    constructor(t) {
+    constructor(t: Transport) {
       super();
       this.transport = t;
     }

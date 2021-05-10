@@ -28,11 +28,8 @@
     "@ledgerhq/hw-transport": "^5.50.0",
     "@ledgerhq/logs": "^5.50.0"
   },
-  "devDependencies": {
-    "flow-bin": "^0.149.0"
-  },
+  "devDependencies": {},
   "scripts": {
-    "flow": "flow",
     "clean": "bash ../../script/clean.sh",
     "build": "tsc && tsc -m ES6 --outDir lib-es",
     "watch": "bash ../../script/watch.sh",
