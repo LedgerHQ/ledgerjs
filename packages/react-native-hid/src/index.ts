@@ -1,4 +1,3 @@
-//@flow
 import { NativeModules, DeviceEventEmitter } from "react-native";
 import { ledgerUSBVendorId, identifyUSBProductId } from "@ledgerhq/devices";
 import type { DeviceModel } from "@ledgerhq/devices";
@@ -11,12 +10,10 @@ import Transport from "@ledgerhq/hw-transport";
 import type { DescriptorEvent } from "@ledgerhq/hw-transport";
 import { Subject, from, concat } from "rxjs";
 import { mergeMap } from "rxjs/operators";
-
 type DeviceObj = {
-  vendorId: number,
-  productId: number,
+  vendorId: number;
+  productId: number;
 };
-
 const disconnectedErrors = [
   "I/O error",
   "Attempt to invoke virtual method 'int android.hardware.usb.UsbDevice.getDeviceClass()' on a null object reference",
@@ -27,9 +24,8 @@ const listLedgerDevices = async () => {
   return devices.filter((d) => d.vendorId === ledgerUSBVendorId);
 };
 
-const liveDeviceEventsSubject: Subject<DescriptorEvent<*>> = new Subject();
-
-DeviceEventEmitter.addListener("onDeviceConnect", (device: *) => {
+const liveDeviceEventsSubject: Subject<DescriptorEvent<any>> = new Subject();
+DeviceEventEmitter.addListener("onDeviceConnect", (device: any) => {
   if (device.vendorId !== ledgerUSBVendorId) return;
   const deviceModel = identifyUSBProductId(device.productId);
   liveDeviceEventsSubject.next({
@@ -38,8 +34,7 @@ DeviceEventEmitter.addListener("onDeviceConnect", (device: *) => {
     deviceModel,
   });
 });
-
-DeviceEventEmitter.addListener("onDeviceDisconnect", (device: *) => {
+DeviceEventEmitter.addListener("onDeviceDisconnect", (device: any) => {
   if (device.vendorId !== ledgerUSBVendorId) return;
   const deviceModel = identifyUSBProductId(device.productId);
   liveDeviceEventsSubject.next({
@@ -48,9 +43,7 @@ DeviceEventEmitter.addListener("onDeviceDisconnect", (device: *) => {
     deviceModel,
   });
 });
-
 const liveDeviceEvents = liveDeviceEventsSubject;
-
 /**
  * Ledger's React Native HID Transport implementation
  * @example
@@ -58,9 +51,10 @@ const liveDeviceEvents = liveDeviceEventsSubject;
  * ...
  * TransportHID.create().then(transport => ...)
  */
-export default class HIDTransport extends Transport<DeviceObj> {
+
+export default class HIDTransport extends Transport {
   id: number;
-  deviceModel: ?DeviceModel;
+  deviceModel: DeviceModel | null | undefined;
 
   constructor(nativeId: number, productId: number) {
     super();
@@ -78,17 +72,19 @@ export default class HIDTransport extends Transport<DeviceObj> {
    * List currently connected devices.
    * @returns Promise of devices
    */
-  static async list() {
+  static async list(): Promise<any[]> {
     if (!NativeModules.HID) return Promise.resolve([]);
-    let list = await listLedgerDevices();
-    return list;
+    return await listLedgerDevices();
   }
 
   /**
    * Listen to ledger devices events
    */
   static listen(observer: any): any {
-    if (!NativeModules.HID) return { unsubscribe: () => {} };
+    if (!NativeModules.HID)
+      return {
+        unsubscribe: () => {},
+      };
     return concat(
       from(listLedgerDevices()).pipe(
         mergeMap((devices) =>
@@ -116,6 +112,7 @@ export default class HIDTransport extends Transport<DeviceObj> {
       if (disconnectedErrors.includes(error.message)) {
         throw new DisconnectedDevice(error.message);
       }
+
       throw error;
     }
   }
@@ -124,7 +121,7 @@ export default class HIDTransport extends Transport<DeviceObj> {
    * @param {*} apdu input value
    * @returns Promise of apdu response
    */
-  async exchange(apdu: Buffer) {
+  async exchange(apdu: Buffer): Promise<any> {
     return this.exchangeAtomicImpl(async () => {
       try {
         const apduHex = apdu.toString("hex");
@@ -138,6 +135,7 @@ export default class HIDTransport extends Transport<DeviceObj> {
           this.emit("disconnect", error);
           throw new DisconnectedDeviceDuringOperation(error.message);
         }
+
         throw error;
       }
     });
