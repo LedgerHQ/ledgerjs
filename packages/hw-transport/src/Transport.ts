@@ -50,8 +50,7 @@ export type Observer<Ev> = Readonly<{
  * it can be for instance an ID, an file path, a URL,...
  */
 
-export default class Transport<Descriptor> {
-  private _value?: Descriptor;
+export default class Transport {
   exchangeTimeout = 30000;
   unresponsiveTimeout = 15000;
   deviceModel: DeviceModel | null | undefined = null;
@@ -67,7 +66,7 @@ export default class Transport<Descriptor> {
    * @example
    * TransportFoo.list().then(descriptors => ...)
    */
-  static readonly list: <Descriptor>() => Promise<Array<Descriptor>>;
+  static readonly list: () => Promise<Array<any>>;
 
   /**
    * Listen all device events for a given Transport. The method takes an Obverver of DescriptorEvent and returns a Subscription (according to Observable paradigm https://github.com/tc39/proposal-observable )
@@ -101,10 +100,10 @@ export default class Transport<Descriptor> {
    * @example
   TransportFoo.open(descriptor).then(transport => ...)
    */
-  static readonly open: <Descriptor>(
-    descriptor: Descriptor,
+  static readonly open: (
+    descriptor: any,
     timeout?: number
-  ) => Promise<Transport<Descriptor>>;
+  ) => Promise<Transport>;
 
   /**
    * low level api to communicate with the device
@@ -228,7 +227,7 @@ export default class Transport<Descriptor> {
   static create(
     openTimeout = 3000,
     listenTimeout?: number
-  ): Promise<Transport<any>> {
+  ): Promise<Transport> {
     return new Promise((resolve, reject) => {
       let found = false;
       const sub = this.listen({
@@ -270,7 +269,9 @@ export default class Transport<Descriptor> {
   }
 
   exchangeBusyPromise: Promise<void> | null | undefined;
-  exchangeAtomicImpl = async (f: () => Buffer): Promise<Buffer> => {
+  exchangeAtomicImpl = async (
+    f: () => Promise<Buffer | void>
+  ): Promise<Buffer | void> => {
     if (this.exchangeBusyPromise) {
       throw new TransportRaceCondition(
         "An action was already pending on the Ledger device. Please deny or reconnect."

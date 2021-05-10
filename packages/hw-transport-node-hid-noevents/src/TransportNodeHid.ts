@@ -1,5 +1,3 @@
-//@flow
-
 import HID from "node-hid";
 import Transport from "@ledgerhq/hw-transport";
 import { log } from "@ledgerhq/logs";
@@ -15,19 +13,17 @@ import type { DeviceModel } from "@ledgerhq/devices";
 import { TransportError, DisconnectedDevice } from "@ledgerhq/errors";
 
 const filterInterface = (device) =>
-  ["win32", "darwin"].includes(process.platform)
-    ? // $FlowFixMe
-      device.usagePage === 0xffa0
+  ["win32", "darwin"].includes(process.platform) // $FlowFixMe
+    ? device.usagePage === 0xffa0
     : device.interface === 0;
 
-export function getDevices(): Array<*> {
+export function getDevices(): Array<any> {
   // $FlowFixMe
   return HID.devices(ledgerUSBVendorId, 0x0).filter(filterInterface);
 }
 
 const isDisconnectedError = (e) =>
   e && e.message && e.message.indexOf("HID") >= 0;
-
 /**
  * node-hid Transport minimal implementation
  * @example
@@ -35,7 +31,8 @@ const isDisconnectedError = (e) =>
  * ...
  * TransportNodeHid.create().then(transport => ...)
  */
-export default class TransportNodeHidNoEvents extends Transport<?string> {
+
+export default class TransportNodeHidNoEvents extends Transport {
   /**
    *
    */
@@ -45,14 +42,12 @@ export default class TransportNodeHidNoEvents extends Transport<?string> {
   /**
    *
    */
-  static list = (): Promise<(?string)[]> =>
+  static list = (): Promise<any> =>
     Promise.resolve(getDevices().map((d) => d.path));
 
   /**
    */
-  static listen = (
-    observer: Observer<DescriptorEvent<?string>>
-  ): Subscription => {
+  static listen = (observer: Observer<DescriptorEvent<any>>): Subscription => {
     getDevices().forEach((device) => {
       const deviceModel = identifyUSBProductId(device.productId);
       observer.next({
@@ -63,17 +58,20 @@ export default class TransportNodeHidNoEvents extends Transport<?string> {
       });
     });
     observer.complete();
-    return { unsubscribe: () => {} };
+    return {
+      unsubscribe: () => {},
+    };
   };
 
   /**
    * if path="" is not provided, the library will take the first device
    */
-  static open(path: ?string) {
+  static open(path: string | null | undefined) {
     return Promise.resolve().then(() => {
       if (path) {
         return new TransportNodeHidNoEvents(new HID.HID(path));
       }
+
       const device = getDevices()[0];
       if (!device) throw new TransportError("NoDevice", "NoDevice");
       return new TransportNodeHidNoEvents(new HID.HID(device.path));
@@ -81,8 +79,7 @@ export default class TransportNodeHidNoEvents extends Transport<?string> {
   }
 
   device: HID.HID;
-  deviceModel: ?DeviceModel;
-
+  deviceModel: DeviceModel | null | undefined;
   channel = Math.floor(Math.random() * 0xffff);
   packetSize = 64;
   disconnected = false;
@@ -102,12 +99,13 @@ export default class TransportNodeHidNoEvents extends Transport<?string> {
       this.disconnected = true;
     }
   };
-
   writeHID = (content: Buffer): Promise<void> => {
     const data = [0x00];
+
     for (let i = 0; i < content.length; i++) {
       data.push(content[i]);
     }
+
     try {
       this.device.write(data);
       return Promise.resolve();
@@ -116,21 +114,23 @@ export default class TransportNodeHidNoEvents extends Transport<?string> {
         this.setDisconnected();
         return Promise.reject(new DisconnectedDevice(e.message));
       }
+
       return Promise.reject(e);
     }
   };
-
   readHID = (): Promise<Buffer> =>
     new Promise((resolve, reject) =>
       this.device.read((e, res) => {
         if (!res) {
           return reject(new DisconnectedDevice());
         }
+
         if (e) {
           if (isDisconnectedError(e)) {
             this.setDisconnected();
             return reject(new DisconnectedDevice(e.message));
           }
+
           reject(e);
         } else {
           const buffer = Buffer.from(res);
@@ -144,15 +144,14 @@ export default class TransportNodeHidNoEvents extends Transport<?string> {
    * @param apdu
    * @returns a promise of apdu response
    */
-  exchange = (apdu: Buffer): Promise<Buffer> =>
+  exchange = (apdu: Buffer): Promise<any> =>
     this.exchangeAtomicImpl(async () => {
       const { channel, packetSize } = this;
       log("apdu", "=> " + apdu.toString("hex"));
-
       const framing = hidFraming(channel, packetSize);
-
       // Write...
       const blocks = framing.makeBlocks(apdu);
+
       for (let i = 0; i < blocks.length; i++) {
         await this.writeHID(blocks[i]);
       }
@@ -160,6 +159,7 @@ export default class TransportNodeHidNoEvents extends Transport<?string> {
       // Read...
       let result;
       let acc;
+
       while (!(result = framing.getReducedResult(acc))) {
         const buffer = await this.readHID();
         acc = framing.reduceResponse(acc, buffer);

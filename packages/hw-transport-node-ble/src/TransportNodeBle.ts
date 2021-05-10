@@ -135,7 +135,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
  * import BluetoothTransport from "@ledgerhq/hw-transport-node-ble";
  */
 
-export default class BluetoothTransport extends Transport<Device | string> {
+export default class BluetoothTransport extends Transport {
   /**
    *
    */

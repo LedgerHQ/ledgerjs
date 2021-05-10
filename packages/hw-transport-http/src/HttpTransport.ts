@@ -8,7 +8,7 @@ import { log } from "@ledgerhq/logs";
 
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-export default class HttpTransport extends Transport<string> {
+export default class HttpTransport extends Transport {
   static isSupported = (): Promise<boolean> =>
     Promise.resolve(typeof fetch === "function");
   // this transport is not discoverable
@@ -33,7 +33,7 @@ export default class HttpTransport extends Transport<string> {
     }
   };
 
-  static async open(url: string, timeout?: number): Promise<Transport<string>> {
+  static async open(url: string, timeout?: number): Promise<Transport> {
     await HttpTransport.check(url, timeout);
     return new HttpTransport(url);
   }
