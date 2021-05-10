@@ -1,5 +1,3 @@
-//@flow
-
 import HID from "node-hid";
 import TransportNodeHidNoEvents, {
   getDevices,
@@ -12,10 +10,9 @@ import type {
 import { identifyUSBProductId } from "@ledgerhq/devices";
 import { TransportError } from "@ledgerhq/errors";
 import listenDevices from "./listenDevices";
-
 let listenDevicesDebounce = 500;
-let listenDevicesPollingSkip = () => false;
 
+let listenDevicesPollingSkip = () => false;
 /**
  * node-hid Transport implementation
  * @example
@@ -23,6 +20,7 @@ let listenDevicesPollingSkip = () => false;
  * ...
  * TransportNodeHid.create().then(transport => ...)
  */
+
 export default class TransportNodeHid extends TransportNodeHidNoEvents {
   /**
    *
@@ -60,7 +58,7 @@ export default class TransportNodeHid extends TransportNodeHidNoEvents {
   /**
    */
   static listen = (
-    observer: Observer<DescriptorEvent<?string>>
+    observer: Observer<DescriptorEvent<string | null | undefined>>
   ): Subscription => {
     let unsubscribed = false;
     Promise.resolve(getDevices()).then((devices) => {
@@ -69,7 +67,12 @@ export default class TransportNodeHid extends TransportNodeHidNoEvents {
         if (!unsubscribed) {
           const descriptor: string = device.path;
           const deviceModel = identifyUSBProductId(device.productId);
-          observer.next({ type: "add", descriptor, device, deviceModel });
+          observer.next({
+            type: "add",
+            descriptor,
+            device,
+            deviceModel,
+          });
         }
       }
     });
@@ -88,6 +91,7 @@ export default class TransportNodeHid extends TransportNodeHidNoEvents {
         device,
       });
     };
+
     const onRemove = (device) => {
       if (unsubscribed || !device) return;
       const deviceModel = identifyUSBProductId(device.productId);
@@ -98,25 +102,31 @@ export default class TransportNodeHid extends TransportNodeHidNoEvents {
         device,
       });
     };
+
     events.on("add", onAdd);
     events.on("remove", onRemove);
+
     function unsubscribe() {
       unsubscribed = true;
       events.removeListener("add", onAdd);
       events.removeListener("remove", onRemove);
       stop();
     }
-    return { unsubscribe };
+
+    return {
+      unsubscribe,
+    };
   };
 
   /**
    * if path="" is not provided, the library will take the first device
    */
-  static open(path: ?string) {
+  static open(path: string | null | undefined) {
     return Promise.resolve().then(() => {
       if (path) {
         return new TransportNodeHid(new HID.HID(path));
       }
+
       const device = getDevices()[0];
       if (!device) throw new TransportError("NoDevice", "NoDevice");
       return new TransportNodeHid(new HID.HID(device.path));
