@@ -1,14 +1,11 @@
-// @flow
-
 import { Observable } from "rxjs";
 import { TransportError } from "@ledgerhq/errors";
 import type { Characteristic } from "./types";
 import { log } from "@ledgerhq/logs";
-
 export const monitorCharacteristic = (
   characteristic: Characteristic
 ): Observable<Buffer> =>
-  Observable.create((o) => {
+  new Observable((o) => {
     log("ble-verbose", "start monitor " + characteristic.uuid);
     const subscription = characteristic.monitor((error, c) => {
       if (error) {
@@ -33,7 +30,6 @@ export const monitorCharacteristic = (
         }
       }
     });
-
     return () => {
       log("ble-verbose", "end monitor " + characteristic.uuid);
       subscription.remove();
