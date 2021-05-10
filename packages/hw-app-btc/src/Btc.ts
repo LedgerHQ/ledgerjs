@@ -21,9 +21,9 @@ export type { AddressFormat };
  */
 
 export default class Btc {
-  transport: Transport<any>;
+  transport: Transport;
 
-  constructor(transport: Transport<any>, scrambleKey = "BTC") {
+  constructor(transport: Transport, scrambleKey = "BTC") {
     this.transport = transport;
     transport.decorateAppAPIMethods(
       this,

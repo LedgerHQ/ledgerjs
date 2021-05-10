@@ -63,9 +63,9 @@ const remapTransactionRelatedErrors = (e) => {
  */
 
 export default class Eth {
-  transport: Transport<any>;
+  transport: Transport;
 
-  constructor(transport: Transport<any>, scrambleKey = "w0w") {
+  constructor(transport: Transport, scrambleKey = "w0w") {
     this.transport = transport;
     transport.decorateAppAPIMethods(
       this,

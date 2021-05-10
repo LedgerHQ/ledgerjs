@@ -51,9 +51,9 @@ const TX_MAX_SIZE = 1540;
  */
 
 export default class Str {
-  transport: Transport<any>;
+  transport: Transport;
 
-  constructor(transport: Transport<any>, scrambleKey = "l0v") {
+  constructor(transport: Transport, scrambleKey = "l0v") {
     this.transport = transport;
     transport.decorateAppAPIMethods(
       this,

@@ -2,7 +2,7 @@ import type Transport from "@ledgerhq/hw-transport";
 import bippath from "bip32-path";
 import { MAX_SCRIPT_BLOCK } from "./constants";
 export async function signMessage(
-  transport: Transport<any>,
+  transport: Transport,
   {
     path,
     messageHex,

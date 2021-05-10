@@ -36,6 +36,7 @@
     "rxjs": "6"
   },
   "devDependencies": {
+    "@types/react-native": "^0.64.5",
     "install-peers-cli": "^2.2.0"
   },
   "scripts": {

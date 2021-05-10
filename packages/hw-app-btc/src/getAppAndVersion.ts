@@ -1,7 +1,7 @@
 import invariant from "invariant";
 import Transport from "@ledgerhq/hw-transport";
 export const getAppAndVersion = async (
-  transport: Transport<any>
+  transport: Transport
 ): Promise<{
   name: string;
   version: string;

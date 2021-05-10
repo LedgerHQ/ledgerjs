@@ -12,7 +12,7 @@ const addressFormatMap = {
   cashaddr: 3,
 };
 export async function getWalletPublicKey(
-  transport: Transport<any>,
+  transport: Transport,
   options: {
     path: string;
     verify?: boolean;

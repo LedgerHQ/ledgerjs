@@ -44,9 +44,9 @@ const SW_ERROR_BAD_KEY_HANDLE = 0x6a80;
  */
 
 export default class Polkadot {
-  transport: Transport<any>;
+  transport: Transport;
 
-  constructor(transport: Transport<any>) {
+  constructor(transport: Transport) {
     this.transport = transport;
     transport.decorateAppAPIMethods(this, ["getAddress", "sign"], "DOT");
   }

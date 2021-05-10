@@ -33,7 +33,7 @@ export type SignP2SHTransactionArg = {
   transactionVersion?: number;
 };
 export async function signP2SHTransaction(
-  transport: Transport<any>,
+  transport: Transport,
   arg: SignP2SHTransactionArg
 ) {
   const {

@@ -4,7 +4,7 @@ import type { Transaction } from "./types";
 import { MAX_SCRIPT_BLOCK } from "./constants";
 import { createVarint } from "./varint";
 export async function getTrustedInputRaw(
-  transport: Transport<any>,
+  transport: Transport,
   transactionData: Buffer,
   indexLookup?: number | null | undefined
 ): Promise<string> {
@@ -31,7 +31,7 @@ export async function getTrustedInputRaw(
   return res;
 }
 export async function getTrustedInput(
-  transport: Transport<any>,
+  transport: Transport,
   indexLookup: number,
   transaction: Transaction,
   additionals: Array<string> = []

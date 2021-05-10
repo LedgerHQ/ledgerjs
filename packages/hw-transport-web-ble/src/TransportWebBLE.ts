@@ -290,7 +290,7 @@ export default class BluetoothTransport extends Transport {
    * @returns a promise of apdu response
    */
   async exchange(apdu: Buffer): Promise<Buffer> {
-    const b = this.exchangeAtomicImpl(async () => {
+    const b = await this.exchangeAtomicImpl(async () => {
       try {
         const msgIn = apdu.toString("hex");
         log("apdu", `=> ${msgIn}`);
@@ -313,7 +313,6 @@ export default class BluetoothTransport extends Transport {
       }
     });
     
-    if (!(b instanceof Buffer)) throw new Error("Buffer is void")
     return (b as Buffer)
   }
 

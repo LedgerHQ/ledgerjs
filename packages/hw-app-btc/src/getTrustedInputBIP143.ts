@@ -3,7 +3,7 @@ import shajs from "sha.js";
 import type { Transaction } from "./types";
 import { serializeTransaction } from "./serializeTransaction";
 export function getTrustedInputBIP143(
-  transport: Transport<any>,
+  transport: Transport,
   indexLookup: number,
   transaction: Transaction,
   additionals: Array<string> = []

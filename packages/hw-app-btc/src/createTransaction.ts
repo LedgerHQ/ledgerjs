@@ -60,7 +60,7 @@ export type CreateTransactionArg = {
   onDeviceSignatureGranted?: () => void;
 };
 export async function createTransaction(
-  transport: Transport<any>,
+  transport: Transport,
   arg: CreateTransactionArg
 ) {
   const {

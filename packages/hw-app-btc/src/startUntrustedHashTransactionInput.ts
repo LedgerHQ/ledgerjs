@@ -3,7 +3,7 @@ import type { Transaction } from "./types";
 import { createVarint } from "./varint";
 import { MAX_SCRIPT_BLOCK } from "./constants";
 export function startUntrustedHashTransactionInputRaw(
-  transport: Transport<any>,
+  transport: Transport,
   newTransaction: boolean,
   firstRound: boolean,
   transactionData: Buffer,
@@ -29,7 +29,7 @@ export function startUntrustedHashTransactionInputRaw(
   );
 }
 export async function startUntrustedHashTransactionInput(
-  transport: Transport<any>,
+  transport: Transport,
   newTransaction: boolean,
   transaction: Transaction,
   inputs: Array<{

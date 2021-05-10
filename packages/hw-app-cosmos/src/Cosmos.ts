@@ -37,9 +37,9 @@ const SW_CANCEL = 0x6986;
  */
 
 export default class Cosmos {
-  transport: Transport<any>;
+  transport: Transport;
 
-  constructor(transport: Transport<any>, scrambleKey: string = APP_KEY) {
+  constructor(transport: Transport, scrambleKey: string = APP_KEY) {
     this.transport = transport;
     transport.decorateAppAPIMethods(
       this,
