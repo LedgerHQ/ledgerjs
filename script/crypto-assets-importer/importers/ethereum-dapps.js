@@ -15,7 +15,9 @@ module.exports = {
           ...obj,
         }),
         {}
-      )
+      ),
+      null,
+      2
     ),
 
   loader: async ({ folder, id }) => {
