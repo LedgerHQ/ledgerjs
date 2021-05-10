@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/devices",
-  "version": "5.50.0",
+  "version": "5.51.1",
   "description": "Ledger devices",
   "keywords": [
     "Ledger"
@@ -26,7 +26,7 @@
   "dependencies": {
     "@ledgerhq/errors": "5.50.0",
     "@ledgerhq/logs": "^5.50.0",
-    "rxjs": "^6.6.7",
+    "rxjs": "6",
     "semver": "^7.3.5"
   },
   "scripts": {
