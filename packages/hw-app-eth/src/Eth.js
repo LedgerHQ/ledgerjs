@@ -21,7 +21,6 @@ import { splitPath, foreach } from "./utils";
 import { EthAppPleaseEnableContractData } from "@ledgerhq/errors";
 import type Transport from "@ledgerhq/hw-transport";
 import { BigNumber } from "bignumber.js";
-import { encode, decode } from "rlp";
 import { ethers } from "ethers";
 import { byContractAddress } from "./erc20";
 import { getInfosForContractMethod } from "./contracts";
@@ -193,11 +192,18 @@ export default class Eth {
     let toSend = [];
     let response;
     // Check if the TX is encoded following EIP 155
-    let rlpTx = decode(rawTx);
+    let rlpTx = ethers.utils.RLP.decode("0x" + rawTxHex).map((hex) =>
+      Buffer.from(hex.slice(2), "hex")
+    );
+
     let rlpOffset = 0;
     let chainIdPrefix = "";
     if (rlpTx.length > 6) {
-      let rlpVrs = encode(rlpTx.slice(-3));
+      let rlpVrs = Buffer.from(
+        ethers.utils.RLP.encode(rlpTx.slice(-3)).slice(2),
+        "hex"
+      );
+
       rlpOffset = rawTx.length - (rlpVrs.length - 1);
       const chainIdSrc = rlpTx[6];
       const chainIdBuf = Buffer.alloc(4);
