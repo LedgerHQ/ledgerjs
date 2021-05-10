@@ -1,4 +1,3 @@
-//@flow
 import { Subject } from "rxjs";
 import net from "net";
 import Transport from "@ledgerhq/hw-transport";
@@ -13,12 +12,11 @@ import { log } from "@ledgerhq/logs";
  *
  */
 export type SpeculosTransportOpts = {
-  apduPort: number,
-  buttonPort?: number,
-  automationPort?: number,
-  host?: string,
+  apduPort: number;
+  buttonPort?: number;
+  automationPort?: number;
+  host?: string;
 };
-
 /**
  * Speculos TCP transport implementation
  *
@@ -27,12 +25,12 @@ export type SpeculosTransportOpts = {
  * const transport = await SpeculosTransport.open({ apduPort });
  * const res = await transport.send(0xE0, 0x01, 0, 0);
  */
-export default class SpeculosTransport extends Transport<SpeculosTransportOpts> {
-  static isSupported = (): Promise<boolean> => Promise.resolve(true);
 
+export default class SpeculosTransport extends Transport {
+  static isSupported = (): Promise<boolean> => Promise.resolve(true);
   // this transport is not discoverable
-  static list = (): * => Promise.resolve([]);
-  static listen = (_observer: *) => ({
+  static list = (): any => Promise.resolve([]);
+  static listen = (_observer: any) => ({
     unsubscribe: () => {},
   });
 
@@ -56,14 +54,12 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
         }, 100);
       });
     });
-
   apduSocket: net.Socket;
   opts: SpeculosTransportOpts;
-  rejectExchange: (Error) => void = (_e) => {};
-  resolveExchange: (Buffer) => void = (_b) => {};
-
-  automationSocket: ?net.Socket;
-  automationEvents: Subject<Object> = new Subject();
+  rejectExchange: (arg0: Error) => void = (_e) => {};
+  resolveExchange: (arg0: Buffer) => void = (_b) => {};
+  automationSocket: net.Socket | null | undefined;
+  automationEvents: Subject<Record<string, any>> = new Subject();
 
   constructor(apduSocket: net.Socket, opts: SpeculosTransportOpts) {
     super();
@@ -85,8 +81,8 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
         this.rejectExchange(e);
       }
     });
-
     const { automationPort } = opts;
+
     if (automationPort) {
       const socket = new net.Socket();
       this.automationSocket = socket;
@@ -95,7 +91,7 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
         socket.destroy();
       });
       socket.on("data", (data) => {
-        log("speculos-automation-data", data);
+        log("speculos-automation-data", data.toString("ascii"));
         const split = data.toString("ascii").split("\n");
         split
           .filter((ascii) => !!ascii)
@@ -131,11 +127,11 @@ export default class SpeculosTransport extends Transport<SpeculosTransportOpts> 
       });
     });
 
-  async exchange(apdu: Buffer): Promise<Buffer> {
+  async exchange(apdu: Buffer): Promise<any> {
     const hex = apdu.toString("hex");
     log("apdu", "=> " + hex);
     const encoded = encodeAPDU(apdu);
-    const res = await new Promise((resolve, reject) => {
+    const res: Buffer = await new Promise((resolve, reject) => {
       this.rejectExchange = reject;
       this.resolveExchange = resolve;
       this.apduSocket.write(encoded);
@@ -161,12 +157,17 @@ function encodeAPDU(apdu: Buffer) {
 
 function decodeAPDUPayload(data: Buffer) {
   const dataLength = data.readUIntBE(0, 4); // 4 bytes tells the data length
+
   const size = dataLength + 2; // size does not include the status code so we add 2
+
   const payload = data.slice(4);
+
   if (payload.length !== size) {
     throw new TransportError(
-      `Expected payload of length ${size} but got ${payload.length}`
+      `Expected payload of length ${size} but got ${payload.length}`,
+      ""
     );
   }
+
   return payload;
 }
