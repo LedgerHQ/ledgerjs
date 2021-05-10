@@ -1,4 +1,3 @@
-// @flow
 import { Observable } from "rxjs";
 import type { Characteristic } from "./types";
 import { log } from "@ledgerhq/logs";
@@ -11,6 +10,7 @@ export const monitorCharacteristic = (
 
     function onCharacteristicValueChanged(event) {
       const characteristic = event.target;
+
       if (characteristic.value) {
         o.next(Buffer.from(characteristic.value.buffer));
       }
@@ -22,7 +22,6 @@ export const monitorCharacteristic = (
         onCharacteristicValueChanged
       );
     });
-
     return () => {
       log("ble-verbose", "end monitor " + characteristic.uuid);
       characteristic.stopNotifications();

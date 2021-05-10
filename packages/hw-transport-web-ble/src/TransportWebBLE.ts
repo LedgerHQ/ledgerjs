@@ -1,6 +1,4 @@
-// @flow
 /* eslint-disable prefer-template */
-
 import Transport from "@ledgerhq/hw-transport";
 import {
   DisconnectedDevice,
@@ -22,18 +20,22 @@ import { monitorCharacteristic } from "./monitorCharacteristic";
 const requiresBluetooth = () => {
   // $FlowFixMe
   const { bluetooth } = navigator;
+
   if (typeof bluetooth === "undefined") {
     throw new Error("web bluetooth not supported");
   }
+
   return bluetooth;
 };
 
 const availability = (): Observable<boolean> =>
   Observable.create((observer) => {
     const bluetooth = requiresBluetooth();
+
     const onAvailabilityChanged = (e) => {
       observer.next(e.value);
     };
+
     bluetooth.addEventListener("availabilitychanged", onAvailabilityChanged);
     let unsubscribed = false;
     bluetooth.getAvailability().then((available) => {
@@ -69,6 +71,7 @@ const retrieveService = async (device) => {
 
 async function open(deviceOrId: Device | string, needsReconnect: boolean) {
   let device;
+
   if (typeof deviceOrId === "string") {
     if (transportsCache[deviceOrId]) {
       log("ble-verbose", "Transport in cache, using that.");
@@ -76,7 +79,6 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
     }
 
     const bluetooth = requiresBluetooth();
-
     // TODO instead we should "query" the device by its ID
     device = await bluetooth.requestDevice(requestDeviceParam());
   } else {
@@ -94,16 +96,13 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
     service.getCharacteristic(writeUuid),
     service.getCharacteristic(notifyUuid),
   ]);
-
   const notifyObservable = monitorCharacteristic(notifyC).pipe(
     tap((value) => {
       log("ble-frame", "<= " + value.toString("hex"));
     }),
     share()
   );
-
   const notif = notifyObservable.subscribe();
-
   const transport = new BluetoothTransport(
     device,
     writeC,
@@ -117,6 +116,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
 
   // eslint-disable-next-line require-atomic-updates
   transportsCache[transport.id] = transport;
+
   const onDisconnect = (e) => {
     console.log("onDisconnect!", e);
     delete transportsCache[transport.id];
@@ -126,18 +126,18 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
     log("ble-verbose", `BleTransport(${transport.id}) disconnected`);
     transport.emit("disconnect", e);
   };
-  device.addEventListener("gattserverdisconnected", onDisconnect);
 
-  let beforeMTUTime = Date.now();
+  device.addEventListener("gattserverdisconnected", onDisconnect);
+  const beforeMTUTime = Date.now();
+
   try {
     await transport.inferMTU();
   } finally {
-    let afterMTUTime = Date.now();
+    const afterMTUTime = Date.now();
 
     // workaround for #279: we need to open() again if we come the first time here,
     // to make sure we do a disconnect() after the first pairing time
     // because of a firmware bug
-
     if (afterMTUTime - beforeMTUTime < 1000) {
       needsReconnect = false; // (optim) there is likely no new pairing done because mtu answer was fast.
     }
@@ -155,13 +155,13 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
 
   return transport;
 }
-
 /**
  * react-native bluetooth BLE implementation
  * @example
  * import BluetoothTransport from "@ledgerhq/hw-transport-web-ble";
  */
-export default class BluetoothTransport extends Transport<Device | string> {
+
+export default class BluetoothTransport extends Transport {
   static isSupported = (): Promise<boolean> =>
     Promise.resolve()
       .then(requiresBluetooth)
@@ -175,23 +175,19 @@ export default class BluetoothTransport extends Transport<Device | string> {
    * (available is generic, type is specific)
    * an event is emit once and then each time it changes
    */
-  static observeAvailability = (observer: *) =>
-    availability.subscribe(observer);
-
-  static list = (): * => Promise.resolve([]);
+  static observeAvailability = (observer: any) =>
+    availability().subscribe(observer);
+  static list = (): any => Promise.resolve([]);
 
   /**
    * Scan for Ledger Bluetooth devices.
    * On this web implementation, it only emits ONE device, the one that was selected in the UI (if any).
    */
-  static listen(observer: *) {
+  static listen(observer: any) {
     log("ble-verbose", "listen...");
     let unsubscribed;
-
     const bluetooth = requiresBluetooth();
-
-    bluetooth.requestDevice(requestDeviceParam()).then(
-      async (device) => {
+    bluetooth.requestDevice(requestDeviceParam()).then((device) => {
         if (!unsubscribed) {
           observer.next({
             type: "add",
@@ -204,10 +200,14 @@ export default class BluetoothTransport extends Transport<Device | string> {
         observer.error(new TransportOpenUserCancelled(error.message));
       }
     );
+
     function unsubscribe() {
       unsubscribed = true;
     }
-    return { unsubscribe };
+
+    return {
+      unsubscribe,
+    };
   }
 
   /**
@@ -220,32 +220,26 @@ export default class BluetoothTransport extends Transport<Device | string> {
   /**
    * globally disconnect a bluetooth device by its id.
    */
-  static disconnect = async (id: *) => {
+  static disconnect = async (id: any) => {
     log("ble-verbose", `user disconnect(${id})`);
     const transport = transportsCache[id];
+
     if (transport) {
       transport.device.gatt.disconnect();
     }
   };
-
   id: string;
-
   device: Device;
-
-  mtuSize: number = 20;
-
+  mtuSize = 20;
   writeCharacteristic: Characteristic;
-
   notifyObservable: Observable<Buffer>;
-
   notYetDisconnected = true;
-
   deviceModel: DeviceModel;
 
   constructor(
     device: Device,
     writeCharacteristic: Characteristic,
-    notifyObservable: Observable<*>,
+    notifyObservable: Observable<any>,
     deviceModel: DeviceModel
   ) {
     super();
@@ -254,13 +248,11 @@ export default class BluetoothTransport extends Transport<Device | string> {
     this.writeCharacteristic = writeCharacteristic;
     this.notifyObservable = notifyObservable;
     this.deviceModel = deviceModel;
-
     log("ble-verbose", `BleTransport(${String(this.id)}) new instance`);
   }
 
   async inferMTU() {
     let mtu = 23;
-
     await this.exchangeAtomicImpl(async () => {
       try {
         mtu =
@@ -297,30 +289,33 @@ export default class BluetoothTransport extends Transport<Device | string> {
    * @param apdu
    * @returns a promise of apdu response
    */
-  exchange = (apdu: Buffer): Promise<Buffer> =>
-    this.exchangeAtomicImpl(async () => {
+  async exchange(apdu: Buffer): Promise<Buffer> {
+    const b = this.exchangeAtomicImpl(async () => {
       try {
         const msgIn = apdu.toString("hex");
         log("apdu", `=> ${msgIn}`);
-
         const data = await merge(
           this.notifyObservable.pipe(receiveAPDU),
           sendAPDU(this.write, apdu, this.mtuSize)
         ).toPromise();
-
         const msgOut = data.toString("hex");
         log("apdu", `<= ${msgOut}`);
-
         return data;
       } catch (e) {
         log("ble-error", "exchange got " + String(e));
+
         if (this.notYetDisconnected) {
           // in such case we will always disconnect because something is bad.
           this.device.gatt.disconnect();
         }
+
         throw e;
       }
     });
+    
+    if (!(b instanceof Buffer)) throw new Error("Buffer is void")
+    return (b as Buffer)
+  }
 
   setScrambleKey() {}
 

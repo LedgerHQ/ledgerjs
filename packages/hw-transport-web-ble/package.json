@@ -33,13 +33,12 @@
     "rxjs": "6"
   },
   "devDependencies": {
-    "flow-bin": "^0.149.0",
-    "flow-typed": "^2.6.1"
+    "@types/web-bluetooth": "^0.0.9"
   },
   "scripts": {
     "flow": "flow",
     "clean": "bash ../../script/clean.sh",
-    "build": "bash ../../script/build.sh",
+    "build": "tsc && tsc -m ES6 --outDir lib-es",
     "watch": "bash ../../script/watch.sh",
     "doc": "bash ../../script/doc.sh"
   },
