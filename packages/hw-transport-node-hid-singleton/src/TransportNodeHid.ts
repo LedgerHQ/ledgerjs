@@ -1,5 +1,3 @@
-//@flow
-
 import HID from "node-hid";
 import TransportNodeHidNoEvents, {
   getDevices,
@@ -13,9 +11,7 @@ import { log } from "@ledgerhq/logs";
 import { identifyUSBProductId } from "@ledgerhq/devices";
 import { CantOpenDevice } from "@ledgerhq/errors";
 import { listenDevices } from "./listenDevices";
-
 let transportInstance;
-
 /**
  * node-hid Transport implementation
  * @example
@@ -23,6 +19,7 @@ let transportInstance;
  * ...
  * TransportNodeHid.create().then(transport => ...)
  */
+
 export default class TransportNodeHidSingleton extends TransportNodeHidNoEvents {
   /**
    *
@@ -36,7 +33,7 @@ export default class TransportNodeHidSingleton extends TransportNodeHidNoEvents 
 
   /**
    */
-  static listen = (observer: Observer<DescriptorEvent<*>>): Subscription => {
+  static listen = (observer: Observer<DescriptorEvent<any>>): Subscription => {
     let unsubscribed;
     Promise.resolve(getDevices()).then((devices) => {
       // this needs to run asynchronously so the subscription is defined during this phase
@@ -46,7 +43,9 @@ export default class TransportNodeHidSingleton extends TransportNodeHidNoEvents 
           observer.next({
             type: "add",
             descriptor: "",
-            device: { name: device.deviceName },
+            device: {
+              name: device.deviceName,
+            },
             deviceModel,
           });
         }
@@ -59,7 +58,9 @@ export default class TransportNodeHidSingleton extends TransportNodeHidNoEvents 
         type: "add",
         descriptor: "",
         deviceModel,
-        device: { name: device.deviceName },
+        device: {
+          name: device.deviceName,
+        },
       });
     };
 
@@ -69,7 +70,9 @@ export default class TransportNodeHidSingleton extends TransportNodeHidNoEvents 
         type: "remove",
         descriptor: "",
         deviceModel,
-        device: { name: device.deviceName },
+        device: {
+          name: device.deviceName,
+        },
       });
     };
 
@@ -79,7 +82,10 @@ export default class TransportNodeHidSingleton extends TransportNodeHidNoEvents 
       stop();
       unsubscribed = true;
     }
-    return { unsubscribe };
+
+    return {
+      unsubscribe,
+    };
   };
 
   /**
@@ -118,6 +124,7 @@ export default class TransportNodeHidSingleton extends TransportNodeHidNoEvents 
           }
         }
       );
+
       const onDisconnect = () => {
         if (!transportInstance) return;
         log("hid-verbose", "transport instance was disconnected");
@@ -125,8 +132,8 @@ export default class TransportNodeHidSingleton extends TransportNodeHidNoEvents 
         transportInstance = null;
         unlisten();
       };
-      transportInstance.on("disconnect", onDisconnect);
 
+      transportInstance.on("disconnect", onDisconnect);
       return transportInstance;
     });
   }
