@@ -1,4 +1,3 @@
-//@flow
 import Transport from "@ledgerhq/hw-transport";
 import type {
   Observer,
@@ -16,10 +15,14 @@ import {
   TransportError,
 } from "@ledgerhq/errors";
 
-const ledgerDevices = [{ vendorId: ledgerUSBVendorId }];
+const ledgerDevices = [
+  {
+    vendorId: ledgerUSBVendorId,
+  },
+];
 
 const isSupported = () =>
-  Promise.resolve(!!(global.navigator && global.navigator.hid));
+  Promise.resolve(!!(window.navigator && window.navigator.hid));
 
 const getHID = (): HID => {
   // $FlowFixMe
@@ -33,7 +36,9 @@ const getHID = (): HID => {
 };
 
 async function requestLedgerDevices(): Promise<HIDDevice[]> {
-  const device = await getHID().requestDevice({ filters: ledgerDevices });
+  const device = await getHID().requestDevice({
+    filters: ledgerDevices,
+  });
   if (Array.isArray(device)) return device;
   return [device];
 }
@@ -49,7 +54,6 @@ async function getFirstLedgerDevice(): Promise<HIDDevice> {
   const devices = await requestLedgerDevices();
   return devices[0];
 }
-
 /**
  * WebHID Transport implementation
  * @example
@@ -57,33 +61,35 @@ async function getFirstLedgerDevice(): Promise<HIDDevice> {
  * ...
  * TransportWebHID.create().then(transport => ...)
  */
-export default class TransportWebHID extends Transport<HIDDevice> {
+
+// @ts-ignore
+export default class TransportWebHID extends Transport {
   device: HIDDevice;
-  deviceModel: ?DeviceModel;
+  deviceModel: DeviceModel | null | undefined;
   channel = Math.floor(Math.random() * 0xffff);
   packetSize = 64;
 
   constructor(device: HIDDevice) {
     super();
     this.device = device;
-    this.deviceModel = identifyUSBProductId(device.productId);
+    this.deviceModel =  typeof device.productId === 'number' ? identifyUSBProductId(device.productId) : undefined;
     device.addEventListener("inputreport", this.onInputReport);
   }
 
-  inputs = [];
-  inputCallback: ?(Buffer) => void;
-
+  inputs: Buffer[] = [];
+  inputCallback: ((arg0: Buffer) => void) | null | undefined;
   read = (): Promise<Buffer> => {
     if (this.inputs.length) {
-      return Promise.resolve(this.inputs.shift());
+      return Promise.resolve(this.inputs.shift() as unknown as Buffer);
     }
+
     return new Promise((success) => {
       this.inputCallback = success;
     });
   };
-
-  onInputReport = (e: InputReportEvent) => {
+  onInputReport = (e: HIDInputReportEvent) => {
     const buffer = Buffer.from(e.data.buffer);
+
     if (this.inputCallback) {
       this.inputCallback(buffer);
       this.inputCallback = null;
@@ -119,8 +125,12 @@ export default class TransportWebHID extends Transport<HIDDevice> {
             new TransportOpenUserCancelled("Access denied to use Ledger device")
           );
         } else if (!unsubscribed) {
-          const deviceModel = identifyUSBProductId(device.productId);
-          observer.next({ type: "add", descriptor: device, deviceModel });
+          const deviceModel = typeof device.productId === 'number' ? identifyUSBProductId(device.productId) : undefined;
+          observer.next({
+            type: "add",
+            descriptor: device,
+            deviceModel,
+          });
           observer.complete();
         }
       },
@@ -128,10 +138,14 @@ export default class TransportWebHID extends Transport<HIDDevice> {
         observer.error(new TransportOpenUserCancelled(error.message));
       }
     );
+
     function unsubscribe() {
       unsubscribed = true;
     }
-    return { unsubscribe };
+
+    return {
+      unsubscribe,
+    };
   };
 
   /**
@@ -157,12 +171,15 @@ export default class TransportWebHID extends Transport<HIDDevice> {
   static async open(device: HIDDevice) {
     await device.open();
     const transport = new TransportWebHID(device);
+
     const onDisconnect = (e) => {
       if (device === e.device) {
         getHID().removeEventListener("disconnect", onDisconnect);
+
         transport._emitDisconnect(new DisconnectedDevice());
       }
     };
+
     getHID().addEventListener("disconnect", onDisconnect);
     return transport;
   }
@@ -188,15 +205,14 @@ export default class TransportWebHID extends Transport<HIDDevice> {
    * @param apdu
    * @returns a promise of apdu response
    */
-  exchange = (apdu: Buffer): Promise<Buffer> =>
-    this.exchangeAtomicImpl(async () => {
+  exchange = async (apdu: Buffer): Promise<Buffer> => {
+    const b = await this.exchangeAtomicImpl(async () => {
       const { channel, packetSize } = this;
       log("apdu", "=> " + apdu.toString("hex"));
-
       const framing = hidFraming(channel, packetSize);
-
       // Write...
       const blocks = framing.makeBlocks(apdu);
+
       for (let i = 0; i < blocks.length; i++) {
         await this.device.sendReport(0, blocks[i]);
       }
@@ -204,6 +220,7 @@ export default class TransportWebHID extends Transport<HIDDevice> {
       // Read...
       let result;
       let acc;
+
       while (!(result = framing.getReducedResult(acc))) {
         const buffer = await this.read();
         acc = framing.reduceResponse(acc, buffer);
@@ -214,10 +231,14 @@ export default class TransportWebHID extends Transport<HIDDevice> {
     }).catch((e) => {
       if (e && e.message && e.message.includes("write")) {
         this._emitDisconnect(e);
+
         throw new DisconnectedDeviceDuringOperation(e.message);
       }
+
       throw e;
     });
+    return (b as Buffer)
+  }
 
   setScrambleKey() {}
 }

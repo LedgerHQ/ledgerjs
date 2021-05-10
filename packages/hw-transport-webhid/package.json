@@ -31,12 +31,12 @@
     "@ledgerhq/logs": "^5.50.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.149.0"
+    "@types/w3c-web-hid": "^1.0.0"
   },
   "scripts": {
     "flow": "flow",
     "clean": "bash ../../script/clean.sh",
-    "build": "bash ../../script/build.sh",
+    "build": "tsc && tsc -m ES6 --outDir lib-es",
     "watch": "bash ../../script/watch.sh",
     "doc": "bash ../../script/doc.sh"
   },
