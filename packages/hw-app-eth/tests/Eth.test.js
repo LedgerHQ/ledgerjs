@@ -167,7 +167,6 @@ test("signTransactionLargeChainID2", async () => {
   });
 });
 
-
 test("signTransactionChunkedLimit", async () => {
   const Transport = createTransportReplayer(
     RecordStore.fromString(`
