@@ -1,4 +1,3 @@
-//@flow
 import Transport from "@ledgerhq/hw-transport";
 import type {
   Observer,
@@ -22,10 +21,8 @@ import {
   requestLedgerDevice,
   isSupported,
 } from "./webusb";
-
 const configurationValue = 1;
 const endpointNumber = 3;
-
 /**
  * WebUSB Transport implementation
  * @example
@@ -33,9 +30,10 @@ const endpointNumber = 3;
  * ...
  * TransportWebUSB.create().then(transport => ...)
  */
-export default class TransportWebUSB extends Transport<USBDevice> {
+// @ts-ignore
+export default class TransportWebUSB extends Transport {
   device: USBDevice;
-  deviceModel: ?DeviceModel;
+  deviceModel: DeviceModel | null | undefined;
   channel = Math.floor(Math.random() * 0xffff);
   packetSize = 64;
   interfaceNumber: number;
@@ -71,7 +69,11 @@ export default class TransportWebUSB extends Transport<USBDevice> {
       (device) => {
         if (!unsubscribed) {
           const deviceModel = identifyUSBProductId(device.productId);
-          observer.next({ type: "add", descriptor: device, deviceModel });
+          observer.next({
+            type: "add",
+            descriptor: device,
+            deviceModel,
+          });
           observer.complete();
         }
       },
@@ -87,10 +89,14 @@ export default class TransportWebUSB extends Transport<USBDevice> {
         }
       }
     );
+
     function unsubscribe() {
       unsubscribed = true;
     }
-    return { unsubscribe };
+
+    return {
+      unsubscribe,
+    };
   };
 
   /**
@@ -115,33 +121,42 @@ export default class TransportWebUSB extends Transport<USBDevice> {
    */
   static async open(device: USBDevice) {
     await device.open();
+
     if (device.configuration === null) {
       await device.selectConfiguration(configurationValue);
     }
+
     await gracefullyResetDevice(device);
     const iface = device.configurations[0].interfaces.find(({ alternates }) =>
       alternates.some((a) => a.interfaceClass === 255)
     );
+
     if (!iface) {
       throw new TransportInterfaceNotAvailable(
         "No WebUSB interface found for your Ledger device. Please upgrade firmware or contact techsupport."
       );
     }
+
     const interfaceNumber = iface.interfaceNumber;
+
     try {
       await device.claimInterface(interfaceNumber);
     } catch (e) {
       await device.close();
       throw new TransportInterfaceNotAvailable(e.message);
     }
+
     const transport = new TransportWebUSB(device, interfaceNumber);
+
     const onDisconnect = (e) => {
       if (device === e.device) {
         // $FlowFixMe
         navigator.usb.removeEventListener("disconnect", onDisconnect);
+
         transport._emitDisconnect(new DisconnectedDevice());
       }
     };
+
     // $FlowFixMe
     navigator.usb.addEventListener("disconnect", onDisconnect);
     return transport;
@@ -169,15 +184,14 @@ export default class TransportWebUSB extends Transport<USBDevice> {
    * @param apdu
    * @returns a promise of apdu response
    */
-  exchange = (apdu: Buffer): Promise<Buffer> =>
-    this.exchangeAtomicImpl(async () => {
+  async exchange(apdu: Buffer): Promise<Buffer> {
+    const b = await this.exchangeAtomicImpl(async () => {
       const { channel, packetSize } = this;
       log("apdu", "=> " + apdu.toString("hex"));
-
       const framing = hidFraming(channel, packetSize);
-
       // Write...
       const blocks = framing.makeBlocks(apdu);
+
       for (let i = 0; i < blocks.length; i++) {
         await this.device.transferOut(endpointNumber, blocks[i]);
       }
@@ -185,8 +199,10 @@ export default class TransportWebUSB extends Transport<USBDevice> {
       // Read...
       let result;
       let acc;
+
       while (!(result = framing.getReducedResult(acc))) {
         const r = await this.device.transferIn(endpointNumber, packetSize);
+        // @ts-ignore
         const buffer = Buffer.from(r.data.buffer);
         acc = framing.reduceResponse(acc, buffer);
       }
@@ -196,10 +212,15 @@ export default class TransportWebUSB extends Transport<USBDevice> {
     }).catch((e) => {
       if (e && e.message && e.message.includes("disconnected")) {
         this._emitDisconnect(e);
+
         throw new DisconnectedDeviceDuringOperation(e.message);
       }
+
       throw e;
     });
+
+    return b as Buffer
+  }
 
   setScrambleKey() {}
 }
