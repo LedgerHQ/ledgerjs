@@ -22,9 +22,11 @@ jobs:
           node-version: 12.x
       - name: install dependencies
         run: yarn install --production
-      - name: test
-        run: yarn test
+      # - name: test
+      #   run: yarn test
+      - name: lint
+        run: yarn lint
       - name: test  no git diff
         run: yarn test-no-git-diff
-      - name: codecov
-        run: npx codecov
+      # - name: codecov
+      #   run: npx codecov
