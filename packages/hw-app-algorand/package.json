@@ -26,9 +26,7 @@
   "module": "lib-es/Algorand.js",
   "types": "lib/Algorand.d.ts",
   "license": "Apache-2.0",
-  "devDependencies": {
-    "flow-bin": "^0.149.0"
-  },
+  "devDependencies": {},
   "dependencies": {
     "@ledgerhq/errors": "^5.50.0",
     "@ledgerhq/hw-transport": "^5.51.1",
