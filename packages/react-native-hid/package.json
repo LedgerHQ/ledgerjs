@@ -33,21 +33,18 @@
     "@ledgerhq/errors": "^5.50.0",
     "@ledgerhq/hw-transport": "^5.51.1",
     "@ledgerhq/logs": "^5.50.0",
+    "react-native": "^0.63.4",
     "rxjs": "6"
   },
   "devDependencies": {
-    "@types/react-native": "^0.64.5",
-    "install-peers-cli": "^2.2.0"
+    "@types/react-native": "^0.64.5"
   },
   "scripts": {
-    "prepare": "install-peers",
     "clean": "bash ../../script/clean.sh",
     "build": "bash ../../script/build.sh",
     "watch": "bash ../../script/watch.sh",
     "doc": "bash ../../script/doc.sh"
   },
   "gitHead": "fca2c7ce74fdb88df4d59dca4cc0e668410d66af",
-  "peerDependencies": {
-    "react-native": "^0.63.4"
-  }
+  "peerDependencies": {}
 }

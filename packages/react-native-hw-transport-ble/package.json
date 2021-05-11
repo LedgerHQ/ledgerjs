@@ -24,23 +24,17 @@
   "module": "lib-es/BleTransport.js",
   "types": "lib/BleTransport.d.ts",
   "license": "Apache-2.0",
-  "peerDependencies": {
-    "react-native-ble-plx": "1.0.1"
-  },
   "dependencies": {
     "@ledgerhq/devices": "^5.51.1",
     "@ledgerhq/errors": "^5.50.0",
     "@ledgerhq/hw-transport": "^5.51.1",
     "@ledgerhq/logs": "^5.50.0",
     "invariant": "^2.2.4",
+    "react-native-ble-plx": "1.0.1",
     "rxjs": "6",
     "uuid": "^3.4.0"
   },
-  "devDependencies": {
-    "install-peers-cli": "^2.2.0"
-  },
   "scripts": {
-    "prepare": "install-peers",
     "clean": "bash ../../script/clean.sh",
     "build": "bash ../../script/build.sh",
     "watch": "bash ../../script/watch.sh",

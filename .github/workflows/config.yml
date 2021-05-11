@@ -21,12 +21,7 @@ jobs:
         with:
           node-version: 12.x
       - name: install dependencies
-        run: |
-          yarn
-          cd packages/react-native-hid
-          yarn
-          cd ../react-native-hw-transport-ble
-          yarn
+        run: yarn
       # - name: test
       #   run: yarn test
       - name: lint
