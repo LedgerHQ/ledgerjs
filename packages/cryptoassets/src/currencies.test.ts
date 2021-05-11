@@ -15,6 +15,7 @@ import {
   findCryptoCurrencyByKeyword,
   registerCryptoCurrency,
 } from "./currencies";
+import { CryptoCurrency } from "./types";
 
 test("can get currency by coin type", () => {
   expect(getCryptoCurrencyById("bitcoin")).toMatchObject({
@@ -71,7 +72,7 @@ test("there are some terminated cryptocurrencies", () => {
 });
 
 test("all cryptocurrencies match (by reference) the one you get by id", () => {
-  for (let c of listCryptoCurrencies()) {
+  for (const c of listCryptoCurrencies()) {
     expect(c).toBe(getCryptoCurrencyById(c.id));
   }
 });
@@ -81,14 +82,15 @@ test("there is no testnet or terminated coin by default", () => {
   expect(listCryptoCurrencies(true, true).length).toBeGreaterThan(
     listCryptoCurrencies().length
   );
-  for (let c of listCryptoCurrencies()) {
+
+  for (const c of listCryptoCurrencies()) {
     expect(!c.terminated).toBe(true);
     expect(!c.isTestnetFor).toBe(true);
   }
 });
 
 test("all cryptocurrencies have at least one unit", () => {
-  for (let c of listCryptoCurrencies()) {
+  for (const c of listCryptoCurrencies()) {
     expect(c.units.length).toBeGreaterThan(0);
   }
 });
@@ -99,6 +101,7 @@ test("fiats list is always the same", () => {
 
 test("fiats list elements are correct", () => {
   const tickers = {};
+
   for (const fiat of listFiatCurrencies()) {
     expect(fiat.ticker).toBeTruthy();
     expect(typeof fiat.ticker).toBe("string");
@@ -117,13 +120,16 @@ test("fiats list elements are correct", () => {
 
 test("tokens are correct", () => {
   expect(listTokens().length).toBeGreaterThan(0);
+
   for (const token of listTokens()) {
     expect(token.ticker).toBeTruthy();
     expect(typeof token.id).toBe("string");
     expect(typeof token.name).toBe("string");
+
     if (token.ledgerSignature) {
       expect(typeof token.ledgerSignature).toBe("string");
     }
+
     expect(typeof token.tokenType).toBe("string");
     expect(typeof token.parentCurrency).toBe("object");
     expect(hasCryptoCurrencyId(token.parentCurrency.id)).toBe(true);
@@ -136,6 +142,7 @@ test("tokens are correct", () => {
     expect(typeof unit.name).toBe("string");
     expect(unit.magnitude).toBeGreaterThan(-1);
     expect(typeof unit.magnitude).toBe("number");
+
     if (token.compoundFor) {
       const t = findTokenById(token.compoundFor);
       expect(typeof t).toBe("object");
@@ -213,6 +220,6 @@ test("can register a new coin externally", () => {
       },
     ],
   };
-  registerCryptoCurrency(coinId, mycoin);
+  registerCryptoCurrency(coinId, mycoin as CryptoCurrency);
   expect(getCryptoCurrencyById(coinId)).toEqual(mycoin);
 });
