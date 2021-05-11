@@ -23,7 +23,7 @@
   "devDependencies": {},
   "scripts": {
     "clean": "bash ../../script/clean.sh",
-    "build": "tsc && tsc -m ES6 --outDir lib-es",
+    "build": "bash ../../script/build.sh",
     "watch": "bash ../../script/watch.sh",
     "doc": "bash ../../script/doc.sh"
   },

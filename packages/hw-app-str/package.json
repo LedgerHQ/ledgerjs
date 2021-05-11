@@ -35,7 +35,7 @@
   "devDependencies": {},
   "scripts": {
     "clean": "bash ../../script/clean.sh",
-    "build": "tsc && tsc -m ES6 --outDir lib-es",
+    "build": "bash ../../script/build.sh",
     "watch": "bash ../../script/watch.sh"
   },
   "gitHead": "fca2c7ce74fdb88df4d59dca4cc0e668410d66af"
