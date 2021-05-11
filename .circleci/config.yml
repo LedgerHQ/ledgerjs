@@ -22,7 +22,7 @@ jobs:
       - restore_cache:
           keys:
             - v12-yarn-packages-{{ checksum "yarn.lock" }}
-      - run: yarn install
+      - run: yarn install --production
       - save_cache:
           key: v12-yarn-packages-{{ checksum "yarn.lock" }}
           paths:
