@@ -23,6 +23,7 @@
   },
   "main": "lib/TransportWebUSB.js",
   "module": "lib-es/TransportWebUSB.js",
+  "types": "lib/TransportWebUSB.d.ts",
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/devices": "^5.51.1",
@@ -31,12 +32,12 @@
     "@ledgerhq/logs": "^5.50.0"
   },
   "devDependencies": {
-    "flow-bin": "^0.149.0"
+    "@types/w3c-web-usb": "^1.0.4"
   },
   "scripts": {
     "flow": "flow",
     "clean": "bash ../../script/clean.sh",
-    "build": "bash ../../script/build.sh",
+    "build": "tsc && tsc -m ES6 --outDir lib-es",
     "watch": "bash ../../script/watch.sh",
     "doc": "bash ../../script/doc.sh"
   },

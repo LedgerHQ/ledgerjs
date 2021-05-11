@@ -2405,6 +2405,11 @@
   resolved "https://registry.yarnpkg.com/@types/w3c-web-hid/-/w3c-web-hid-1.0.0.tgz#eca49db58fd114f6839579fba6e4a422e8a2e4c5"
   integrity sha512-sbcYWo0eP/XvVqtDFh9h1zFoPtr7nLGQjGJFtHlKcKdrz+dXFPTKK7JpCpORBQkqNodvOQx8OW8FbdOiEuwHOQ==
 
+"@types/w3c-web-usb@^1.0.4":
+  version "1.0.4"
+  resolved "https://registry.yarnpkg.com/@types/w3c-web-usb/-/w3c-web-usb-1.0.4.tgz#57e4181041dc1ad2bfad59b737caa7bddc7e1a27"
+  integrity sha512-aaOB3EL5WCWBBOYX7W1MKuzspOM9ZJI9s3iziRVypr1N+QyvIgXzCM4lm1iiOQ1VFzZioUPX9bsa23myCbKK4A==
+
 "@types/web-bluetooth@^0.0.9":
   version "0.0.9"
   resolved "https://registry.yarnpkg.com/@types/web-bluetooth/-/web-bluetooth-0.0.9.tgz#bfd545f6cbc32fc9d92e9543b5ea18ba0957e955"
