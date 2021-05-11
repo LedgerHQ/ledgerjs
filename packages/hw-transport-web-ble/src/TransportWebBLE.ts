@@ -187,7 +187,8 @@ export default class BluetoothTransport extends Transport {
     log("ble-verbose", "listen...");
     let unsubscribed;
     const bluetooth = requiresBluetooth();
-    bluetooth.requestDevice(requestDeviceParam()).then((device) => {
+    bluetooth.requestDevice(requestDeviceParam()).then(
+      (device) => {
         if (!unsubscribed) {
           observer.next({
             type: "add",
@@ -312,8 +313,8 @@ export default class BluetoothTransport extends Transport {
         throw e;
       }
     });
-    
-    return (b as Buffer)
+
+    return b as Buffer;
   }
 
   setScrambleKey() {}

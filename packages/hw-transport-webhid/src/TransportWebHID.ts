@@ -62,6 +62,7 @@ async function getFirstLedgerDevice(): Promise<HIDDevice> {
  * TransportWebHID.create().then(transport => ...)
  */
 
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 export default class TransportWebHID extends Transport {
   device: HIDDevice;
@@ -72,7 +73,10 @@ export default class TransportWebHID extends Transport {
   constructor(device: HIDDevice) {
     super();
     this.device = device;
-    this.deviceModel =  typeof device.productId === 'number' ? identifyUSBProductId(device.productId) : undefined;
+    this.deviceModel =
+      typeof device.productId === "number"
+        ? identifyUSBProductId(device.productId)
+        : undefined;
     device.addEventListener("inputreport", this.onInputReport);
   }
 
@@ -80,7 +84,7 @@ export default class TransportWebHID extends Transport {
   inputCallback: ((arg0: Buffer) => void) | null | undefined;
   read = (): Promise<Buffer> => {
     if (this.inputs.length) {
-      return Promise.resolve(this.inputs.shift() as unknown as Buffer);
+      return Promise.resolve((this.inputs.shift() as unknown) as Buffer);
     }
 
     return new Promise((success) => {
@@ -125,7 +129,10 @@ export default class TransportWebHID extends Transport {
             new TransportOpenUserCancelled("Access denied to use Ledger device")
           );
         } else if (!unsubscribed) {
-          const deviceModel = typeof device.productId === 'number' ? identifyUSBProductId(device.productId) : undefined;
+          const deviceModel =
+            typeof device.productId === "number"
+              ? identifyUSBProductId(device.productId)
+              : undefined;
           observer.next({
             type: "add",
             descriptor: device,
@@ -237,8 +244,8 @@ export default class TransportWebHID extends Transport {
 
       throw e;
     });
-    return (b as Buffer)
-  }
+    return b as Buffer;
+  };
 
   setScrambleKey() {}
 }

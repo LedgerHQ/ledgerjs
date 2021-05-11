@@ -30,6 +30,7 @@ const endpointNumber = 3;
  * ...
  * TransportWebUSB.create().then(transport => ...)
  */
+// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 export default class TransportWebUSB extends Transport {
   device: USBDevice;
@@ -202,6 +203,7 @@ export default class TransportWebUSB extends Transport {
 
       while (!(result = framing.getReducedResult(acc))) {
         const r = await this.device.transferIn(endpointNumber, packetSize);
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
         const buffer = Buffer.from(r.data.buffer);
         acc = framing.reduceResponse(acc, buffer);
@@ -219,7 +221,7 @@ export default class TransportWebUSB extends Transport {
       throw e;
     });
 
-    return b as Buffer
+    return b as Buffer;
   }
 
   setScrambleKey() {}
