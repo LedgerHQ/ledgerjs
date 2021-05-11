@@ -5,15 +5,18 @@ import data from "@ledgerhq/cryptoassets/data/dapps/ethereum";
  */
 
 export const getInfosForContractMethod = (contractAddress, selector) => {
-  if (contractAddress in data) {
-    let contractSelectors = data[contractAddress];
+  const lcSelector = selector.toLowerCase();
+  const lcContractAddress = contractAddress.toLowerCase();
 
-    if (selector in contractSelectors) {
+  if (lcContractAddress in data) {
+    const contractSelectors = data[lcContractAddress];
+
+    if (lcSelector in contractSelectors) {
       return {
-        payload: contractSelectors[selector]["serialized_data"],
-        signature: contractSelectors[selector]["signature"],
-        plugin: contractSelectors[selector]["plugin"],
-        erc20OfInterest: contractSelectors[selector]["erc20OfInterest"],
+        payload: contractSelectors[lcSelector]["serialized_data"],
+        signature: contractSelectors[lcSelector]["signature"],
+        plugin: contractSelectors[lcSelector]["plugin"],
+        erc20OfInterest: contractSelectors[lcSelector]["erc20OfInterest"],
         abi: contractSelectors["abi"],
       };
     }
