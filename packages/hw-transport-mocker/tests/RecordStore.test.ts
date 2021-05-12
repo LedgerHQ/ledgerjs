@@ -5,7 +5,7 @@ import {
   RecordStoreQueueEmpty,
   RecordStoreInvalidSynthax,
   RecordStoreWrongAPDU,
-  RecordStoreRemainingAPDU
+  RecordStoreRemainingAPDU,
 } from "../src";
 
 test("transport", async () => {
@@ -14,6 +14,7 @@ test("transport", async () => {
     <= 000000050107426974636f696e034254439000
   `);
   const Transport = createTransportReplayer(store);
+  // @ts-expect-error
   const t = await Transport.create();
   const r = await t.send(0xe0, 0x16, 0, 0);
   expect(r.toString("hex")).toBe("000000050107426974636f696e034254439000");
@@ -26,6 +27,7 @@ test("RecordStoreQueueEmpty", async () => {
   `);
   store.replayExchange(Buffer.from("e016000000", "hex"));
   expect(() => store.replayExchange(Buffer.from("00", "hex"))).toThrow(
+    // @ts-expect-error
     RecordStoreQueueEmpty
   );
 });
@@ -36,6 +38,7 @@ test("ensureQueueEmpty", async () => {
     <= 000000050107426974636f696e034254439000
   `);
   expect(store.isEmpty()).toBe(false);
+  // @ts-expect-error
   expect(() => store.ensureQueueEmpty()).toThrow(RecordStoreRemainingAPDU);
   store.replayExchange(Buffer.from("e016000000", "hex"));
   expect(store.isEmpty()).toBe(true);
@@ -51,12 +54,10 @@ test("record", async () => {
     Buffer.from("000000050107426974636f696e034254439000", "hex")
   );
   expect(store.isEmpty()).toBe(false);
+  // @ts-expect-error
   expect(() => store.ensureQueueEmpty()).toThrow(RecordStoreRemainingAPDU);
   const res = store.replayExchange(Buffer.from("e016000000", "hex"));
-  expect(res.toString("hex")).toBe(
-    "000000050107426974636f696e034254439000",
-    "hex"
-  );
+  expect(res.toString("hex")).toBe("000000050107426974636f696e034254439000");
   expect(store.isEmpty()).toBe(true);
   store.ensureQueueEmpty();
 });
@@ -83,12 +84,15 @@ test("multiple apdu", async () => {
     <= 000000050107426974636f696e034254439000
   `);
   expect(store.isEmpty()).toBe(false);
+  // @ts-expect-error
   expect(() => store.ensureQueueEmpty()).toThrow(RecordStoreRemainingAPDU);
   store.replayExchange(Buffer.from("e016000000", "hex"));
   expect(store.isEmpty()).toBe(false);
+  // @ts-expect-error
   expect(() => store.ensureQueueEmpty()).toThrow(RecordStoreRemainingAPDU);
   store.replayExchange(Buffer.from("e016000000", "hex"));
   expect(store.isEmpty()).toBe(false);
+  // @ts-expect-error
   expect(() => store.ensureQueueEmpty()).toThrow(RecordStoreRemainingAPDU);
   store.replayExchange(Buffer.from("e016000000", "hex"));
   expect(store.isEmpty()).toBe(true);
@@ -101,11 +105,14 @@ test("invalid apdu", async () => {
     <= 000000050107426974636f696e034254439000
   `);
   expect(store.isEmpty()).toBe(false);
+  // @ts-expect-error
   expect(() => store.ensureQueueEmpty()).toThrow(RecordStoreRemainingAPDU);
   expect(() => store.replayExchange(Buffer.from("0000000000", "hex"))).toThrow(
+    // @ts-expect-error
     RecordStoreWrongAPDU
   );
   expect(store.isEmpty()).toBe(false);
+  // @ts-expect-error
   expect(() => store.ensureQueueEmpty()).toThrow(RecordStoreRemainingAPDU);
   store.replayExchange(Buffer.from("e016000000", "hex"));
   expect(store.isEmpty()).toBe(true);
@@ -120,6 +127,7 @@ test("skipping apdu mechanism is not on by default", async () => {
     <= 3110000405312e352e35042300000004312e37002013fe17e06cf2f710d33328aa46d1053f8fadd48dcaeca2c5512dd79e2158d5779000
   `);
   expect(() => store.replayExchange(Buffer.from("e001000000", "hex"))).toThrow(
+    // @ts-expect-error
     RecordStoreWrongAPDU
   );
 });
@@ -133,7 +141,7 @@ test("skipping apdu mechanism", async () => {
     <= 3110000405312e352e35042300000004312e37002013fe17e06cf2f710d33328aa46d1053f8fadd48dcaeca2c5512dd79e2158d5779000
   `,
     {
-      autoSkipUnknownApdu: true
+      autoSkipUnknownApdu: true,
     }
   );
   expect(
@@ -158,12 +166,12 @@ test("skipping apdu mechanism (customized warning function", async () => {
   `,
     {
       autoSkipUnknownApdu: true,
-      warning: log => {
+      warning: (log) => {
         expect(log).toBe(
           "skipped unmatched apdu (line 2 – expected e016000000)"
         );
         ++warnings;
-      }
+      },
     }
   );
   store.replayExchange(Buffer.from("e016000000", "hex"));
@@ -188,7 +196,7 @@ test("parser to allow different alternative syntax", async () => {
       `
   =>e016000000
 
-  <=000000050107426974636f696e034254439000    
+  <=000000050107426974636f696e034254439000
   =>e016000000
   <=     000000050107426974636f696e034254439000
 
@@ -201,31 +209,44 @@ test("parser to allow different alternative syntax", async () => {
 });
 
 test("invalid syntaxes", async () => {
-  expect(() =>
-    RecordStore.fromString(
-      "=>e016000000<=000000050107426974636f696e034254439000"
-    )
+  expect(
+    () =>
+      RecordStore.fromString(
+        "=>e016000000<=000000050107426974636f696e034254439000"
+      )
+    // @ts-expect-error
   ).toThrow(RecordStoreInvalidSynthax);
   expect(() => RecordStore.fromString("=>e016000000")).toThrow(
+    // @ts-expect-error
     RecordStoreInvalidSynthax
   );
-  expect(() =>
-    RecordStore.fromString("e016000000\n000000050107426974636f696e034254439000")
+  expect(
+    () =>
+      RecordStore.fromString(
+        "e016000000\n000000050107426974636f696e034254439000"
+      )
+    // @ts-expect-error
   ).toThrow(RecordStoreInvalidSynthax);
-  expect(() =>
-    RecordStore.fromString(
-      "=>e016000000\n000000050107426974636f696e034254439000"
-    )
+  expect(
+    () =>
+      RecordStore.fromString(
+        "=>e016000000\n000000050107426974636f696e034254439000"
+      )
+    // @ts-expect-error
   ).toThrow(RecordStoreInvalidSynthax);
   expect(() => RecordStore.fromString("=>e016000000\n=>e016000000")).toThrow(
+    // @ts-expect-error
     RecordStoreInvalidSynthax
   );
   expect(() => RecordStore.fromString("=>e016000000\n<=AZERTY")).toThrow(
+    // @ts-expect-error
     RecordStoreInvalidSynthax
   );
-  expect(() =>
-    RecordStore.fromString(
-      "=>e016000000\n<=00000005Z10742674636f696e034254439000"
-    )
+  expect(
+    () =>
+      RecordStore.fromString(
+        "=>e016000000\n<=00000005Z10742674636f696e034254439000"
+      )
+    // @ts-expect-error
   ).toThrow(RecordStoreInvalidSynthax);
 });
