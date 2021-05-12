@@ -20,21 +20,6 @@
     "rebuild": "lerna run clean && lerna run build",
     "publish": "yarn && lerna run clean && lerna run build && lerna publish --registry=https://registry.npmjs.org/"
   },
-  "jest": {
-    "preset": "ts-jest",
-    "projects": ["<rootDir>/packages/*"],
-    "collectCoverage": true,
-    "testPathIgnorePatterns": [
-      "packages/.*/lib-es",
-      "packages/.*/lib"
-    ],
-    "coveragePathIgnorePatterns": [
-      "packages/create-dapp"
-    ],
-    "collectCoverageFrom": [
-      "packages/**/src/*.ts"
-    ]
-  },
   "devDependencies": {
     "@babel/cli": "^7.12.10",
     "@babel/core": "^7.12.10",
@@ -66,6 +51,7 @@
     "rollup": "^2.47.0",
     "rollup-plugin-typescript2": "^0.30.0",
     "ts-jest": "^26.5.6",
+    "ts-node": "^9.1.1",
     "typescript": "^4.2.4",
     "uglify-js": "^3.13.5"
   },
