@@ -1,7 +1,7 @@
 export default {
   preset: "ts-jest",
   testEnvironment: "node",
-  testRegex: "test.ts$",
+  testRegex: ".test.ts$",
   collectCoverage: true,
   testPathIgnorePatterns: ["packages/*/lib-es", "packages/*/lib"],
   coveragePathIgnorePatterns: ["packages/create-dapp"],
