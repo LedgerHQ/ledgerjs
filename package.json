@@ -9,7 +9,7 @@
     "preinstall": "node -e \"if (process.env.npm_execpath.indexOf('yarn') === -1) { console.log('\u001b[31mPlease use yarn\u001b[0m'); process.exit(1); }\"",
     "prettier": "prettier --write 'packages/*/src/**/*.?s'",
     "ci": "yarn run build && yarn run lint && yarn run doc && jest",
-    "test": "yarn run build && jest",
+    "test": "jest",
     "test-no-git-diff": "git diff --exit-code || exit 1",
     "doc": "lerna run doc",
     "lint": "eslint packages/**/src --no-error-on-unmatched-pattern --ext .ts,.tsx -c .eslintrc.json",
