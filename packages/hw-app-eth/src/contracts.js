@@ -22,5 +22,3 @@ export const getInfosForContractMethod = (contractAddress, selector) => {
     }
   }
 };
-
-exports.getInfosForContractMethod = getInfosForContractMethod;
