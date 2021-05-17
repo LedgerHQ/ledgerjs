@@ -21,7 +21,9 @@ import { splitPath, foreach } from "./utils";
 import { EthAppPleaseEnableContractData } from "@ledgerhq/errors";
 import type Transport from "@ledgerhq/hw-transport";
 import { BigNumber } from "bignumber.js";
-import { encode, decode } from "rlp";
+import { ethers } from "ethers";
+import { byContractAddress } from "./erc20";
+import { getInfosForContractMethod } from "./contracts";
 
 export type StarkQuantizationType =
   | "eth"
@@ -87,6 +89,7 @@ export default class Eth {
         "starkUnsafeSign",
         "eth2GetPublicKey",
         "eth2SetWithdrawalIndex",
+        "setExternalPlugin",
       ],
       scrambleKey
     );
@@ -167,17 +170,7 @@ export default class Eth {
    * const signed = await appEth.signTransaction(path, rawTxHex)
    */
   provideERC20TokenInformation({ data }: { data: Buffer }): Promise<boolean> {
-    return this.transport.send(0xe0, 0x0a, 0x00, 0x00, data).then(
-      () => true,
-      (e) => {
-        if (e && e.statusCode === 0x6d00) {
-          // this case happen for older version of ETH app, since older app version had the ERC20 data hardcoded, it's fine to assume it worked.
-          // we return a flag to know if the call was effective or not
-          return false;
-        }
-        throw e;
-      }
-    );
+    return _provideERC20TokenInformation.call(this, { data });
   }
 
   /**
@@ -199,11 +192,18 @@ export default class Eth {
     let toSend = [];
     let response;
     // Check if the TX is encoded following EIP 155
-    let rlpTx = decode(rawTx);
+    let rlpTx = ethers.utils.RLP.decode("0x" + rawTxHex).map((hex) =>
+      Buffer.from(hex.slice(2), "hex")
+    );
+
     let rlpOffset = 0;
     let chainIdPrefix = "";
     if (rlpTx.length > 6) {
-      let rlpVrs = encode(rlpTx.slice(-3));
+      let rlpVrs = Buffer.from(
+        ethers.utils.RLP.encode(rlpTx.slice(-3)).slice(2),
+        "hex"
+      );
+
       rlpOffset = rawTx.length - (rlpVrs.length - 1);
       const chainIdSrc = rlpTx[6];
       const chainIdBuf = Buffer.alloc(4);
@@ -240,6 +240,51 @@ export default class Eth {
       toSend.push(buffer);
       offset += chunkSize;
     }
+
+    rlpTx = ethers.utils.RLP.decode("0x" + rawTxHex);
+
+    const decodedTx = {
+      data: rlpTx[5],
+      to: rlpTx[3],
+    };
+
+    if (decodedTx.data.length >= 10) {
+      const erc20Info = byContractAddress(decodedTx.to);
+      if (erc20Info) {
+        _provideERC20TokenInformation.call(this, erc20Info);
+      }
+
+      const selector = decodedTx.data.substring(0, 10);
+      const infos = getInfosForContractMethod(decodedTx.to, selector);
+
+      if (infos) {
+        let { plugin, payload, signature, erc20OfInterest, abi } = infos;
+
+        if (erc20OfInterest?.length && abi) {
+          const contract = new ethers.utils.Interface(abi);
+          const args = contract.parseTransaction(decodedTx).args;
+
+          erc20OfInterest.forEach((path) => {
+            const address = path.split(".").reduce((value, seg) => {
+              if (seg === "-1" && Array.isArray(value)) {
+                return value[value.length - 1];
+              }
+              return value[seg];
+            }, args);
+
+            const erc20Info = byContractAddress(address);
+            if (erc20Info) {
+              _provideERC20TokenInformation.call(this, erc20Info);
+            }
+          });
+        }
+
+        if (plugin) {
+          _setExternalPlugin.call(this, payload, signature);
+        }
+      }
+    }
+
     return foreach(toSend, (data, i) =>
       this.transport
         .send(0xe0, 0x04, i === 0 ? 0x00 : 0x80, 0x00, data)
@@ -1002,4 +1047,63 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
       }
     );
   }
+
+  /**
+   * Set the name of the plugin that should be used to parse the next transaction
+   *
+   * @param pluginName string containing the name of the plugin, must have length between 1 and 30 bytes
+   * @return True if the method was executed successfully
+   */
+  setExternalPlugin(
+    pluginName: string,
+    contractAddress: string,
+    selector: string
+  ): Promise<boolean> {
+    return _setExternalPlugin.call(this, pluginName, contractAddress, selector);
+  }
+}
+
+// PRIVATE
+
+function _provideERC20TokenInformation({
+  data,
+}: {
+  data: Buffer,
+}): Promise<boolean> {
+  return this.transport.send(0xe0, 0x0a, 0x00, 0x00, data).then(
+    () => true,
+    (e) => {
+      if (e && e.statusCode === 0x6d00) {
+        // this case happen for older version of ETH app, since older app version had the ERC20 data hardcoded, it's fine to assume it worked.
+        // we return a flag to know if the call was effective or not
+        return false;
+      }
+      throw e;
+    }
+  );
+}
+
+function _setExternalPlugin(
+  payload: string,
+  signature: string
+): Promise<boolean> {
+  let payloadBuffer = Buffer.from(payload, "hex");
+  let signatureBuffer = Buffer.from(signature, "hex");
+  let buffer = Buffer.concat([payloadBuffer, signatureBuffer]);
+  return this.transport.send(0xe0, 0x12, 0x00, 0x00, buffer).then(
+    () => true,
+    (e) => {
+      if (e && e.statusCode === 0x6a80) {
+        // this case happen when the plugin name is too short or too long
+        return false;
+      } else if (e && e.statusCode === 0x6984) {
+        // this case happen when the plugin requested is not installed on the device
+        return false;
+      } else if (e && e.statusCode === 0x6d00) {
+        // this case happen for older version of ETH app
+        return false;
+      }
+      throw e;
+    }
+  );
 }

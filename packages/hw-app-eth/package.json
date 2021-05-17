@@ -30,7 +30,7 @@
     "@ledgerhq/errors": "^5.50.0",
     "@ledgerhq/hw-transport": "^5.51.1",
     "bignumber.js": "^9.0.1",
-    "rlp": "^2.2.6"
+    "ethers": "^5.1.4"
   },
   "devDependencies": {
     "flow-bin": "^0.149.0"
