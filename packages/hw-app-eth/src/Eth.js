@@ -260,7 +260,7 @@ export default class Eth {
       if (infos) {
         let { plugin, payload, signature, erc20OfInterest, abi } = infos;
 
-        if (erc20OfInterest?.length && abi) {
+        if (erc20OfInterest && erc20OfInterest.length && abi) {
           const contract = new ethers.utils.Interface(abi);
           const args = contract.parseTransaction(decodedTx).args;
 
