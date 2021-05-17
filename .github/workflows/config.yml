@@ -21,7 +21,7 @@ jobs:
         with:
           node-version: 12.x
       - name: install dependencies
-        run: yarn install --production
+        run: yarn
       - name: test
         run: yarn test
       - name: test  no git diff
