@@ -170,7 +170,7 @@ export default class Eth {
    * const signed = await appEth.signTransaction(path, rawTxHex)
    */
   provideERC20TokenInformation({ data }: { data: Buffer }): Promise<boolean> {
-    return _provideERC20TokenInformation.call(this, { data });
+    return provideERC20TokenInformation(this.transport, data);
   }
 
   /**
@@ -178,7 +178,7 @@ export default class Eth {
    * @example
    eth.signTransaction("44'/60'/0'/0/0", "e8018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a2487400080").then(result => ...)
    */
-  signTransaction(
+  async signTransaction(
     path: string,
     rawTxHex: string
   ): Promise<{
@@ -251,7 +251,7 @@ export default class Eth {
     if (decodedTx.data.length >= 10) {
       const erc20Info = byContractAddress(decodedTx.to);
       if (erc20Info) {
-        _provideERC20TokenInformation.call(this, erc20Info);
+        await provideERC20TokenInformation(this.transport, erc20Info.data);
       }
 
       const selector = decodedTx.data.substring(0, 10);
@@ -264,7 +264,7 @@ export default class Eth {
           const contract = new ethers.utils.Interface(abi);
           const args = contract.parseTransaction(decodedTx).args;
 
-          erc20OfInterest.forEach((path) => {
+          for (path of erc20OfInterest) {
             const address = path.split(".").reduce((value, seg) => {
               if (seg === "-1" && Array.isArray(value)) {
                 return value[value.length - 1];
@@ -274,13 +274,16 @@ export default class Eth {
 
             const erc20Info = byContractAddress(address);
             if (erc20Info) {
-              _provideERC20TokenInformation.call(this, erc20Info);
+              await provideERC20TokenInformation(
+                this.transport,
+                erc20Info.data
+              );
             }
-          });
+          }
         }
 
         if (plugin) {
-          _setExternalPlugin.call(this, payload, signature);
+          await setExternalPlugin(this.transport, payload, signature);
         }
       }
     }
@@ -1059,18 +1062,22 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     contractAddress: string,
     selector: string
   ): Promise<boolean> {
-    return _setExternalPlugin.call(this, pluginName, contractAddress, selector);
+    return setExternalPlugin(
+      this.transport,
+      pluginName,
+      contractAddress,
+      selector
+    );
   }
 }
 
 // PRIVATE
 
-function _provideERC20TokenInformation({
-  data,
-}: {
-  data: Buffer,
-}): Promise<boolean> {
-  return this.transport.send(0xe0, 0x0a, 0x00, 0x00, data).then(
+function provideERC20TokenInformation(
+  transport: Transport<*>,
+  data: Buffer
+): Promise<boolean> {
+  return transport.send(0xe0, 0x0a, 0x00, 0x00, data).then(
     () => true,
     (e) => {
       if (e && e.statusCode === 0x6d00) {
@@ -1083,14 +1090,15 @@ function _provideERC20TokenInformation({
   );
 }
 
-function _setExternalPlugin(
+function setExternalPlugin(
+  transport: Transport<*>,
   payload: string,
   signature: string
 ): Promise<boolean> {
   let payloadBuffer = Buffer.from(payload, "hex");
   let signatureBuffer = Buffer.from(signature, "hex");
   let buffer = Buffer.concat([payloadBuffer, signatureBuffer]);
-  return this.transport.send(0xe0, 0x12, 0x00, 0x00, buffer).then(
+  return transport.send(0xe0, 0x12, 0x00, 0x00, buffer).then(
     () => true,
     (e) => {
       if (e && e.statusCode === 0x6a80) {
