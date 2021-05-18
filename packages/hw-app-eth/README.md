@@ -67,8 +67,8 @@ Retrieve the metadatas a given contract address and a method selector
 
 #### Parameters
 
--   `contractAddress`  
--   `selector`  
+-   `contractAddress` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `selector` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
 ### byContractAddress
 

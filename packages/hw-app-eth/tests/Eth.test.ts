@@ -11,7 +11,7 @@ test("getAppConfiguration", async () => {
   const Transport = createTransportReplayer(
     RecordStore.fromString(`
     => e006000000
-    <= 010101069000    
+    <= 010101069000
     `)
   );
   // @ts-expect-error Todo: fix types for Transport creator
@@ -32,7 +32,7 @@ test("getAddress", async () => {
   const Transport = createTransportReplayer(
     RecordStore.fromString(`
     => e002000015058000002c8000003c800000008000000000000000
-    <= 4104df00ad3869baad7ce54f4d560ba7f268d542df8f2679a5898d78a690c3db8f9833d2973671cb14b088e91bdf7c0ab00029a576473c0e12f84d252e630bb3809b28436241393833363265313939633431453138363444303932334146393634366433413634383435319000      
+    <= 4104df00ad3869baad7ce54f4d560ba7f268d542df8f2679a5898d78a690c3db8f9833d2973671cb14b088e91bdf7c0ab00029a576473c0e12f84d252e630bb3809b28436241393833363265313939633431453138363444303932334146393634366433413634383435319000
     `)
   );
   // @ts-expect-error Todo: fix types for Transport creator
@@ -120,6 +120,7 @@ test("signTransaction testing provideERC20Informations + setExternalPlugin", asy
     )
   );
   // Original TX: https://etherscan.io/tx/0xf87e29ee49230352f56f099ef2ae9c7144b3ecb2d0085212e2478b267479b4df
+  //  @ts-expect-error we need to fix Transport type
   const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.signTransaction(
@@ -330,7 +331,7 @@ test("starkGetPublicKey", async () => {
   const Transport = createTransportReplayer(
     RecordStore.fromString(`
     => f002000009028000534b00000000
-    <= 05e8330615774c27af37530e34aa17e279eb1ac8ac91709932e0a1929bba54ac9000      
+    <= 05e8330615774c27af37530e34aa17e279eb1ac8ac91709932e0a1929bba54ac9000
     `)
   );
   // @ts-expect-error Todo: fix types for Transport creator
