@@ -66,8 +66,6 @@ jobs:
         run: yarn build
       - name: test
         run: yarn test
-      - name: test no git diff
-        run: yarn test-no-git-diff
       # - name: codecov
       #   run: npx codecov
   docs:
@@ -89,3 +87,5 @@ jobs:
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
       - name: docs
         run: yarn doc
+      - name: test no git diff
+        run: yarn test-no-git-diff
