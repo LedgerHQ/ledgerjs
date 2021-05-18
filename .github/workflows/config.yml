@@ -21,7 +21,7 @@ jobs:
       - uses: actions/cache@v2
         id: cache
         with:
-          path: '**/node_modules'
+          path: "**/node_modules"
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
       - name: Install Dependencies
         if: steps.cache.outputs.cache-hit != 'true'
@@ -41,7 +41,7 @@ jobs:
           node-version: 12.x
       - uses: actions/cache@v2
         with:
-          path: '**/node_modules'
+          path: "**/node_modules"
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
       - name: lint
         run: yarn lint
@@ -60,7 +60,7 @@ jobs:
           node-version: 12.x
       - uses: actions/cache@v2
         with:
-          path: '**/node_modules'
+          path: "**/node_modules"
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
       - name: build
         run: yarn build
@@ -85,7 +85,7 @@ jobs:
           node-version: 12.x
       - uses: actions/cache@v2
         with:
-          path: '**/node_modules'
+          path: "**/node_modules"
           key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
       - name: docs
         run: yarn doc
