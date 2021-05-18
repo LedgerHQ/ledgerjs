@@ -1074,12 +1074,7 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
     contractAddress: string,
     selector: string
   ): Promise<boolean> {
-    return setExternalPlugin(
-      this.transport,
-      pluginName,
-      contractAddress,
-      selector
-    );
+    return setExternalPlugin(this.transport, pluginName, selector);
   }
 }
 
