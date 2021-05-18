@@ -66,8 +66,8 @@ jobs:
         run: yarn build
       - name: test
         run: yarn test
-      # - name: codecov
-      #   run: npx codecov
+      - name: codecov
+        run: npx codecov
   docs:
     needs: setup
     runs-on: ubuntu-latest
