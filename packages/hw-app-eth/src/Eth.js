@@ -1086,7 +1086,7 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
   }
 }
 
-// PRIVATE
+// internal helpers
 
 function provideERC20TokenInformation(
   transport: Transport<*>,

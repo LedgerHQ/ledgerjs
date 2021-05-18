@@ -2,7 +2,7 @@
 
 ## @ledgerhq/cryptoassets
 
-library that contains Ledger internal crypto assets list and signatures.
+Ledger's material for crypto currencies, tokens and fiats. Also includes signatures required by Nano devices for these tokens.
 
 **DO NOT EDIT because this library is generated.**
 
