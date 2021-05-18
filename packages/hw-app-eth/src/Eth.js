@@ -18,6 +18,7 @@
 
 // FIXME drop:
 import { splitPath, foreach } from "./utils";
+import { log } from "@ledgerhq/logs";
 import { EthAppPleaseEnableContractData } from "@ledgerhq/errors";
 import type Transport from "@ledgerhq/hw-transport";
 import { BigNumber } from "bignumber.js";
@@ -274,6 +275,14 @@ export default class Eth {
 
             const erc20Info = byContractAddress(address);
             if (erc20Info) {
+              log(
+                "ethereum",
+                "loading erc20token info for " +
+                  erc20Info.contractAddress +
+                  " (" +
+                  erc20Info.ticker +
+                  ")"
+              );
               await provideERC20TokenInformation(
                 this.transport,
                 erc20Info.data
@@ -283,8 +292,11 @@ export default class Eth {
         }
 
         if (plugin) {
+          log("ethereum", "loading plugin for " + selector);
           await setExternalPlugin(this.transport, payload, signature);
         }
+      } else {
+        log("ethereum", "no infos for selector " + selector);
       }
     }
 

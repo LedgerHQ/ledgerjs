@@ -28,6 +28,7 @@
   "dependencies": {
     "@ledgerhq/cryptoassets": "^6.0.0-alpha.0",
     "@ledgerhq/errors": "^5.50.0",
+    "@ledgerhq/logs": "^5.50.0",
     "@ledgerhq/hw-transport": "^5.51.1",
     "bignumber.js": "^9.0.1",
     "ethers": "^5.1.4"
