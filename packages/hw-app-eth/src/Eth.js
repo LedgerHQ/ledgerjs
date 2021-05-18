@@ -250,16 +250,16 @@ export default class Eth {
     };
 
     if (decodedTx.data.length >= 10) {
-      const erc20Info = byContractAddress(decodedTx.to);
-      if (erc20Info) {
-        await provideERC20TokenInformation(this.transport, erc20Info.data);
-      }
-
       const selector = decodedTx.data.substring(0, 10);
       const infos = getInfosForContractMethod(decodedTx.to, selector);
 
       if (infos) {
         let { plugin, payload, signature, erc20OfInterest, abi } = infos;
+
+        if (plugin) {
+          log("ethereum", "loading plugin for " + selector);
+          await setExternalPlugin(this.transport, payload, signature);
+        }
 
         if (erc20OfInterest && erc20OfInterest.length && abi) {
           const contract = new ethers.utils.Interface(abi);
@@ -291,9 +291,17 @@ export default class Eth {
           }
         }
 
-        if (plugin) {
-          log("ethereum", "loading plugin for " + selector);
-          await setExternalPlugin(this.transport, payload, signature);
+        const erc20Info = byContractAddress(decodedTx.to);
+        if (erc20Info) {
+          log(
+            "ethereum",
+            "loading erc20token info for " +
+              erc20Info.contractAddress +
+              " (" +
+              erc20Info.ticker +
+              ")"
+          );
+          await provideERC20TokenInformation(this.transport, erc20Info.data);
         }
       } else {
         log("ethereum", "no infos for selector " + selector);
