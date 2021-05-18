@@ -1159,12 +1159,7 @@ export default class Eth {
     contractAddress: string,
     selector: string
   ): Promise<boolean> {
-    return setExternalPlugin(
-      this.transport,
-      pluginName,
-      contractAddress,
-      selector
-    );
+    return setExternalPlugin(this.transport, pluginName, selector);
   }
 }
 
