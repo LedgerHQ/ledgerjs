@@ -144,8 +144,8 @@ export default class TransportNodeHidNoEvents extends Transport {
    * @param apdu
    * @returns a promise of apdu response
    */
-  exchange = (apdu: Buffer): Promise<any> =>
-    this.exchangeAtomicImpl(async () => {
+  async exchange(apdu: Buffer): Promise<Buffer> {
+    const b = await this.exchangeAtomicImpl(async () => {
       const { channel, packetSize } = this;
       log("apdu", "=> " + apdu.toString("hex"));
       const framing = hidFraming(channel, packetSize);
@@ -168,6 +168,9 @@ export default class TransportNodeHidNoEvents extends Transport {
       log("apdu", "<= " + result.toString("hex"));
       return result;
     });
+
+    return b as Buffer;
+  }
 
   setScrambleKey() {}
 
