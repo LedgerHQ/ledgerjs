@@ -54,7 +54,7 @@ Exchange with the device using APDU protocol.
 
 -   `apdu` **[Buffer](https://nodejs.org/api/buffer.html)** 
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;any>** a promise of apdu response
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Buffer](https://nodejs.org/api/buffer.html)>** a promise of apdu response
 
 #### close
 
