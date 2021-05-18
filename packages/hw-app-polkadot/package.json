@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-app-polkadot",
-  "version": "5.51.1",
+  "version": "6.0.0-typescript.0",
   "description": "Ledger Hardware Wallet Polkadot Application API",
   "keywords": [
     "Ledger",
@@ -26,10 +26,9 @@
   "module": "lib-es/Polkadot.js",
   "types": "lib/Polkadot.d.ts",
   "license": "Apache-2.0",
-  "devDependencies": {},
   "dependencies": {
-    "@ledgerhq/errors": "^5.50.0",
-    "@ledgerhq/hw-transport": "^5.51.1",
+    "@ledgerhq/errors": "^6.0.0-typescript.0",
+    "@ledgerhq/hw-transport": "^6.0.0-typescript.0",
     "bip32-path": "^0.4.2"
   },
   "scripts": {
