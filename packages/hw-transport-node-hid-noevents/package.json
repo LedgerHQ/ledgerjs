@@ -33,7 +33,9 @@
     "@ledgerhq/logs": "^5.50.0",
     "node-hid": "2.1.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@types/node-hid": "^1.3.0"
+  },
   "scripts": {
     "clean": "bash ../../script/clean.sh",
     "build": "bash ../../script/build.sh",

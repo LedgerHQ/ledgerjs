@@ -1,15 +1,15 @@
-import HID from "node-hid";
-import Transport from "@ledgerhq/hw-transport";
+import HID, { Device } from "node-hid";
 import { log } from "@ledgerhq/logs";
-import type {
+import Transport, {
   Observer,
   DescriptorEvent,
   Subscription,
+  Device as TransportDevice,
 } from "@ledgerhq/hw-transport";
 import { ledgerUSBVendorId } from "@ledgerhq/devices";
 import hidFraming from "@ledgerhq/devices/lib/hid-framing";
 import { identifyUSBProductId, identifyProductName } from "@ledgerhq/devices";
-import type { DeviceModel } from "@ledgerhq/devices";
+import { DeviceModel } from "@ledgerhq/devices";
 import { TransportError, DisconnectedDevice } from "@ledgerhq/errors";
 
 const filterInterface = (device) =>
@@ -17,7 +17,7 @@ const filterInterface = (device) =>
     ? device.usagePage === 0xffa0
     : device.interface === 0;
 
-export function getDevices(): Array<any> {
+export function getDevices(): Device[] {
   // $FlowFixMe
   return HID.devices(ledgerUSBVendorId, 0x0).filter(filterInterface);
 }
@@ -54,7 +54,7 @@ export default class TransportNodeHidNoEvents extends Transport {
         type: "add",
         descriptor: device.path,
         deviceModel,
-        device,
+        device: (device as unknown) as TransportDevice,
       });
     });
     observer.complete();
@@ -74,7 +74,7 @@ export default class TransportNodeHidNoEvents extends Transport {
 
       const device = getDevices()[0];
       if (!device) throw new TransportError("NoDevice", "NoDevice");
-      return new TransportNodeHidNoEvents(new HID.HID(device.path));
+      return new TransportNodeHidNoEvents(new HID.HID(device.path as string));
     });
   }
 
@@ -87,7 +87,7 @@ export default class TransportNodeHidNoEvents extends Transport {
   constructor(device: HID.HID) {
     super();
     this.device = device;
-    // $FlowFixMe
+    // @ts-expect-error accessing low level API in C
     const info = device.getDeviceInfo();
     this.deviceModel =
       info && info.product ? identifyProductName(info.product) : null;
