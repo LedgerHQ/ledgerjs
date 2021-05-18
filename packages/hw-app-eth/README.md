@@ -13,49 +13,62 @@ Ledger Hardware Wallet ETH JavaScript bindings.
 
 #### Table of Contents
 
--   [byContractAddress](#bycontractaddress)
+-   [getInfosForContractMethod](#getinfosforcontractmethod)
     -   [Parameters](#parameters)
+-   [byContractAddress](#bycontractaddress)
+    -   [Parameters](#parameters-1)
 -   [list](#list)
 -   [Eth](#eth)
-    -   [Parameters](#parameters-1)
+    -   [Parameters](#parameters-2)
     -   [Examples](#examples)
     -   [getAddress](#getaddress)
-        -   [Parameters](#parameters-2)
+        -   [Parameters](#parameters-3)
         -   [Examples](#examples-1)
     -   [provideERC20TokenInformation](#provideerc20tokeninformation)
-        -   [Parameters](#parameters-3)
+        -   [Parameters](#parameters-4)
         -   [Examples](#examples-2)
     -   [signTransaction](#signtransaction)
-        -   [Parameters](#parameters-4)
+        -   [Parameters](#parameters-5)
         -   [Examples](#examples-3)
     -   [getAppConfiguration](#getappconfiguration)
     -   [signPersonalMessage](#signpersonalmessage)
-        -   [Parameters](#parameters-5)
+        -   [Parameters](#parameters-6)
         -   [Examples](#examples-4)
     -   [signEIP712HashedMessage](#signeip712hashedmessage)
-        -   [Parameters](#parameters-6)
+        -   [Parameters](#parameters-7)
         -   [Examples](#examples-5)
     -   [starkGetPublicKey](#starkgetpublickey)
-        -   [Parameters](#parameters-7)
-    -   [starkSignOrder](#starksignorder)
         -   [Parameters](#parameters-8)
-    -   [starkSignOrder_v2](#starksignorder_v2)
+    -   [starkSignOrder](#starksignorder)
         -   [Parameters](#parameters-9)
-    -   [starkSignTransfer](#starksigntransfer)
+    -   [starkSignOrder_v2](#starksignorder_v2)
         -   [Parameters](#parameters-10)
-    -   [starkSignTransfer_v2](#starksigntransfer_v2)
+    -   [starkSignTransfer](#starksigntransfer)
         -   [Parameters](#parameters-11)
-    -   [starkProvideQuantum](#starkprovidequantum)
+    -   [starkSignTransfer_v2](#starksigntransfer_v2)
         -   [Parameters](#parameters-12)
-    -   [starkProvideQuantum_v2](#starkprovidequantum_v2)
+    -   [starkProvideQuantum](#starkprovidequantum)
         -   [Parameters](#parameters-13)
-    -   [starkUnsafeSign](#starkunsafesign)
+    -   [starkProvideQuantum_v2](#starkprovidequantum_v2)
         -   [Parameters](#parameters-14)
-    -   [eth2GetPublicKey](#eth2getpublickey)
+    -   [starkUnsafeSign](#starkunsafesign)
         -   [Parameters](#parameters-15)
+    -   [eth2GetPublicKey](#eth2getpublickey)
+        -   [Parameters](#parameters-16)
         -   [Examples](#examples-6)
     -   [eth2SetWithdrawalIndex](#eth2setwithdrawalindex)
-        -   [Parameters](#parameters-16)
+        -   [Parameters](#parameters-17)
+    -   [setExternalPlugin](#setexternalplugin)
+        -   [Parameters](#parameters-18)
+
+### getInfosForContractMethod
+
+Retrieve the metadatas a given contract address and a method selector
+
+#### Parameters
+
+-   `contractAddress` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `selector` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
 ### byContractAddress
 
@@ -362,5 +375,17 @@ It shall be run before the ETH 2 deposit transaction is signed. If not called, t
 ##### Parameters
 
 -   `withdrawalIndex` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** index path in the EIP 2334 path m/12381/3600/withdrawalIndex/0
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** True if the method was executed successfully
+
+#### setExternalPlugin
+
+Set the name of the plugin that should be used to parse the next transaction
+
+##### Parameters
+
+-   `pluginName` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** string containing the name of the plugin, must have length between 1 and 30 bytes
+-   `contractAddress` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `selector` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** True if the method was executed successfully
