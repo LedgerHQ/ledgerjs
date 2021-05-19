@@ -13,12 +13,11 @@ import { DeviceModel } from "@ledgerhq/devices";
 import { TransportError, DisconnectedDevice } from "@ledgerhq/errors";
 
 const filterInterface = (device) =>
-  ["win32", "darwin"].includes(process.platform) // $FlowFixMe
+  ["win32", "darwin"].includes(process.platform)
     ? device.usagePage === 0xffa0
     : device.interface === 0;
 
-export function getDevices(): Device[] {
-  // $FlowFixMe
+export function getDevices(): (Device & { deviceName?: string })[] {
   return HID.devices(ledgerUSBVendorId, 0x0).filter(filterInterface);
 }
 

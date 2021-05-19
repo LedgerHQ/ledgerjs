@@ -22,7 +22,7 @@ export type Subscription = {
 
 /**
  */
-export type Device = Record<string, unknown>;
+export type Device = any;
 
 /**
  * type: add or remove event

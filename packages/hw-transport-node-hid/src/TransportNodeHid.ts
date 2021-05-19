@@ -65,7 +65,7 @@ export default class TransportNodeHid extends TransportNodeHidNoEvents {
       // this needs to run asynchronously so the subscription is defined during this phase
       for (const device of devices) {
         if (!unsubscribed) {
-          const descriptor: string = device.path;
+          const descriptor = device.path;
           const deviceModel = identifyUSBProductId(device.productId);
           observer.next({
             type: "add",
@@ -129,7 +129,7 @@ export default class TransportNodeHid extends TransportNodeHidNoEvents {
 
       const device = getDevices()[0];
       if (!device) throw new TransportError("NoDevice", "NoDevice");
-      return new TransportNodeHid(new HID.HID(device.path));
+      return new TransportNodeHid(new HID.HID(device.path as string));
     });
   }
 }
