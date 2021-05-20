@@ -18,10 +18,13 @@
 
 // FIXME drop:
 import { splitPath, foreach } from "./utils";
+import { log } from "@ledgerhq/logs";
 import { EthAppPleaseEnableContractData } from "@ledgerhq/errors";
 import type Transport from "@ledgerhq/hw-transport";
 import { BigNumber } from "bignumber.js";
-import { encode, decode } from "rlp";
+import { ethers } from "ethers";
+import { byContractAddress } from "./erc20";
+import { getInfosForContractMethod } from "./contracts";
 
 export type StarkQuantizationType =
   | "eth"
@@ -87,6 +90,7 @@ export default class Eth {
         "starkUnsafeSign",
         "eth2GetPublicKey",
         "eth2SetWithdrawalIndex",
+        "setExternalPlugin",
       ],
       scrambleKey
     );
@@ -167,17 +171,7 @@ export default class Eth {
    * const signed = await appEth.signTransaction(path, rawTxHex)
    */
   provideERC20TokenInformation({ data }: { data: Buffer }): Promise<boolean> {
-    return this.transport.send(0xe0, 0x0a, 0x00, 0x00, data).then(
-      () => true,
-      (e) => {
-        if (e && e.statusCode === 0x6d00) {
-          // this case happen for older version of ETH app, since older app version had the ERC20 data hardcoded, it's fine to assume it worked.
-          // we return a flag to know if the call was effective or not
-          return false;
-        }
-        throw e;
-      }
-    );
+    return provideERC20TokenInformation(this.transport, data);
   }
 
   /**
@@ -185,7 +179,7 @@ export default class Eth {
    * @example
    eth.signTransaction("44'/60'/0'/0/0", "e8018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a2487400080").then(result => ...)
    */
-  signTransaction(
+  async signTransaction(
     path: string,
     rawTxHex: string
   ): Promise<{
@@ -199,11 +193,18 @@ export default class Eth {
     let toSend = [];
     let response;
     // Check if the TX is encoded following EIP 155
-    let rlpTx = decode(rawTx);
+    let rlpTx = ethers.utils.RLP.decode("0x" + rawTxHex).map((hex) =>
+      Buffer.from(hex.slice(2), "hex")
+    );
+
     let rlpOffset = 0;
     let chainIdPrefix = "";
     if (rlpTx.length > 6) {
-      let rlpVrs = encode(rlpTx.slice(-3));
+      let rlpVrs = Buffer.from(
+        ethers.utils.RLP.encode(rlpTx.slice(-3)).slice(2),
+        "hex"
+      );
+
       rlpOffset = rawTx.length - (rlpVrs.length - 1);
       const chainIdSrc = rlpTx[6];
       const chainIdBuf = Buffer.alloc(4);
@@ -240,6 +241,61 @@ export default class Eth {
       toSend.push(buffer);
       offset += chunkSize;
     }
+
+    rlpTx = ethers.utils.RLP.decode("0x" + rawTxHex);
+
+    const decodedTx = {
+      data: rlpTx[5],
+      to: rlpTx[3],
+    };
+    const provideForContract = async (address) => {
+      const erc20Info = byContractAddress(address);
+      if (erc20Info) {
+        log(
+          "ethereum",
+          "loading erc20token info for " +
+            erc20Info.contractAddress +
+            " (" +
+            erc20Info.ticker +
+            ")"
+        );
+        await provideERC20TokenInformation(this.transport, erc20Info.data);
+      }
+    };
+
+    if (decodedTx.data.length >= 10) {
+      const selector = decodedTx.data.substring(0, 10);
+      const infos = getInfosForContractMethod(decodedTx.to, selector);
+
+      if (infos) {
+        let { plugin, payload, signature, erc20OfInterest, abi } = infos;
+
+        if (plugin) {
+          log("ethereum", "loading plugin for " + selector);
+          await setExternalPlugin(this.transport, payload, signature);
+        }
+
+        if (erc20OfInterest && erc20OfInterest.length && abi) {
+          const contract = new ethers.utils.Interface(abi);
+          const args = contract.parseTransaction(decodedTx).args;
+
+          for (path of erc20OfInterest) {
+            const address = path.split(".").reduce((value, seg) => {
+              if (seg === "-1" && Array.isArray(value)) {
+                return value[value.length - 1];
+              }
+              return value[seg];
+            }, args);
+            await provideForContract(address);
+          }
+        }
+      } else {
+        log("ethereum", "no infos for selector " + selector);
+      }
+
+      await provideForContract(decodedTx.to);
+    }
+
     return foreach(toSend, (data, i) =>
       this.transport
         .send(0xe0, 0x04, i === 0 ? 0x00 : 0x80, 0x00, data)
@@ -1002,4 +1058,63 @@ eth.signPersonalMessage("44'/60'/0'/0/0", Buffer.from("test").toString("hex")).t
       }
     );
   }
+
+  /**
+   * Set the name of the plugin that should be used to parse the next transaction
+   *
+   * @param pluginName string containing the name of the plugin, must have length between 1 and 30 bytes
+   * @return True if the method was executed successfully
+   */
+  setExternalPlugin(
+    pluginName: string,
+    contractAddress: string,
+    selector: string
+  ): Promise<boolean> {
+    return setExternalPlugin(this.transport, pluginName, selector);
+  }
+}
+
+// internal helpers
+
+function provideERC20TokenInformation(
+  transport: Transport<*>,
+  data: Buffer
+): Promise<boolean> {
+  return transport.send(0xe0, 0x0a, 0x00, 0x00, data).then(
+    () => true,
+    (e) => {
+      if (e && e.statusCode === 0x6d00) {
+        // this case happen for older version of ETH app, since older app version had the ERC20 data hardcoded, it's fine to assume it worked.
+        // we return a flag to know if the call was effective or not
+        return false;
+      }
+      throw e;
+    }
+  );
+}
+
+function setExternalPlugin(
+  transport: Transport<*>,
+  payload: string,
+  signature: string
+): Promise<boolean> {
+  let payloadBuffer = Buffer.from(payload, "hex");
+  let signatureBuffer = Buffer.from(signature, "hex");
+  let buffer = Buffer.concat([payloadBuffer, signatureBuffer]);
+  return transport.send(0xe0, 0x12, 0x00, 0x00, buffer).then(
+    () => true,
+    (e) => {
+      if (e && e.statusCode === 0x6a80) {
+        // this case happen when the plugin name is too short or too long
+        return false;
+      } else if (e && e.statusCode === 0x6984) {
+        // this case happen when the plugin requested is not installed on the device
+        return false;
+      } else if (e && e.statusCode === 0x6d00) {
+        // this case happen for older version of ETH app
+        return false;
+      }
+      throw e;
+    }
+  );
 }

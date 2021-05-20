@@ -3,6 +3,7 @@ const fs = require("fs");
 const path = require("path");
 
 const importers = [
+  require("./importers/ethereum-dapps"),
   require("./importers/erc20-signatures"),
   require("./importers/erc20full"),
   require("./importers/erc20exchange"),
