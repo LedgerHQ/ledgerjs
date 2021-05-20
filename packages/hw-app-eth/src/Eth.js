@@ -248,6 +248,20 @@ export default class Eth {
       data: rlpTx[5],
       to: rlpTx[3],
     };
+    const provideForContract = async (address) => {
+      const erc20Info = byContractAddress(address);
+      if (erc20Info) {
+        log(
+          "ethereum",
+          "loading erc20token info for " +
+            erc20Info.contractAddress +
+            " (" +
+            erc20Info.ticker +
+            ")"
+        );
+        await provideERC20TokenInformation(this.transport, erc20Info.data);
+      }
+    };
 
     if (decodedTx.data.length >= 10) {
       const selector = decodedTx.data.substring(0, 10);
@@ -272,40 +286,14 @@ export default class Eth {
               }
               return value[seg];
             }, args);
-
-            const erc20Info = byContractAddress(address);
-            if (erc20Info) {
-              log(
-                "ethereum",
-                "loading erc20token info for " +
-                  erc20Info.contractAddress +
-                  " (" +
-                  erc20Info.ticker +
-                  ")"
-              );
-              await provideERC20TokenInformation(
-                this.transport,
-                erc20Info.data
-              );
-            }
+            await provideForContract(address);
           }
         }
       } else {
         log("ethereum", "no infos for selector " + selector);
       }
 
-      const erc20Info = byContractAddress(decodedTx.to);
-      if (erc20Info) {
-        log(
-          "ethereum",
-          "loading erc20token info for " +
-            erc20Info.contractAddress +
-            " (" +
-            erc20Info.ticker +
-            ")"
-        );
-        await provideERC20TokenInformation(this.transport, erc20Info.data);
-      }
+      await provideForContract(decodedTx.to);
     }
 
     return foreach(toSend, (data, i) =>
