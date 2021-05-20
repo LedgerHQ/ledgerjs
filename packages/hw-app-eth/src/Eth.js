@@ -290,21 +290,21 @@ export default class Eth {
             }
           }
         }
-
-        const erc20Info = byContractAddress(decodedTx.to);
-        if (erc20Info) {
-          log(
-            "ethereum",
-            "loading erc20token info for " +
-              erc20Info.contractAddress +
-              " (" +
-              erc20Info.ticker +
-              ")"
-          );
-          await provideERC20TokenInformation(this.transport, erc20Info.data);
-        }
       } else {
         log("ethereum", "no infos for selector " + selector);
+      }
+
+      const erc20Info = byContractAddress(decodedTx.to);
+      if (erc20Info) {
+        log(
+          "ethereum",
+          "loading erc20token info for " +
+            erc20Info.contractAddress +
+            " (" +
+            erc20Info.ticker +
+            ")"
+        );
+        await provideERC20TokenInformation(this.transport, erc20Info.data);
       }
     }
 
