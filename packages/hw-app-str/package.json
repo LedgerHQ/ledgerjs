@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-app-str",
-  "version": "5.51.1",
+  "version": "6.0.0-alpha.5",
   "description": "Ledger Hardware Wallet Stellar Application API",
   "keywords": [
     "Ledger",
@@ -27,12 +27,11 @@
   "types": "lib/Str.d.ts",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^5.51.1",
+    "@ledgerhq/hw-transport": "^6.0.0-alpha.5",
     "base32.js": "^0.1.0",
     "sha.js": "^2.3.6",
     "tweetnacl": "^1.0.3"
   },
-  "devDependencies": {},
   "scripts": {
     "clean": "bash ../../script/clean.sh",
     "build": "bash ../../script/build.sh",
