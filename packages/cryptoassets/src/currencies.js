@@ -406,18 +406,18 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
   bnb: {
     type: "CryptoCurrency",
     id: "bnb",
-    coinType: 714,
+    coinType: 60,
     name: "BNB",
-    managerAppName: "Binance Chain",
+    managerAppName: "Ethereum", // FIXME this is likely to create issue
     ticker: "BNB",
     scheme: "bnb",
     color: "#F0B90A",
-    family: "bnb",
+    family: "ethereum",
     units: [
       {
         name: "BNB",
         code: "BNB",
-        magnitude: 8,
+        magnitude: 18,
       },
     ],
     explorerViews: [],
