@@ -7,6 +7,7 @@
   ],
   "scripts": {
     "preinstall": "node -e \"if (process.env.npm_execpath.indexOf('yarn') === -1) { console.log('\u001b[31mPlease use yarn\u001b[0m'); process.exit(1); }\"",
+    "postinstall": "(cd ./flow-support && yarn)",
     "prettier": "prettier --write 'packages/*/src/**/*.?s'",
     "test": "jest",
     "test-no-git-diff": "git diff --exit-code || exit 1",
