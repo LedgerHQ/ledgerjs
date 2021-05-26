@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/logs",
-  "version": "6.0.0-alpha.5",
+  "version": "6.0.0-typescript.1",
   "description": "Ledger logs central point",
   "keywords": [
     "Ledger"
