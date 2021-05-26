@@ -33,5 +33,5 @@
     "build": "bash ../../script/build.sh",
     "watch": "bash ../../script/watch.sh"
   },
-  "gitHead": "fca2c7ce74fdb88df4d59dca4cc0e668410d66af"
+  "gitHead": "dd0dea64b58e5a9125c8a422dcffd29e5ef6abec"
 }
