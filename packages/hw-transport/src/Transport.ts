@@ -22,7 +22,7 @@ export type Subscription = {
 
 /**
  */
-export type Device = Record<string, unknown>;
+export type Device = any; // Should be a union type of all possible Device object's shape
 
 /**
  * type: add or remove event

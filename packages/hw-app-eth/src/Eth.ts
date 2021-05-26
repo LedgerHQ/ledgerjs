@@ -255,18 +255,32 @@ export default class Eth {
       data: rlpTx[5],
       to: rlpTx[3],
     };
-
-    if (decodedTx.data.length >= 10) {
-      const erc20Info = byContractAddress(decodedTx.to);
+    const provideForContract = async (address) => {
+      const erc20Info = byContractAddress(address);
       if (erc20Info) {
+        log(
+          "ethereum",
+          "loading erc20token info for " +
+            erc20Info.contractAddress +
+            " (" +
+            erc20Info.ticker +
+            ")"
+        );
         await provideERC20TokenInformation(this.transport, erc20Info.data);
       }
+    };
 
+    if (decodedTx.data.length >= 10) {
       const selector = decodedTx.data.substring(0, 10);
       const infos = getInfosForContractMethod(decodedTx.to, selector);
 
       if (infos) {
         const { plugin, payload, signature, erc20OfInterest, abi } = infos;
+
+        if (plugin) {
+          log("ethereum", "loading plugin for " + selector);
+          await setExternalPlugin(this.transport, payload, signature);
+        }
 
         if (erc20OfInterest && erc20OfInterest.length && abi) {
           const contract = new ethers.utils.Interface(abi);
@@ -279,32 +293,14 @@ export default class Eth {
               }
               return value[seg];
             }, args);
-            // @ts-expect-error type here is ethers.utils.Result instead of string
-            const erc20Info = byContractAddress(address);
-            if (erc20Info) {
-              log(
-                "ethereum",
-                "loading erc20token info for " +
-                  erc20Info.contractAddress +
-                  " (" +
-                  erc20Info.ticker +
-                  ")"
-              );
-              await provideERC20TokenInformation(
-                this.transport,
-                erc20Info.data
-              );
-            }
+            await provideForContract(address);
           }
-        }
-
-        if (plugin) {
-          log("ethereum", "loading plugin for " + selector);
-          await setExternalPlugin(this.transport, payload, signature);
         }
       } else {
         log("ethereum", "no infos for selector " + selector);
       }
+
+      await provideForContract(decodedTx.to);
     }
 
     return foreach(toSend, (data, i) =>
@@ -1163,7 +1159,7 @@ export default class Eth {
   }
 }
 
-// PRIVATE
+// internal helpers
 
 function provideERC20TokenInformation(
   transport: Transport,

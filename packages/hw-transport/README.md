@@ -58,7 +58,7 @@ Type: {unsubscribe: function (): void}
 
 ### Device
 
-Type: Record&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), any>
+Type: any
 
 ### DescriptorEvent
 

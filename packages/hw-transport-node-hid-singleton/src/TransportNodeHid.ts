@@ -113,7 +113,7 @@ export default class TransportNodeHidSingleton extends TransportNodeHidNoEvents 
       if (!device) throw new CantOpenDevice("no device found");
       log("hid-verbose", "new HID transport");
       transportInstance = new TransportNodeHidSingleton(
-        new HID.HID(device.path)
+        new HID.HID(device.path as string)
       );
       const unlisten = listenDevices(
         () => {},
