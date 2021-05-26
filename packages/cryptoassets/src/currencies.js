@@ -1505,6 +1505,10 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     ],
     explorerViews: [
       {
+        tx: "https://nanolooker.com/block/$hash",
+        address: "https://nanolooker.com/account/$address",
+      },
+      {
         tx: "https://nanoexplorer.io/blocks/$hash",
       },
     ],
