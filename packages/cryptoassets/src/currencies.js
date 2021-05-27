@@ -413,6 +413,12 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     scheme: "bnb",
     color: "#F0B90A",
     family: "ethereum",
+    ethereumLikeInfo: {
+        baseChain: "mainnet",
+        chainId: 56,
+        networkId: 56,
+        hardfork: "muirGlacier" // it makes it work in ethereumjs-common but it's probably earlier than this.
+    },
     units: [
       {
         name: "BNB",
@@ -871,7 +877,10 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     family: "ethereum",
     blockAvgTime: 15,
     ethereumLikeInfo: {
+      baseChain: "mainnet",
       chainId: 1,
+      networkId: 1,
+      hardfork: "petersburg"
     },
     explorerViews: [
       {
@@ -894,7 +903,10 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     family: "ethereum",
     blockAvgTime: 15,
     ethereumLikeInfo: {
+      baseChain: "mainnet",
       chainId: 61,
+      networkId: 1,
+      hardfork: "dao"
     },
     explorerViews: [
       {
@@ -2703,7 +2715,10 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     family: "ethereum",
     blockAvgTime: 15,
     ethereumLikeInfo: {
+      baseChain: "ropsten",
       chainId: 3, // ropsten
+      networkId: 3,
+      hardfork: "petersburg"
     },
     explorerViews: [
       {
