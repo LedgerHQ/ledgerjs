@@ -420,7 +420,12 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
         magnitude: 18,
       },
     ],
-    explorerViews: [],
+    explorerViews: [
+      {
+        tx: "https://bscscan.com/tx/$hash",
+        address: "https://bscscan.com/address/$address",
+        token: "https://bscscan.com/token/$contractAddress?a=$address",
+      },],
   },
   callisto: {
     type: "CryptoCurrency",
