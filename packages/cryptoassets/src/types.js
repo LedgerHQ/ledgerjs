@@ -108,7 +108,7 @@ export type CryptoCurrency = CurrencyCommon & {
     chainId: number,
     networkId?: number,
     baseName?: string,
-    hardfork?: string
+    hardfork?: string,
   },
   explorerViews: ExplorerView[],
   terminated?: {

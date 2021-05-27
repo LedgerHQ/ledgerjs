@@ -414,10 +414,10 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     color: "#F0B90A",
     family: "ethereum",
     ethereumLikeInfo: {
-        baseChain: "mainnet",
-        chainId: 56,
-        networkId: 56,
-        hardfork: "muirGlacier" // it makes it work in ethereumjs-common but it's probably earlier than this.
+      baseChain: "mainnet",
+      chainId: 56,
+      networkId: 56,
+      hardfork: "muirGlacier", // it makes it work in ethereumjs-common but it's probably earlier than this.
     },
     units: [
       {
@@ -431,7 +431,8 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
         tx: "https://bscscan.com/tx/$hash",
         address: "https://bscscan.com/address/$address",
         token: "https://bscscan.com/token/$contractAddress?a=$address",
-      },],
+      },
+    ],
   },
   callisto: {
     type: "CryptoCurrency",
@@ -880,7 +881,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
       baseChain: "mainnet",
       chainId: 1,
       networkId: 1,
-      hardfork: "petersburg"
+      hardfork: "petersburg",
     },
     explorerViews: [
       {
@@ -906,7 +907,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
       baseChain: "mainnet",
       chainId: 61,
       networkId: 1,
-      hardfork: "dao"
+      hardfork: "dao",
     },
     explorerViews: [
       {
@@ -2718,7 +2719,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
       baseChain: "ropsten",
       chainId: 3, // ropsten
       networkId: 3,
-      hardfork: "petersburg"
+      hardfork: "petersburg",
     },
     explorerViews: [
       {
