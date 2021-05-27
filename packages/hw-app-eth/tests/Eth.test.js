@@ -178,7 +178,7 @@ test("signTransactionChunkedLimit", async () => {
     <= 9000
     => e00480000400018080
     <= 1bdc6ad1d9d847defdffde2f3b70004c89a1a8a6c614fec484891ae8f1ebc46f9966159ca542f5cf36d64278218bfcce24ba96d7495dec25b10a7609346ca063ec9000
-    `)
+    `) // Incorrect signature but it doesn't matter for tests
   );
   const transport = await Transport.open();
   const eth = new Eth(transport);
@@ -201,7 +201,7 @@ test("signTransactionChunkedLimitBigVRS", async () => {
     => e004800095bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
     <= 9000
     => e004800044bb25a090ee578f5ed7c417fae04264416a43d72e70859d8978ca58455a30b67bbeda8aa0284afa8b169a8bfb677238b69b16387f262c9173ad6f40677d1dee630fed8455
-    <= 9000
+    <= 1bdc6ad1d9d847defdffde2f3b70004c89a1a8a6c614fec484891ae8f1ebc46f9966159ca542f5cf36d64278218bfcce24ba96d7495dec25b10a7609346ca063ec9000
     `)
   );
   const transport = await Transport.open();
@@ -211,13 +211,9 @@ test("signTransactionChunkedLimitBigVRS", async () => {
     "f9015782abcd8609184e72a00082271094aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa820300b8edbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb25a090ee578f5ed7c417fae04264416a43d72e70859d8978ca58455a30b67bbeda8aa0284afa8b169a8bfb677238b69b16387f262c9173ad6f40677d1dee630fed8455",
   );
   expect(result).toEqual({
-    r: "00",
-    s: "", //ed8455
-    v: "90",
-    /*
-    r: "25a090ee578f5ed7c417fae04264416a43d72e70859d8978ca58455a30b67bbe",
-    s: "da8aa0284afa8b169a8bfb677238b69b16387f262c9173ad6f40677d1dee630f", //ed8455
-    v: "1b",*/
+    r: "dc6ad1d9d847defdffde2f3b70004c89a1a8a6c614fec484891ae8f1ebc46f99",
+    s: "66159ca542f5cf36d64278218bfcce24ba96d7495dec25b10a7609346ca063ec",
+    v: "1b",
   });
 });
 
