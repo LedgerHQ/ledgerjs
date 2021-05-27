@@ -253,7 +253,6 @@ export default class Eth {
       }
       toSend.push(buffer);
       offset += chunkSize;
-      console.log(buffer.toString("hex"));
     }
 
     rlpTx = ethers.utils.RLP.decode("0x" + rawTxHex);
