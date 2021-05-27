@@ -31,7 +31,7 @@
     "@ledgerhq/hw-transport": "^5.51.1",
     "@ledgerhq/logs": "^5.50.0",
     "bignumber.js": "^9.0.1",
-    "ethers": "^5.1.4"
+    "ethers": "^5.2.0"
   },
   "devDependencies": {
     "flow-bin": "^0.149.0"
