@@ -207,8 +207,8 @@ export default class Eth {
 
       rlpOffset = rawTx.length - (rlpVrs.length - 1);
 
-      // First byte >= 0xf7 means the length of the list length doesn't fit in a single byte.
-      if (rlpVrs[0] >= 0xf7) {
+      // First byte > 0xf7 means the length of the list length doesn't fit in a single byte.
+      if (rlpVrs[0] > 0xf7) {
         // Increment rlpOffset to account for that extra byte.
         rlpOffset++;
 
