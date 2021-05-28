@@ -32,7 +32,7 @@
     "@ledgerhq/hw-transport": "^6.0.0-typescript.1",
     "@ledgerhq/logs": "^6.0.0-typescript.1",
     "bignumber.js": "^9.0.1",
-    "ethers": "^5.1.4"
+    "ethers": "^5.2.0"
   },
   "scripts": {
     "clean": "bash ../../script/clean.sh",

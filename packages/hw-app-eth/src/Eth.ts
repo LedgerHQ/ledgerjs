@@ -206,6 +206,19 @@ export default class Eth {
       );
 
       rlpOffset = rawTx.length - (rlpVrs.length - 1);
+
+      // First byte > 0xf7 means the length of the list length doesn't fit in a single byte.
+      if (rlpVrs[0] > 0xf7) {
+        // Increment rlpOffset to account for that extra byte.
+        rlpOffset++;
+
+        // Compute size of the list length.
+        const sizeOfListLen = rlpVrs[0] - 0xf7;
+
+        // Increase rlpOffset by the size of the list length.
+        rlpOffset += sizeOfListLen - 1;
+      }
+
       const chainIdSrc: any = rlpTx[6];
       const chainIdBuf = Buffer.alloc(4);
       chainIdSrc.copy(chainIdBuf, 4 - chainIdSrc.length);
