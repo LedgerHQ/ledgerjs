@@ -88,8 +88,8 @@ export default class Transport {
   complete: () => {}
   })
    */
-  static readonly listen: <Descriptor>(
-    observer: Observer<DescriptorEvent<Descriptor>>
+  static readonly listen: (
+    observer: Observer<DescriptorEvent<any>>
   ) => Subscription;
 
   /**
@@ -101,7 +101,7 @@ export default class Transport {
   TransportFoo.open(descriptor).then(transport => ...)
    */
   static readonly open: (
-    descriptor: any,
+    descriptor?: any,
     timeout?: number
   ) => Promise<Transport>;
 

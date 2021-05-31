@@ -9,6 +9,7 @@ import type { RecordStore } from "./RecordStore";
 const createTransportReplayer = (
   recordStore: RecordStore
 ): new () => Transport => {
+  console.warn("TO BE DEPRECATED: use openTransportReplayer instead");
   class TransportReplayer extends Transport {
     static isSupported = () => Promise.resolve(true);
     static list = () => Promise.resolve([null]);

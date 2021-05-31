@@ -1,6 +1,6 @@
 // @flow
 import {
-  createTransportReplayer,
+  openTransportReplayer,
   RecordStore,
   RecordStoreQueueEmpty,
   RecordStoreInvalidSynthax,
@@ -13,10 +13,8 @@ test("transport", async () => {
     => e016000000
     <= 000000050107426974636f696e034254439000
   `);
-  const Transport = createTransportReplayer(store);
-  // @ts-expect-error
-  const t = await Transport.create();
-  const r = await t.send(0xe0, 0x16, 0, 0);
+  const transport = await openTransportReplayer(store);
+  const r = await transport.send(0xe0, 0x16, 0, 0);
   expect(r.toString("hex")).toBe("000000050107426974636f696e034254439000");
 });
 

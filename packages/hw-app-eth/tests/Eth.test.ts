@@ -1,5 +1,5 @@
 import {
-  createTransportReplayer,
+  openTransportReplayer,
   RecordStore,
 } from "@ledgerhq/hw-transport-mocker";
 import Eth from "../src/Eth";
@@ -8,14 +8,13 @@ import { BigNumber } from "bignumber.js";
 import { byContractAddress } from "../src/erc20";
 
 test("getAppConfiguration", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e006000000
     <= 010101069000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
+
   const eth = new Eth(transport);
   const result = await eth.getAppConfiguration();
 
@@ -29,14 +28,12 @@ test("getAppConfiguration", async () => {
 });
 
 test("getAddress", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e002000015058000002c8000003c800000008000000000000000
     <= 4104df00ad3869baad7ce54f4d560ba7f268d542df8f2679a5898d78a690c3db8f9833d2973671cb14b088e91bdf7c0ab00029a576473c0e12f84d252e630bb3809b28436241393833363265313939633431453138363444303932334146393634366433413634383435319000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.getAddress("44'/60'/0'/0'/0");
 
@@ -48,14 +45,12 @@ test("getAddress", async () => {
 });
 
 test("signTransaction", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e00400003e058000002c8000003c800000008000000000000000e8018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a2487400080
     <= 1b3694583045a85ada8d15d5e01b373b00e86a405c9c52f7835691dcc522b7353b30392e638a591c65ed307809825ca48346980f52d004ab7a5f93657f7e62a4009000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.signTransaction(
     "44'/60'/0'/0'/0",
@@ -69,7 +64,7 @@ test("signTransaction", async () => {
 });
 
 test("signTransaction testing provideERC20Informations + setExternalPlugin", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(
       `
       => e0120000680850617261737761701bd435f3c054b6e901b7b108a0ab7617c808677bec1d21dd3045022100ee2b33270cf910f481e64b7781c4693e7bc86e338476d65c30c9f3d41fa4924e022079fc72cc69954f5ab1949e7d2f3023948f10dc94c9455999eb2ef38ac25fe33d
@@ -120,8 +115,6 @@ test("signTransaction testing provideERC20Informations + setExternalPlugin", asy
     )
   );
   // Original TX: https://etherscan.io/tx/0xf87e29ee49230352f56f099ef2ae9c7144b3ecb2d0085212e2478b267479b4df
-  //  @ts-expect-error we need to fix Transport type
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.signTransaction(
     "44'/60'/0'/0'/0",
@@ -135,14 +128,12 @@ test("signTransaction testing provideERC20Informations + setExternalPlugin", asy
 });
 
 test("signTransactionLargeChainID", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e004000043058000002c8000003c800000008000000000000000ed018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a248740008082aa008080
     <= 1b3694583045a85ada8d15d5e01b373b00e86a405c9c52f7835691dcc522b7353b30392e638a591c65ed307809825ca48346980f52d004ab7a5f93657f7e62a4009000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.signTransaction(
     "44'/60'/0'/0'/0",
@@ -156,14 +147,12 @@ test("signTransactionLargeChainID", async () => {
 });
 
 test("signTransactionLargeChainID2", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e004000043058000002c8000003c800000008000000000000000ed018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a248740008081fa008080
     <= 173694583045a85ada8d15d5e01b373b00e86a405c9c52f7835691dcc522b7353b30392e638a591c65ed307809825ca48346980f52d004ab7a5f93657f7e62a4009000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.signTransaction(
     "44'/60'/0'/0'/0",
@@ -177,7 +166,7 @@ test("signTransactionLargeChainID2", async () => {
 });
 
 test("signTransactionChunkedLimit", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e004000096058000002c8000003c800000000000000000000000f901ad8205448505c205da808310c8e19402b3f51ac9202aa19be63d61a8c681579d6e3a5180b90184293491160000000000000000000000000000000000000000000000000000000005ee832e0000000000000000000000000000000000000000000000000000000005eeb9ac0000000000000000000000000000000000000000
     <= 9000
@@ -189,8 +178,6 @@ test("signTransactionChunkedLimit", async () => {
     <= 1bdc6ad1d9d847defdffde2f3b70004c89a1a8a6c614fec484891ae8f1ebc46f9966159ca542f5cf36d64278218bfcce24ba96d7495dec25b10a7609346ca063ec9000
     `) // Incorrect signature but it doesn't matter for tests
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.signTransaction(
     "44'/60'/0'/0/0",
@@ -204,7 +191,7 @@ test("signTransactionChunkedLimit", async () => {
 });
 
 test("signTransactionChunkedLimitBigVRS", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e004000096058000002c8000003c800000000000000000000000f9015782abcd8609184e72a00082271094aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa820300b8edbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb
     <= 9000
@@ -214,8 +201,6 @@ test("signTransactionChunkedLimitBigVRS", async () => {
     <= 1bdc6ad1d9d847defdffde2f3b70004c89a1a8a6c614fec484891ae8f1ebc46f9966159ca542f5cf36d64278218bfcce24ba96d7495dec25b10a7609346ca063ec9000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.signTransaction(
     "44'/60'/0'/0/0",
@@ -229,14 +214,12 @@ test("signTransactionChunkedLimitBigVRS", async () => {
 });
 
 test("signPersonalMessage", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e00800001d058000002c8000003c8000000080000000000000000000000474657374
     <= 1b8beafdd56521af1213d6d668a2aed262cc840e7174b642215aec013a1c88b2bd3a407b9125f1bfc015df6983ae8b87a34d54be367b4275834c3039622a73ee009000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.signPersonalMessage(
     "44'/60'/0'/0'/0",
@@ -250,14 +233,12 @@ test("signPersonalMessage", async () => {
 });
 
 test("signEIP712HashedMessage", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e00c000055058000002c8000003c800000008000000000000000c24f499b8c957196651b13edd64aaccc3980009674b2aea0966c8a56ba81278e9d96be8a7cca396e711a3ba356bd9878df02a726d753ddb6cda3c507d888bc77
     <= 1c47937d12e45197f2f4c47fe34e88944ee10c8e9ee1faf7aa4658f5aab8e0d2bb026c0d81290478fbc45d5bc1308c4b7119ab43d986805413e7f85da5d94597e79000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.signEIP712HashedMessage(
     "44'/60'/0'/0'/0",
@@ -278,14 +259,12 @@ test("signEIP712HashedMessage", async () => {
 });
 
 test("provideERC20TokenInformation", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e00a000066035a5258e41d2489571d322189246dafa5ebde1f4699f4980000001200000001304402200ae8634c22762a8ba41d2acb1e068dcce947337c6dd984f13b820d396176952302203306a49d8a6c35b11a61088e1570b3928ca3a0db6bd36f577b5ef87628561ff7
     <= 9000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const zrxInfo = byContractAddress(
     "0xe41d2489571d322189246dafa5ebde1f4699f498"
@@ -295,7 +274,7 @@ test("provideERC20TokenInformation", async () => {
 });
 
 test("signAllowance", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e00a0000670455534454dac17f958d2ee523a2206206994597c13d831ec700000006000000013044022078c66ccea3e4dedb15a24ec3c783d7b582cd260daf62fd36afe9a8212a344aed0220160ba8c1c4b6a8aa6565bed20632a091aeeeb7bfdac67fc6589a6031acbf511c
     <= 9000
@@ -305,8 +284,6 @@ test("signAllowance", async () => {
     <= 1b0a5a7a8732d95ee05e6dd11b28500c0482fd9ef24028eb5448b5c9c713f13bbb1ef940556853fc8b3883e6ef810d18566f13019e6bea70f340cbfde36947408b9000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const tokenInfo = byContractAddress(
     "0xdac17f958d2ee523a2206206994597c13d831ec7"
@@ -324,7 +301,7 @@ test("signAllowance", async () => {
 });
 
 test("signAllowanceUnlimited", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e00a0000670455534454dac17f958d2ee523a2206206994597c13d831ec700000006000000013044022078c66ccea3e4dedb15a24ec3c783d7b582cd260daf62fd36afe9a8212a344aed0220160ba8c1c4b6a8aa6565bed20632a091aeeeb7bfdac67fc6589a6031acbf511c
     <= 9000
@@ -334,8 +311,6 @@ test("signAllowanceUnlimited", async () => {
     <= 1b3fa6a78fb25f87f063fc8db5cb4efc1794e01c973994e26a6fa1603c3ac3db9d3dc98795b5f99ba1eeae84ef01ecbfad188f00446d56b6e9a0eb9ec6f4bae7fe9000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const tokenInfo = byContractAddress(
     "0xdac17f958d2ee523a2206206994597c13d831ec7"
@@ -353,14 +328,12 @@ test("signAllowanceUnlimited", async () => {
 });
 
 test("starkGetPublicKey", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => f002000009028000534b00000000
     <= 05e8330615774c27af37530e34aa17e279eb1ac8ac91709932e0a1929bba54ac9000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.starkGetPublicKey("21323'/0");
   expect(result).toEqual(
@@ -372,14 +345,12 @@ test("starkGetPublicKey", async () => {
 });
 
 test("starkSignOrderEth", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => f004010091028000534b000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000010000000100000000000186a00000000000030d4000000d6a00001618
     <= 00029526c310368e835a2a0ee412a3bf084e0f94d91b8265f88a0bee32488223c4012c34bef05a7b80ba22b0d58a18acd1a8198ee8fc9b525f85d2f4f843c5510f9000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.starkSignOrder(
     "21323'/0",
@@ -401,14 +372,12 @@ test("starkSignOrderEth", async () => {
 });
 
 test("starkSignOrderEth_v2", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => f0040300d3028000534b000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000000000010000000100000000000186a00000000000030d4000000d6a00001618
     <= 00029526c310368e835a2a0ee412a3bf084e0f94d91b8265f88a0bee32488223c4012c34bef05a7b80ba22b0d58a18acd1a8198ee8fc9b525f85d2f4f843c5510f9000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.starkSignOrder_v2(
     "21323'/0",
@@ -434,7 +403,7 @@ test("starkSignOrderEth_v2", async () => {
 });
 
 test("starkSignOrderTokens", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e00a000066035a5258e41d2489571d322189246dafa5ebde1f4699f4980000001200000001304402200ae8634c22762a8ba41d2acb1e068dcce947337c6dd984f13b820d396176952302203306a49d8a6c35b11a61088e1570b3928ca3a0db6bd36f577b5ef87628561ff7
     <= 9000
@@ -444,8 +413,6 @@ test("starkSignOrderTokens", async () => {
     <= 0003c4a1aef46539c90eaad9a71eee8319586e2b749793335060a2431c42d0d48901faac9386aaaf9d8d2cc3229aecf9e202f4b83f63e3fff7426ca07725d10fb29000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const tokenInfo1 = byContractAddress(
     "0xe41d2489571d322189246dafa5ebde1f4699f498"
@@ -475,7 +442,7 @@ test("starkSignOrderTokens", async () => {
 });
 
 test("starkSignOrderTokens_v2", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e00a000066035a5258e41d2489571d322189246dafa5ebde1f4699f4980000001200000001304402200ae8634c22762a8ba41d2acb1e068dcce947337c6dd984f13b820d396176952302203306a49d8a6c35b11a61088e1570b3928ca3a0db6bd36f577b5ef87628561ff7
     <= 9000
@@ -485,8 +452,6 @@ test("starkSignOrderTokens_v2", async () => {
     <= 0003c4a1aef46539c90eaad9a71eee8319586e2b749793335060a2431c42d0d48901faac9386aaaf9d8d2cc3229aecf9e202f4b83f63e3fff7426ca07725d10fb29000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const tokenInfo1 = byContractAddress(
     "0xe41d2489571d322189246dafa5ebde1f4699f498"
@@ -520,14 +485,12 @@ test("starkSignOrderTokens_v2", async () => {
 });
 
 test("starkSignTransfer1", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => f004020075028000534b0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001f1f789e47bb134082b2e901f779a0d188af7fbd7d97d10a9e121f22adadb5b05000000010000000100000000000186a000000d6a00001618
     <= 00028c0e3b4d2e7b0c1055c7d40e8df12676bc90cf19d0006225d500baecd5e11c0305fe1782f050839619c3e9627121bacd3a8dc87859e1ba5376fbd1b3bee4d49000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.starkSignTransfer(
     "21323'/0",
@@ -547,14 +510,12 @@ test("starkSignTransfer1", async () => {
 });
 
 test("starkSignTransfer1_v2", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => f004040096028000534b0000000001000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000f1f789e47bb134082b2e901f779a0d188af7fbd7d97d10a9e121f22adadb5b05000000010000000100000000000186a000000d6a00001618
     <= 00028c0e3b4d2e7b0c1055c7d40e8df12676bc90cf19d0006225d500baecd5e11c0305fe1782f050839619c3e9627121bacd3a8dc87859e1ba5376fbd1b3bee4d49000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.starkSignTransfer_v2(
     "21323'/0",
@@ -575,14 +536,12 @@ test("starkSignTransfer1_v2", async () => {
   });
 });
 test("starkProvideQuantum", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => f008000034e41d2489571d322189246dafa5ebde1f4699f4980000000000000000000000000000000000000000000000000000000000000001
     <= 9000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.starkProvideQuantum(
     "e41d2489571d322189246dafa5ebde1f4699f498",
@@ -591,14 +550,12 @@ test("starkProvideQuantum", async () => {
   expect(result).toEqual(true);
 });
 test("starkProvideQuantum_v2", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => f008010054e41d2489571d322189246dafa5ebde1f4699f49800000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000000
     <= 9000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.starkProvideQuantum_v2(
     "e41d2489571d322189246dafa5ebde1f4699f498",
@@ -608,7 +565,7 @@ test("starkProvideQuantum_v2", async () => {
   expect(result).toEqual(true);
 });
 test("starkDepositEth", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => f00800003400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001
     <= 9000
@@ -616,8 +573,6 @@ test("starkDepositEth", async () => {
     <= 1be263d5b15fb088411683ac652f5429173e78bd3f6934a905fbb67f302874d49122b175206744fe898c0f7ed21520e06c919fd9ef61fc5368e62def1f86b991439000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   await eth.starkProvideQuantum((null as unknown) as string, new BigNumber(1));
   const result = await eth.signTransaction(
@@ -631,7 +586,7 @@ test("starkDepositEth", async () => {
   });
 });
 test("starkDepositToken", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e00a0000670455534454dac17f958d2ee523a2206206994597c13d831ec700000006000000013044022078c66ccea3e4dedb15a24ec3c783d7b582cd260daf62fd36afe9a8212a344aed0220160ba8c1c4b6a8aa6565bed20632a091aeeeb7bfdac67fc6589a6031acbf511c
     <= 9000
@@ -643,8 +598,6 @@ test("starkDepositToken", async () => {
     <= 1b294214de6341a0a63609f5643700c58be4b7aa46a5f56dea8c9ff5ecf4d5228662a3a4c8a6a0714d147b2a98071cfb892ed3f3edd5da049a2608605970b63dc29000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const tokenInfo = byContractAddress(
     "0xdac17f958d2ee523a2206206994597c13d831ec7"
@@ -665,7 +618,7 @@ test("starkDepositToken", async () => {
   });
 });
 test("starkWithdrawEth", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => f00800003400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001
     <= 9000
@@ -673,8 +626,6 @@ test("starkWithdrawEth", async () => {
     <= 1b27839551fb3d8b7717ebb02a81308740a6d4b719afa12159b4c41308edc3d82c07c40a39ea0aa3c5114b05f1441de594467e152e7b267a25433236da78d201ee9000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   await eth.starkProvideQuantum((null as unknown) as string, new BigNumber(1));
   const result = await eth.signTransaction(
@@ -688,7 +639,7 @@ test("starkWithdrawEth", async () => {
   });
 });
 test("starkWithdrawToken", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e00a0000670455534454dac17f958d2ee523a2206206994597c13d831ec700000006000000013044022078c66ccea3e4dedb15a24ec3c783d7b582cd260daf62fd36afe9a8212a344aed0220160ba8c1c4b6a8aa6565bed20632a091aeeeb7bfdac67fc6589a6031acbf511c
     <= 9000
@@ -698,8 +649,6 @@ test("starkWithdrawToken", async () => {
     <= 1bad0d49ea55b2fd57523ad94698e16acb8b151fa57afd4ae37bb457e9200aac1b53162e87514d7a0ebc383a69f9c27a6abc4ee038f1360b4ffe9cd3f63b4c7f429000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const tokenInfo = byContractAddress(
     "0xdac17f958d2ee523a2206206994597c13d831ec7"
@@ -720,7 +669,7 @@ test("starkWithdrawToken", async () => {
   });
 });
 test("starkDepositCancel", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => f00800003400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001
     <= 9000
@@ -728,8 +677,6 @@ test("starkDepositCancel", async () => {
     <= 1cb8c4260b5cc4a960f7957806fe4d4f52733b2c0f221ff5a0c09cd0af98471952724ea6b3c70ab0d8c3104ab740c5c7ae6d1a6451f87b3bf7504741136b212eba9000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   await eth.starkProvideQuantum((null as unknown) as string, new BigNumber(1));
   const result = await eth.signTransaction(
@@ -743,7 +690,7 @@ test("starkDepositCancel", async () => {
   });
 });
 test("starkDepositReclaim", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => f00800003400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001
     <= 9000
@@ -751,8 +698,6 @@ test("starkDepositReclaim", async () => {
     <= 1bf80742e1ced6770d846a03b557d37a522c1afe96dcbec24406772d49194c4cba26b3fb49df1d8ac54eda7d5fde3bbe2912fabee6fd535210cb1f08f113e8e5f49000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   await eth.starkProvideQuantum((null as unknown) as string, new BigNumber(1));
   const result = await eth.signTransaction(
@@ -766,14 +711,12 @@ test("starkDepositReclaim", async () => {
   });
 });
 test("starkFullWithdrawal", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e004000063058000002c8000003c800000000000000000000000f84c018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000a4276dd1de0000000000000000000000000000000000000000000000000000000000000001
     <= 1b6e1947ab2c9ec22e44af515a24a7453a8431fb2d38ab88fa8971aa0522ec0fa709933014df3bde62ece53e7e7ee8a76d374d6218bd81cb4d1e16ecba29100a6b9000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.signTransaction(
     "44'/60'/0'/0/0",
@@ -786,14 +729,12 @@ test("starkFullWithdrawal", async () => {
   });
 });
 test("starkFreeze", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e004000063058000002c8000003c800000000000000000000000f84c018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000a4b91072090000000000000000000000000000000000000000000000000000000000000001
     <= 1b4035b138d55f5be5dab88988ce179e41547412a66b170acd2130d7c851537d717959162e3b8ae5f0ca1869e5887b8886fe71d31be0745c284bf0fdde56d287699000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.signTransaction(
     "44'/60'/0'/0/0",
@@ -806,7 +747,7 @@ test("starkFreeze", async () => {
   });
 });
 test("starkEscapeEth", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => f00800003400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001
     <= 9000
@@ -816,8 +757,6 @@ test("starkEscapeEth", async () => {
     <= 1c77220f9513431ecb2eeb53edee025eb78f1fd3c194d75f4988462b78bacd88b43e74b88584f9091a4bdb2605ec128e2bda7eaa262891bf83bb7b34acf22c6a9c9000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   await eth.starkProvideQuantum((null as unknown) as string, new BigNumber(1));
   const result = await eth.signTransaction(
@@ -831,7 +770,7 @@ test("starkEscapeEth", async () => {
   });
 });
 test("starkEscapeTokens", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e00a0000670455534454dac17f958d2ee523a2206206994597c13d831ec700000006000000013044022078c66ccea3e4dedb15a24ec3c783d7b582cd260daf62fd36afe9a8212a344aed0220160ba8c1c4b6a8aa6565bed20632a091aeeeb7bfdac67fc6589a6031acbf511c
     <= 9000
@@ -843,8 +782,6 @@ test("starkEscapeTokens", async () => {
     <= 1c56846c1ec5ce862f0abb59054ae9a5279ddac47953907902a0dada43b9a0e06b35ad5523cf0b01efa3a369c24b80cd003f87a2f725cf40ecc2354290fc8369a29000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const tokenInfo = byContractAddress(
     "0xdac17f958d2ee523a2206206994597c13d831ec7"
@@ -865,7 +802,7 @@ test("starkEscapeTokens", async () => {
   });
 });
 test("starkEscapeVerify", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e004000096058000002c8000003c800000000000000000000000f88d018504e3b29200825208940102030405060708090a0b0c0d0e0f1011121314872bd72a24874000b8642dd5300602ce625e94458d39dd0bf3b45a843544dd4a14b8169045a3a3d15aa564b936c50000000000000000000000000000000000000000000000000000000000000001000000000000000000000000000000000000
     <= 9000
@@ -873,8 +810,6 @@ test("starkEscapeVerify", async () => {
     <= 1b372586695f148927a74b6ef4b2e40f42b3a6e44afbd16cb4d3dcec6859aec1d2736da27ba0a716492e96ebd6cbbaec894af5cad24a2c6c3f683ade376f9fdc4f9000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.signTransaction(
     "44'/60'/0'/0/0",
@@ -887,14 +822,12 @@ test("starkEscapeVerify", async () => {
   });
 });
 test("eth2GetPublicKey", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e00e010011040000305d00000e100000000000000000
     <= a0fcd39edaa082bdbf23a0c01568471b8a2bd998c9ae347f7e7690e420bd2f96e436c215422aa86f233f67cbbdfb9b2f9000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.eth2GetPublicKey("12381/3600/0/0", true);
   expect(result).toEqual({
@@ -903,14 +836,12 @@ test("eth2GetPublicKey", async () => {
   });
 });
 test("eth2SetWithdrawalIndex", async () => {
-  const Transport = createTransportReplayer(
+  const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => e01000000400000001
     <= 9000
     `)
   );
-  // @ts-expect-error Todo: fix types for Transport creator
-  const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.eth2SetWithdrawalIndex(1);
   expect(result).toEqual(true);
