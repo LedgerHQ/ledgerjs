@@ -214,11 +214,12 @@ test("signTransactionChunkedLimitBigVRS", async () => {
     <= 1bdc6ad1d9d847defdffde2f3b70004c89a1a8a6c614fec484891ae8f1ebc46f9966159ca542f5cf36d64278218bfcce24ba96d7495dec25b10a7609346ca063ec9000
     `)
   );
+  // @ts-expect-error Todo: fix types for Transport creator
   const transport = await Transport.open();
   const eth = new Eth(transport);
   const result = await eth.signTransaction(
     "44'/60'/0'/0/0",
-    "f9015782abcd8609184e72a00082271094aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa820300b8edbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb25a090ee578f5ed7c417fae04264416a43d72e70859d8978ca58455a30b67bbeda8aa0284afa8b169a8bfb677238b69b16387f262c9173ad6f40677d1dee630fed8455",
+    "f9015782abcd8609184e72a00082271094aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa820300b8edbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb25a090ee578f5ed7c417fae04264416a43d72e70859d8978ca58455a30b67bbeda8aa0284afa8b169a8bfb677238b69b16387f262c9173ad6f40677d1dee630fed8455"
   );
   expect(result).toEqual({
     r: "dc6ad1d9d847defdffde2f3b70004c89a1a8a6c614fec484891ae8f1ebc46f99",
@@ -226,7 +227,6 @@ test("signTransactionChunkedLimitBigVRS", async () => {
     v: "1b",
   });
 });
-
 
 test("signPersonalMessage", async () => {
   const Transport = createTransportReplayer(
