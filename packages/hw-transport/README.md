@@ -197,7 +197,7 @@ a DescriptorEvent is a `{ descriptor, type }` object. type can be `"add"` or `"r
 each listen() call will first emit all potential device already connected and then will emit events can come over times,
 for instance if you plug a USB device after listen() or a bluetooth device become discoverable.
 
-Type: function (observer: [Observer](#observer)&lt;[DescriptorEvent](#descriptorevent)&lt;Descriptor>>): [Subscription](#subscription)
+Type: function (observer: [Observer](#observer)&lt;[DescriptorEvent](#descriptorevent)&lt;any>>): [Subscription](#subscription)
 
 ##### Parameters
 
