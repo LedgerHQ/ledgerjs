@@ -973,6 +973,29 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
       },
     ],
   },
+  equilibrium: {
+    type: "CryptoCurrency",
+    id: "equilibrium",
+    coinType: 99999997,
+    name: "Equilibrium",
+    managerAppName: "Equilibrium",
+    ticker: "EQ",
+    scheme: "equilibrium",
+    color: "#1792FF",
+    family: "equilibrium",
+    units: [
+      {
+        name: "EQ",
+        code: "EQ",
+        magnitude: 9,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://equilibrium.subscan.io/extrinsic/$hash",
+      },
+    ],
+  },
   factom: {
     type: "CryptoCurrency",
     id: "factom",
