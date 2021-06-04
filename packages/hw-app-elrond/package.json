@@ -40,5 +40,4 @@
     "watch": "bash ../../script/watch.sh",
     "doc": "bash ../../script/doc.sh"
   }
-
 }
