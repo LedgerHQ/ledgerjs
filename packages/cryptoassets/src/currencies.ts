@@ -167,8 +167,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        tx:
-          "https://goalseeker.purestake.io/algorand/mainnet/transaction/$hash",
+        tx: "https://algoexplorer.io/tx/$hash",
       },
     ],
   },
@@ -598,8 +597,8 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        tx: "https://explorer.dash.org/tx/$hash",
-        address: "https://explorer.dash.org/address/$address",
+        tx: "https://explorer.dash.org/insight/tx/$hash",
+        address: "https://explorer.dash.org/insight/address/$address",
       },
     ],
   },
@@ -1499,6 +1498,10 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
     explorerViews: [
+      {
+        tx: "https://nanolooker.com/block/$hash",
+        address: "https://nanolooker.com/account/$address",
+      },
       {
         tx: "https://nanoexplorer.io/blocks/$hash",
       },
