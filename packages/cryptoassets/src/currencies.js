@@ -172,8 +172,7 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     ],
     explorerViews: [
       {
-        tx:
-          "https://goalseeker.purestake.io/algorand/mainnet/transaction/$hash",
+        tx: "https://algoexplorer.io/tx/$hash",
       },
     ],
   },
