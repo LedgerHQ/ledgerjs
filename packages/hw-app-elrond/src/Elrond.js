@@ -8,7 +8,7 @@ const CURVE_MASK = 0x80;
 const CLA = 0xed;
 
 const INS = {
-  GET_VERSION: 0x02,
+  GET_APP_CONFIGURATION: 0x02,
   GET_ADDRESS: 0x03,
   SET_ADDRESS: 0x05,
 };
@@ -53,7 +53,7 @@ export default class Elrond {
   }> {
     const response = await this.transport.send(
       CLA,
-      INS.GET_VERSION,
+      INS.GET_APP_CONFIGURATION,
       0x00,
       0x00
     );
