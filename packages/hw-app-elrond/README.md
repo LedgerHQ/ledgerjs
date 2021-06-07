@@ -3,9 +3,9 @@
 [Github](https://github.com/LedgerHQ/ledgerjs/),
 [Ledger Devs Slack](https://ledger-dev.slack.com/)
 
-## @ledgerhq/hw-app-polkadot
+## @ledgerhq/hw-app-elrond
 
-Ledger Hardware Wallet Polkadot JavaScript bindings.
+Ledger Hardware Wallet Elrond JavaScript bindings.
 
 ## API
 
@@ -97,54 +97,6 @@ const { contractData, accountIndex, addressIndex, version } = result;
 ```
 
 Returns **[Promise][11]&lt;{version: [string][12]}>** an object with a contractData, accountIndex, addressIndex, version
-
-## getAddress
-
-Get Elrond address for a given BIP 32 path.
-
-### Parameters
-
--   `path` **[string][12]** a path in BIP 32 format
--   `display` **[boolean][13]?** optionally enable or not the display
-
-### Examples
-
-```javascript
-const result = await elrond.getAddress("44'/508'/0'/0'/0'");
-const { address, returnCode } = result;
-```
-
-Returns **[Promise][11]&lt;{address: [string][12]}>** an object with a address
-
-## setAddress
-
-Set Elrond address for a given BIP 32 path.
-
-### Parameters
-
--   `path` **[string][12]** a path in BIP 32 format
--   `display` **[boolean][13]?** optionally enable or not the display
-
-### Examples
-
-```javascript
-const result = await elrond.setAddress("44'/508'/0'/0/0");
-result : Buffer;
-```
-
-Returns **any** an object with a address
-
-## signTransaction
-
-Sign Elrond transaction for a given BIP 32 path.
-
-### Parameters
-
--   `path` **[string][12]** a path in BIP 32 format
--   `message` **[string][12]** string with an unsigned transaction
--   `usingHash` **[boolean][13]** boolean wich indicate if transaction is hash or raw
-
-Returns **[Promise][11]&lt;[string][12]>** a signature for transaction
 
 [1]: #getappconfiguration
 
