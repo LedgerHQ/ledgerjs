@@ -603,8 +603,8 @@ const cryptocurrenciesById: { [name: string]: CryptoCurrency } = {
     ],
     explorerViews: [
       {
-        tx: "https://explorer.dash.org/tx/$hash",
-        address: "https://explorer.dash.org/address/$address",
+        tx: "https://explorer.dash.org/insight/tx/$hash",
+        address: "https://explorer.dash.org/insight/address/$address",
       },
     ],
   },
