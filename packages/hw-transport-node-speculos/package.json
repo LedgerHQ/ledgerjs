@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-transport-node-speculos",
-  "version": "6.0.0-typescript.1",
+  "version": "6.0.0-typescript.3",
   "description": "Ledger Hardware Wallet communication layer with speculos Nano simulator",
   "keywords": [
     "Ledger",
@@ -29,7 +29,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/errors": "^6.0.0-typescript.1",
-    "@ledgerhq/hw-transport": "^6.0.0-typescript.1",
+    "@ledgerhq/hw-transport": "^6.0.0-typescript.3",
     "@ledgerhq/logs": "^6.0.0-typescript.1",
     "rxjs": "6"
   },

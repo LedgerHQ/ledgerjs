@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/cryptoassets",
-  "version": "6.0.0-typescript.1",
+  "version": "6.0.0-typescript.3",
   "description": "Ledger crypto-assets list",
   "keywords": [
     "Ledger"
