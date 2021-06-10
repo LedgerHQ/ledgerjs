@@ -63,6 +63,7 @@ export async function createTransaction(
   transport: Transport,
   arg: CreateTransactionArg
 ) {
+  const signTx = { ...defaultsSignTransaction, ...arg };
   const {
     inputs,
     associatedKeysets,
@@ -77,8 +78,8 @@ export async function createTransaction(
     onDeviceStreaming,
     onDeviceSignatureGranted,
     onDeviceSignatureRequested,
-  } = { ...defaultsSignTransaction, ...arg };
-  let { useTrustedInputForSegwit } = { ...defaultsSignTransaction, ...arg };
+  } = signTx;
+  let useTrustedInputForSegwit = signTx.useTrustedInputForSegwit;
 
   if (useTrustedInputForSegwit === undefined) {
     try {

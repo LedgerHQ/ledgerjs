@@ -518,9 +518,9 @@ export default class Eth {
    */
   starkSignOrder(
     path: string,
-    sourceTokenAddress: string,
+    sourceTokenAddress: string | undefined,
     sourceQuantization: BigNumber,
-    destinationTokenAddress: string,
+    destinationTokenAddress: string | undefined,
     destinationQuantization: BigNumber,
     sourceVault: number,
     destinationVault: number,
@@ -614,14 +614,14 @@ export default class Eth {
    */
   starkSignOrder_v2(
     path: string,
-    sourceTokenAddress: string,
+    sourceTokenAddress: string | undefined,
     sourceQuantizationType: StarkQuantizationType,
-    sourceQuantization: BigNumber,
-    sourceMintableBlobOrTokenId: BigNumber,
-    destinationTokenAddress: string,
+    sourceQuantization: BigNumber | undefined,
+    sourceMintableBlobOrTokenId: BigNumber | undefined,
+    destinationTokenAddress: string | undefined,
     destinationQuantizationType: StarkQuantizationType,
-    destinationQuantization: BigNumber,
-    destinationMintableBlobOrTokenId: BigNumber,
+    destinationQuantization: BigNumber | undefined,
+    destinationMintableBlobOrTokenId: BigNumber | undefined,
     sourceVault: number,
     destinationVault: number,
     amountSell: BigNumber,
@@ -768,7 +768,7 @@ export default class Eth {
    */
   starkSignTransfer(
     path: string,
-    transferTokenAddress: string,
+    transferTokenAddress: string | undefined,
     transferQuantization: BigNumber,
     targetPublicKey: string,
     sourceVault: number,
@@ -846,10 +846,10 @@ export default class Eth {
    */
   starkSignTransfer_v2(
     path: string,
-    transferTokenAddress: string,
+    transferTokenAddress: string | undefined,
     transferQuantizationType: StarkQuantizationType,
-    transferQuantization: BigNumber,
-    transferMintableBlobOrTokenId: BigNumber,
+    transferQuantization: BigNumber | undefined,
+    transferMintableBlobOrTokenId: BigNumber | undefined,
     targetPublicKey: string,
     sourceVault: number,
     destinationVault: number,
@@ -973,7 +973,7 @@ export default class Eth {
    * @param operationQuantization quantization used for the token to be transferred
    */
   starkProvideQuantum(
-    operationContract: string,
+    operationContract: string | undefined,
     operationQuantization: BigNumber
   ): Promise<boolean> {
     const operationContractHex = maybeHexBuffer(operationContract);
@@ -1011,7 +1011,7 @@ export default class Eth {
    * @option operationMintableBlobOrTokenId mintable blob (mintable erc 20 / mintable erc 721) or token id (erc 721) of the token to be transferred
    */
   starkProvideQuantum_v2(
-    operationContract: string,
+    operationContract: string | undefined,
     operationQuantizationType: StarkQuantizationType,
     operationQuantization?: BigNumber,
     operationMintableBlobOrTokenId?: BigNumber

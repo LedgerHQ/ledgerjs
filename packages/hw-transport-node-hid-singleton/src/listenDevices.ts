@@ -26,9 +26,7 @@ const monitor = () => {
     usbDetect.startMonitoring();
   }
 
-  return () => {
-    usbDetect.stopMonitoring();
-  };
+  return () => {};
 };
 
 // No better way for now. see https://github.com/LedgerHQ/ledgerjs/issues/434
@@ -75,6 +73,10 @@ export const listenDevices = (
   usbDetect.on(removeEvent, remove);
   return () => {
     if (timeout) clearTimeout(timeout);
+    // @ts-expect-error not all EventEmitter methods are covered in its definition file
+    usbDetect.off(addEvent, add);
+    // @ts-expect-error not all EventEmitter methods are covered in its definition file
+    usbDetect.off(removeEvent, remove);
     unmonitor();
   };
 };

@@ -12,15 +12,15 @@ export async function hashOutputFull(
   transport: Transport,
   outputScript: Buffer,
   additionals: Array<string> = []
-): Promise<void> {
+): Promise<Buffer | void> {
   let offset = 0;
-  const p1 = 0x80;
+  const p1 = Number(0x80);
   const isDecred = additionals.includes("decred");
 
   ///WARNING: Decred works only with one call (without chunking)
   //TODO: test without this for Decred
   if (isDecred) {
-    await transport.send(0xe0, 0x4a, p1, 0x00, outputScript);
+    return transport.send(0xe0, 0x4a, p1, 0x00, outputScript);
   }
 
   while (offset < outputScript.length) {
