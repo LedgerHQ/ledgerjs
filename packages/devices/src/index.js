@@ -33,6 +33,7 @@ const devices = {
     usbOnly: true,
     memorySize: 480 * 1024,
     blockSize: 4 * 1024,
+    masks: [0x31000000, 0x31010000],
     getBlockSize: (_firwareVersion: string): number => 4 * 1024,
   },
   nanoS: {
@@ -43,6 +44,7 @@ const devices = {
     usbOnly: true,
     memorySize: 320 * 1024,
     blockSize: 4 * 1024,
+    masks: [0x31100000],
     getBlockSize: (firmwareVersion: string): number =>
       semver.lt(semver.coerce(firmwareVersion), "2.0.0") ? 4 * 1024 : 2 * 1024,
   },
@@ -54,6 +56,7 @@ const devices = {
     usbOnly: false,
     memorySize: 2 * 1024 * 1024,
     blockSize: 4 * 1024,
+    masks: [0x33000000],
     getBlockSize: (_firwareVersion: string): number => 4 * 1024,
     bluetoothSpec: [
       {
@@ -92,6 +95,18 @@ export const getDeviceModel = (id: DeviceModelId): DeviceModel => {
   const info = devices[id];
   if (!info) throw new Error("device '" + id + "' does not exist");
   return info;
+};
+
+/**
+ * Given a `targetId`, return the deviceModel associated to it,
+ * based on the first two bytes.
+ */
+export const identifyTargetId = (targetId: number): ?DeviceModel => {
+  const deviceModel = devicesList.find(({ masks }) =>
+    masks.find((mask) => (targetId & 0xffff0000) === mask)
+  );
+
+  return deviceModel;
 };
 
 /**
@@ -158,6 +173,7 @@ export type DeviceModel = {
   legacyUsbProductId: number,
   usbOnly: boolean,
   memorySize: number,
+  masks: Array<number>,
   // blockSize: number, // THIS FIELD IS DEPRECATED, use getBlockSize
   getBlockSize: (firmwareVersion: string) => number,
   bluetoothSpec?: Array<{
