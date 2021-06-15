@@ -81,14 +81,23 @@ const productMap = {
 
 const devicesList: DeviceModel[] = Object.values(devices);
 
+/**
+ *
+ */
 export const ledgerUSBVendorId = 0x2c97;
 
+/**
+ *
+ */
 export const getDeviceModel = (id: DeviceModelId): DeviceModel => {
   const info = devices[id];
   if (!info) throw new Error("device '" + id + "' does not exist");
   return info;
 };
 
+/**
+ *
+ */
 export const identifyUSBProductId = (
   usbProductId: number
 ): DeviceModel | null | undefined => {
@@ -98,6 +107,7 @@ export const identifyUSBProductId = (
   const deviceModel = devicesList.find((d) => d.productIdMM === mm);
   return deviceModel;
 };
+
 export const identifyProductName = (
   productName: string
 ): DeviceModel | null | undefined => {
@@ -105,6 +115,7 @@ export const identifyProductName = (
   const deviceModel = devicesList.find((d) => d.id === productId);
   return deviceModel;
 };
+
 const bluetoothServices: string[] = [];
 const serviceUuidToInfos: Record<string, BluetoothInfos> = {};
 
@@ -126,12 +137,21 @@ for (const id in devices) {
   }
 }
 
+/**
+ *
+ */
 export const getBluetoothServiceUuids = (): string[] => bluetoothServices;
 
+/**
+ *
+ */
 export const getInfosForServiceUuid = (
   uuid: string
 ): BluetoothInfos | undefined => serviceUuidToInfos[uuid.toLowerCase()];
 
+/**
+ *
+ */
 export interface DeviceModel {
   id: DeviceModelId;
   productName: string;
@@ -148,6 +168,9 @@ export interface DeviceModel {
   }>;
 }
 
+/**
+ *
+ */
 export interface BluetoothInfos {
   deviceModel: DeviceModel;
   serviceUuid: string;
