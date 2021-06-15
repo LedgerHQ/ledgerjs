@@ -1,6 +1,6 @@
 import type { FiatCurrency } from "./types";
-
 // inspired by https://github.com/smirzaei/currency-formatter/blob/master/currencies.json
+
 function fiat(name, ticker, defaultSymbol, defaultMagnitude): FiatCurrency {
   // for now, we only create one unit, in the future we will allow more
   return {

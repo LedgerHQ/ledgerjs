@@ -72,7 +72,19 @@ export default class Btc {
     bitcoinAddress: string;
     chainCode: string;
   }> {
-    const options = opts || {};
+    let options;
+    if (arguments.length > 2 || typeof opts === "boolean") {
+      console.warn(
+        "btc.getWalletPublicKey deprecated signature used. Please switch to getWalletPublicKey(path, { format, verify })"
+      );
+      options = {
+        verify: !!opts,
+        // eslint-disable-next-line prefer-rest-params
+        format: arguments[2] ? "p2sh" : "legacy",
+      };
+    } else {
+      options = opts || {};
+    }
 
     return getWalletPublicKey(this.transport, { ...options, path });
   }
@@ -133,6 +145,26 @@ export default class Btc {
   }).then(res => ...);
    */
   createPaymentTransactionNew(arg: CreateTransactionArg): Promise<string> {
+    if (arguments.length > 1) {
+      console.warn(
+        "@ledgerhq/hw-app-btc: createPaymentTransactionNew multi argument signature is deprecated. please switch to named parameters."
+      );
+      // eslint-disable-next-line prefer-rest-params
+      arg = fromDeprecateArguments(arguments, [
+        "inputs",
+        "associatedKeysets",
+        "changePath",
+        "outputScriptHex",
+        "lockTime",
+        "sigHashType",
+        "segwit",
+        "initialTimestamp",
+        "additionals",
+        "expiryHeight",
+        "useTrustedInputForSegwit",
+      ]);
+    }
+
     return createTransaction(this.transport, arg);
   }
 
@@ -156,6 +188,41 @@ export default class Btc {
   }).then(result => ...);
    */
   signP2SHTransaction(arg: SignP2SHTransactionArg): Promise<string[]> {
+    if (arguments.length > 1) {
+      console.warn(
+        "@ledgerhq/hw-app-btc: signP2SHTransaction multi argument signature is deprecated. please switch to named parameters."
+      );
+      const [
+        inputs,
+        associatedKeysets,
+        outputScriptHex,
+        lockTime,
+        sigHashType,
+        segwit,
+        transactionVersion,
+        // eslint-disable-next-line prefer-rest-params
+      ] = arguments;
+      arg = {
+        inputs,
+        associatedKeysets,
+        outputScriptHex,
+        lockTime,
+        sigHashType,
+        segwit,
+        transactionVersion,
+      };
+      // eslint-disable-next-line prefer-rest-params
+      arg = fromDeprecateArguments(arguments, [
+        "inputs",
+        "associatedKeysets",
+        "outputScriptHex",
+        "lockTime",
+        "sigHashType",
+        "segwit",
+        "transactionVersion",
+      ]);
+    }
+
     return signP2SHTransaction(this.transport, arg);
   }
 
@@ -214,4 +281,15 @@ export default class Btc {
       additionals
     );
   }
+}
+
+function fromDeprecateArguments(args, keys) {
+  const obj = {};
+  keys.forEach((key, i) => {
+    const value = args[i];
+    if (value !== undefined) {
+      obj[key] = value;
+    }
+  });
+  return obj;
 }

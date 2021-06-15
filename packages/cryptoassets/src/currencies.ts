@@ -1811,8 +1811,8 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     managerAppName: "PoSW",
     ticker: "POSW",
     scheme: "posw",
-    color: "#000000",
     // FIXME
+    color: "#000000",
     family: "bitcoin",
     blockAvgTime: 60,
     bitcoinLikeInfo: {
@@ -2716,8 +2716,8 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     scheme: "stacks",
     color: "#000",
     family: "stacks",
-    disableCountervalue: true,
     // currently not available as countervalue and ticker collides with token Stox(STX)
+    disableCountervalue: true,
     units: [
       {
         name: "STX",
