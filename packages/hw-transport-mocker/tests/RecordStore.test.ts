@@ -1,4 +1,3 @@
-// @flow
 import {
   openTransportReplayer,
   RecordStore,
@@ -25,8 +24,7 @@ test("RecordStoreQueueEmpty", async () => {
   `);
   store.replayExchange(Buffer.from("e016000000", "hex"));
   expect(() => store.replayExchange(Buffer.from("00", "hex"))).toThrow(
-    // @ts-expect-error
-    RecordStoreQueueEmpty
+    (RecordStoreQueueEmpty as unknown) as Error
   );
 });
 
@@ -36,8 +34,9 @@ test("ensureQueueEmpty", async () => {
     <= 000000050107426974636f696e034254439000
   `);
   expect(store.isEmpty()).toBe(false);
-  // @ts-expect-error
-  expect(() => store.ensureQueueEmpty()).toThrow(RecordStoreRemainingAPDU);
+  expect(() => store.ensureQueueEmpty()).toThrow(
+    (RecordStoreRemainingAPDU as unknown) as Error
+  );
   store.replayExchange(Buffer.from("e016000000", "hex"));
   expect(store.isEmpty()).toBe(true);
   store.ensureQueueEmpty();
@@ -52,8 +51,9 @@ test("record", async () => {
     Buffer.from("000000050107426974636f696e034254439000", "hex")
   );
   expect(store.isEmpty()).toBe(false);
-  // @ts-expect-error
-  expect(() => store.ensureQueueEmpty()).toThrow(RecordStoreRemainingAPDU);
+  expect(() => store.ensureQueueEmpty()).toThrow(
+    (RecordStoreRemainingAPDU as unknown) as Error
+  );
   const res = store.replayExchange(Buffer.from("e016000000", "hex"));
   expect(res.toString("hex")).toBe("000000050107426974636f696e034254439000");
   expect(store.isEmpty()).toBe(true);
@@ -82,16 +82,19 @@ test("multiple apdu", async () => {
     <= 000000050107426974636f696e034254439000
   `);
   expect(store.isEmpty()).toBe(false);
-  // @ts-expect-error
-  expect(() => store.ensureQueueEmpty()).toThrow(RecordStoreRemainingAPDU);
+  expect(() => store.ensureQueueEmpty()).toThrow(
+    (RecordStoreRemainingAPDU as unknown) as Error
+  );
   store.replayExchange(Buffer.from("e016000000", "hex"));
   expect(store.isEmpty()).toBe(false);
-  // @ts-expect-error
-  expect(() => store.ensureQueueEmpty()).toThrow(RecordStoreRemainingAPDU);
+  expect(() => store.ensureQueueEmpty()).toThrow(
+    (RecordStoreRemainingAPDU as unknown) as Error
+  );
   store.replayExchange(Buffer.from("e016000000", "hex"));
   expect(store.isEmpty()).toBe(false);
-  // @ts-expect-error
-  expect(() => store.ensureQueueEmpty()).toThrow(RecordStoreRemainingAPDU);
+  expect(() => store.ensureQueueEmpty()).toThrow(
+    (RecordStoreRemainingAPDU as unknown) as Error
+  );
   store.replayExchange(Buffer.from("e016000000", "hex"));
   expect(store.isEmpty()).toBe(true);
   store.ensureQueueEmpty();
@@ -103,15 +106,16 @@ test("invalid apdu", async () => {
     <= 000000050107426974636f696e034254439000
   `);
   expect(store.isEmpty()).toBe(false);
-  // @ts-expect-error
-  expect(() => store.ensureQueueEmpty()).toThrow(RecordStoreRemainingAPDU);
+  expect(() => store.ensureQueueEmpty()).toThrow(
+    (RecordStoreRemainingAPDU as unknown) as Error
+  );
   expect(() => store.replayExchange(Buffer.from("0000000000", "hex"))).toThrow(
-    // @ts-expect-error
-    RecordStoreWrongAPDU
+    (RecordStoreWrongAPDU as unknown) as Error
   );
   expect(store.isEmpty()).toBe(false);
-  // @ts-expect-error
-  expect(() => store.ensureQueueEmpty()).toThrow(RecordStoreRemainingAPDU);
+  expect(() => store.ensureQueueEmpty()).toThrow(
+    (RecordStoreRemainingAPDU as unknown) as Error
+  );
   store.replayExchange(Buffer.from("e016000000", "hex"));
   expect(store.isEmpty()).toBe(true);
   store.ensureQueueEmpty();
@@ -125,8 +129,7 @@ test("skipping apdu mechanism is not on by default", async () => {
     <= 3110000405312e352e35042300000004312e37002013fe17e06cf2f710d33328aa46d1053f8fadd48dcaeca2c5512dd79e2158d5779000
   `);
   expect(() => store.replayExchange(Buffer.from("e001000000", "hex"))).toThrow(
-    // @ts-expect-error
-    RecordStoreWrongAPDU
+    (RecordStoreWrongAPDU as unknown) as Error
   );
 });
 
@@ -207,44 +210,31 @@ test("parser to allow different alternative syntax", async () => {
 });
 
 test("invalid syntaxes", async () => {
-  expect(
-    () =>
-      RecordStore.fromString(
-        "=>e016000000<=000000050107426974636f696e034254439000"
-      )
-    // @ts-expect-error
-  ).toThrow(RecordStoreInvalidSynthax);
+  expect(() =>
+    RecordStore.fromString(
+      "=>e016000000<=000000050107426974636f696e034254439000"
+    )
+  ).toThrow((RecordStoreInvalidSynthax as unknown) as Error);
   expect(() => RecordStore.fromString("=>e016000000")).toThrow(
-    // @ts-expect-error
-    RecordStoreInvalidSynthax
+    (RecordStoreInvalidSynthax as unknown) as Error
   );
-  expect(
-    () =>
-      RecordStore.fromString(
-        "e016000000\n000000050107426974636f696e034254439000"
-      )
-    // @ts-expect-error
-  ).toThrow(RecordStoreInvalidSynthax);
-  expect(
-    () =>
-      RecordStore.fromString(
-        "=>e016000000\n000000050107426974636f696e034254439000"
-      )
-    // @ts-expect-error
-  ).toThrow(RecordStoreInvalidSynthax);
+  expect(() =>
+    RecordStore.fromString("e016000000\n000000050107426974636f696e034254439000")
+  ).toThrow((RecordStoreInvalidSynthax as unknown) as Error);
+  expect(() =>
+    RecordStore.fromString(
+      "=>e016000000\n000000050107426974636f696e034254439000"
+    )
+  ).toThrow((RecordStoreInvalidSynthax as unknown) as Error);
   expect(() => RecordStore.fromString("=>e016000000\n=>e016000000")).toThrow(
-    // @ts-expect-error
-    RecordStoreInvalidSynthax
+    (RecordStoreInvalidSynthax as unknown) as Error
   );
   expect(() => RecordStore.fromString("=>e016000000\n<=AZERTY")).toThrow(
-    // @ts-expect-error
-    RecordStoreInvalidSynthax
+    (RecordStoreInvalidSynthax as unknown) as Error
   );
-  expect(
-    () =>
-      RecordStore.fromString(
-        "=>e016000000\n<=00000005Z10742674636f696e034254439000"
-      )
-    // @ts-expect-error
-  ).toThrow(RecordStoreInvalidSynthax);
+  expect(() =>
+    RecordStore.fromString(
+      "=>e016000000\n<=00000005Z10742674636f696e034254439000"
+    )
+  ).toThrow((RecordStoreInvalidSynthax as unknown) as Error);
 });

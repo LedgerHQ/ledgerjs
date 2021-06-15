@@ -16,8 +16,6 @@ const WebSocket = global.WebSocket || require("ws");
  * WebSocket transport implementation
  */
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 export default class WebSocketTransport extends Transport {
   static isSupported = (): Promise<boolean> =>
     Promise.resolve(typeof WebSocket === "function");

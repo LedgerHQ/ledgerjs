@@ -21,8 +21,10 @@ import {
   requestLedgerDevice,
   isSupported,
 } from "./webusb";
+
 const configurationValue = 1;
 const endpointNumber = 3;
+
 /**
  * WebUSB Transport implementation
  * @example
@@ -30,8 +32,6 @@ const endpointNumber = 3;
  * ...
  * TransportWebUSB.create().then(transport => ...)
  */
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 export default class TransportWebUSB extends Transport {
   device: USBDevice;
   deviceModel: DeviceModel | null | undefined;

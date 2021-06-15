@@ -5,9 +5,10 @@ export interface Log {
   type: string;
   message?: string;
   data?: any;
-  id: string;
   // unique amount all logs
-  date: Date; // date of the log
+  id: string;
+  // date of the log
+  date: Date;
 }
 export type Unsubscribe = () => void;
 export type Subscriber = (arg0: Log) => void;

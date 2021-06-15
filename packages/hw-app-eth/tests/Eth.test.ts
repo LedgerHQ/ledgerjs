@@ -312,10 +312,6 @@ test("signAllowanceUnlimited", async () => {
     `)
   );
   const eth = new Eth(transport);
-  const tokenInfo = byContractAddress(
-    "0xdac17f958d2ee523a2206206994597c13d831ec7"
-  );
-  await eth.provideERC20TokenInformation(tokenInfo as TokenInfo);
   const result = await eth.signTransaction(
     "44'/60'/0'/0/0",
     "f86d018504e3b2920082520894dac17f958d2ee523a2206206994597c13d831ec7872bd72a24874000b844095ea7b30000000000000000000000000102030405060708090a0b0c0d0e0f1011121314ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"

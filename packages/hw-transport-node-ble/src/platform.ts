@@ -1,4 +1,3 @@
-/* eslint-disable prefer-template */
 import noble, { Characteristic, Service } from "@abandonware/noble";
 import { Observable } from "rxjs";
 import { log } from "@ledgerhq/logs";
@@ -10,7 +9,9 @@ import { TransportError } from "@ledgerhq/errors";
 noble.on("warning", (message) => {
   log("ble-warning", message);
 });
+
 const POWERED_ON = "poweredOn";
+
 export const availability: Observable<boolean> = Observable.create(
   (observer) => {
     const onAvailabilityChanged = (e) => {
@@ -25,12 +26,14 @@ export const availability: Observable<boolean> = Observable.create(
     };
   }
 );
+
 export const listenDeviceDisconnect = (device: any, onDisconnect: any) => {
   device.addListener("disconnect", onDisconnect);
   return () => {
     device.removeListener("disconnect", onDisconnect);
   };
 };
+
 export const connectDevice = (device: any): Promise<void> =>
   new Promise((resolve, reject) => {
     device.connect((error) => {
@@ -41,6 +44,7 @@ export const connectDevice = (device: any): Promise<void> =>
       }
     });
   });
+
 export const disconnectDevice = (device: any): Promise<void> =>
   new Promise((resolve, reject) => {
     device.disconnect((error) => {
@@ -51,6 +55,7 @@ export const disconnectDevice = (device: any): Promise<void> =>
       }
     });
   });
+
 export const isDeviceDisconnected = (device: any): boolean =>
   device.state === "disconnected";
 
@@ -102,6 +107,7 @@ export const listen = (): Observable<any> =>
       noble.stopScanning();
     };
   });
+
 export const retrieveServiceAndCharacteristics = async (device: any) => {
   const [service] = await discoverDeviceServices(device);
   const infos = getInfosForServiceUuid(service.uuid);
@@ -137,6 +143,7 @@ export const retrieveServiceAndCharacteristics = async (device: any) => {
     deviceModel: infos.deviceModel,
   };
 };
+
 export const monitorCharacteristic = (
   characteristic: any
 ): [Observable<Buffer>, Promise<void>] => {
@@ -171,6 +178,7 @@ export const monitorCharacteristic = (
   });
   return [observable, readyness];
 };
+
 export const write = (
   writeCharacteristic: any,
   buffer: Buffer

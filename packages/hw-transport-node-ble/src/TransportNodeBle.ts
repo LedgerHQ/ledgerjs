@@ -1,4 +1,3 @@
-/* eslint-disable prefer-template */
 import Transport from "@ledgerhq/hw-transport";
 import type { DeviceModel } from "@ledgerhq/devices";
 import { sendAPDU } from "@ledgerhq/devices/lib/ble/sendAPDU";
@@ -21,16 +20,21 @@ import {
   connectDevice,
   isDeviceDisconnected,
 } from "./platform";
+
 type Device = any;
+
 const transportsCache = {};
+
 type ReconnectionConfig = {
   pairingThreshold: number;
   delayAfterFirstPairing: number;
 };
+
 let reconnectionConfig: ReconnectionConfig | null | undefined = {
   pairingThreshold: 1000,
   delayAfterFirstPairing: 4000,
 };
+
 export function setReconnectionConfig(
   config: ReconnectionConfig | null | undefined
 ) {
@@ -129,12 +133,12 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
 
   return transport;
 }
+
 /**
  * TransportNodeBle bluetooth BLE implementation
  * @example
  * import BluetoothTransport from "@ledgerhq/hw-transport-node-ble";
  */
-
 export default class BluetoothTransport extends Transport {
   /**
    *

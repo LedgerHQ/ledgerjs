@@ -149,20 +149,6 @@ export default class Btc {
       console.warn(
         "@ledgerhq/hw-app-btc: createPaymentTransactionNew multi argument signature is deprecated. please switch to named parameters."
       );
-      // eslint-disable-next-line prefer-rest-params
-      arg = fromDeprecateArguments(arguments, [
-        "inputs",
-        "associatedKeysets",
-        "changePath",
-        "outputScriptHex",
-        "lockTime",
-        "sigHashType",
-        "segwit",
-        "initialTimestamp",
-        "additionals",
-        "expiryHeight",
-        "useTrustedInputForSegwit",
-      ]);
     }
 
     return createTransaction(this.transport, arg);
@@ -192,35 +178,6 @@ export default class Btc {
       console.warn(
         "@ledgerhq/hw-app-btc: signP2SHTransaction multi argument signature is deprecated. please switch to named parameters."
       );
-      const [
-        inputs,
-        associatedKeysets,
-        outputScriptHex,
-        lockTime,
-        sigHashType,
-        segwit,
-        transactionVersion,
-        // eslint-disable-next-line prefer-rest-params
-      ] = arguments;
-      arg = {
-        inputs,
-        associatedKeysets,
-        outputScriptHex,
-        lockTime,
-        sigHashType,
-        segwit,
-        transactionVersion,
-      };
-      // eslint-disable-next-line prefer-rest-params
-      arg = fromDeprecateArguments(arguments, [
-        "inputs",
-        "associatedKeysets",
-        "outputScriptHex",
-        "lockTime",
-        "sigHashType",
-        "segwit",
-        "transactionVersion",
-      ]);
     }
 
     return signP2SHTransaction(this.transport, arg);
@@ -281,15 +238,4 @@ export default class Btc {
       additionals
     );
   }
-}
-
-function fromDeprecateArguments(args, keys) {
-  const obj = {};
-  keys.forEach((key, i) => {
-    const value = args[i];
-    if (value !== undefined) {
-      obj[key] = value;
-    }
-  });
-  return obj;
 }
