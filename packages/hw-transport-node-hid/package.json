@@ -40,7 +40,7 @@
     "clean": "bash ../../script/clean.sh",
     "build": "bash ../../script/build.sh",
     "watch": "bash ../../script/watch.sh",
-    "doc": "bash ../../script/doc-ts.sh"
+    "doc": "bash ../../script/doc.sh"
   },
   "gitHead": "dd0dea64b58e5a9125c8a422dcffd29e5ef6abec"
 }
