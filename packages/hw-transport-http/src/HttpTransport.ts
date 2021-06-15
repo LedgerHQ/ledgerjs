@@ -6,8 +6,6 @@ import { log } from "@ledgerhq/logs";
  * HTTP transport implementation
  */
 
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
 export default class HttpTransport extends Transport {
   static isSupported = (): Promise<boolean> =>
     Promise.resolve(typeof fetch === "function");
