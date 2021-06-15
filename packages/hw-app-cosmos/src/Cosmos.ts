@@ -161,7 +161,7 @@ export default class Cosmos {
       chunks.push(buffer.slice(i, end));
     }
 
-    let response: Buffer;
+    let response: any = {};
     return this.foreach(chunks, (data, j) =>
       this.transport
         .send(

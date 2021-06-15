@@ -146,7 +146,7 @@ export default class Polkadot {
       chunks.push(buffer.slice(i, end));
     }
 
-    let response;
+    let response: any = {};
     return this.foreach(chunks, (data, j) =>
       this.transport
         .send(

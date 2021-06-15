@@ -183,8 +183,9 @@ export default class Tezos {
       bakingApp,
     };
   }
-} // TODO use bip32-path library
+}
 
+// TODO use bip32-path library
 function splitPath(path: string): number[] {
   const result: number[] = [];
   const components = path.split("/");
