@@ -177,8 +177,7 @@ export default class Polkadot {
         const errorMessage = response
           .slice(0, response.length - 2)
           .toString("ascii");
-        // FIXME: add correct id to TransportError
-        throw new TransportError(errorMessage, "");
+        throw new TransportError(errorMessage, "Sign");
       }
 
       let signature = null;
