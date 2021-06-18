@@ -112,7 +112,7 @@ export default class TransportNodeHidNoEvents extends Transport {
       return Promise.resolve();
     } catch (e) {
       const maybeMappedError =
-        e && e.message ? DisconnectedDeviceDuringOperation(e.message) : e;
+        e && e.message ? new DisconnectedDeviceDuringOperation(e.message) : e;
       if (maybeMappedError instanceof DisconnectedDeviceDuringOperation) {
         this.setDisconnected();
       }
@@ -129,7 +129,9 @@ export default class TransportNodeHidNoEvents extends Transport {
 
         if (e) {
           const maybeMappedError =
-            e && e.message ? DisconnectedDeviceDuringOperation(e.message) : e;
+            e && e.message
+              ? new DisconnectedDeviceDuringOperation(e.message)
+              : e;
           if (maybeMappedError instanceof DisconnectedDeviceDuringOperation) {
             this.setDisconnected();
             return reject(new DisconnectedDevice(e.message));
