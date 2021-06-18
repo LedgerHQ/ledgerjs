@@ -1,0 +1,40 @@
+import {
+  createTransportReplayer,
+  RecordStore,
+} from "@ledgerhq/hw-transport-mocker";
+import Elrond from "../src/Elrond";
+
+test("Elrond init", async () => {
+  const Transport = createTransportReplayer(RecordStore.fromString(""));
+  const transport = await Transport.open();
+  const egld = new Elrond(transport);
+  expect(egld).not.toBe(undefined);
+});
+
+test("getAppConfiguration", async () => {
+  const Transport = createTransportReplayer(
+    RecordStore.fromString(` 
+    => ed02000000
+    <= 000300019000
+    `)
+  );
+  const transport = await Transport.open();
+  const egld = new Elrond(transport);
+  const result = await egld.getAppConfiguration();
+
+  expect(result).not.toBe(undefined);
+});
+
+test("getAddress", async () => {
+  const Transport = createTransportReplayer(
+    RecordStore.fromString(` 
+    => ed030000088000000080000000
+    <= 000300019000
+    `)
+  );
+  const transport = await Transport.open();
+  const egld = new Elrond(transport);
+  const result = await egld.getAddress("44'/508'/0'/0'/0'");
+
+  expect(result).not.toBe(undefined);
+});
