@@ -36,7 +36,7 @@ export function getDevices(): (Device & { deviceName?: string })[] {
 // Mapping errors from https://github.com/node-hid/node-hid/blob/master/src/HID.cc
 const mapError = (e) => {
   if (e && e.message) {
-    return new DisconnectedDeviceDuringOperation(e);
+    return new DisconnectedDeviceDuringOperation(e.message);
   }
   return e;
 };
