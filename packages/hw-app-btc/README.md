@@ -43,11 +43,8 @@ Ledger Hardware Wallet BTC JavaScript bindings. Also supports many altcoins.
 -   [SignP2SHTransactionArg](#signp2shtransactionarg)
     -   [Properties](#properties-1)
 -   [TransactionInput](#transactioninput)
-    -   [Properties](#properties-2)
 -   [TransactionOutput](#transactionoutput)
-    -   [Properties](#properties-3)
 -   [Transaction](#transaction)
-    -   [Properties](#properties-4)
 
 ### Btc
 
@@ -55,8 +52,8 @@ Bitcoin API.
 
 #### Parameters
 
--   `transport` **Transport&lt;any>** 
--   `scrambleKey` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)**  (optional, default `"BTC"`)
+-   `transport` **Transport** 
+-   `scrambleKey`   (optional, default `"BTC"`)
 
 #### Examples
 
@@ -70,7 +67,7 @@ const btc = new Btc(transport)
 ##### Parameters
 
 -   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a BIP 32 path
--   `opts` **([boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | {verify: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, format: [AddressFormat](#addressformat)?})?** 
+-   `opts` **{verify: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, format: [AddressFormat](#addressformat)?}?** 
 -   `options`  an object with optional these fields:-   verify (boolean) will ask user to confirm the address on the device
 
     -   format ("legacy" | "p2sh" | "bech32" | "cashaddr") to use different bitcoin address formatter.NB The normal usage is to use:-   legacy format with 44' paths
@@ -147,7 +144,7 @@ outputScriptHex: "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d
 }).then(res => ...);
 ```
 
-Returns **any** the signed transaction ready to be broadcast
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** the signed transaction ready to be broadcast
 
 #### signP2SHTransaction
 
@@ -175,7 +172,7 @@ outputScriptHex: "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d
 }).then(result => ...);
 ```
 
-Returns **any** the signed transaction ready to be broadcast
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>>** the signed transaction ready to be broadcast
 
 #### splitTransaction
 
@@ -184,9 +181,9 @@ For each UTXO included in your transaction, create a transaction object from the
 ##### Parameters
 
 -   `transactionHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
--   `isSegwitSupported` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?**  (optional, default `false`)
--   `hasTimestamp` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)**  (optional, default `false`)
--   `hasExtraData` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)**  (optional, default `false`)
+-   `isSegwitSupported` **([boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))**  (optional, default `false`)
+-   `hasTimestamp`   (optional, default `false`)
+-   `hasExtraData`   (optional, default `false`)
 -   `additionals` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>**  (optional, default `[]`)
 
 ##### Examples
@@ -214,9 +211,11 @@ Returns **[Buffer](https://nodejs.org/api/buffer.html)**
 
 ### CreateTransactionArg
 
+Type: {inputs: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;\[[Transaction](#transaction), [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), ([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined)), ([number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))]>, associatedKeysets: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>, changePath: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?, outputScriptHex: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), lockTime: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, sigHashType: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, segwit: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, initialTimestamp: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, additionals: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>, expiryHeight: [Buffer](https://nodejs.org/api/buffer.html)?, useTrustedInputForSegwit: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, onDeviceStreaming: function (arg0: {progress: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), total: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), index: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)}): void?, onDeviceSignatureRequested: function (): void?, onDeviceSignatureGranted: function (): void?}
+
 #### Properties
 
--   `inputs` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;\[[Transaction](#transaction), [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?, [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?]>** 
+-   `inputs` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;\[[Transaction](#transaction), [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), ([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined)), ([number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))]>** 
 -   `associatedKeysets` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** 
 -   `changePath` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** 
 -   `outputScriptHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
@@ -227,7 +226,7 @@ Returns **[Buffer](https://nodejs.org/api/buffer.html)**
 -   `additionals` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** 
 -   `expiryHeight` **[Buffer](https://nodejs.org/api/buffer.html)?** 
 -   `useTrustedInputForSegwit` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** 
--   `onDeviceStreaming` **function ({progress: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), total: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), index: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)}): void?** 
+-   `onDeviceStreaming` **function (arg0: {progress: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), total: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), index: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)}): void?** 
 -   `onDeviceSignatureRequested` **function (): void?** 
 -   `onDeviceSignatureGranted` **function (): void?** 
 
@@ -255,9 +254,11 @@ Returns **[Buffer](https://nodejs.org/api/buffer.html)**
 
 ### SignP2SHTransactionArg
 
+Type: {inputs: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;\[[Transaction](#transaction), [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), ([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined)), ([number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))]>, associatedKeysets: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>, outputScriptHex: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), lockTime: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, sigHashType: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, segwit: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, transactionVersion: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?}
+
 #### Properties
 
--   `inputs` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;\[[Transaction](#transaction), [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?, [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?]>** 
+-   `inputs` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;\[[Transaction](#transaction), [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), ([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined)), ([number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))]>** 
 -   `associatedKeysets` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** 
 -   `outputScriptHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 -   `lockTime` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
@@ -267,30 +268,6 @@ Returns **[Buffer](https://nodejs.org/api/buffer.html)**
 
 ### TransactionInput
 
-#### Properties
-
--   `prevout` **[Buffer](https://nodejs.org/api/buffer.html)** 
--   `script` **[Buffer](https://nodejs.org/api/buffer.html)** 
--   `sequence` **[Buffer](https://nodejs.org/api/buffer.html)** 
--   `tree` **[Buffer](https://nodejs.org/api/buffer.html)?** 
-
 ### TransactionOutput
 
-#### Properties
-
--   `amount` **[Buffer](https://nodejs.org/api/buffer.html)** 
--   `script` **[Buffer](https://nodejs.org/api/buffer.html)** 
-
 ### Transaction
-
-#### Properties
-
--   `version` **[Buffer](https://nodejs.org/api/buffer.html)** 
--   `inputs` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[TransactionInput](#transactioninput)>** 
--   `outputs` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[TransactionOutput](#transactionoutput)>?** 
--   `locktime` **[Buffer](https://nodejs.org/api/buffer.html)?** 
--   `witness` **[Buffer](https://nodejs.org/api/buffer.html)?** 
--   `timestamp` **[Buffer](https://nodejs.org/api/buffer.html)?** 
--   `nVersionGroupId` **[Buffer](https://nodejs.org/api/buffer.html)?** 
--   `nExpiryHeight` **[Buffer](https://nodejs.org/api/buffer.html)?** 
--   `extraData` **[Buffer](https://nodejs.org/api/buffer.html)?** 

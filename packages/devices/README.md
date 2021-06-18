@@ -23,11 +23,8 @@ Logic for all Ledger devices.
 -   [getBluetoothServiceUuids](#getbluetoothserviceuuids)
 -   [getInfosForServiceUuid](#getinfosforserviceuuid)
     -   [Parameters](#parameters-4)
--   [DeviceModelId](#devicemodelid)
 -   [DeviceModel](#devicemodel)
-    -   [Properties](#properties)
 -   [BluetoothInfos](#bluetoothinfos)
-    -   [Properties](#properties-1)
 
 ### createHIDframing
 
@@ -62,7 +59,7 @@ Type: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Globa
 
 #### Parameters
 
--   `id` **[DeviceModelId](#devicemodelid)** 
+-   `id` **DeviceModelId** 
 
 Returns **[DeviceModel](#devicemodel)** 
 
@@ -75,7 +72,7 @@ based on the first two bytes.
 
 -   `targetId` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 
-Returns **[DeviceModel](#devicemodel)?** 
+Returns **([DeviceModel](#devicemodel) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))** 
 
 ### identifyUSBProductId
 
@@ -83,9 +80,11 @@ Returns **[DeviceModel](#devicemodel)?**
 
 -   `usbProductId` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 
-Returns **[DeviceModel](#devicemodel)?** 
+Returns **([DeviceModel](#devicemodel) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))** 
 
 ### getBluetoothServiceUuids
+
+Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** 
 
 ### getInfosForServiceUuid
 
@@ -93,13 +92,13 @@ Returns **[DeviceModel](#devicemodel)?**
 
 -   `uuid` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
-Returns **[BluetoothInfos](#bluetoothinfos)?** 
-
-### DeviceModelId
-
-Type: $Keys&lt;any>
+Returns **([BluetoothInfos](#bluetoothinfos) \| [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))** 
 
 ### DeviceModel
+
+### BluetoothInfos
+
+# &lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
 
 #### Properties
 
@@ -113,14 +112,9 @@ Type: $Keys&lt;any>
 -   `getBlockSize` **function (firmwareVersion: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)): [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 -   `bluetoothSpec` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;{serviceUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), writeUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), notifyUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>?** 
 
-### BluetoothInfos
-
-#### Properties
-
--   `deviceModel` **[DeviceModel](#devicemodel)** 
--   `serviceUuid` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
--   `writeUuid` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
--   `notifyUuid` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+> > > > > > > 7184a62c3469949743efa3c4fc2b93293add5e04
+> > > > > > >
+> > > > > > > ### BluetoothInfos
 
 # Type: {id: [DeviceModelId](#devicemodelid), productName: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), usbProductId: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), bluetoothSpec: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;{serviceUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), writeUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), notifyUuid: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>?}
 

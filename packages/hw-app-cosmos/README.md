@@ -26,7 +26,7 @@ Cosmos API
 
 #### Parameters
 
--   `transport` **Transport&lt;any>** 
+-   `transport` **Transport** 
 -   `scrambleKey` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)**  (optional, default `APP_KEY`)
 
 #### Examples

@@ -17,7 +17,6 @@
     -   [Properties](#properties)
 -   [Device](#device)
 -   [DescriptorEvent](#descriptorevent)
-    -   [Properties](#properties-1)
 -   [Observer](#observer)
 -   [Transport](#transport)
     -   [exchange](#exchange)
@@ -51,13 +50,15 @@
 
 ### Subscription
 
+Type: {unsubscribe: function (): void}
+
 #### Properties
 
 -   `unsubscribe` **function (): void** 
 
 ### Device
 
-Type: [Object](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Object)
+Type: any
 
 ### DescriptorEvent
 
@@ -66,16 +67,9 @@ descriptor: a parameter that can be passed to open(descriptor)
 deviceModel: device info on the model (is it a nano s, nano x, ...)
 device: transport specific device info
 
-#### Properties
-
--   `type` **(`"add"` \| `"remove"`)** 
--   `descriptor` **Descriptor** 
--   `deviceModel` **DeviceModel??** 
--   `device` **[Device](#device)?** 
-
 ### Observer
 
-Type: $ReadOnly&lt;{next: function (event: Ev): any, error: function (e: any): any, complete: function (): any}>
+Type: Readonly&lt;{next: function (event: Ev): any, error: function (e: any): any, complete: function (): any}>
 
 ### Transport
 
@@ -122,7 +116,9 @@ Transport implementation can have specific events. Here is the common events:
 ##### Parameters
 
 -   `eventName` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
--   `cb` **[Function](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function)** 
+-   `cb` **function (...args: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;any>): any** 
+
+Returns **void** 
 
 #### off
 
@@ -131,7 +127,9 @@ Stop listening to an event on an instance of transport.
 ##### Parameters
 
 -   `eventName` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
--   `cb` **[Function](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Statements/function)** 
+-   `cb` **function (...args: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;any>): any** 
+
+Returns **void** 
 
 #### setDebugMode
 
@@ -145,6 +143,8 @@ Set a timeout (in milliseconds) for the exchange call. Only some transport might
 
 -   `exchangeTimeout` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 
+Returns **void** 
+
 #### setExchangeUnresponsiveTimeout
 
 Define the delay before emitting "unresponsive" on an exchange that does not respond
@@ -152,6 +152,8 @@ Define the delay before emitting "unresponsive" on an exchange that does not res
 ##### Parameters
 
 -   `unresponsiveTimeout` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+
+Returns **void** 
 
 #### send
 
@@ -178,7 +180,7 @@ Type: function (): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/R
 
 List once all available descriptors. For a better granularity, checkout `listen()`.
 
-Type: function (): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;Descriptor>>
+Type: function (): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;any>>
 
 ##### Examples
 
@@ -195,7 +197,7 @@ a DescriptorEvent is a `{ descriptor, type }` object. type can be `"add"` or `"r
 each listen() call will first emit all potential device already connected and then will emit events can come over times,
 for instance if you plug a USB device after listen() or a bluetooth device become discoverable.
 
-Type: function (observer: [Observer](#observer)&lt;[DescriptorEvent](#descriptorevent)&lt;Descriptor>>): [Subscription](#subscription)
+Type: function (observer: [Observer](#observer)&lt;[DescriptorEvent](#descriptorevent)&lt;any>>): [Subscription](#subscription)
 
 ##### Parameters
 
@@ -223,7 +225,7 @@ Returns **any** a Subscription object on which you can `.unsubscribe()` to stop 
 
 attempt to create a Transport instance with potentially a descriptor.
 
-Type: function (descriptor: Descriptor, timeout: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Transport](#transport)&lt;Descriptor>>
+Type: function (descriptor: any, timeout: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Transport](#transport)>
 
 ##### Parameters
 
@@ -246,7 +248,7 @@ This is a light helper, alternative to using listen() and open() (that you may n
 
 ##### Parameters
 
--   `openTimeout` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)**  (optional, default `3000`)
+-   `openTimeout`   (optional, default `3000`)
 -   `listenTimeout` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
 
 ##### Examples
@@ -255,4 +257,4 @@ This is a light helper, alternative to using listen() and open() (that you may n
 TransportFoo.create().then(transport => ...)
 ```
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Transport](#transport)&lt;Descriptor>>** 
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Transport](#transport)>** 
