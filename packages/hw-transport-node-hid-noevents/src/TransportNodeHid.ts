@@ -33,14 +33,6 @@ export function getDevices(): (Device & { deviceName?: string })[] {
  * TransportNodeHid.create().then(transport => ...)
  */
 
-// Mapping errors from https://github.com/node-hid/node-hid/blob/master/src/HID.cc
-const mapError = (e) => {
-  if (e && e.message) {
-    return new DisconnectedDeviceDuringOperation(e.message);
-  }
-  return e;
-};
-
 export default class TransportNodeHidNoEvents extends Transport {
   /**
    *
@@ -119,12 +111,13 @@ export default class TransportNodeHidNoEvents extends Transport {
       this.device.write(data);
       return Promise.resolve();
     } catch (e) {
-      const mappedError = mapError(e);
-      if (mappedError instanceof DisconnectedDeviceDuringOperation) {
+      const maybeMappedError =
+        e && e.message ? DisconnectedDeviceDuringOperation(e.message) : e;
+      if (maybeMappedError instanceof DisconnectedDeviceDuringOperation) {
         this.setDisconnected();
       }
 
-      return Promise.reject(mappedError);
+      return Promise.reject(maybeMappedError);
     }
   };
   readHID = (): Promise<Buffer> =>
@@ -135,13 +128,14 @@ export default class TransportNodeHidNoEvents extends Transport {
         }
 
         if (e) {
-          const mappedError = mapError(e);
-          if (mappedError instanceof DisconnectedDeviceDuringOperation) {
+          const maybeMappedError =
+            e && e.message ? DisconnectedDeviceDuringOperation(e.message) : e;
+          if (maybeMappedError instanceof DisconnectedDeviceDuringOperation) {
             this.setDisconnected();
             return reject(new DisconnectedDevice(e.message));
           }
 
-          return Promise.reject(mappedError);
+          return Promise.reject(maybeMappedError);
         } else {
           const buffer = Buffer.from(res);
           resolve(buffer);
