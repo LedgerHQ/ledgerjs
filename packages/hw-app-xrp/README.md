@@ -31,8 +31,8 @@ XRP API
 
 #### Parameters
 
--   `transport` **Transport&lt;any>** 
--   `scrambleKey` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)**  (optional, default `"XRP"`)
+-   `transport` **Transport** 
+-   `scrambleKey`   (optional, default `"XRP"`)
 
 #### Examples
 

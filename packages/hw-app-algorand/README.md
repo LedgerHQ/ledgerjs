@@ -26,7 +26,7 @@ Cosmos API
 
 #### Parameters
 
--   `transport` **Transport&lt;any>** 
+-   `transport` **Transport** 
 
 #### Examples
 
@@ -50,4 +50,4 @@ get Algorajt address for a given BIP 32 path.
 cosmos.getAddress("44'/60'/0'/0/0").then(o => o.address)
 ```
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{publicKey: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), address: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** an object with a publicKey, address and (optionally) chainCode
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{publicKey: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), address: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?}>** an object with a publicKey, address and (optionally) chainCode

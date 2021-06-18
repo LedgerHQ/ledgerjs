@@ -53,7 +53,7 @@ TransportHID.create().then(transport => ...)
 
 -   `apdu` **any** input value
 
-Returns **any** Promise of apdu response
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;any>** Promise of apdu response
 
 #### close
 
@@ -71,7 +71,7 @@ Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 
 List currently connected devices.
 
-Returns **any** Promise of devices
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;any>>** Promise of devices
 
 #### listen
 

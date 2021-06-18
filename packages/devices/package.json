@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/devices",
-  "version": "5.51.1",
+  "version": "6.0.1-typescript.0",
   "description": "Ledger devices",
   "keywords": [
     "Ledger"
@@ -18,22 +18,22 @@
   },
   "main": "lib/index.js",
   "module": "lib-es/index.js",
+  "types": "lib/index.d.ts",
   "license": "Apache-2.0",
   "devDependencies": {
-    "flow-bin": "^0.149.0"
+    "@types/semver": "^7.3.5"
   },
   "dependencies": {
-    "@ledgerhq/errors": "^5.50.0",
-    "@ledgerhq/logs": "^5.50.0",
+    "@ledgerhq/errors": "^6.0.1-typescript.0",
+    "@ledgerhq/logs": "^6.0.1-typescript.0",
     "rxjs": "6",
     "semver": "^7.3.5"
   },
   "scripts": {
-    "flow": "flow",
     "clean": "bash ../../script/clean.sh",
     "build": "bash ../../script/build.sh",
     "watch": "bash ../../script/watch.sh",
     "doc": "bash ../../script/doc.sh"
   },
-  "gitHead": "fca2c7ce74fdb88df4d59dca4cc0e668410d66af"
+  "gitHead": "dd0dea64b58e5a9125c8a422dcffd29e5ef6abec"
 }

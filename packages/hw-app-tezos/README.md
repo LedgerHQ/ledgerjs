@@ -26,7 +26,7 @@ Tezos API
 
 #### Parameters
 
--   `transport` **Transport&lt;any>** 
+-   `transport` **Transport** 
 
 #### Examples
 
