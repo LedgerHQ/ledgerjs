@@ -25,7 +25,7 @@ const SW_CANCEL = 0x6986;
 export default class Elrond {
   transport: Transport;
 
-  constructor(transport: Transport, scrambleKey: string = "eGLD") {
+  constructor(transport: Transport) {
     this.transport = transport;
     transport.decorateAppAPIMethods(
       this,
@@ -36,7 +36,7 @@ export default class Elrond {
         "signMessage",
         "getAppConfiguration",
       ],
-      scrambleKey
+      "eGLD"
     );
   }
 
@@ -49,10 +49,10 @@ export default class Elrond {
    * const { contractData, accountIndex, addressIndex, version } = result;
    */
   async getAppConfiguration(): Promise<{
-    contractData: string,
-    accountIndex: string,
-    addressIndex: string,
-    version: string,
+    contractData: string;
+    accountIndex: string;
+    addressIndex: string;
+    version: string;
   }> {
     const response = await this.transport.send(
       CLA,
@@ -91,7 +91,7 @@ export default class Elrond {
     path: string,
     display?: boolean
   ): Promise<{
-    address: string,
+    address: string;
   }> {
     const bipPath = BIPPath.fromString(path).toPathArray();
 
@@ -177,12 +177,15 @@ export default class Elrond {
 
     let response;
 
-    message.forEach(async(data, index) => {
-
-      response = await this.transport.send(CLA, type, index === 0 ? 0x00 : CURVE_MASK,CURVE_MASK,data)
-      
+    message.forEach(async (data, index) => {
+      response = await this.transport.send(
+        CLA,
+        type,
+        index === 0 ? 0x00 : CURVE_MASK,
+        CURVE_MASK,
+        data
+      );
     });
-   
 
     if (response.length !== 67 || response[0] !== 64) {
       throw new Error("invalid signature received from ledger device");
