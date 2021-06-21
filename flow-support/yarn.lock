@@ -483,14 +483,6 @@
     axios "^0.21.1"
     ws "6"
 
-"@ledgerhq/hw-transport-mocker@^5.51.1":
-  version "5.51.1"
-  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport-mocker/-/hw-transport-mocker-5.51.1.tgz#01adf00abe33c130588d4975e510a6021161a71a"
-  integrity sha512-CPw6nG4tYjfCmbFwHACEUM45P3K/s0XlOOqaT/R/GKZ6Uq+MdFB2UC6tPtDuZXjat3jkYJqRD5brteePLV/jFw==
-  dependencies:
-    "@ledgerhq/hw-transport" "^5.51.1"
-    "@ledgerhq/logs" "^5.50.0"
-
 "@ledgerhq/hw-transport-node-ble@^5.51.1":
   version "5.51.1"
   resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport-node-ble/-/hw-transport-node-ble-5.51.1.tgz#e4710203102b2406edd5090fdbf389eb51c7cfeb"

@@ -20,7 +20,6 @@
     "@ledgerhq/hw-app-xrp": "^5.51.1",
     "@ledgerhq/hw-transport": "^5.51.1",
     "@ledgerhq/hw-transport-http": "^5.51.1",
-    "@ledgerhq/hw-transport-mocker": "^5.51.1",
     "@ledgerhq/hw-transport-node-ble": "^5.51.1",
     "@ledgerhq/hw-transport-node-hid": "^5.51.1",
     "@ledgerhq/hw-transport-node-hid-noevents": "^5.51.1",
