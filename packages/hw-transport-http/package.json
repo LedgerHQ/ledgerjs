@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-transport-http",
-  "version": "6.0.1-typescript.0",
+  "version": "6.0.0",
   "description": "Ledger Hardware Wallet communication layer over http",
   "keywords": [
     "Ledger",
@@ -27,9 +27,9 @@
   "types": "lib/withStaticURLs.d.ts",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/errors": "^6.0.1-typescript.0",
-    "@ledgerhq/hw-transport": "^6.0.1-typescript.0",
-    "@ledgerhq/logs": "^6.0.1-typescript.0",
+    "@ledgerhq/errors": "^6.0.0",
+    "@ledgerhq/hw-transport": "^6.0.0",
+    "@ledgerhq/logs": "^6.0.0",
     "axios": "^0.21.1",
     "ws": "7"
   },
