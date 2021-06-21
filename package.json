@@ -13,7 +13,7 @@
     "test-no-git-diff": "git diff --exit-code || exit 1",
     "doc": "lerna run doc",
     "lint": "eslint packages/**/src --no-error-on-unmatched-pattern --ext .ts,.tsx -c .eslintrc.json",
-    "build": "BABEL_ENV=production && lerna run build",
+    "build": "lerna run build",
     "watch": "lerna run --parallel watch",
     "clean": "rm -rf node_modules packages/*/node_modules/ packages/*/lib",
     "rebuild": "lerna run clean && lerna run build",
