@@ -49,9 +49,9 @@ export default class Elrond {
    * const { contractData, accountIndex, addressIndex, version } = result;
    */
   async getAppConfiguration(): Promise<{
-    contractData: string;
-    accountIndex: string;
-    addressIndex: string;
+    contractData: string | number;
+    accountIndex: string | number;
+    addressIndex: string | number;
     version: string;
   }> {
     const response = await this.transport.send(
