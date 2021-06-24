@@ -785,7 +785,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     id: "elrond",
     coinType: 508,
     name: "Elrond",
-    managerAppName: "Elrond (eGLD)",
+    managerAppName: "Elrond",
     ticker: "EGLD",
     scheme: "elrond",
     color: "#1b46c2",
