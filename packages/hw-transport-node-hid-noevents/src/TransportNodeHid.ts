@@ -134,7 +134,6 @@ export default class TransportNodeHidNoEvents extends Transport {
               : e;
           if (maybeMappedError instanceof DisconnectedDeviceDuringOperation) {
             this.setDisconnected();
-            return reject(new DisconnectedDevice(e.message));
           }
 
           reject(maybeMappedError);
