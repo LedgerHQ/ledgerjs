@@ -137,7 +137,7 @@ export default class TransportNodeHidNoEvents extends Transport {
             return reject(new DisconnectedDevice(e.message));
           }
 
-          return Promise.reject(maybeMappedError);
+          reject(maybeMappedError);
         } else {
           const buffer = Buffer.from(res);
           resolve(buffer);
