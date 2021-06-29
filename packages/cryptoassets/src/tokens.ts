@@ -196,12 +196,10 @@ function convertERC20([
   };
 }
 
-function convertESDT([
-  ticker,
-  name,
-  magnitude,
-]): TokenCurrency {
-  const contractAddress = "000000000000000000010000000000000000000000000000000000000002ffff";
+function convertESDT([ticker, name, magnitude]): TokenCurrency {
+  const contractAddress =
+    "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u";
+
   return {
     type: "TokenCurrency",
     id: `elrond/esdt/${ticker}`,
@@ -210,11 +208,13 @@ function convertESDT([
     tokenType: "esdt",
     name,
     ticker,
-    units: [{
-      name,
-      code: ticker,
-      magnitude, 
-    }],
+    units: [
+      {
+        name,
+        code: ticker,
+        magnitude,
+      },
+    ],
   };
 }
 
