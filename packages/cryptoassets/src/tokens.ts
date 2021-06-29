@@ -4,6 +4,7 @@ import erc20tokens from "../data/erc20";
 import trc10tokens from "../data/trc10";
 import trc20tokens from "../data/trc20";
 import asatokens from "../data/asa";
+import esdttokens from "../data/esdt";
 const emptyArray = [];
 const tokensArray: TokenCurrency[] = [];
 const tokensArrayWithDelisted: TokenCurrency[] = [];
@@ -16,6 +17,7 @@ addTokens(erc20tokens.map(convertERC20));
 addTokens(trc10tokens.map(convertTRONTokens("trc10")));
 addTokens(trc20tokens.map(convertTRONTokens("trc20")));
 addTokens(asatokens.map(convertAlgorandASATokens));
+addTokens(esdttokens.map(convertESDT));
 type TokensListOptions = {
   withDelisted: boolean;
 };
@@ -191,6 +193,28 @@ function convertERC20([
         magnitude,
       },
     ],
+  };
+}
+
+function convertESDT([
+  ticker,
+  name,
+  magnitude
+]): TokenCurrency {
+  const contractAddress = "000000000000000000010000000000000000000000000000000000000002ffff";
+  return {
+    type: "TokenCurrency",
+    id: `elrond/esdt/${ticker}`,
+    contractAddress,
+    parentCurrency: getCryptoCurrencyById("elrond"),
+    tokenType: "esdt",
+    name,
+    ticker,
+    units: [{
+      name,
+      code: ticker,
+      magnitude, 
+    }]
   };
 }
 
