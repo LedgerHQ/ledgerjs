@@ -199,7 +199,7 @@ function convertERC20([
 function convertESDT([
   ticker,
   name,
-  magnitude
+  magnitude,
 ]): TokenCurrency {
   const contractAddress = "000000000000000000010000000000000000000000000000000000000002ffff";
   return {
@@ -214,7 +214,7 @@ function convertESDT([
       name,
       code: ticker,
       magnitude, 
-    }]
+    }],
   };
 }
 
