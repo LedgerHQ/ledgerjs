@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-app-cosmos",
-  "version": "6.0.2",
+  "version": "6.1.0",
   "description": "Ledger Hardware Wallet Cosmos Application API",
   "keywords": [
     "Ledger",
@@ -28,7 +28,7 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/errors": "^6.0.2",
-    "@ledgerhq/hw-transport": "^6.0.2",
+    "@ledgerhq/hw-transport": "^6.1.0",
     "bip32-path": "^0.4.2"
   },
   "scripts": {
