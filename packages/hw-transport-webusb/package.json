@@ -32,7 +32,7 @@
     "@ledgerhq/logs": "^6.0.2"
   },
   "devDependencies": {
-    "@types/w3c-web-usb": "^1.0.4"
+    "@types/w3c-web-usb": "^1.0.5"
   },
   "scripts": {
     "flow": "flow",
