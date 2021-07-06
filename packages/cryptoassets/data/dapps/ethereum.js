@@ -12721,6 +12721,28 @@ module.exports = {
       }
     ]
   },
+  "0xae7ab96520de3a18e5e111b5eaab095312d7fe84": {
+    "0xa1903eab": {
+      "plugin": "Lido",
+      "serialized_data": "044c69646fae7ab96520de3a18e5e111b5eaab095312d7fe84a1903eab",
+      "signature": "304402206d838855c4f0ddb2ce499e95c1528c501b69dbb8d71b99459f2bc72a728efec4022079e92fb8bfc17f0387593c54b89732ba5db0c48960873421a1ef70c4fcbb255a",
+      "erc20OfInterest": []
+    }
+  },
+  "0x7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0": {
+    "0xea598cb0": {
+      "plugin": "Lido",
+      "serialized_data": "044c69646f7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0ea598cb0",
+      "signature": "304402207e859382bc7bb019fe7ffb4402b77b160e03192b269f21fc6dde242385ea29b202202c7dc8dd1eb29329b997b1cd92f052e9f8cc4b77592145ff3d7fb18f734c9976",
+      "erc20OfInterest": []
+    },
+    "0xde0e9a3e": {
+      "plugin": "Lido",
+      "serialized_data": "044c69646f7f39c581f595b53c5cb19bd0b3f8da6c935e2ca0de0e9a3e",
+      "signature": "30440220047d00f28d9f88d31269152f28ce24c71c3a65e09481dff69932777e3fbdf1ae02203ce615e26093129afa737c2ef938a0c5c8ad09a39be3b5bccf4324f656d36eea",
+      "erc20OfInterest": []
+    }
+  },
   "0x1bd435f3c054b6e901b7b108a0ab7617c808677b": {
     "0x8f00eccb": {
       "plugin": "Paraswap",
