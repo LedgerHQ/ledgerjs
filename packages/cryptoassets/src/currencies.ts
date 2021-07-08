@@ -221,7 +221,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     managerAppName: "Avalanche",
     ticker: "AVAX",
     scheme: "avalanche",
-    color: "#000000",
+    color: "#E84142",
     family: "ethereum",
     units: [
       {
