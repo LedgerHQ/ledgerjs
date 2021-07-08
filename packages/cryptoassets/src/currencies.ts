@@ -239,7 +239,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
         address: "https://cchain.explorer.avax.network/address/$address",
         token: "https://cchain.explorer.avax.network/token/$contractAddress?a=$address",
       },
-    ],explorerViews: [],
+    ],
   },  
   banano: {
     type: "CryptoCurrency",
