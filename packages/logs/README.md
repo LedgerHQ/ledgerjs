@@ -11,7 +11,6 @@ Utility library that is used by all Ledger libraries to dispatch logs so we can 
 #### Table of Contents
 
 -   [Log](#log)
-    -   [Properties](#properties)
 -   [log](#log-1)
     -   [Parameters](#parameters)
 -   [listen](#listen)
@@ -20,14 +19,6 @@ Utility library that is used by all Ledger libraries to dispatch logs so we can 
 ### Log
 
 A Log object
-
-#### Properties
-
--   `type` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
--   `message` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** 
--   `data` **any?** 
--   `id` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
--   `date` **[Date](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Date)** 
 
 ### log
 
@@ -45,6 +36,6 @@ listen to logs.
 
 #### Parameters
 
--   `cb` **function ([Log](#log)): void** that is called for each future log() with the Log object
+-   `cb` **Subscriber** that is called for each future log() with the Log object
 
 Returns **Unsubscribe** a function that can be called to unsubscribe the listener

@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/logs",
-  "version": "5.50.0",
+  "version": "6.0.2",
   "description": "Ledger logs central point",
   "keywords": [
     "Ledger"
@@ -18,16 +18,13 @@
   },
   "main": "lib/index.js",
   "module": "lib-es/index.js",
+  "types": "lib/index.d.ts",
   "license": "Apache-2.0",
-  "devDependencies": {
-    "flow-bin": "^0.149.0"
-  },
   "scripts": {
-    "flow": "flow",
     "clean": "bash ../../script/clean.sh",
     "build": "bash ../../script/build.sh",
     "watch": "bash ../../script/watch.sh",
     "doc": "bash ../../script/doc.sh"
   },
-  "gitHead": "fca2c7ce74fdb88df4d59dca4cc0e668410d66af"
+  "gitHead": "dd0dea64b58e5a9125c8a422dcffd29e5ef6abec"
 }

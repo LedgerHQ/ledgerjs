@@ -12,3 +12,4 @@ lerna-error.log
 yarn-error.log
 *.swp
 coverage
+.vscode/

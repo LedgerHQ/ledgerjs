@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-app-tezos",
-  "version": "5.51.1",
+  "version": "6.1.0",
   "description": "Ledger Hardware Wallet Tezos Application API",
   "keywords": [
     "Ledger",
@@ -24,22 +24,19 @@
   },
   "main": "lib/Tezos.js",
   "module": "lib-es/Tezos.js",
+  "types": "lib/Tezos.d.ts",
   "license": "Apache-2.0",
-  "devDependencies": {
-    "flow-bin": "^0.149.0"
-  },
   "dependencies": {
-    "@ledgerhq/hw-transport": "^5.51.1",
+    "@ledgerhq/hw-transport": "^6.1.0",
     "blake2b": "^2.1.3",
     "bs58check": "^2.1.2",
     "invariant": "^2.2.4"
   },
   "scripts": {
-    "flow": "flow",
     "clean": "bash ../../script/clean.sh",
     "build": "bash ../../script/build.sh",
     "watch": "bash ../../script/watch.sh",
     "doc": "bash ../../script/doc.sh"
   },
-  "gitHead": "fca2c7ce74fdb88df4d59dca4cc0e668410d66af"
+  "gitHead": "dd0dea64b58e5a9125c8a422dcffd29e5ef6abec"
 }

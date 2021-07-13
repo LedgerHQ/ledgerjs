@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-transport-webusb",
-  "version": "5.51.1",
+  "version": "6.1.0",
   "description": "Ledger Hardware Wallet WebUSB implementation of the communication layer",
   "keywords": [
     "Ledger",
@@ -23,15 +23,16 @@
   },
   "main": "lib/TransportWebUSB.js",
   "module": "lib-es/TransportWebUSB.js",
+  "types": "lib/TransportWebUSB.d.ts",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/devices": "^5.51.1",
-    "@ledgerhq/errors": "^5.50.0",
-    "@ledgerhq/hw-transport": "^5.51.1",
-    "@ledgerhq/logs": "^5.50.0"
+    "@ledgerhq/devices": "^6.1.0",
+    "@ledgerhq/errors": "^6.0.2",
+    "@ledgerhq/hw-transport": "^6.1.0",
+    "@ledgerhq/logs": "^6.0.2"
   },
   "devDependencies": {
-    "flow-bin": "^0.149.0"
+    "@types/w3c-web-usb": "^1.0.5"
   },
   "scripts": {
     "flow": "flow",
@@ -40,5 +41,5 @@
     "watch": "bash ../../script/watch.sh",
     "doc": "bash ../../script/doc.sh"
   },
-  "gitHead": "fca2c7ce74fdb88df4d59dca4cc0e668410d66af"
+  "gitHead": "dd0dea64b58e5a9125c8a422dcffd29e5ef6abec"
 }

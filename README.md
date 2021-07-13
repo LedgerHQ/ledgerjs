@@ -237,3 +237,124 @@ deploy a canary release (beta, etc)
 ```
 
 > NB: if there is a new package, AFAIK you need to manually `npm publish` it once on NPM.
+
+## VSCode settings 
+
+Here is a example config for a workspace file to handle the monorepo setup.  
+Just add `project.code-workspace` to your `.vscode` folder
+
+```json
+{
+  "folders": [
+    {
+      "name": "root",
+      "path": "../"
+    },
+    {
+      "name": "cryptoassets",
+      "path": "../packages/cryptoassets"
+    },
+    {
+      "name": "devices",
+      "path": "../packages/devices"
+    },
+    {
+      "name": "errors",
+      "path": "../packages/errors"
+    },
+    {
+      "name": "hw-app-algorand",
+      "path": "../packages/hw-app-algorand"
+    },
+    {
+      "name": "hw-app-btc",
+      "path": "../packages/hw-app-btc"
+    },
+    {
+      "name": "hw-app-cosmos",
+      "path": "../packages/hw-app-cosmos"
+    },
+    {
+      "name": "hw-app-eth",
+      "path": "../packages/hw-app-eth"
+    },
+    {
+      "name": "hw-app-polkadot",
+      "path": "../packages/hw-app-polkadot"
+    },
+    {
+      "name": "hw-app-str",
+      "path": "../packages/hw-app-str"
+    },
+    {
+      "name": "hw-app-tezos",
+      "path": "../packages/hw-app-tezos"
+    },
+    {
+      "name": "hw-app-trx",
+      "path": "../packages/hw-app-trx"
+    },
+    {
+      "name": "hw-app-xrp",
+      "path": "../packages/hw-app-xrp"
+    },
+    {
+      "name": "hw-transport",
+      "path": "../packages/hw-transport"
+    },
+    {
+      "name": "hw-transport-http",
+      "path": "../packages/hw-transport-http"
+    },
+    {
+      "name": "hw-transport-mocker",
+      "path": "../packages/hw-transport-mocker"
+    },
+    {
+      "name": "hw-transport-node-ble",
+      "path": "../packages/hw-transport-node-ble"
+    },
+    {
+      "name": "hw-transport-node-hid",
+      "path": "../packages/hw-transport-node-hid"
+    },
+    {
+      "name": "hw-transport-node-hid-noevents",
+      "path": "../packages/hw-transport-node-hid-noevents"
+    },
+    {
+      "name": "hw-transport-node-hid-singleton",
+      "path": "../packages/hw-transport-node-hid-singleton"
+    },
+    {
+      "name": "hw-transport-node-speculos",
+      "path": "../packages/hw-transport-node-speculos"
+    },
+    {
+      "name": "hw-transport-web-ble",
+      "path": "../packages/hw-transport-web-ble"
+    },
+    {
+      "name": "hw-transport-webhid",
+      "path": "../packages/hw-transport-webhid"
+    },
+    {
+      "name": "hw-transport-webusb",
+      "path": "../packages/hw-transport-webusb"
+    },
+    {
+      "name": "logs",
+      "path": "../packages/logs"
+    },
+    {
+      "name": "react-native-hid",
+      "path": "../packages/react-native-hid"
+    },
+    {
+      "name": "react-native-hw-transport-ble",
+      "path": "../packages/react-native-hw-transport-ble"
+    }
+  ],
+}
+```
+

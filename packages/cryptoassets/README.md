@@ -21,8 +21,6 @@ There are two modes of usage of this library.
 
 -   [getAbandonSeedAddress](#getabandonseedaddress)
     -   [Parameters](#parameters)
--   [CryptoCurrencyObjMap](#cryptocurrencyobjmap)
--   [CryptoCurrencyConfig](#cryptocurrencyconfig)
 -   [CryptoCurrencyIds](#cryptocurrencyids)
 -   [registerCryptoCurrency](#registercryptocurrency)
     -   [Parameters](#parameters-1)
@@ -93,17 +91,9 @@ DO NOT USE AS RECIPIENT OR SIGN TRANSACTIONS INTO THEM
 
 Returns **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
-### CryptoCurrencyObjMap
-
-Type: $Exact&lt;$ObjMap&lt;any, F>>
-
-### CryptoCurrencyConfig
-
-Type: [CryptoCurrencyObjMap](#cryptocurrencyobjmap)&lt;function (any): C>
-
 ### CryptoCurrencyIds
 
-Type: $Keys&lt;any>
+Type: any
 
 ### registerCryptoCurrency
 
@@ -127,7 +117,7 @@ Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Gl
 
 -   `f` **any** 
 
-Returns **[CryptoCurrency](#cryptocurrency)?** 
+Returns **([CryptoCurrency](#cryptocurrency) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))** 
 
 ### findCryptoCurrencyByScheme
 
@@ -135,7 +125,7 @@ Returns **[CryptoCurrency](#cryptocurrency)?**
 
 -   `scheme` **any** 
 
-Returns **[CryptoCurrency](#cryptocurrency)?** 
+Returns **([CryptoCurrency](#cryptocurrency) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))** 
 
 ### findCryptoCurrencyByTicker
 
@@ -143,7 +133,7 @@ Returns **[CryptoCurrency](#cryptocurrency)?**
 
 -   `ticker` **any** 
 
-Returns **[CryptoCurrency](#cryptocurrency)?** 
+Returns **([CryptoCurrency](#cryptocurrency) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))** 
 
 ### findCryptoCurrencyById
 
@@ -151,7 +141,7 @@ Returns **[CryptoCurrency](#cryptocurrency)?**
 
 -   `id` **any** 
 
-Returns **[CryptoCurrency](#cryptocurrency)?** 
+Returns **([CryptoCurrency](#cryptocurrency) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))** 
 
 ### findCryptoCurrencyByKeyword
 
@@ -159,7 +149,7 @@ Returns **[CryptoCurrency](#cryptocurrency)?**
 
 -   `keyword` **any** 
 
-Returns **[CryptoCurrency](#cryptocurrency)?** 
+Returns **([CryptoCurrency](#cryptocurrency) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))** 
 
 ### hasCryptoCurrencyId
 
@@ -183,7 +173,7 @@ Returns **[CryptoCurrency](#cryptocurrency)**
 
 -   `id` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
-Returns **{config: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), signature: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}?** 
+Returns **({config: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), signature: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)} | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))** 
 
 ### hasFiatCurrencyTicker
 
@@ -199,7 +189,7 @@ Returns **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 
 -   `ticker` **any** 
 
-Returns **[FiatCurrency](#fiatcurrency)?** 
+Returns **([FiatCurrency](#fiatcurrency) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))** 
 
 ### getFiatCurrencyByTicker
 
@@ -217,7 +207,7 @@ Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Gl
 
 #### Parameters
 
--   `options` **$Shape&lt;TokensListOptions>?** 
+-   `options` **Partial&lt;TokensListOptions>?** 
 
 Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[TokenCurrency](#tokencurrency)>** 
 
@@ -226,7 +216,7 @@ Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Gl
 #### Parameters
 
 -   `currency` **[CryptoCurrency](#cryptocurrency)** 
--   `options` **$Shape&lt;TokensListOptions>?** 
+-   `options` **Partial&lt;TokensListOptions>?** 
 
 Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[TokenCurrency](#tokencurrency)>** 
 
@@ -244,7 +234,7 @@ Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Gl
 
 -   `ticker` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
-Returns **[TokenCurrency](#tokencurrency)?** 
+Returns **([TokenCurrency](#tokencurrency) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))** 
 
 ### findTokenById
 
@@ -252,7 +242,7 @@ Returns **[TokenCurrency](#tokencurrency)?**
 
 -   `id` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
-Returns **[TokenCurrency](#tokencurrency)?** 
+Returns **([TokenCurrency](#tokencurrency) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))** 
 
 ### findTokenByAddress
 
@@ -260,7 +250,7 @@ Returns **[TokenCurrency](#tokencurrency)?**
 
 -   `address` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
-Returns **[TokenCurrency](#tokencurrency)?** 
+Returns **([TokenCurrency](#tokencurrency) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))** 
 
 ### hasTokenId
 
@@ -286,9 +276,11 @@ if a given token account is a token that can be used in compound, give the assoc
 
 -   `token` **any** 
 
-Returns **[TokenCurrency](#tokencurrency)?** 
+Returns **([TokenCurrency](#tokencurrency) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))** 
 
 ### Unit
+
+Type: {name: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), code: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), magnitude: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), showAllDigits: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, prefixCode: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?}
 
 #### Properties
 
@@ -299,6 +291,8 @@ Returns **[TokenCurrency](#tokencurrency)?**
 -   `prefixCode` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** 
 
 ### CurrencyCommon
+
+Type: {name: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), ticker: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), units: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[Unit](#unit)>, symbol: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?, disableCountervalue: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, delisted: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, countervalueTicker: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?}
 
 #### Properties
 
@@ -319,6 +313,8 @@ Type: any
 Type: any
 
 ### ExplorerView
+
+Type: {tx: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?, address: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?, token: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?}
 
 #### Properties
 

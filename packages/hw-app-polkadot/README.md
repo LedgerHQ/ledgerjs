@@ -27,7 +27,7 @@ Polkadot API
 
 #### Parameters
 
--   `transport` **Transport&lt;any>** 
+-   `transport` **Transport** 
 
 #### Examples
 
@@ -42,6 +42,8 @@ const polkadot = new Polkadot(transport)
 
 -   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 -   `requireConfirmation` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** if true, user must valid if the address is correct on the device (optional, default `false`)
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{pubKey: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), address: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), return_code: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)}>** 
 
 #### sign
 
