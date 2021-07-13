@@ -401,7 +401,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     type: "CryptoCurrency",
     id: "bsc",
     coinType: 60,
-    name: "BNB",
+    name: "Binance Smart Chain",
     managerAppName: "Ethereum", // FIXME this is likely to create issue
     ticker: "BNB",
     scheme: "bsc",
