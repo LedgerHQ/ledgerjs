@@ -13,5 +13,4 @@ This repository hosts the `@ledgerhq/*` JavaScript libraries.
 * TypeScript is used to typecheck the library. Check with `yarn build`.
 
 > NB. for the 3 points above, the best is to have integration of Prettier,
-> ESlint, Flowtype in your text editor (there are plugin for most editors). The
-> easiest might be to use Atom with Nuclide plugin.
+> ESlint, Flowtype in your text editor (there are plugin for most editors).
