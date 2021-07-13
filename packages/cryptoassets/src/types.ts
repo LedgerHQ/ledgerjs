@@ -103,7 +103,7 @@ export type CryptoCurrency = CurrencyCommon & {
   ethereumLikeInfo?: {
     chainId: number;
     networkId?: number;
-    baseName?: string;
+    baseChain?: string;
     hardfork?: string;
   };
   explorerViews: ExplorerView[];
