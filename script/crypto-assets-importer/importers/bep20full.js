@@ -6,7 +6,7 @@ const {
 } = require("../../../packages/cryptoassets/lib/fiats");
 
 // TODO in future: if we have diff network for bnb we would have to change
-const inferParentCurrency = () => "bnb";
+const inferParentCurrency = () => "bsc";
 
 const withoutExtraComma = (str) => {
   const m = str.match(/,+$/);
@@ -20,11 +20,11 @@ const lenseTicker = (a) => a[9] || a[2];
 
 module.exports = {
   // FIXME not yet sure if it's our final path
-  paths: ["tokens/bnb/bnb"],
+  paths: ["tokens/bsc/bep20"],
   output: "data/bep20.js",
 
   validate: (everything, countervaluesTickers) =>
-    ["bnb"].flatMap((cid) => {
+    ["bsc"].flatMap((cid) => {
       const all = everything.filter((a) => a[0] === cid);
       const fiatCollisions = all.filter(
         (a) =>

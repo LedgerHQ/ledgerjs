@@ -397,14 +397,14 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
-  bnb: {
+  bsc: {
     type: "CryptoCurrency",
-    id: "bnb",
+    id: "bsc",
     coinType: 60,
     name: "BNB",
     managerAppName: "Ethereum", // FIXME this is likely to create issue
     ticker: "BNB",
-    scheme: "bnb",
+    scheme: "bsc",
     color: "#F0B90A",
     family: "ethereum",
     ethereumLikeInfo: {
