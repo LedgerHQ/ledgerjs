@@ -207,7 +207,6 @@ function convertBEP20([
   disableCountervalue,
   delisted,
   countervalueTicker,
-  compoundFor,
 ]): TokenCurrency {
   const parentCurrency = getCryptoCurrencyById(parentCurrencyId);
   return {
