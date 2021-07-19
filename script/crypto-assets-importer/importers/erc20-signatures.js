@@ -2,8 +2,8 @@ const path = require("path");
 const Buffer = require("buffer").Buffer;
 const { readFileJSON } = require("../utils");
 
-const inferChainId = (common, id) =>
-  id === "bep20"
+const inferChainId = (common, folder) =>
+  folder.endsWith("bsc/bep20")
     ? 56
     : common.blockchain_name === "foundation"
     ? 1
@@ -46,7 +46,7 @@ module.exports = {
         "hex"
       );
       const ticker = Buffer.from(common.ticker, "ascii");
-      const chainId = asUint4be(inferChainId(common, id));
+      const chainId = asUint4be(inferChainId(common, folder));
       const signature = Buffer.from(ledgerSignature, "hex");
       return Buffer.concat([
         Buffer.from([ticker.length]),
