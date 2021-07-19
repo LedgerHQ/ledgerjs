@@ -402,7 +402,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     id: "bsc",
     coinType: 60,
     name: "Binance Smart Chain",
-    managerAppName: "Ethereum", // FIXME this is likely to create issue
+    managerAppName: "Binance Smart Chain",
     ticker: "BNB",
     scheme: "bsc",
     color: "#F0B90A",
@@ -411,7 +411,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       baseChain: "mainnet",
       chainId: 56,
       networkId: 56,
-      hardfork: "muirGlacier", // it makes it work in ethereumjs-common but it's probably earlier than this.
+      hardfork: "muirGlacier",
     },
     units: [
       {
