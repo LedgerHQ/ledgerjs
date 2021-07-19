@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-app-algorand",
-  "version": "6.2.0-bsc.5",
+  "version": "6.2.0",
   "description": "Ledger Hardware Wallet Algorand Application API",
   "keywords": [
     "Ledger",
@@ -27,8 +27,8 @@
   "types": "lib/Algorand.d.ts",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/errors": "^6.2.0-bsc.5",
-    "@ledgerhq/hw-transport": "^6.2.0-bsc.5",
+    "@ledgerhq/errors": "^6.2.0",
+    "@ledgerhq/hw-transport": "^6.2.0",
     "bip32-path": "^0.4.2"
   },
   "scripts": {
