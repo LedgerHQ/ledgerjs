@@ -397,24 +397,36 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
-  bnb: {
+  bsc: {
     type: "CryptoCurrency",
-    id: "bnb",
-    coinType: 714,
-    name: "BNB",
-    managerAppName: "Binance Chain",
+    id: "bsc",
+    coinType: 60,
+    name: "Binance Smart Chain",
+    managerAppName: "Binance Smart Chain",
     ticker: "BNB",
-    scheme: "bnb",
+    scheme: "bsc",
     color: "#F0B90A",
-    family: "bnb",
+    family: "ethereum",
+    ethereumLikeInfo: {
+      baseChain: "mainnet",
+      chainId: 56,
+      networkId: 56,
+      hardfork: "muirGlacier",
+    },
     units: [
       {
         name: "BNB",
         code: "BNB",
-        magnitude: 8,
+        magnitude: 18,
       },
     ],
-    explorerViews: [],
+    explorerViews: [
+      {
+        tx: "https://bscscan.com/tx/$hash",
+        address: "https://bscscan.com/address/$address",
+        token: "https://bscscan.com/token/$contractAddress?a=$address",
+      },
+    ],
   },
   callisto: {
     type: "CryptoCurrency",
@@ -860,7 +872,10 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     family: "ethereum",
     blockAvgTime: 15,
     ethereumLikeInfo: {
+      baseChain: "mainnet",
       chainId: 1,
+      networkId: 1,
+      hardfork: "petersburg",
     },
     explorerViews: [
       {
@@ -883,7 +898,10 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     family: "ethereum",
     blockAvgTime: 15,
     ethereumLikeInfo: {
+      baseChain: "mainnet",
       chainId: 61,
+      networkId: 1,
+      hardfork: "dao",
     },
     explorerViews: [
       {
@@ -2697,7 +2715,10 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     family: "ethereum",
     blockAvgTime: 15,
     ethereumLikeInfo: {
+      baseChain: "ropsten",
       chainId: 3, // ropsten
+      networkId: 3,
+      hardfork: "petersburg",
     },
     explorerViews: [
       {

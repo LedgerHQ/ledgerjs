@@ -7,6 +7,7 @@ const importers = [
   require("./importers/erc20-signatures"),
   require("./importers/erc20full"),
   require("./importers/erc20exchange"),
+  require("./importers/bep20full"),
   require("./importers/currenciesExchange"),
 ];
 

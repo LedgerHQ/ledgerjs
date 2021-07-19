@@ -3,6 +3,7 @@ import { getCryptoCurrencyById } from "./currencies";
 import erc20tokens from "../data/erc20";
 import trc10tokens from "../data/trc10";
 import trc20tokens from "../data/trc20";
+import bep20tokens from "../data/bep20";
 import asatokens from "../data/asa";
 const emptyArray = [];
 const tokensArray: TokenCurrency[] = [];
@@ -15,6 +16,7 @@ const tokensByAddress: Record<string, TokenCurrency> = {};
 addTokens(erc20tokens.map(convertERC20));
 addTokens(trc10tokens.map(convertTRONTokens("trc10")));
 addTokens(trc20tokens.map(convertTRONTokens("trc20")));
+addTokens(bep20tokens.map(convertBEP20));
 addTokens(asatokens.map(convertAlgorandASATokens));
 type TokensListOptions = {
   withDelisted: boolean;
@@ -184,6 +186,41 @@ function convertERC20([
     compoundFor: compoundFor
       ? parentCurrencyId + "/erc20/" + compoundFor
       : undefined,
+    units: [
+      {
+        name,
+        code: ticker,
+        magnitude,
+      },
+    ],
+  };
+}
+
+function convertBEP20([
+  parentCurrencyId,
+  token,
+  ticker,
+  magnitude,
+  name,
+  ledgerSignature,
+  contractAddress,
+  disableCountervalue,
+  delisted,
+  countervalueTicker,
+]): TokenCurrency {
+  const parentCurrency = getCryptoCurrencyById(parentCurrencyId);
+  return {
+    type: "TokenCurrency",
+    id: parentCurrencyId + "/bep20/" + token,
+    ledgerSignature,
+    contractAddress,
+    parentCurrency,
+    tokenType: "bep20",
+    name,
+    ticker,
+    delisted,
+    disableCountervalue: !!parentCurrency.isTestnetFor || !!disableCountervalue,
+    countervalueTicker,
     units: [
       {
         name,
