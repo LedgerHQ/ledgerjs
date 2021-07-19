@@ -34,7 +34,7 @@
     "rxjs": "6"
   },
   "devDependencies": {
-    "@types/web-bluetooth": "^0.0.9"
+    "@types/web-bluetooth": "^0.0.10"
   },
   "scripts": {
     "clean": "bash ../../script/clean.sh",
