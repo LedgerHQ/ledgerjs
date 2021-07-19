@@ -81,18 +81,18 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
   near: {
     type: "CryptoCurrency",
     id: "near",
-    coinType: 0, //TODO: what should I put here?
-    name: "NEAR", //TODO: is it the name of the company, or name of the cryptocurrency?
+    coinType: 397,
+    name: "NEAR",
     managerAppName: "NEAR",
-    ticker: "N",
-    scheme: "near", //TODO: where this will be used? `near` is ok?
-    color: "#000", //TODO: where this collor woll be used?
-    family: "near", //TODO: where this will be used? `near` is ok?
+    ticker: "NEAR",
+    scheme: "near",
+    color: "#000",
+    family: "near",
     units: [
       {
-        name: "N",
-        code: "N",
-        magnitude: 8, //TODO: what is the magnitude? How is it used?
+        name: "NEAR",
+        code: "NEAR",
+        magnitude: 24,
       },
     ],
     explorerViews: [],
