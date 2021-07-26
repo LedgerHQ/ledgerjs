@@ -58,6 +58,9 @@ export const EnpointConfigError = createCustomErrorClass("EnpointConfig");
 export const EthAppPleaseEnableContractData = createCustomErrorClass(
   "EthAppPleaseEnableContractData"
 );
+export const LatAppPleaseEnableContractData = createCustomErrorClass(
+  "LatAppPleaseEnableContractData"
+);
 export const FeeEstimationFailed = createCustomErrorClass(
   "FeeEstimationFailed"
 );

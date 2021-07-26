@@ -858,6 +858,66 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [],
   },
+  platon: {
+    type: "CryptoCurrency",
+    id: "platon",
+    coinType: 486, // TODO ? coin type according to slip44. THIS IS NOT GUARANTEED UNIQUE across currencies (e.g testnets,..)
+    name: "PlatON",
+    managerAppName: "PlatON", // 管理器显示的应用名称
+    ticker: "LAT",
+    scheme: "platon", // the scheme name to use when formatting an URI (without the ':')
+    color: "#fcb811",
+    units: [
+      {
+        name: "platon",
+        code: "LAT",
+        magnitude: 18
+      },
+      {
+        name: "Glat",
+        code: "Glat",
+        magnitude: 27
+      },
+      {
+        name: "Mlat",
+        code: "Mlat",
+        magnitude: 24,
+      },
+      {
+        name: "Gvon",
+        code: "Gvon",
+        magnitude: 9,
+      },
+      {
+        name: "Mvon",
+        code: "Mvon",
+        magnitude: 6,
+      },
+      {
+        name: "Kvon",
+        code: "Kvon",
+        magnitude: 3,
+      },
+      {
+        name: "von",
+        code: "von",
+        magnitude: 0,
+      },
+    ],
+    family: "platon",
+    blockAvgTime: 2,
+    ethereumLikeInfo: { // TODO  should be defined for ethereum family
+      chainId: 100,
+      networkId: 1,
+    },
+    explorerViews: [
+      {
+        tx: "https://scan.platon.network/trade-detail?txHash=$hash",
+        address: "https://scan.platon.network/address-detail?address=$address",
+        token: "https://scan.platon.network/tokens-detail?address=$address",
+      },
+    ],
+  },
   ethereum: {
     type: "CryptoCurrency",
     id: "ethereum",
@@ -2840,8 +2900,8 @@ export function listCryptoCurrencies(
       ? cryptocurrenciesArray
       : prodCryptoArray
     : withDevCrypto
-    ? cryptocurrenciesArrayWithoutTerminated
-    : prodCryptoArrayWithoutTerminated;
+      ? cryptocurrenciesArrayWithoutTerminated
+      : prodCryptoArrayWithoutTerminated;
 }
 
 /**
