@@ -78,6 +78,25 @@ const ethereumUnits = (name, code) => [
 ];
 
 const cryptocurrenciesById: Record<string, CryptoCurrency> = {
+  near: {
+    type: "CryptoCurrency",
+    id: "near",
+    coinType: 397,
+    name: "NEAR",
+    managerAppName: "NEAR",
+    ticker: "NEAR",
+    scheme: "near",
+    color: "#000",
+    family: "near",
+    units: [
+      {
+        name: "NEAR",
+        code: "NEAR",
+        magnitude: 24,
+      },
+    ],
+    explorerViews: [],
+  },
   aeternity: {
     type: "CryptoCurrency",
     id: "aeternity",
