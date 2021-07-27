@@ -22,7 +22,7 @@ import type Transport from "@ledgerhq/hw-transport";
 import { BigNumber } from "bignumber.js";
 import { ethers } from "ethers";
 import { byContractAddress } from "./erc20";
-import { getInfosForContractMethod } from "./contracts";
+import { loadInfosForContractMethod } from "./contracts";
 
 export type StarkQuantizationType =
   | "eth"
@@ -285,7 +285,7 @@ export default class Eth {
 
     if (decodedTx.data.length >= 10) {
       const selector = decodedTx.data.substring(0, 10);
-      const infos = getInfosForContractMethod(decodedTx.to, selector);
+      const infos = await loadInfosForContractMethod(decodedTx.to, selector);
 
       if (infos) {
         const { plugin, payload, signature, erc20OfInterest, abi } = infos;

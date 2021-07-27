@@ -5,9 +5,8 @@ const mapObject = (obj, fn) => Object.fromEntries(Object.entries(obj).map(fn));
 
 module.exports = {
   paths: ["dapps/ethereum"],
-  output: "data/dapps/ethereum.js",
+  output: "ethereum.json", // to be put in crypto assets list
   outputTemplate: (data) =>
-    "module.exports = " +
     JSON.stringify(
       data.reduce(
         (acc, obj) => ({
