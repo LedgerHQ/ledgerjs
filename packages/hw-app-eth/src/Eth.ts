@@ -239,9 +239,9 @@ export default class Eth {
           ? rawTx.length - offset
           : maxChunkSize;
 
-      if (rlpOffset != 0 && offset + chunkSize == rlpOffset) {
+      if (rlpOffset != 0 && offset + chunkSize >= rlpOffset) {
         // Make sure that the chunk doesn't end right on the EIP 155 marker if set
-        chunkSize--;
+        chunkSize = rawTx.length - offset;
       }
 
       const buffer = Buffer.alloc(
