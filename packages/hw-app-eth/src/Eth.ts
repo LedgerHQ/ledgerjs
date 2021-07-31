@@ -189,16 +189,11 @@ export default class Eth {
     const paths = splitPath(path);
     let offset = 0;
 
-    let txType = null as null | number;
-
     const rawTx = Buffer.from(rawTxHex, "hex");
-
-    // Check if tx is EIP1559 tx
-    // TODO: add support for EIP2930 tx
-    if (rawTx[0] == 2) {
-      txType = rawTx[0];
-    }
+    const VALID_TYPES = [1, 2];
+    const txType = VALID_TYPES.includes(rawTx[0]) ? rawTx[0] : null
     const rlpData = txType === null ? rawTx : rawTx.slice(1, rawTxHex.length);
+    
     const toSend: Buffer[] = [];
     let response;
     // Check if the TX is encoded following EIP 155
@@ -275,12 +270,17 @@ export default class Eth {
     rlpTx = ethers.utils.RLP.decode(rlpData);
 
     let decodedTx;
-    // TODO: add eip2930 tx
-    if (txType == 2) {
+    if (txType === 2) {
       // EIP1559
       decodedTx = {
         data: rlpTx[7],
         to: rlpTx[5],
+      };
+    } else if (txType === 1) {
+      // EIP2930
+      decodedTx = {
+        data: rlpTx[6],
+        to: rlpTx[4],
       };
     } else {
       // Legacy tx
