@@ -191,9 +191,9 @@ export default class Eth {
 
     const rawTx = Buffer.from(rawTxHex, "hex");
     const VALID_TYPES = [1, 2];
-    const txType = VALID_TYPES.includes(rawTx[0]) ? rawTx[0] : null
+    const txType = VALID_TYPES.includes(rawTx[0]) ? rawTx[0] : null;
     const rlpData = txType === null ? rawTx : rawTx.slice(1, rawTxHex.length);
-    
+
     const toSend: Buffer[] = [];
     let response;
     // Check if the TX is encoded following EIP 155
