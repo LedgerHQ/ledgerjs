@@ -188,18 +188,28 @@ export default class Eth {
   }> {
     const paths = splitPath(path);
     let offset = 0;
+
+    let txType = null as null | number;
+
     const rawTx = Buffer.from(rawTxHex, "hex");
+
+    // Check if tx is EIP1559 tx
+    // TODO: add support for EIP2930 tx
+    if (rawTx[0] == 2) {
+      txType = rawTx[0];
+    }
+    const rlpData = txType === null ? rawTx : rawTx.slice(1, rawTxHex.length);
     const toSend: Buffer[] = [];
     let response;
     // Check if the TX is encoded following EIP 155
-    let rlpTx = ethers.utils.RLP.decode("0x" + rawTxHex).map((hex) =>
+    let rlpTx = ethers.utils.RLP.decode(rlpData).map((hex) =>
       Buffer.from(hex.slice(2), "hex")
     );
 
     let rlpOffset = 0;
     let chainIdPrefix = "";
 
-    if (rlpTx.length > 6) {
+    if (rlpTx.length > 6 && txType === null) {
       const rlpVrs = Buffer.from(
         ethers.utils.RLP.encode(rlpTx.slice(-3)).slice(2),
         "hex"
@@ -262,12 +272,23 @@ export default class Eth {
       offset += chunkSize;
     }
 
-    rlpTx = ethers.utils.RLP.decode("0x" + rawTxHex);
+    rlpTx = ethers.utils.RLP.decode(rlpData);
 
-    const decodedTx = {
-      data: rlpTx[5],
-      to: rlpTx[3],
-    };
+    let decodedTx;
+    // TODO: add eip2930 tx
+    if (txType == 2) {
+      // EIP1559
+      decodedTx = {
+        data: rlpTx[7],
+        to: rlpTx[5],
+      };
+    } else {
+      // Legacy tx
+      decodedTx = {
+        data: rlpTx[5],
+        to: rlpTx[3],
+      };
+    }
     const provideForContract = async (address) => {
       const erc20Info = byContractAddress(address);
       if (erc20Info) {

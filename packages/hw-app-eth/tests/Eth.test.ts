@@ -63,6 +63,26 @@ test("signTransaction", async () => {
   });
 });
 
+test("signTransaction EIP1559", async () => {
+  const transport = await openTransportReplayer(
+    RecordStore.fromString(`
+    => e004000041058000002c8000003c800000000000000000000000eb0685012a05f20082520894b2bb2b958afa2e96dab3f3ce7162b87daea39017872386f26fc1000080038080
+    <= 2975b96c4423ea79037099e0f8a0fa7d8538f00c6aaddea26e151320aac65ae3bd5266d81476adedc28c5e769f8bf016de33bdaa49f341435df429e01fe5f9b16e9000
+    `)
+  );
+  const eth = new Eth(transport);
+  const result = await eth.signTransaction(
+    "44'/60'/0'/0'/0",
+    "02ef0306843b9aca008504a817c80082520894b2bb2b958afa2e96dab3f3ce7162b87daea39017872386f26fc1000080c0"
+  );
+  expect(result).toEqual({
+    r: "3694583045a85ada8d15d5e01b373b00e86a405c9c52f7835691dcc522b7353b",
+    s: "30392e638a591c65ed307809825ca48346980f52d004ab7a5f93657f7e62a400",
+    v: "1",
+  });
+});
+
+
 test("signTransaction testing provideERC20Informations + setExternalPlugin", async () => {
   const transport = await openTransportReplayer(
     RecordStore.fromString(
