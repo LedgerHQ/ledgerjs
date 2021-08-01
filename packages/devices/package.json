@@ -21,7 +21,7 @@
   "types": "lib/index.d.ts",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@types/semver": "^7.3.7"
+    "@types/semver": "^7.3.8"
   },
   "dependencies": {
     "@ledgerhq/errors": "^6.2.0",
