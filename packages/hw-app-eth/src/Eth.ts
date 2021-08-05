@@ -224,14 +224,11 @@ export default class Eth {
         rlpOffset += sizeOfListLen - 1;
       }
 
-      const chainIdSrc: any = rlpTx[6];
-      const chainIdBuf = Buffer.alloc(4);
-      chainIdSrc.copy(chainIdBuf, 4 - chainIdSrc.length);
-      chainIdPrefix = (chainIdBuf.readUInt32BE(0) * 2 + 35)
+      chainIdPrefix = new BigNumber(rlpTx[6].toString("hex"), 16)
+        .times(2)
+        .plus(35)
         .toString(16)
-        .slice(0, -2);
-
-      // Drop the low byte, that comes from the ledger.
+        .slice(0, -2); // Drop the low byte, that comes from the ledger.
       if (chainIdPrefix.length % 2 === 1) {
         chainIdPrefix = "0" + chainIdPrefix;
       }
