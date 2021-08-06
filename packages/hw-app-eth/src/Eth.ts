@@ -202,10 +202,10 @@ export default class Eth {
     );
 
     let rlpOffset = 0;
-    let chainId;
+    let chainId = 0;
     let chainIdTruncated = 0;
 
-    if (rlpTx.length > 6 && txType === null) {
+    if (txType === null && rlpTx.length > 6) {
       const rlpVrs = Buffer.from(
         ethers.utils.RLP.encode(rlpTx.slice(-3)).slice(2),
         "hex"
