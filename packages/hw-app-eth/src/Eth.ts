@@ -349,7 +349,7 @@ export default class Eth {
           if (oneByteChainId > response_byte[0]) {
             ecc_parity = 256;
           }
-          ecc_parity += response_byte[0] - ((chainIdTruncated * 2 + 35) % 256);
+          ecc_parity += response_byte[0] - oneByteChainId;
 
           if (txType != null) {
             // For EIP2930 and EIP1559 tx, v is simply the parity.
