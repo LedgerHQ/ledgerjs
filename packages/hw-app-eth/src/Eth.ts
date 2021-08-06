@@ -202,7 +202,7 @@ export default class Eth {
     );
 
     let rlpOffset = 0;
-    let chainId = 0;
+    let chainId = new BigNumber(0);
     let chainIdTruncated = 0;
 
     if (txType === null && rlpTx.length > 6) {
