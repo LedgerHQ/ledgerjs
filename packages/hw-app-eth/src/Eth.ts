@@ -203,6 +203,7 @@ export default class Eth {
 
     let rlpOffset = 0;
     let chainId;
+    let chainIdLen = 0;
 
     if (rlpTx.length > 6 && txType === null) {
       const rlpVrs = Buffer.from(
@@ -226,6 +227,7 @@ export default class Eth {
 
       // Using BigNumber because chainID could be any uint256.
       chainId = new BigNumber(rlpTx[6].toString("hex"), 16);
+      chainIdLen = rlpTx[6].length;
     }
 
     while (offset !== rawTx.length) {
@@ -336,20 +338,20 @@ export default class Eth {
         })
     ).then(
       () => {
-        const response_byte = response.slice(0, 1);
+        const response_byte: number = response.slice(0, 1)[0];
         let v = "";
 
         if (chainId.times(2).plus(35).plus(1) > 255) {
-          // Only take the lowest 32 bits of the chain ID.
-          const chainIdTruncated = chainId.modulo(0xffffffff).toNumber();
-          const oneByteChainId = (chainIdTruncated * 2 + 35) % 256;
-          let ecc_parity;
-
-          // Make sure we don't underflow by adding 256 if needed.
-          if (oneByteChainId > response_byte[0]) {
-            ecc_parity = 256;
+          let chainIdTruncated = 0;
+          // We wish to keep the 4 lowest bytes.
+          while (chainIdLen > 4) {
+            chainIdTruncated = chainId.idiv(256);
+            chainIdLen--;
           }
-          ecc_parity += response_byte[0] - oneByteChainId;
+
+          const oneByteChainId = (chainIdTruncated * 2 + 35) % 256;
+
+          const ecc_parity = response_byte - oneByteChainId;
 
           if (txType != null) {
             // For EIP2930 and EIP1559 tx, v is simply the parity.
