@@ -38,7 +38,7 @@ module.exports = {
     const abis = addresses.reduce(
       (acc, address, i) => ({
         ...acc,
-        [address]: abisList[i],
+        [address.toLowerCase()]: abisList[i],
       }),
       {}
     );
@@ -46,15 +46,15 @@ module.exports = {
     return bare.contracts.reduce(
       (acc, contract) => ({
         ...acc,
-        [contract.address]: {
+        [contract.address.toLowerCase()]: {
           ...mapObject(contract.selectors, ([selector, data]) => [
             selector,
             {
-              ...(signatures[contract.address][selector] || {}),
+              ...(signatures[contract.address.toLowerCase()][selector] || {}),
               erc20OfInterest: data.erc20OfInterest,
             },
           ]),
-          abi: abis[contract.address],
+          abi: abis[contract.address.toLowerCase()],
         },
       }),
       {}
