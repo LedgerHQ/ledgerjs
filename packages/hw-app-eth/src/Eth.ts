@@ -202,7 +202,7 @@ export default class Eth {
     );
 
     let rlpOffset = 0;
-    let chainIdPrefix = "";
+    let chainId;
 
     if (rlpTx.length > 6 && txType === null) {
       const rlpVrs = Buffer.from(
@@ -224,14 +224,8 @@ export default class Eth {
         rlpOffset += sizeOfListLen - 1;
       }
 
-      chainIdPrefix = new BigNumber(rlpTx[6].toString("hex"), 16)
-        .times(2)
-        .plus(35)
-        .toString(16)
-        .slice(0, -2); // Drop the low byte, that comes from the ledger.
-      if (chainIdPrefix.length % 2 === 1) {
-        chainIdPrefix = "0" + chainIdPrefix;
-      }
+      // Using BigNumber because chainID could be any uint256.
+      chainId = new BigNumber(rlpTx[6].toString("hex"), 16);
     }
 
     while (offset !== rawTx.length) {
@@ -342,7 +336,37 @@ export default class Eth {
         })
     ).then(
       () => {
-        const v = chainIdPrefix + response.slice(0, 1).toString("hex");
+        const response_byte = response.slice(0, 1);
+        let v = "";
+
+        if (chainId.times(2).plus(35).plus(1) > 255) {
+          // Only take the lowest 32 bits of the chain ID.
+          const chainIdTruncated = chainId.modulo(0xffffffff).toNumber();
+          const oneByteChainId = (chainIdTruncated * 2 + 35) % 256;
+          let ecc_parity;
+
+          // Make sure we don't underflow by adding 256 if needed.
+          if (oneByteChainId > response_byte[0]) {
+            ecc_parity = 256;
+          }
+          ecc_parity += response_byte[0] - ((chainIdTruncated * 2 + 35) % 256);
+
+          if (txType != null) {
+            // For EIP2930 and EIP1559 tx, v is simply the parity.
+            v = ecc_parity % 2 == 1 ? "00" : "01";
+          } else {
+            // Legacy type transaction with a big chain ID
+            v = chainId.times(2).plus(35).plus(ecc_parity).toString(16);
+          }
+        } else {
+          v = response_byte[0].toString(16);
+        }
+
+        // Make sure v has is prefixed with a 0 if its length is odd ("1" -> "01").
+        if (v.length % 2 == 1) {
+          v = "0" + v;
+        }
+
         const r = response.slice(1, 1 + 32).toString("hex");
         const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
         return {
