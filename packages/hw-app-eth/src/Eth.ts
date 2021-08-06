@@ -341,7 +341,7 @@ export default class Eth {
         const response_byte: number = response.slice(0, 1)[0];
         let v = "";
 
-        if (chainId.times(2).plus(35).plus(1) > 255) {
+        if (chainId.times(2).plus(35).plus(1).isGreaterThan(255)) {
           const oneByteChainId = (chainIdTruncated * 2 + 35) % 256;
 
           const ecc_parity = response_byte - oneByteChainId;
