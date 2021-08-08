@@ -227,7 +227,10 @@ export default class Eth {
 
       // Using BigNumber because chainID could be any uint256.
       chainId = new BigNumber(rlpTx[6].toString("hex"), 16);
-      chainIdTruncated = rlpTx[6].readUint32BE();
+      const chainIdSrc = rlpTx[6];
+      const chainIdTruncatedBuf = Buffer.alloc(4);
+      chainIdSrc.copy(chainIdTruncatedBuf, 4 - chainIdSrc.length);
+      chainIdTruncated = chainIdTruncatedBuf.readUInt32BE(0);
     }
 
     while (offset !== rawTx.length) {
