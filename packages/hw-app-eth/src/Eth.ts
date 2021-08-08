@@ -229,7 +229,11 @@ export default class Eth {
       chainId = new BigNumber(rlpTx[6].toString("hex"), 16);
       const chainIdSrc = rlpTx[6];
       const chainIdTruncatedBuf = Buffer.alloc(4);
-      chainIdSrc.copy(chainIdTruncatedBuf, 4 - chainIdSrc.length);
+      if (chainIdSrc.length > 4) {
+        chainIdSrc.copy(chainIdTruncatedBuf);
+      } else {
+        chainIdSrc.copy(chainIdTruncatedBuf, 4 - chainIdSrc.length);
+      }
       chainIdTruncated = chainIdTruncatedBuf.readUInt32BE(0);
     }
 
