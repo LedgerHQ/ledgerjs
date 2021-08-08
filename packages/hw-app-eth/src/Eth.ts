@@ -354,7 +354,7 @@ export default class Eth {
             v = chainId.times(2).plus(35).plus(ecc_parity).toString(16);
           }
         } else {
-          v = response_byte.toString(16)
+          v = response_byte.toString(16);
         }
 
         // Make sure v has is prefixed with a 0 if its length is odd ("1" -> "01").
