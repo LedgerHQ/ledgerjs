@@ -32,7 +32,7 @@
     "@ledgerhq/logs": "^6.2.0"
   },
   "devDependencies": {
-    "@types/w3c-web-hid": "^1.0.1"
+    "@types/w3c-web-hid": "^1.0.2"
   },
   "scripts": {
     "flow": "flow",
