@@ -201,7 +201,7 @@ export default class Eth {
       Buffer.from(hex.slice(2), "hex")
     );
 
-    let rlpOffset = 0;
+    let vrsOffset = 0;
     let chainId = new BigNumber(0);
     let chainIdTruncated = 0;
 
@@ -211,18 +211,18 @@ export default class Eth {
         "hex"
       );
 
-      rlpOffset = rawTx.length - (rlpVrs.length - 1);
+      vrsOffset = rawTx.length - (rlpVrs.length - 1);
 
       // First byte > 0xf7 means the length of the list length doesn't fit in a single byte.
       if (rlpVrs[0] > 0xf7) {
-        // Increment rlpOffset to account for that extra byte.
-        rlpOffset++;
+        // Increment vrsOffset to account for that extra byte.
+        vrsOffset++;
 
         // Compute size of the list length.
         const sizeOfListLen = rlpVrs[0] - 0xf7;
 
         // Increase rlpOffset by the size of the list length.
-        rlpOffset += sizeOfListLen - 1;
+        vrsOffset += sizeOfListLen - 1;
       }
 
       // Using BigNumber because chainID could be any uint256.
@@ -244,7 +244,7 @@ export default class Eth {
           ? rawTx.length - offset
           : maxChunkSize;
 
-      if (rlpOffset != 0 && offset + chunkSize >= rlpOffset) {
+      if (vrsOffset != 0 && offset + chunkSize >= vrsOffset) {
         // Make sure that the chunk doesn't end right on the EIP 155 marker if set
         chunkSize = rawTx.length - offset;
       }
