@@ -2196,8 +2196,8 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        tx: "https://chain.stealth.org/tx/$hash",
-        address: "https://chain.stealth.org/address/$address",
+        tx: "https://www.stealthmonitor.org/transactions/$hash",
+        address: "https://www.stealthmonitor.org/address/$address",
       },
     ],
   },
