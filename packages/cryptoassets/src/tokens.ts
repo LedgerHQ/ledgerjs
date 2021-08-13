@@ -5,6 +5,7 @@ import trc10tokens from "../data/trc10";
 import trc20tokens from "../data/trc20";
 import bep20tokens from "../data/bep20";
 import asatokens from "../data/asa";
+
 const emptyArray = [];
 const tokensArray: TokenCurrency[] = [];
 const tokensArrayWithDelisted: TokenCurrency[] = [];
@@ -18,6 +19,7 @@ addTokens(trc10tokens.map(convertTRONTokens("trc10")));
 addTokens(trc20tokens.map(convertTRONTokens("trc20")));
 addTokens(bep20tokens.map(convertBEP20));
 addTokens(asatokens.map(convertAlgorandASATokens));
+
 type TokensListOptions = {
   withDelisted: boolean;
 };
