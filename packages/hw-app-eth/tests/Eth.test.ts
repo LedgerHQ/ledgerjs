@@ -103,7 +103,7 @@ test("signTransaction supports EIP2930", async () => {
   });
 });
 
-test("signTransaction testing provideERC20Informations + setExternalPlugin", async () => {
+test.skip("signTransaction testing provideERC20Informations + setExternalPlugin", async () => {
   const transport = await openTransportReplayer(
     RecordStore.fromString(
       `
@@ -331,55 +331,6 @@ test("provideERC20TokenInformation", async () => {
   );
   const result = await eth.provideERC20TokenInformation(zrxInfo as TokenInfo);
   expect(result).toEqual(true);
-});
-
-test("signAllowance", async () => {
-  const transport = await openTransportReplayer(
-    RecordStore.fromString(`
-    => e00a0000670455534454dac17f958d2ee523a2206206994597c13d831ec700000006000000013044022078c66ccea3e4dedb15a24ec3c783d7b582cd260daf62fd36afe9a8212a344aed0220160ba8c1c4b6a8aa6565bed20632a091aeeeb7bfdac67fc6589a6031acbf511c
-    <= 9000
-    => e00a0000670455534454dac17f958d2ee523a2206206994597c13d831ec700000006000000013044022078c66ccea3e4dedb15a24ec3c783d7b582cd260daf62fd36afe9a8212a344aed0220160ba8c1c4b6a8aa6565bed20632a091aeeeb7bfdac67fc6589a6031acbf511c
-    <= 9000
-    => e004000084058000002c8000003c800000000000000000000000f86d018504e3b2920082520894dac17f958d2ee523a2206206994597c13d831ec7872bd72a24874000b844095ea7b30000000000000000000000000102030405060708090a0b0c0d0e0f101112131400000000000000000000000000000000000000000000000000000000000186a0
-    <= 1b0a5a7a8732d95ee05e6dd11b28500c0482fd9ef24028eb5448b5c9c713f13bbb1ef940556853fc8b3883e6ef810d18566f13019e6bea70f340cbfde36947408b9000
-    `)
-  );
-  const eth = new Eth(transport);
-  const tokenInfo = byContractAddressAndChainId(
-    "0xdac17f958d2ee523a2206206994597c13d831ec7",
-    1
-  );
-  await eth.provideERC20TokenInformation(tokenInfo as TokenInfo);
-  const result = await eth.signTransaction(
-    "44'/60'/0'/0/0",
-    "f86d018504e3b2920082520894dac17f958d2ee523a2206206994597c13d831ec7872bd72a24874000b844095ea7b30000000000000000000000000102030405060708090a0b0c0d0e0f101112131400000000000000000000000000000000000000000000000000000000000186a0"
-  );
-  expect(result).toEqual({
-    r: "0a5a7a8732d95ee05e6dd11b28500c0482fd9ef24028eb5448b5c9c713f13bbb",
-    s: "1ef940556853fc8b3883e6ef810d18566f13019e6bea70f340cbfde36947408b",
-    v: "1b",
-  });
-});
-
-test("signAllowanceUnlimited", async () => {
-  const transport = await openTransportReplayer(
-    RecordStore.fromString(`
-    => e00a0000670455534454dac17f958d2ee523a2206206994597c13d831ec700000006000000013044022078c66ccea3e4dedb15a24ec3c783d7b582cd260daf62fd36afe9a8212a344aed0220160ba8c1c4b6a8aa6565bed20632a091aeeeb7bfdac67fc6589a6031acbf511c
-    <= 9000
-    => e004000084058000002c8000003c800000000000000000000000f86d018504e3b2920082520894dac17f958d2ee523a2206206994597c13d831ec7872bd72a24874000b844095ea7b30000000000000000000000000102030405060708090a0b0c0d0e0f1011121314ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-    <= 1b3fa6a78fb25f87f063fc8db5cb4efc1794e01c973994e26a6fa1603c3ac3db9d3dc98795b5f99ba1eeae84ef01ecbfad188f00446d56b6e9a0eb9ec6f4bae7fe9000
-    `)
-  );
-  const eth = new Eth(transport);
-  const result = await eth.signTransaction(
-    "44'/60'/0'/0/0",
-    "f86d018504e3b2920082520894dac17f958d2ee523a2206206994597c13d831ec7872bd72a24874000b844095ea7b30000000000000000000000000102030405060708090a0b0c0d0e0f1011121314ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-  );
-  expect(result).toEqual({
-    r: "3fa6a78fb25f87f063fc8db5cb4efc1794e01c973994e26a6fa1603c3ac3db9d",
-    s: "3dc98795b5f99ba1eeae84ef01ecbfad188f00446d56b6e9a0eb9ec6f4bae7fe",
-    v: "1b",
-  });
 });
 
 test("starkGetPublicKey", async () => {
