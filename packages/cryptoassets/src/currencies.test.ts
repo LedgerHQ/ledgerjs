@@ -171,13 +171,13 @@ test("findTokenByAddressInCurrency", () => {
   ).toMatchObject({
     id: "ethereum/erc20/1inch_token",
   });
-  expect(findTokenByAddressInCurrency("0x0", "bsc")).toEqual(null);
+  expect(findTokenByAddressInCurrency("0x0", "bsc")).toBe(undefined);
   expect(
     findTokenByAddressInCurrency(
       "0x111111111117dC0aa78b770fA6A738034120C302",
       "tron"
     )
-  ).toEqual(null);
+  ).toBe(undefined);
 });
 
 test("fiats list is sorted by ticker", () => {
