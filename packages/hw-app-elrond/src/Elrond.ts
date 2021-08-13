@@ -11,6 +11,7 @@ const INS = {
   GET_APP_CONFIGURATION: 0x02,
   GET_ADDRESS: 0x03,
   SET_ADDRESS: 0x05,
+  PROVIDE_ESDT_INFO: 0x08,
 };
 
 const SIGN_RAW_TX_INS = 0x04;
@@ -35,6 +36,7 @@ export default class Elrond {
         "signTransaction",
         "signMessage",
         "getAppConfiguration",
+        "provideESDTInfo"
       ],
       "eGLD"
     );
@@ -194,5 +196,59 @@ export default class Elrond {
     const signature = response.slice(1, response.length - 2).toString("hex");
 
     return signature;
+  }
+  
+  serializeESDTInfo(
+    ticker: string,
+    id: string,
+    decimals: number,
+    chainId: string,
+    signature: string
+  ): Buffer {
+    const tickerLengthBuffer = Buffer.from([ticker.length]);
+    const tickerBuffer = Buffer.from(ticker);
+    const idLengthBuffer = Buffer.from([id.length]);
+    const idBuffer = Buffer.from(id);
+    const decimalsBuffer = Buffer.from([decimals]);
+    const chainIdLengthBuffer = Buffer.from([chainId.length]);
+    const chainIdBuffer = Buffer.from(chainId);
+    const signatureBuffer = Buffer.from(signature, "hex");
+    let infoBuffer = [
+      tickerLengthBuffer,
+      tickerBuffer,
+      idLengthBuffer,
+      idBuffer,
+      decimalsBuffer,
+      chainIdLengthBuffer,
+      chainIdBuffer,
+      signatureBuffer,
+    ];
+    return Buffer.concat(infoBuffer);
+  }
+
+  async provideESDTInfo(
+    ticker: string,
+    id: string,
+    decimals: number,
+    chainId: string,
+    signature: string
+  ): Promise<any> {
+    const data = this.serializeESDTInfo(
+      ticker,
+      id,
+      decimals,
+      chainId,
+      signature
+    );
+
+    const response = await this.transport.send(
+      CLA,
+      INS.PROVIDE_ESDT_INFO,
+      0x00,
+      0x00,
+      data
+    );
+
+    return response;
   }
 }
