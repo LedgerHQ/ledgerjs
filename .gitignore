@@ -1,6 +1,7 @@
 node_modules
 .DS_Store
 *.pem
+packages/cryptoassets/ethereum.json
 browser/
 dbdata/
 packages/**/lib/

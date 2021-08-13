@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-app-elrond",
-  "version": "6.0.0",
+  "version": "6.3.0",
   "description": "Ledger Hardware Wallet Elrond Application API",
   "keywords": [
     "Ledger",
@@ -26,10 +26,9 @@
   "module": "lib-es/Elrond.js",
   "types": "lib/Elrond.d.ts",
   "license": "Apache-2.0",
-  "devDependencies": {},
   "dependencies": {
-    "@ledgerhq/errors": "^6.0.0",
-    "@ledgerhq/hw-transport": "^6.0.0",
+    "@ledgerhq/errors": "^6.2.0",
+    "@ledgerhq/hw-transport": "^6.3.0",
     "bip32-path": "^0.4.2"
   },
   "scripts": {

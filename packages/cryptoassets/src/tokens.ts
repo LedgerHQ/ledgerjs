@@ -3,8 +3,9 @@ import { getCryptoCurrencyById } from "./currencies";
 import erc20tokens from "../data/erc20";
 import trc10tokens from "../data/trc10";
 import trc20tokens from "../data/trc20";
+import bep20tokens from "../data/bep20";
 import asatokens from "../data/asa";
-import esdttokens from "../data/esdt";
+
 const emptyArray = [];
 const tokensArray: TokenCurrency[] = [];
 const tokensArrayWithDelisted: TokenCurrency[] = [];
@@ -16,8 +17,9 @@ const tokensByAddress: Record<string, TokenCurrency> = {};
 addTokens(erc20tokens.map(convertERC20));
 addTokens(trc10tokens.map(convertTRONTokens("trc10")));
 addTokens(trc20tokens.map(convertTRONTokens("trc20")));
+addTokens(bep20tokens.map(convertBEP20));
 addTokens(asatokens.map(convertAlgorandASATokens));
-addTokens(esdttokens.map(convertESDT));
+
 type TokensListOptions = {
   withDelisted: boolean;
 };
@@ -196,18 +198,31 @@ function convertERC20([
   };
 }
 
-function convertESDT([ticker, name, magnitude]): TokenCurrency {
-  const contractAddress =
-    "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u";
-
+function convertBEP20([
+  parentCurrencyId,
+  token,
+  ticker,
+  magnitude,
+  name,
+  ledgerSignature,
+  contractAddress,
+  disableCountervalue,
+  delisted,
+  countervalueTicker,
+]): TokenCurrency {
+  const parentCurrency = getCryptoCurrencyById(parentCurrencyId);
   return {
     type: "TokenCurrency",
-    id: `elrond/esdt/${ticker}`,
+    id: parentCurrencyId + "/bep20/" + token,
+    ledgerSignature,
     contractAddress,
-    parentCurrency: getCryptoCurrencyById("elrond"),
-    tokenType: "esdt",
+    parentCurrency,
+    tokenType: "bep20",
     name,
     ticker,
+    delisted,
+    disableCountervalue: !!parentCurrency.isTestnetFor || !!disableCountervalue,
+    countervalueTicker,
     units: [
       {
         name,
