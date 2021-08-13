@@ -2,8 +2,10 @@ const path = require("path");
 const Buffer = require("buffer").Buffer;
 const { readFileJSON } = require("../utils");
 
-const inferChainId = (common) =>
-  common.blockchain_name === "foundation"
+const inferChainId = (common, folder) =>
+  folder.endsWith("bsc/bep20")
+    ? 56
+    : common.blockchain_name === "foundation"
     ? 1
     : common.blockchain_name === "ropsten"
     ? 3
@@ -16,7 +18,11 @@ const asUint4be = (n) => {
 };
 
 module.exports = {
-  paths: ["tokens/ethereum/erc20", "tokens/ethereum_ropsten/erc20"],
+  paths: [
+    "tokens/ethereum/erc20",
+    "tokens/ethereum_ropsten/erc20",
+    "tokens/bsc/bep20",
+  ],
   id: "erc20",
   output: "data/erc20-signatures.js",
 
@@ -40,7 +46,7 @@ module.exports = {
         "hex"
       );
       const ticker = Buffer.from(common.ticker, "ascii");
-      const chainId = asUint4be(inferChainId(common));
+      const chainId = asUint4be(inferChainId(common, folder));
       const signature = Buffer.from(ledgerSignature, "hex");
       return Buffer.concat([
         Buffer.from([ticker.length]),
