@@ -3,10 +3,11 @@ import blob from "@ledgerhq/cryptoassets/data/erc20-signatures";
 /**
  * Retrieve the token information by a given contract address if any
  */
-export const byContractAddress = (
-  contract: string
+export const byContractAddressAndChainId = (
+  contract: string,
+  chainId: number
 ): TokenInfo | null | undefined =>
-  get().byContract(asContractAddress(contract));
+  get().byContractAndChainId(asContractAddress(contract), chainId);
 
 /**
  * list all the ERC20 tokens informations
@@ -21,7 +22,10 @@ export type TokenInfo = {
   data: Buffer;
 };
 export type API = {
-  byContract: (arg0: string) => TokenInfo | null | undefined;
+  byContractAndChainId: (
+    addr: string,
+    id: number
+  ) => TokenInfo | null | undefined;
   list: () => TokenInfo[];
 };
 
@@ -36,7 +40,7 @@ const get: () => API = (() => {
   return () => {
     if (cache) return cache;
     const buf = Buffer.from(blob, "base64");
-    const byContract = {};
+    const map = {};
     const entries: TokenInfo[] = [];
     let i = 0;
 
@@ -67,13 +71,14 @@ const get: () => API = (() => {
         data: item,
       };
       entries.push(entry);
-      byContract[contractAddress] = entry;
+      map[String(chainId) + ":" + contractAddress] = entry;
       i += length;
     }
 
     const api = {
       list: () => entries,
-      byContract: (contractAddress) => byContract[contractAddress],
+      byContractAndChainId: (contractAddress, chainId) =>
+        map[String(chainId) + ":" + contractAddress],
     };
     cache = api;
     return api;

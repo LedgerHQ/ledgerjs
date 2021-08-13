@@ -5,7 +5,7 @@ import {
 import Eth from "../src/Eth";
 import { TokenInfo } from "../src/erc20";
 import { BigNumber } from "bignumber.js";
-import { byContractAddress } from "../src/erc20";
+import { byContractAddressAndChainId } from "../src/erc20";
 
 test("getAppConfiguration", async () => {
   const transport = await openTransportReplayer(
@@ -325,8 +325,9 @@ test("provideERC20TokenInformation", async () => {
     `)
   );
   const eth = new Eth(transport);
-  const zrxInfo = byContractAddress(
-    "0xe41d2489571d322189246dafa5ebde1f4699f498"
+  const zrxInfo = byContractAddressAndChainId(
+    "0xe41d2489571d322189246dafa5ebde1f4699f498",
+    1
   );
   const result = await eth.provideERC20TokenInformation(zrxInfo as TokenInfo);
   expect(result).toEqual(true);
@@ -344,8 +345,9 @@ test("signAllowance", async () => {
     `)
   );
   const eth = new Eth(transport);
-  const tokenInfo = byContractAddress(
-    "0xdac17f958d2ee523a2206206994597c13d831ec7"
+  const tokenInfo = byContractAddressAndChainId(
+    "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    1
   );
   await eth.provideERC20TokenInformation(tokenInfo as TokenInfo);
   const result = await eth.signTransaction(
@@ -467,12 +469,14 @@ test("starkSignOrderTokens", async () => {
     `)
   );
   const eth = new Eth(transport);
-  const tokenInfo1 = byContractAddress(
-    "0xe41d2489571d322189246dafa5ebde1f4699f498"
+  const tokenInfo1 = byContractAddressAndChainId(
+    "0xe41d2489571d322189246dafa5ebde1f4699f498",
+    1
   );
   await eth.provideERC20TokenInformation(tokenInfo1 as TokenInfo);
-  const tokenInfo2 = byContractAddress(
-    "0xdac17f958d2ee523a2206206994597c13d831ec7"
+  const tokenInfo2 = byContractAddressAndChainId(
+    "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    1
   );
   await eth.provideERC20TokenInformation(tokenInfo2 as TokenInfo);
   const result = await eth.starkSignOrder(
@@ -506,12 +510,14 @@ test("starkSignOrderTokens_v2", async () => {
     `)
   );
   const eth = new Eth(transport);
-  const tokenInfo1 = byContractAddress(
-    "0xe41d2489571d322189246dafa5ebde1f4699f498"
+  const tokenInfo1 = byContractAddressAndChainId(
+    "0xe41d2489571d322189246dafa5ebde1f4699f498",
+    1
   );
   await eth.provideERC20TokenInformation(tokenInfo1 as TokenInfo);
-  const tokenInfo2 = byContractAddress(
-    "0xdac17f958d2ee523a2206206994597c13d831ec7"
+  const tokenInfo2 = byContractAddressAndChainId(
+    "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    1
   );
   await eth.provideERC20TokenInformation(tokenInfo2 as TokenInfo);
   const result = await eth.starkSignOrder_v2(
@@ -652,8 +658,9 @@ test("starkDepositToken", async () => {
     `)
   );
   const eth = new Eth(transport);
-  const tokenInfo = byContractAddress(
-    "0xdac17f958d2ee523a2206206994597c13d831ec7"
+  const tokenInfo = byContractAddressAndChainId(
+    "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    1
   );
   await eth.provideERC20TokenInformation(tokenInfo as TokenInfo);
   await eth.starkProvideQuantum(
@@ -703,8 +710,9 @@ test("starkWithdrawToken", async () => {
     `)
   );
   const eth = new Eth(transport);
-  const tokenInfo = byContractAddress(
-    "0xdac17f958d2ee523a2206206994597c13d831ec7"
+  const tokenInfo = byContractAddressAndChainId(
+    "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    1
   );
   await eth.provideERC20TokenInformation(tokenInfo as TokenInfo);
   await eth.starkProvideQuantum(
@@ -836,8 +844,9 @@ test("starkEscapeTokens", async () => {
     `)
   );
   const eth = new Eth(transport);
-  const tokenInfo = byContractAddress(
-    "0xdac17f958d2ee523a2206206994597c13d831ec7"
+  const tokenInfo = byContractAddressAndChainId(
+    "0xdac17f958d2ee523a2206206994597c13d831ec7",
+    1
   );
   await eth.provideERC20TokenInformation(tokenInfo as TokenInfo);
   await eth.starkProvideQuantum(

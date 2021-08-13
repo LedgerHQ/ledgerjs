@@ -15,7 +15,7 @@ Ledger Hardware Wallet ETH JavaScript bindings.
 
 -   [loadInfosForContractMethod](#loadinfosforcontractmethod)
     -   [Parameters](#parameters)
--   [byContractAddress](#bycontractaddress)
+-   [byContractAddressAndChainId](#bycontractaddressandchainid)
     -   [Parameters](#parameters-1)
 -   [list](#list)
 -   [Eth](#eth)
@@ -72,13 +72,14 @@ Retrieve the metadatas a given contract address and a method selector
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;(ContractMethod | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))>** 
 
-### byContractAddress
+### byContractAddressAndChainId
 
 Retrieve the token information by a given contract address if any
 
 #### Parameters
 
 -   `contract` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `chainId` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 
 Returns **(TokenInfo | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))** 
 
