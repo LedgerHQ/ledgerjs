@@ -21,7 +21,7 @@ import { EthAppPleaseEnableContractData } from "@ledgerhq/errors";
 import type Transport from "@ledgerhq/hw-transport";
 import { BigNumber } from "bignumber.js";
 import { ethers } from "ethers";
-import { byContractAddress } from "./erc20";
+import { byContractAddressAndChainId } from "./erc20";
 import { loadInfosForContractMethod } from "./contracts";
 
 export type StarkQuantizationType =
@@ -164,8 +164,8 @@ export default class Eth {
    * @param {*} info: a blob from "erc20.js" utilities that contains all token information.
    *
    * @example
-   * import { byContractAddress } from "@ledgerhq/hw-app-eth/erc20"
-   * const zrxInfo = byContractAddress("0xe41d2489571d322189246dafa5ebde1f4699f498")
+   * import { byContractAddressAndChainId } from "@ledgerhq/hw-app-eth/erc20"
+   * const zrxInfo = byContractAddressAndChainId("0xe41d2489571d322189246dafa5ebde1f4699f498", chainId)
    * if (zrxInfo) await appEth.provideERC20TokenInformation(zrxInfo)
    * const signed = await appEth.signTransaction(path, rawTxHex)
    */
@@ -290,7 +290,7 @@ export default class Eth {
       };
     }
     const provideForContract = async (address) => {
-      const erc20Info = byContractAddress(address);
+      const erc20Info = byContractAddressAndChainId(address, chainIdTruncated);
       if (erc20Info) {
         log(
           "ethereum",
