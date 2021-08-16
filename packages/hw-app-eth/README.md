@@ -139,8 +139,8 @@ calling this contract address to display the proper token information to the use
 ##### Examples
 
 ```javascript
-import { byContractAddress } from "@ledgerhq/hw-app-eth/erc20"
-const zrxInfo = byContractAddress("0xe41d2489571d322189246dafa5ebde1f4699f498")
+import { byContractAddressAndChainId } from "@ledgerhq/hw-app-eth/erc20"
+const zrxInfo = byContractAddressAndChainId("0xe41d2489571d322189246dafa5ebde1f4699f498", chainId)
 if (zrxInfo) await appEth.provideERC20TokenInformation(zrxInfo)
 const signed = await appEth.signTransaction(path, rawTxHex)
 ```
