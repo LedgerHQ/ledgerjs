@@ -59,14 +59,12 @@ There are two modes of usage of this library.
     -   [Parameters](#parameters-17)
 -   [findTokenById](#findtokenbyid)
     -   [Parameters](#parameters-18)
--   [findTokenByAddress](#findtokenbyaddress)
-    -   [Parameters](#parameters-19)
 -   [hasTokenId](#hastokenid)
-    -   [Parameters](#parameters-20)
+    -   [Parameters](#parameters-19)
 -   [getTokenById](#gettokenbyid)
-    -   [Parameters](#parameters-21)
+    -   [Parameters](#parameters-20)
 -   [findCompoundToken](#findcompoundtoken)
-    -   [Parameters](#parameters-22)
+    -   [Parameters](#parameters-21)
 -   [Unit](#unit)
     -   [Properties](#properties)
 -   [CurrencyCommon](#currencycommon)
@@ -241,14 +239,6 @@ Returns **([TokenCurrency](#tokencurrency) | null | [undefined](https://develope
 #### Parameters
 
 -   `id` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
-
-Returns **([TokenCurrency](#tokencurrency) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))** 
-
-### findTokenByAddress
-
-#### Parameters
-
--   `address` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
 Returns **([TokenCurrency](#tokencurrency) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))** 
 

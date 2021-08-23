@@ -14,6 +14,7 @@ const tokensByCryptoCurrencyWithDelisted: Record<string, TokenCurrency[]> = {};
 const tokensById: Record<string, TokenCurrency> = {};
 const tokensByTicker: Record<string, TokenCurrency> = {};
 const tokensByAddress: Record<string, TokenCurrency> = {};
+const tokensByCurrencyAddress: Record<string, TokenCurrency> = {};
 addTokens(erc20tokens.map(convertERC20));
 addTokens(trc10tokens.map(convertTRONTokens("trc10")));
 addTokens(trc20tokens.map(convertTRONTokens("trc20")));
@@ -86,13 +87,24 @@ export function findTokenById(id: string): TokenCurrency | null | undefined {
   return tokensById[id];
 }
 
-/**
- *
- */
+let deprecatedDisplayed = false;
 export function findTokenByAddress(
   address: string
 ): TokenCurrency | null | undefined {
+  if (!deprecatedDisplayed) {
+    deprecatedDisplayed = true;
+    console.warn(
+      "findTokenByAddress is deprecated. use findTokenByAddressInCurrency"
+    );
+  }
   return tokensByAddress[address.toLowerCase()];
+}
+
+export function findTokenByAddressInCurrency(
+  address: string,
+  currencyId: string
+): TokenCurrency | null | undefined {
+  return tokensByCurrencyAddress[currencyId + ":" + address.toLowerCase()];
 }
 
 /**
@@ -143,8 +155,10 @@ function addTokens(list: TokenCurrency[]) {
       tokensByTicker[token.ticker] = token;
     }
 
-    tokensByAddress[token.contractAddress.toLowerCase()] = token;
+    const lowCaseContract = token.contractAddress.toLowerCase();
+    tokensByAddress[lowCaseContract] = token;
     const { parentCurrency } = token;
+    tokensByCurrencyAddress[parentCurrency.id + ":" + lowCaseContract] = token;
 
     if (!(parentCurrency.id in tokensByCryptoCurrency)) {
       tokensByCryptoCurrency[parentCurrency.id] = [];
