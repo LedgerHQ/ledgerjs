@@ -1,0 +1,49 @@
+{
+  "name": "@ledgerhq/json-rpc",
+  "version": "6.5.0",
+  "description": "Ledger Hardware Wallet Ethereum JSON RPC Middleware",
+  "keywords": [
+    "Ledger",
+    "LedgerWallet",
+    "Ethereum",
+    "eth",
+    "NanoS",
+    "Blue",
+    "Hardware Wallet",
+    "web3",
+    "subprovider",
+    "provider"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LedgerHQ/ledgerjs"
+  },
+  "bugs": {
+    "url": "https://github.com/LedgerHQ/ledgerjs/issues"
+  },
+  "homepage": "https://github.com/LedgerHQ/ledgerjs",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "lib/index.js",
+  "module": "lib-es/index.js",
+  "types": "lib/index.d.ts",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@ledgerhq/errors": "^6.2.0",
+    "@ledgerhq/hw-app-eth": "^6.5.0",
+    "@ledgerhq/hw-transport": "^6.3.0",
+    "@metamask/safe-event-emitter": "^2.0.0",
+    "ethereumjs-tx": "^2.1.2",
+    "json-rpc-engine": "^6.1.0",
+    "strip-hex-prefix": "^1.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "clean": "bash ../../script/clean.sh",
+    "build": "bash ../../script/build.sh",
+    "watch": "bash ../../script/watch.sh",
+    "doc": "bash ../../script/doc.sh"
+  },
+  "gitHead": "dd0dea64b58e5a9125c8a422dcffd29e5ef6abec"
+}
