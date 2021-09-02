@@ -227,7 +227,8 @@ export default class Eth {
       decodedTx = {
         data: rlpDecoded[5],
         to: rlpDecoded[3],
-        chainId: rlpTx[6],
+        // Default to 1 for non EIP 155 txs
+        chainId: rlpTx.length > 6 ? rlpTx[6] : Buffer.from('0x01', 'hex'),
       };
     }
 
