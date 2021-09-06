@@ -197,13 +197,40 @@ export default class Eth {
     const toSend: Buffer[] = [];
     let response;
     // Check if the TX is encoded following EIP 155
-    let rlpTx = ethers.utils.RLP.decode(rlpData).map((hex) =>
+    const rlpTx = ethers.utils.RLP.decode(rlpData).map((hex) =>
       Buffer.from(hex.slice(2), "hex")
     );
 
     let vrsOffset = 0;
     let chainId = new BigNumber(0);
     let chainIdTruncated = 0;
+
+    const rlpDecoded = ethers.utils.RLP.decode(rlpData);
+
+    let decodedTx;
+    if (txType === 2) {
+      // EIP1559
+      decodedTx = {
+        data: rlpDecoded[7],
+        to: rlpDecoded[5],
+        chainId: rlpTx[0],
+      };
+    } else if (txType === 1) {
+      // EIP2930
+      decodedTx = {
+        data: rlpDecoded[6],
+        to: rlpDecoded[4],
+        chainId: rlpTx[0],
+      };
+    } else {
+      // Legacy tx
+      decodedTx = {
+        data: rlpDecoded[5],
+        to: rlpDecoded[3],
+        // Default to 1 for non EIP 155 txs
+        chainId: rlpTx.length > 6 ? rlpTx[6] : Buffer.from("0x01", "hex"),
+      };
+    }
 
     if (txType === null && rlpTx.length > 6) {
       const rlpVrs = Buffer.from(
@@ -224,10 +251,12 @@ export default class Eth {
         // Increase rlpOffset by the size of the list length.
         vrsOffset += sizeOfListLen - 1;
       }
+    }
 
+    const chainIdSrc = decodedTx.chainId;
+    if (chainIdSrc) {
       // Using BigNumber because chainID could be any uint256.
-      chainId = new BigNumber(rlpTx[6].toString("hex"), 16);
-      const chainIdSrc = rlpTx[6];
+      chainId = new BigNumber(chainIdSrc.toString("hex"), 16);
       const chainIdTruncatedBuf = Buffer.alloc(4);
       if (chainIdSrc.length > 4) {
         chainIdSrc.copy(chainIdTruncatedBuf);
@@ -267,28 +296,6 @@ export default class Eth {
       offset += chunkSize;
     }
 
-    rlpTx = ethers.utils.RLP.decode(rlpData);
-
-    let decodedTx;
-    if (txType === 2) {
-      // EIP1559
-      decodedTx = {
-        data: rlpTx[7],
-        to: rlpTx[5],
-      };
-    } else if (txType === 1) {
-      // EIP2930
-      decodedTx = {
-        data: rlpTx[6],
-        to: rlpTx[4],
-      };
-    } else {
-      // Legacy tx
-      decodedTx = {
-        data: rlpTx[5],
-        to: rlpTx[3],
-      };
-    }
     const provideForContract = async (address) => {
       const erc20Info = byContractAddressAndChainId(address, chainIdTruncated);
       if (erc20Info) {
