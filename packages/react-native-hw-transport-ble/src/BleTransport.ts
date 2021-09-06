@@ -93,7 +93,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
 
       try {
         device = await bleManager.connectToDevice(deviceOrId, connectOptions);
-      } catch (e) {
+      } catch (e: any) {
         if (e.errorCode === BleErrorCode.DeviceMTUChangeFailed) {
           // eslint-disable-next-line require-atomic-updates
           connectOptions = {};
@@ -116,7 +116,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
 
     try {
       await device.connect(connectOptions);
-    } catch (e) {
+    } catch (e: any) {
       if (e.errorCode === BleErrorCode.DeviceMTUChangeFailed) {
         // eslint-disable-next-line require-atomic-updates
         connectOptions = {};
@@ -408,7 +408,7 @@ export default class BluetoothTransport extends Transport {
         const msgOut = data.toString("hex");
         log("apdu", `<= ${msgOut}`);
         return data;
-      } catch (e) {
+      } catch (e: any) {
         log("ble-error", "exchange got " + String(e));
 
         if (this.notYetDisconnected) {
@@ -435,7 +435,7 @@ export default class BluetoothTransport extends Transport {
               ignoreElements()
             )
           ).toPromise()) + 3;
-      } catch (e) {
+      } catch (e: any) {
         log("ble-error", "inferMTU got " + String(e));
         await bleManager.cancelDeviceConnection(this.id).catch(() => {}); // but we ignore if disconnect worked.
 
@@ -475,7 +475,7 @@ export default class BluetoothTransport extends Transport {
         buffer.toString("base64"),
         txid
       );
-    } catch (e) {
+    } catch (e: any) {
       throw new DisconnectedDeviceDuringOperation(e.message);
     }
   };

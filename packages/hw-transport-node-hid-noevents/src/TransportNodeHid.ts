@@ -110,7 +110,7 @@ export default class TransportNodeHidNoEvents extends Transport {
     try {
       this.device.write(data);
       return Promise.resolve();
-    } catch (e) {
+    } catch (e: any) {
       const maybeMappedError =
         e && e.message ? new DisconnectedDeviceDuringOperation(e.message) : e;
       if (maybeMappedError instanceof DisconnectedDeviceDuringOperation) {
