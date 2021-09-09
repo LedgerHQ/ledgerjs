@@ -29,9 +29,13 @@ module.exports = {
 
     const abisList = await Promise.all(
       addresses.map((address) =>
-        readFileJSON(
-          path.join(folder, id, "abis", `${address}.abi.json`)
-        ).catch(() => {})
+        readFileJSON(path.join(folder, id, "abis", `${address}.abi.json`))
+          .catch(() =>
+            readFileJSON(path.join(folder, id, "abis", `${address}.json`))
+          )
+          .catch((e) => {
+            console.warn(`${id} ${address} failed to load`, e);
+          })
       )
     );
 
