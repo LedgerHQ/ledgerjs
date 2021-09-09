@@ -30,13 +30,14 @@ axios
       );
       Promise.all(
         imp.paths.flatMap((p) => {
-          const folder = path.join(inputFolder, p);
+          const folder = path.join(inputFolder, "assets", p);
+          const signatureFolder = path.join(inputFolder, "signatures/prod/", p);
           const items = fs.readdirSync(folder);
           return items
             .sort()
             .filter((a) => !a.endsWith(".json"))
             .map((id) =>
-              imp.loader({ folder, id }).catch((e) => {
+              imp.loader({ signatureFolder, folder, id }).catch((e) => {
                 console.log("FAILED " + id + " " + e);
               })
             );

@@ -12,9 +12,9 @@ module.exports = {
     data.map((item) => JSON.stringify(item)).join(",\n\t") +
     "];\n",
 
-  loader: ({ folder, id }) =>
+  loader: ({ signatureFolder, folder, id }) =>
     Promise.all([
-      readFileJSON(path.join(folder, id, "exchange_signature.json")),
+      readFileJSON(path.join(signatureFolder, id, "exchange_signature.json")),
     ]).then(([exchange]) => {
       return [
         idFromFolderAndFile(folder, id),

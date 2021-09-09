@@ -19,9 +19,9 @@ module.exports = {
       2
     ),
 
-  loader: async ({ folder, id }) => {
+  loader: async ({ signatureFolder, folder, id }) => {
     const [signatures, bare] = await Promise.all([
-      readFileJSON(path.join(folder, id, "b2c_signatures.json")),
+      readFileJSON(path.join(signatureFolder, id, "b2c_signatures.json")),
       readFileJSON(path.join(folder, id, "b2c.json")),
     ]);
 
