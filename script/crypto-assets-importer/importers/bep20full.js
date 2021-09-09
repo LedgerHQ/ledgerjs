@@ -98,10 +98,10 @@ ${data
   .join(",\n")}
 ];`,
 
-  loader: ({ folder, id }) =>
+  loader: ({ signatureFolder, folder, id }) =>
     Promise.all([
       readFileJSON(path.join(folder, id, "common.json")),
-      readFileJSON(path.join(folder, id, "ledger_signature.json")),
+      readFileJSON(path.join(signatureFolder, id, "ledger_signature.json")),
     ]).then(([common, ledgerSignature]) => {
       const name = common.name;
       const ticker = common.ticker.toUpperCase();
