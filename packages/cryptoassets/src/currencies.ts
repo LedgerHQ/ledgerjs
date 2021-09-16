@@ -1955,8 +1955,10 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     units: ethereumUnits("SGB", "SGB"),
     explorerViews: [
       {
-        tx: "https://songbird-explorer.flare.network/tx/$hash/internal-transactions",
-        address: "https://songbird-explorer.flare.network/address/$address/transactions",
+        tx:
+          "https://songbird-explorer.flare.network/tx/$hash/internal-transactions",
+        address:
+          "https://songbird-explorer.flare.network/address/$address/transactions",
       },
     ],
   },
