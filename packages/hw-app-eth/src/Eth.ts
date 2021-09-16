@@ -23,6 +23,7 @@ import { BigNumber } from "bignumber.js";
 import { ethers } from "ethers";
 import { byContractAddressAndChainId } from "./erc20";
 import { loadInfosForContractMethod } from "./contracts";
+import type { PluginsLoadConfig } from "./contracts";
 
 export type StarkQuantizationType =
   | "eth"
@@ -68,9 +69,19 @@ const remapTransactionRelatedErrors = (e) => {
 
 export default class Eth {
   transport: Transport;
+  pluginsLoadConfig: PluginsLoadConfig;
 
-  constructor(transport: Transport, scrambleKey = "w0w") {
+  setPluginsLoadConfig(pluginsLoadConfig: PluginsLoadConfig): void {
+    this.pluginsLoadConfig = pluginsLoadConfig;
+  }
+
+  constructor(
+    transport: Transport,
+    scrambleKey = "w0w",
+    pluginsLoadConfig: PluginsLoadConfig = {}
+  ) {
     this.transport = transport;
+    this.pluginsLoadConfig = pluginsLoadConfig;
     transport.decorateAppAPIMethods(
       this,
       [
@@ -313,7 +324,12 @@ export default class Eth {
 
     if (decodedTx.data.length >= 10) {
       const selector = decodedTx.data.substring(0, 10);
-      const infos = await loadInfosForContractMethod(decodedTx.to, selector);
+      const infos = await loadInfosForContractMethod(
+        decodedTx.to,
+        selector,
+        chainIdTruncated,
+        this.pluginsLoadConfig
+      );
 
       if (infos) {
         const { plugin, payload, signature, erc20OfInterest, abi } = infos;
