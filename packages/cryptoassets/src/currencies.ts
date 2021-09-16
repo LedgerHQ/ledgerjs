@@ -1936,6 +1936,30 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
+  songbird: {
+    type: "CryptoCurrency",
+    id: "songbird",
+    coinType: 60,
+    name: "Songbird",
+    managerAppName: "Songbird",
+    ticker: "SGB",
+    scheme: "songbird",
+    color: "#000000",
+    family: "ethereum",
+    ethereumLikeInfo: {
+      baseChain: "mainnet",
+      chainId: 19,
+      networkId: 19,
+      hardfork: "berlin",
+    },
+    units: ethereumUnits("SGB", "SGB"),
+    explorerViews: [
+      {
+        tx: "https://songbird-explorer.flare.network/tx/$hash/internal-transactions",
+        address: "https://songbird-explorer.flare.network/address/$address/transactions",
+      },
+    ],
+  },
   nem: {
     type: "CryptoCurrency",
     id: "nem",
