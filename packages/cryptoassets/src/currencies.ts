@@ -2812,7 +2812,6 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     scheme: "filecoin",
     color: "#000",
     family: "filecoin",
-    disableCountervalue: true, // FIXME - Check if the value is correct
     units: [
       {
         name: "FIL",
