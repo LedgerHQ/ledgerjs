@@ -69,6 +69,8 @@ Retrieve the metadatas a given contract address and a method selector
 
 -   `contractAddress` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 -   `selector` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `chainId` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+-   `userPluginsLoadConfig` **PluginsLoadConfig** 
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;(ContractMethod | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))>** 
 
@@ -97,6 +99,7 @@ Ethereum API
 
 -   `transport` **Transport** 
 -   `scrambleKey`   (optional, default `"w0w"`)
+-   `pluginsLoadConfig` **PluginsLoadConfig**  (optional, default `{}`)
 
 #### Examples
 
