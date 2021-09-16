@@ -2802,6 +2802,31 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
+  filecoin: {
+    type: "CryptoCurrency",
+    id: "filecoin",
+    coinType: 461,
+    name: "filecoin",
+    managerAppName: "Filecoin",
+    ticker: "FIL",
+    scheme: "filecoin",
+    color: "#000",
+    family: "filecoin",
+    disableCountervalue: true, // FIXME - Check if the value is correct
+    units: [
+      {
+        name: "FIL",
+        code: "FIL",
+        magnitude: 18,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://filfox.info/en/message/$hash",
+        address: "https://filfox.info/en/address/$address",
+      },
+    ],
+  },
 };
 const cryptocurrenciesByScheme: Record<string, CryptoCurrency> = {};
 const cryptocurrenciesByTicker: Record<string, CryptoCurrency> = {};
