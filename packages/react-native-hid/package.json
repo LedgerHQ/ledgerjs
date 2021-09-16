@@ -37,7 +37,7 @@
     "rxjs": "6"
   },
   "devDependencies": {
-    "@types/react-native": "^0.64.13"
+    "@types/react-native": "^0.65.0"
   },
   "scripts": {
     "clean": "bash ../../script/clean.sh",
