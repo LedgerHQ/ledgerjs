@@ -39,7 +39,7 @@ export const loadInfosForContractMethod = async (
   let data = !baseURL
     ? {}
     : await axios
-        .get(`${baseURL}/plugins/ethereum/${chainId}.json`)
+        .get(`${baseURL}/plugins/ethereum.json`)
         .then((r) => r.data)
         .catch((e) => {
           if (
