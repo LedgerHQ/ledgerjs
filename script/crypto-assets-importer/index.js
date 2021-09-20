@@ -21,7 +21,7 @@ if (!inputFolder) {
 }
 
 axios
-  .get("https://countervalues.api.live.ledger.com/tickers")
+  .get("https://countervalues.live.ledger.com/v2/tickers")
   .then(({ data: countervaluesTickers }) => {
     importers.forEach((imp) => {
       const outputJS = path.join(
