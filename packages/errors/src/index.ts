@@ -120,6 +120,8 @@ export const NotEnoughSpendableBalance = createCustomErrorClass(
 export const NotEnoughBalanceBecauseDestinationNotCreated = createCustomErrorClass(
   "NotEnoughBalanceBecauseDestinationNotCreated"
 );
+export const NotEnoughNftOwned = createCustomErrorClass("NotEnoughNftOwned");
+export const NotOwnedNft = createCustomErrorClass("NotOwnedNft");
 export const NoAccessToCamera = createCustomErrorClass("NoAccessToCamera");
 export const NotEnoughGas = createCustomErrorClass("NotEnoughGas");
 export const NotSupportedLegacyAddress = createCustomErrorClass(
