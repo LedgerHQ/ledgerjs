@@ -5,6 +5,7 @@ const PSBT_GLOBAL_TX_VERSION = 0x02;
 const PSBT_GLOBAL_FALLBACK_LOCKTIME = 0x03;
 const PSBT_GLOBAL_INPUT_COUNT = 0x04;
 const PSBT_GLOBAL_OUTPUT_COUNT = 0x05;
+const PSBT_GLOBAL_TX_MODIFIABLE = 0x06;
 const PSBT_GLOBAL_VERSION = 0xfb;
 
 const PSBT_IN_NON_WITNESS_UTXO = 0x00;
@@ -22,6 +23,8 @@ const PSBT_OUT_BIP_32_DERIVATION = 0x02;
 const PSBT_OUT_AMOUNT = 0x03;
 const PSBT_OUT_SCRIPT = 0x04;
 const PSBT_OUT_TAP_BIP32_DERIVATION = 0x07;
+
+export class NoSuchEntry extends Error {}
 
 export class PsbtV2 {
   protected globalMap: Map<string, Buffer> = new Map();
@@ -52,6 +55,12 @@ export class PsbtV2 {
   getGlobalOutputCount(): number {
     return fromVarint(this.getGlobal(PSBT_GLOBAL_OUTPUT_COUNT));
   }
+  setGlobalTxModifiable(byte: Buffer) {
+    this.setGlobal(PSBT_GLOBAL_TX_MODIFIABLE, byte);
+  }
+  getGlobalTxModifiable(): Buffer {
+    return this.getGlobal(PSBT_GLOBAL_TX_MODIFIABLE);
+  }
   setGlobalPsbtVersion(psbtVersion: number) {
     this.setGlobal(PSBT_GLOBAL_VERSION, uint32LE(psbtVersion));
   }
@@ -71,15 +80,15 @@ export class PsbtV2 {
     buf.writeVarSlice(scriptPubKey);
     this.setInput(inputIndex, PSBT_IN_WITNESS_UTXO, b(), buf.buffer);
   }
-  getInputWitnessUtxo(inputIndex: number, amount: Buffer, scriptPubKey: Buffer): {amount: Buffer, scriptPubKey: Buffer} {
-    const buf = new BufferReader(this.getInput(inputIndex, PSBT_IN_WITNESS_UTXO, b()));    
+  getInputWitnessUtxo(inputIndex: number): {amount: Buffer, scriptPubKey: Buffer} {
+    const buf = new BufferReader(this.getInput(inputIndex, PSBT_IN_WITNESS_UTXO, b()));
     return {amount: buf.readSlice(8), scriptPubKey: buf.readVarSlice()};
   }
-  setInputPartialSig(inputIndex: number, signature: Buffer) {
-    this.setInput(inputIndex, PSBT_IN_PARTIAL_SIG, b(), signature);
+  setInputPartialSig(inputIndex: number, pubkey: Buffer, signature: Buffer) {
+    this.setInput(inputIndex, PSBT_IN_PARTIAL_SIG, pubkey, signature);
   }
-  getInputPartialSig(inputIndex: number): Buffer {
-    return this.getInput(inputIndex, PSBT_IN_PARTIAL_SIG, b());
+  getInputPartialSig(inputIndex: number, pubkey: Buffer): Buffer {
+    return this.getInput(inputIndex, PSBT_IN_PARTIAL_SIG, pubkey);
   }
   setInputRedeemScript(inputIndex: number, redeemScript: Buffer) {
     this.setInput(inputIndex, PSBT_IN_REDEEM_SCRIPT, b(), redeemScript);
@@ -119,6 +128,9 @@ export class PsbtV2 {
   getInputTapBip32Derivation(inputIndex: number, pubkey: Buffer): {hashes: Buffer[], masterFingerprint: Buffer, path: number[]} {
     const buf = this.getInput(inputIndex, PSBT_IN_TAP_BIP32_DERIVATION, pubkey);
     return this.decodeTapBip32Derivation(buf);
+  }
+  getInputKeyDatas(inputIndex: number, keyType: KeyType): Buffer[] {
+    return this.getKeyDatas(this.inputMaps[inputIndex], keyType);
   }
 
   setOutputRedeemScript(outputIndex: number, redeemScript: Buffer) {
@@ -186,6 +198,15 @@ export class PsbtV2 {
     return buf.buffer
   }
 
+  private getKeyDatas(map: Map<string, Buffer>, keyType: KeyType): Buffer[] {
+    const result: Buffer[] = [];
+    map.forEach((_v, k) => {
+      if (k.substring(0, 2) == Buffer.of(keyType).toString('hex')) {
+        result.push(Buffer.from(k.substring(2), 'hex'));
+      }
+    })
+    return result;
+  }
   private setGlobal(keyType: KeyType, value: Buffer) {
     const key = new Key(keyType, Buffer.of());
     this.globalMap[key.toString()] = new KeyPair(key, value);
@@ -259,9 +280,16 @@ export class PsbtV2 {
 function get(map: Map<string, Buffer>, keyType: KeyType, keyData: Buffer): Buffer {
   if (map) throw Error("No such map");
   const key = new Key(keyType, keyData);
-  return map[Key.toString()];
+  const value: Buffer = map[Key.toString()];
+  if (!value) {
+    const e = new Error("");
+    throw new NoSuchEntry(key.toString());
+  }
+  // Make sure to return a copy, to protect the underlying data.
+  return Buffer.from(value);
 }
 type KeyType = number;
+
 class Key {
   keyType: KeyType
   keyData: Buffer
