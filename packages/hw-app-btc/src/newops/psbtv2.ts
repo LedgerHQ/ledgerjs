@@ -9,10 +9,12 @@ const PSBT_GLOBAL_VERSION = 0xfb;
 
 const PSBT_IN_NON_WITNESS_UTXO = 0x00;
 const PSBT_IN_WITNESS_UTXO = 0x01;
+const PSBT_IN_PARTIAL_SIG = 0x02;
 const PSBT_IN_REDEEM_SCRIPT = 0x04;
 const PSBT_IN_BIP32_DERIVATION = 0x06;
 const PSBT_IN_PREVIOUS_TXID = 0x0e;
 const PSBT_IN_OUTPUT_INDEX = 0x0f;
+const PSBT_IN_TAP_KEY_SIG = 0x13;
 const PSBT_IN_TAP_BIP32_DERIVATION = 0x16;
 
 const PSBT_OUT_REDEEM_SCRIPT = 0x00;
@@ -29,8 +31,14 @@ export class PsbtV2 {
   setGlobalTxVersion(version: number) {
     this.setGlobal(PSBT_GLOBAL_TX_VERSION, uint32LE(version));
   }
+  getGlobalTxVersion(): number {
+    return this.getGlobal(PSBT_GLOBAL_TX_VERSION).readUInt32LE(0);
+  }
   setGlobalFallbackLocktime(locktime: number) {
     this.setGlobal(PSBT_GLOBAL_FALLBACK_LOCKTIME, uint32LE(locktime));
+  }
+  getGlobalFallbackLocktime(): number {
+    return this.getGlobal(PSBT_GLOBAL_FALLBACK_LOCKTIME).readUInt32LE(0);
   }
   setGlobalInputCount(inputCount: number) {
     this.setGlobal(PSBT_GLOBAL_INPUT_COUNT, varint(inputCount));
@@ -47,50 +55,104 @@ export class PsbtV2 {
   setGlobalPsbtVersion(psbtVersion: number) {
     this.setGlobal(PSBT_GLOBAL_VERSION, uint32LE(psbtVersion));
   }
+  getGlobalPsbtVersion(): number {
+    return this.getGlobal(PSBT_GLOBAL_VERSION).readUInt32LE(0);
+  }
 
   setInputNonWitnessUtxo(inputIndex: number, transaction: Buffer) {
     this.setInput(inputIndex, PSBT_IN_NON_WITNESS_UTXO, b(), transaction)
   }
+  getInputNonWitnessUtxo(inputIndex: number): Buffer {
+    return this.getInput(inputIndex, PSBT_IN_NON_WITNESS_UTXO, b());
+  }
   setInputWitnessUtxo(inputIndex: number, amount: Buffer, scriptPubKey: Buffer) {
     const buf = new BufferWriter(Buffer.alloc(8));
     buf.writeSlice(amount);
-    buf.writeSlice(scriptPubKey);
+    buf.writeVarSlice(scriptPubKey);
     this.setInput(inputIndex, PSBT_IN_WITNESS_UTXO, b(), buf.buffer);
+  }
+  getInputWitnessUtxo(inputIndex: number, amount: Buffer, scriptPubKey: Buffer): {amount: Buffer, scriptPubKey: Buffer} {
+    const buf = new BufferReader(this.getInput(inputIndex, PSBT_IN_WITNESS_UTXO, b()));    
+    return {amount: buf.readSlice(8), scriptPubKey: buf.readVarSlice()};
+  }
+  setInputPartialSig(inputIndex: number, signature: Buffer) {
+    this.setInput(inputIndex, PSBT_IN_PARTIAL_SIG, b(), signature);
+  }
+  getInputPartialSig(inputIndex: number): Buffer {
+    return this.getInput(inputIndex, PSBT_IN_PARTIAL_SIG, b());
   }
   setInputRedeemScript(inputIndex: number, redeemScript: Buffer) {
     this.setInput(inputIndex, PSBT_IN_REDEEM_SCRIPT, b(), redeemScript);
   }
+  getInputRedeemScript(inputIndex: number): Buffer {
+    return this.getInput(inputIndex, PSBT_IN_REDEEM_SCRIPT, b());
+  }
   setInputBip32Derivation(inputIndex: number, pubkey: Buffer, masterFingerprint: Buffer, path: number[]) {
     this.setInput(inputIndex, PSBT_IN_BIP32_DERIVATION, pubkey, this.encodeBip32Derivation(masterFingerprint, path))
   }
-
+  getInputBip32Derivation(inputIndex: number, pubkey: Buffer, masterFingerprint: Buffer, path: number[]): {masterFingerprint: Buffer, path: number[]} {
+    const buf = this.getInput(inputIndex, PSBT_IN_BIP32_DERIVATION, pubkey);      
+    return this.decodeBip32Derivation(buf);
+  }
   setInputPreviousTxId(inputIndex: number, txid: Buffer) {
     this.setInput(inputIndex, PSBT_IN_PREVIOUS_TXID, b(), txid);
+  }
+  getInputPreviousTxId(inputIndex: number): Buffer {
+    return this.getInput(inputIndex, PSBT_IN_PREVIOUS_TXID, b());
   }
   setInputOutputIndex(inputIndex: number, outputIndex: number) {
     this.setInput(inputIndex, PSBT_IN_OUTPUT_INDEX, b(), uint32LE(outputIndex));
   }
-  setInputTapBip32Derivation(inputIndex: number, pubkey: Buffer, hashes: Buffer[], fingerprint: Buffer, path: number[]) {
-    const buf = this.encodeTapBip32Derivation(hashes, fingerprint, path);
+  getInputOutputIndex(inputIndex: number) {
+    this.getInput(inputIndex, PSBT_IN_OUTPUT_INDEX, b()).readUInt32LE(0);
+  }
+  setInputTapKeySig(inputIndex: number, sig: Buffer) {
+    this.setInput(inputIndex, PSBT_IN_TAP_KEY_SIG, b(), sig);
+  }
+  getInputTapKeySig(inputIndex: number): Buffer {
+    return this.getInput(inputIndex, PSBT_IN_TAP_KEY_SIG, b());
+  }
+  setInputTapBip32Derivation(inputIndex: number, pubkey: Buffer, hashes: Buffer[], masterFingerprint: Buffer, path: number[]) {
+    const buf = this.encodeTapBip32Derivation(hashes, masterFingerprint, path);
     this.setInput(inputIndex, PSBT_IN_TAP_BIP32_DERIVATION, pubkey, buf);
   }
-
+  getInputTapBip32Derivation(inputIndex: number, pubkey: Buffer): {hashes: Buffer[], masterFingerprint: Buffer, path: number[]} {
+    const buf = this.getInput(inputIndex, PSBT_IN_TAP_BIP32_DERIVATION, pubkey);
+    return this.decodeTapBip32Derivation(buf);
+  }
 
   setOutputRedeemScript(outputIndex: number, redeemScript: Buffer) {
     this.setOutput(outputIndex, PSBT_OUT_REDEEM_SCRIPT, b(), redeemScript);
   }
+  getOutputRedeemScript(outputIndex: number): Buffer {
+    return this.getOutput(outputIndex, PSBT_OUT_REDEEM_SCRIPT, b());
+  }
   setOutputBip32Derivation(outputIndex: number, pubkey: Buffer, masterFingerprint: Buffer, path: number[]) {
     this.setOutput(outputIndex, PSBT_OUT_BIP_32_DERIVATION, pubkey, this.encodeBip32Derivation(masterFingerprint, path));
+  }
+  getOutputBip32Derivation(outputIndex: number, pubkey: Buffer): {masterFingerprint: Buffer, path: number[]} {
+    const buf = this.getOutput(outputIndex, PSBT_OUT_BIP_32_DERIVATION, pubkey);
+    return this.decodeBip32Derivation(buf);
   }
   setOutputAmount(outputIndex: number, amount: Buffer) {
     this.setOutput(outputIndex, PSBT_OUT_AMOUNT, b(), amount);
   }
+  getOutputAmount(outputIndex: number): Buffer {
+    return this.getOutput(outputIndex, PSBT_OUT_AMOUNT, b());
+  }
   setOutputScript(outputIndex: number, scriptPubKey: Buffer) {
     this.setOutput(outputIndex, PSBT_OUT_SCRIPT, b(), scriptPubKey)
+  }
+  getOutputScript(outputIndex: number): Buffer {
+    return this.getOutput(outputIndex, PSBT_OUT_SCRIPT, b());
   }
   setOutputTapBip32Derivation(outputIndex: number, pubkey: Buffer, hashes: Buffer[], fingerprint: Buffer, path: number[]) {
     const buf = this.encodeTapBip32Derivation(hashes, fingerprint, path);
     this.setOutput(outputIndex, PSBT_OUT_TAP_BIP32_DERIVATION, pubkey, buf);
+  }
+  getOutputTapBip32Derivation(outputIndex: number, pubkey: Buffer): {hashes: Buffer[], masterFingerprint: Buffer, path: number[]} {
+    const buf = this.getOutput(outputIndex, PSBT_OUT_TAP_BIP32_DERIVATION, pubkey);
+    return this.decodeTapBip32Derivation(buf);
   }
 
   copy(to: PsbtV2) {
@@ -129,8 +191,7 @@ export class PsbtV2 {
     this.globalMap[key.toString()] = new KeyPair(key, value);
   }
   private getGlobal(keyType: KeyType): Buffer {
-    const key = new Key(keyType, Buffer.of());
-    return this.globalMap[key.toString()];
+    return get(this.globalMap, keyType, b());
   }
   private setInput(index: number, keyType: KeyType, keyData: Buffer, value: Buffer) {
     let map = this.inputMaps[index];
@@ -139,6 +200,9 @@ export class PsbtV2 {
     }
     set(map, keyType, keyData, value)
   }
+  private getInput(index: number, keyType: KeyType, keyData: Buffer): Buffer {
+    return get(this.inputMaps[index], keyType, keyData);
+  }
   private setOutput(index: number, keyType: KeyType, keyData: Buffer, value: Buffer) {
     let map = this.outputMaps[index];
     if (!map) {
@@ -146,17 +210,31 @@ export class PsbtV2 {
     }
     set(map, keyType, keyData, value)
   }
-
+  private getOutput(index: number, keyType: KeyType, keyData: Buffer): Buffer {
+    return get(this.outputMaps[index], keyType, keyData); 
+  }
   private encodeBip32Derivation(masterFingerprint: Buffer, path: number[]) {
     const buf = new BufferWriter(Buffer.alloc(4 * (path.length+1)));
     this.writeBip32Derivation(buf, masterFingerprint, path);
     return buf.buffer;
+  }
+  private decodeBip32Derivation(buffer: Buffer): {masterFingerprint: Buffer, path: number[]} {
+    const buf = new BufferReader(buffer);
+    return this.readBip32Derivation(buf);
   }
   private writeBip32Derivation(buf: BufferWriter, masterFingerprint: Buffer, path: number[]) {
     buf.writeSlice(masterFingerprint);
     path.forEach(element => {
       buf.writeUInt32(element);
     });
+  }
+  private readBip32Derivation(buf: BufferReader): {masterFingerprint: Buffer, path: number[]} {
+    const masterFingerprint = buf.readSlice(4);    
+    const path: number[] = [];
+    while (buf.offset < buf.buffer.length) {
+      path.push(buf.readUInt32());
+    }
+    return {masterFingerprint, path}
   }
   private encodeTapBip32Derivation(hashes: Buffer[], masterFingerprint: Buffer, path: number[]): Buffer {
     const buf = new BufferWriter(Buffer.of());
@@ -167,11 +245,21 @@ export class PsbtV2 {
     this.writeBip32Derivation(buf, masterFingerprint, path);
     return buf.buffer;
   }
+  private decodeTapBip32Derivation(buffer: Buffer): {hashes: Buffer[], masterFingerprint: Buffer, path: number[]} {
+    const buf = new BufferReader(buffer);
+    const hashCount = buf.readVarInt();
+    const hashes: Buffer[] = [];
+    for (let i = 0; i < hashCount; i++) {
+      hashes.push(buf.readSlice(32));
+    }
+    const deriv = this.readBip32Derivation(buf);
+    return {hashes, ...deriv};
+  }
 }
-
-function get(map: Map<String, Buffer>, keyBuf: Buffer) {
-  const k = createKey(keyBuf);
-  return map[k.toString()];
+function get(map: Map<string, Buffer>, keyType: KeyType, keyData: Buffer): Buffer {
+  if (map) throw Error("No such map");
+  const key = new Key(keyType, keyData);
+  return map[Key.toString()];
 }
 type KeyType = number;
 class Key {
