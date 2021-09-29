@@ -16,6 +16,9 @@ export class Merkle {
     size(): number {
       return this.leaves.length;
     }
+    getLeafHash(index: number): Buffer {
+      return this.leafNodes[index].hash;
+    }
     getProof(index: number): Buffer[] {
       if (index >= this.leaves.length) throw Error("Index out of bounds");
       return proveNode(this.leafNodes[index]);
@@ -57,7 +60,7 @@ function calculateRoot(leaves: Buffer[]): {root: Node, leaves: Node[]} {
     const newNode = new Node(undefined, undefined, hashLeaf(leaves[0]))
     return {root: newNode, leaves: [newNode]};
   }
-  const leftCount = highestMultipleOf2LessThan(n)
+  const leftCount = highestPowerOf2LessThan(n)
   const leftBranch = calculateRoot(leaves.slice(0, leftCount));
   const rightBranch = calculateRoot(leaves.slice(leftCount));
   const leftChild = leftBranch.root;
@@ -69,7 +72,7 @@ function calculateRoot(leaves: Buffer[]): {root: Node, leaves: Node[]} {
   return {root: node, leaves: leftBranch.leaves.concat(rightBranch.leaves)};
 }
 
-function highestMultipleOf2LessThan(n: number) {
+function highestPowerOf2LessThan(n: number) {
   if (n < 2) {
     throw Error("Expected n >= 2")
   }
