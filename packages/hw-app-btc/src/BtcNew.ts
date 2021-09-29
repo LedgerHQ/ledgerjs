@@ -24,6 +24,7 @@ import { hashPublicKey } from "./hashPublicKey";
 import { pubkeyFromXpub } from "./bip32";
 import { Merkle } from "./newops/merkle";
 import { createKey, DefaultDescriptorTemplate, WalletPolicy } from "./newops/policy";
+import { MerkelizedPsbt } from "./newops/merkelizedPsbt";
 
 export type { AddressFormat };
 /**
@@ -164,9 +165,12 @@ export default class BtcNew {
         "@ledgerhq/hw-app-btc: createPaymentTransactionNew multi argument signature is deprecated. please switch to named parameters."
       );
     }
+    if (arg.inputs.length == 0) {
+      throw Error("No inputs");
+    }    
     return this.createTransaction(arg);
   }
-  async createTransaction(arg: CreateTransactionArg): Promise<string> {
+  async createTransaction(arg: CreateTransactionArg): Promise<string> {    
     const psbt = new PsbtV2();
     const newProtocol = new NewProtocol(this.transport);
 
@@ -186,15 +190,13 @@ export default class BtcNew {
     const psbtVersionNumberBuf = Buffer.of(2);
     psbt.setGlobalPsbtVersion(2);
     psbt.setGlobalTxVersion(2);
-    
-    const masterFingerprint = await newProtocol.getMasterFingerprint();
-    if (!arg.accountXpub || !arg.accountPath) {
-      throw Error("missing account xpub or path");
-    }
-    const accountKey = createKey(masterFingerprint, arg.accountPath, arg.accountXpub);
+
+    // We assume all inputs belong to the same account, so we
+    // figure out the descriptor template while iterating the inputs.
+    // We only need one input, but we set it once for each input to
+    // reduce amount of code.
     let descriptorTemplate: DefaultDescriptorTemplate = "wpkh(@0)";
-
-
+    const masterFingerprint = await newProtocol.getMasterFingerprint();
     for (let i = 0; i < arg.inputs.length; i++) {
       const input = arg.inputs[i];
       const inputTx = input[0];
@@ -208,7 +210,6 @@ export default class BtcNew {
       const pathElements = bippath.fromString(arg.associatedKeysets[i]).toPathArray();
       const xpubBase58 = await newProtocol.getPubkey(false, pathElements);
       const pubkey = pubkeyFromXpub(xpubBase58);
-      let walletPolicy;
       if (arg.segwit) {        
         if (!inputTx.outputs) {
           throw Error("Missing outputs array in transaction to sign")
@@ -272,19 +273,17 @@ export default class BtcNew {
       psbt.setOutputAmount(i, amount);
       psbt.setOutputScript(i, outputScript);      
     }
+
+    if (!arg.accountXpub || !arg.accountPath) {
+      throw Error("missing account xpub or path");
+    }
     const p = new WalletPolicy(descriptorTemplate, createKey(masterFingerprint, arg.accountPath, arg.accountXpub));
-    newProtocol.signPsbt(psbt, p.getWalletId());
+    this.signPsbt(psbt, p);
   }  
 
-  private walletKey(masterFingerprint: Buffer, pathElements: number[], xpub: string) {
-    // wallet_id (sha256 of the wallet serialization), 
-    // Limitation: bippath can't handle and empty path. It shouldn't affect us
-    // right now, but might in the future.
-    // TODO: Fix support for empty path.
-    const accountPath = bippath.fromPathArray(pathElements.slice(0, -2)).toString(true);
-    const listOfKeys = [`[${masterFingerprint.toString('hex')}/${accountPath}]${xpub}/**`];
-    
-    return buf.buffer;
+  private signPsbt(psbt: PsbtV2, walletPolicy: WalletPolicy) {
+    const newProtocol = new NewProtocol(this.transport);
+    newProtocol.signPsbt(psbt, walletPolicy);
   }
 
   private createRedeemScript(pubkey: Buffer): Buffer {

@@ -1,5 +1,5 @@
 import { BigNumber } from 'bignumber.js'
-import { BufferWriter } from 'bitcoinjs-lib/types/bufferutils';
+import { BufferReader, BufferWriter } from 'bitcoinjs-lib/types/bufferutils';
 
 const PSBT_GLOBAL_TX_VERSION = 0x02;
 const PSBT_GLOBAL_FALLBACK_LOCKTIME = 0x03;
@@ -22,9 +22,9 @@ const PSBT_OUT_SCRIPT = 0x04;
 const PSBT_OUT_TAP_BIP32_DERIVATION = 0x07;
 
 export class PsbtV2 {
-  private globalMap: Map<string, KeyPair> = new Map();
-  private inputMaps: Map<string, KeyPair>[] = [];
-  private outputMaps: Map<string, KeyPair>[] = [];
+  protected globalMap: Map<string, Buffer> = new Map();
+  protected inputMaps: Map<string, Buffer>[] = [];
+  protected outputMaps: Map<string, Buffer>[] = [];
 
   setGlobalTxVersion(version: number) {
     this.setGlobal(PSBT_GLOBAL_TX_VERSION, uint32LE(version));
@@ -35,8 +35,14 @@ export class PsbtV2 {
   setGlobalInputCount(inputCount: number) {
     this.setGlobal(PSBT_GLOBAL_INPUT_COUNT, varint(inputCount));
   }
+  getGlobalInputCount(): number {
+    return fromVarint(this.getGlobal(PSBT_GLOBAL_INPUT_COUNT));
+  }
   setGlobalOutputCount(outputCount: number) {
     this.setGlobal(PSBT_GLOBAL_OUTPUT_COUNT, varint(outputCount));
+  }
+  getGlobalOutputCount(): number {
+    return fromVarint(this.getGlobal(PSBT_GLOBAL_OUTPUT_COUNT));
   }
   setGlobalPsbtVersion(psbtVersion: number) {
     this.setGlobal(PSBT_GLOBAL_VERSION, uint32LE(psbtVersion));
@@ -86,6 +92,25 @@ export class PsbtV2 {
     const buf = this.encodeTapBip32Derivation(hashes, fingerprint, path);
     this.setOutput(outputIndex, PSBT_OUT_TAP_BIP32_DERIVATION, pubkey, buf);
   }
+
+  copy(to: PsbtV2) {
+    this.copyMap(this.globalMap, to.globalMap);
+    this.copyMaps(this.inputMaps, to.inputMaps);
+    this.copyMaps(this.outputMaps, to.outputMaps);
+  }  
+  copyMaps(from: Map<string, Buffer>[], to: Map<string, Buffer>[]) {
+    from.forEach((m, index) => {
+      if (m === undefined) {
+        return;
+      }
+      const to = new Map();
+      this.copyMap(m, to);
+      to[index] = to;
+    });    
+  }
+  copyMap(from: Map<string, Buffer>, to: Map<string, Buffer>) {
+    from.forEach((v, k) => to[k] = Buffer.from(v))
+  }
   serialize(): Buffer {
     const buf = new BufferWriter(Buffer.of());
     buf.writeSlice(Buffer.of(0x70, 0x73, 0x62, 0x74, 0xFF))
@@ -102,6 +127,10 @@ export class PsbtV2 {
   private setGlobal(keyType: KeyType, value: Buffer) {
     const key = new Key(keyType, Buffer.of());
     this.globalMap[key.toString()] = new KeyPair(key, value);
+  }
+  private getGlobal(keyType: KeyType): Buffer {
+    const key = new Key(keyType, Buffer.of());
+    return this.globalMap[key.toString()];
   }
   private setInput(index: number, keyType: KeyType, keyData: Buffer, value: Buffer) {
     let map = this.inputMaps[index];
@@ -140,6 +169,10 @@ export class PsbtV2 {
   }
 }
 
+function get(map: Map<String, Buffer>, keyBuf: Buffer) {
+  const k = createKey(keyBuf);
+  return map[k.toString()];
+}
 type KeyType = number;
 class Key {
   keyType: KeyType
@@ -171,16 +204,27 @@ class KeyPair {
   }
   serialize(buf: BufferWriter) {
     this.key.serialize(buf);
-    buf.writeSlice(this.value);
+    buf.writeVarSlice(this.value);
   }
 }
+function createKey(buf: Buffer): Key {
+  return new Key(buf.readUInt8(0), buf.slice(1));
+}
+function serializeMap(buf: BufferWriter, map: Map<String, Buffer>) {
+  for (let k in map.keys) {
+    const value = map[k];
+    const keyPair = new KeyPair(createKey(Buffer.from(k, 'hex')), value)
+    keyPair.serialize(buf)
+  }
+  buf.writeUInt8(0);
+}
+
 function b(): Buffer {
   return Buffer.of();
 }
-function set(map: Map<string, KeyPair>, keyType: KeyType, keyData: Buffer, value: Buffer) {
+function set(map: Map<String, Buffer>, keyType: KeyType, keyData: Buffer, value: Buffer) {
   const key = new Key(keyType, keyData);
-  const keyPair = new KeyPair(key, value);
-  map[key.toString()] = keyPair;
+  map[key.toString()] = value;
 }
 function uint32LE(n: number): Buffer {
   const b = Buffer.alloc(4)
@@ -192,10 +236,6 @@ function varint(n: number): Buffer {
   b.writeVarInt(n)
   return b.buffer;
 }
-function serializeMap(buf: BufferWriter, map: Map<string, KeyPair>) {
-  for (let k in map.keys) {
-    const keyPair = map[k];
-    keyPair.serialize(buf)
-  }
-  buf.writeUInt8(0);
+function fromVarint(buf: Buffer): number {
+  return new BufferReader(buf).readVarInt();
 }

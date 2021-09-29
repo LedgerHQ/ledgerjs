@@ -2,27 +2,71 @@ import { sha256 } from "bitcoinjs-lib/types/crypto";
 
 export class Merkle {
     private leaves: Buffer[];
+    private rootNode: Node;    
+    private leafNodes: Node[];
     constructor(leaves: Buffer[]) {
       this.leaves = leaves;
+      const nodes = calculateRoot(leaves);
+      this.rootNode = nodes.root;
+      this.leafNodes = nodes.leaves;
     }
-
     getRoot(): Buffer {
-      return calculateRoot(this.leaves)
+      return this.rootNode.hash;
+    }
+    size(): number {
+      return this.leaves.length;
+    }
+    getProof(index: number): Buffer[] {
+      if (index >= this.leaves.length) throw Error("Index out of bounds");
+      return proveNode(this.leafNodes[index]);
     }
 }
 
-function calculateRoot(leaves: Buffer[]): Buffer {
+class Node {
+  leftChild?: Node;
+  rightChild?: Node;
+  parent?: Node;
+  hash: Buffer;
+  constructor(left: Node | undefined, right: Node | undefined, hash: Buffer) {
+    this.leftChild = left;
+    this.rightChild = right;
+    this.hash = hash;
+  }
+  isLeaf(): boolean {
+    return this.leftChild == undefined;
+  }  
+}
+
+function proveNode(node: Node): Buffer[] {
+  if (!node.parent) {
+    return [];
+  }
+  if (node.parent.leftChild == node) {
+    return [node.parent.rightChild!.hash, ...proveNode(node.parent)];
+  } else {
+    return [node.parent.leftChild!.hash, ...proveNode(node.parent)];
+  }
+}
+
+function calculateRoot(leaves: Buffer[]): {root: Node, leaves: Node[]} {
   const n = leaves.length;
-  if (n == 0) {
-    return Buffer.alloc(32, 0);
+  if (n == 0) {    
+    return {root: new Node(undefined, undefined, Buffer.alloc(32, 0)), leaves: []};
   }
   if (n == 1) {
-    return hashLeaf(leaves[0]);
+    const newNode = new Node(undefined, undefined, hashLeaf(leaves[0]))
+    return {root: newNode, leaves: [newNode]};
   }
   const leftCount = highestMultipleOf2LessThan(n)
   const leftBranch = calculateRoot(leaves.slice(0, leftCount));
   const rightBranch = calculateRoot(leaves.slice(leftCount));
-  return hashNode(leftBranch, rightBranch);
+  const leftChild = leftBranch.root;
+  const rightChild = rightBranch.root;
+  const hash = hashNode(leftChild.hash, rightChild.hash);
+  const node = new Node(leftChild, rightChild, hash);
+  leftChild.parent = node;
+  rightChild.parent = node;
+  return {root: node, leaves: leftBranch.leaves.concat(rightBranch.leaves)};
 }
 
 function highestMultipleOf2LessThan(n: number) {

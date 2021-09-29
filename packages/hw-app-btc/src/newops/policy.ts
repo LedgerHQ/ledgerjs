@@ -1,3 +1,5 @@
+import { BufferWriter } from "bitcoinjs-lib/types/bufferutils";
+import { sha256 } from "bitcoinjs-lib/types/crypto";
 import { Merkle } from "./merkle";
 
 export type DefaultDescriptorTemplate = "pkh(@0)" | "sh(pkh(@0))" | "wpkh(@0)" | "tr(@0)";
@@ -14,7 +16,11 @@ export class WalletPolicy {
   }
 
   getWalletId(): Buffer {
-    // wallet_id (sha256 of the wallet serialization), 
+    // wallet_id (sha256 of the wallet serialization),     
+    return sha256(this.serialize());
+  }
+
+  serialize(): Buffer {
     const keyBuffers = this.keys.map(k => {
       return Buffer.from(k, 'ascii');
     });
