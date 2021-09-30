@@ -197,6 +197,8 @@ export default class BtcNew {
     // reduce amount of code.
     let descriptorTemplate: DefaultDescriptorTemplate = "wpkh(@0)";
     const masterFingerprint = await newProtocol.getMasterFingerprint();
+    let accountXpub = "";
+    let accountPath: number[] = [];    
     for (let i = 0; i < arg.inputs.length; i++) {
       const input = arg.inputs[i];
       const inputTx = input[0];
@@ -207,8 +209,13 @@ export default class BtcNew {
       const inputTxBuffer = serializeTransaction(inputTx, true);
       const inputTxid = hash256(inputTxBuffer);
 
-      const pathElements = bippath.fromString(arg.associatedKeysets[i]).toPathArray();
+      const pathElements: number[] = bippath.fromString(arg.associatedKeysets[i]).toPathArray();
+      if (accountXpub == "") {
+        accountPath = pathElements.slice(0, -2);
+        accountXpub = await newProtocol.getPubkey(false, accountPath);
+      }
       const xpubBase58 = await newProtocol.getPubkey(false, pathElements);
+      
       const pubkey = pubkeyFromXpub(xpubBase58);
       if (arg.segwit) {        
         if (!inputTx.outputs) {
@@ -273,11 +280,8 @@ export default class BtcNew {
       psbt.setOutputAmount(i, amount);
       psbt.setOutputScript(i, outputScript);      
     }
-
-    if (!arg.accountXpub || !arg.accountPath) {
-      throw Error("missing account xpub or path");
-    }
-    const p = new WalletPolicy(descriptorTemplate, createKey(masterFingerprint, arg.accountPath, arg.accountXpub));
+    
+    const p = new WalletPolicy(descriptorTemplate, createKey(masterFingerprint, accountPath, accountXpub));
     this.signPsbt(psbt, p);
   }  
 
