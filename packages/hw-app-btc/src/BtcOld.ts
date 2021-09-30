@@ -1,6 +1,5 @@
 import type Transport from "@ledgerhq/hw-transport";
 import { signMessage } from "./signMessage";
-import { getAppAndVersion } from "./getAppAndVersion";
 import { getWalletPublicKey } from "./getWalletPublicKey";
 import type { AddressFormat } from "./getWalletPublicKey";
 import { splitTransaction } from "./splitTransaction";
@@ -12,10 +11,7 @@ import type { CreateTransactionArg } from "./createTransaction";
 import { signP2SHTransaction } from "./signP2SHTransaction";
 import type { SignP2SHTransactionArg } from "./signP2SHTransaction";
 import { serializeTransactionOutputs } from "./serializeTransaction";
-import { SemVer } from "semver";
-import { NewProtocol } from "./newops/newProtocol";
-import BtcNew from "./BtcNew";
-import BtcOld from "./BtcOld";
+import Btc from "./Btc";
 export type { AddressFormat };
 /**
  * Bitcoin API.
@@ -25,23 +21,9 @@ export type { AddressFormat };
  * const btc = new Btc(transport)
  */
 
-export default class Btc {
-  transport: Transport;
-
+export default class BtcOld extends Btc {
   constructor(transport: Transport, scrambleKey = "BTC") {
-    this.transport = transport;
-    transport.decorateAppAPIMethods(
-      this,
-      [
-        "getWalletPublicKey",
-        "signP2SHTransaction",
-        "signMessageNew",
-        "createPaymentTransactionNew",
-        "getTrustedInput",
-        "getTrustedInputBIP143",
-      ],
-      scrambleKey
-    );
+    super(transport, scrambleKey);
   }
 
   /**
@@ -77,9 +59,21 @@ export default class Btc {
     bitcoinAddress: string;
     chainCode: string;
   }> {
-    return this.getCorrectImpl().then((impl) => {
-      return impl.getWalletPublicKey(path, opts);
-    });
+    let options;
+    if (arguments.length > 2 || typeof opts === "boolean") {
+      console.warn(
+        "btc.getWalletPublicKey deprecated signature used. Please switch to getWalletPublicKey(path, { format, verify })"
+      );
+      options = {
+        verify: !!opts,
+        // eslint-disable-next-line prefer-rest-params
+        format: arguments[2] ? "p2sh" : "legacy",
+      };
+    } else {
+      options = opts || {};
+    }
+
+    return getWalletPublicKey(this.transport, { ...options, path });
   }
 
   /**
@@ -99,8 +93,9 @@ export default class Btc {
     r: string;
     s: string;
   }> {
-    return this.getCorrectImpl().then((impl) => {
-      return impl.signMessageNew(path, messageHex);
+    return signMessage(this.transport, {
+      path,
+      messageHex,
     });
   }
 
@@ -137,9 +132,13 @@ export default class Btc {
   }).then(res => ...);
    */
   createPaymentTransactionNew(arg: CreateTransactionArg): Promise<string> {
-    return this.getCorrectImpl().then((impl) => {
-      return impl.createPaymentTransactionNew(arg);
-    });
+    if (arguments.length > 1) {
+      console.warn(
+        "@ledgerhq/hw-app-btc: createPaymentTransactionNew multi argument signature is deprecated. please switch to named parameters."
+      );
+    }
+
+    return createTransaction(this.transport, arg);
   }
 
   /**
@@ -162,80 +161,12 @@ export default class Btc {
   }).then(result => ...);
    */
   signP2SHTransaction(arg: SignP2SHTransactionArg): Promise<string[]> {
-    return this.getCorrectImpl().then((impl) => {
-      return impl.signP2SHTransaction(arg);
-    });
-  }
-
-  /**
-   * For each UTXO included in your transaction, create a transaction object from the raw serialized version of the transaction used in this UTXO.
-   * @example
-  const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc4af009f4d4dc57ae597ed0420b71010000008a47304402201f36a12c240dbf9e566bc04321050b1984cd6eaf6caee8f02bb0bfec08e3354b022012ee2aeadcbbfd1e92959f57c15c1c6debb757b798451b104665aa3010569b49014104090b15bde569386734abf2a2b99f9ca6a50656627e77de663ca7325702769986cf26cc9dd7fdea0af432c8e2becc867c932e1b9dd742f2a108997c2252e2bdebffffffff0281b72e00000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88aca0860100000000001976a9144533f5fb9b4817f713c48f0bfe96b9f50c476c9b88ac00000000");
-   */
-  splitTransaction(
-    transactionHex: string,
-    isSegwitSupported: boolean | null | undefined = false,
-    hasTimestamp = false,
-    hasExtraData = false,
-    additionals: Array<string> = []
-  ): Transaction {   
-    return splitTransaction(
-      transactionHex,
-      isSegwitSupported,
-      hasTimestamp,
-      hasExtraData,
-      additionals
-    );
-  }
-
-  /**
-  @example
-  const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc4af009f4d4dc57ae597ed0420b71010000008a47304402201f36a12c240dbf9e566bc04321050b1984cd6eaf6caee8f02bb0bfec08e3354b022012ee2aeadcbbfd1e92959f57c15c1c6debb757b798451b104665aa3010569b49014104090b15bde569386734abf2a2b99f9ca6a50656627e77de663ca7325702769986cf26cc9dd7fdea0af432c8e2becc867c932e1b9dd742f2a108997c2252e2bdebffffffff0281b72e00000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88aca0860100000000001976a9144533f5fb9b4817f713c48f0bfe96b9f50c476c9b88ac00000000");
-  const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
-  */
-  serializeTransactionOutputs(t: Transaction): Buffer {
-    return serializeTransactionOutputs(t);
-  }
-
-  getTrustedInput(
-    indexLookup: number,
-    transaction: Transaction,
-    additionals: Array<string> = []
-  ): Promise<string> {
-    return getTrustedInput(
-      this.transport,
-      indexLookup,
-      transaction,
-      additionals
-    );
-  }
-
-  getTrustedInputBIP143(
-    indexLookup: number,
-    transaction: Transaction,
-    additionals: Array<string> = []
-  ): string {
-    return getTrustedInputBIP143(
-      this.transport,
-      indexLookup,
-      transaction,
-      additionals
-    );
-  }
-
-  private async getCorrectImpl(): Promise<Btc> {
-    const isNewApp = await this.useNewApp()
-    if (isNewApp) {
-      return new BtcNew(this.transport);
-    } else {
-      return new BtcOld(this.transport);
+    if (arguments.length > 1) {
+      console.warn(
+        "@ledgerhq/hw-app-btc: signP2SHTransaction multi argument signature is deprecated. please switch to named parameters."
+      );
     }
-  }
 
-  private async useNewApp(): Promise<boolean> {
-    const a = await getAppAndVersion(this.transport);
-    // if ("btc" == a.name && 
-    // new NewProtocol(this.transport).
-    return false;
+    return signP2SHTransaction(this.transport, arg);
   }
 }

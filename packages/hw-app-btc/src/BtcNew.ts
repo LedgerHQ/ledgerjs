@@ -1,32 +1,20 @@
 import type Transport from "@ledgerhq/hw-transport";
-import { signMessage } from "./signMessage";
-import { getWalletPublicKey } from "./getWalletPublicKey";
-import type { AddressFormat } from "./getWalletPublicKey";
-import { splitTransaction } from "./splitTransaction";
-import { getTrustedInput } from "./getTrustedInput";
-import { getTrustedInputBIP143 } from "./getTrustedInputBIP143";
-import type { Transaction } from "./types";
-import { createTransaction } from "./createTransaction";
-import type { CreateTransactionArg } from "./createTransaction";
-import { signP2SHTransaction } from "./signP2SHTransaction";
-import type { SignP2SHTransactionArg } from "./signP2SHTransaction";
-import { serializeTransaction, serializeTransactionOutputs } from "./serializeTransaction";
-import { getPubkey } from "./newops/getPubkey";
-import { AddressType, getAddress } from "./newops/getAddress";
-import { bip32, Psbt, PsbtTxInput, PsbtTxOutput } from "bitcoinjs-lib";
-import { hash256 } from "bitcoinjs-lib/types/crypto";
-import { PsbtGlobalUpdate, PsbtInputUpdate, PsbtOutputUpdate, WitnessUtxo } from "bip174/src/lib/interfaces";
+import { WitnessUtxo } from "bip174/src/lib/interfaces";
 import bippath from "bip32-path";
-import { BufferReader, BufferWriter } from 'bitcoinjs-lib/types/bufferutils';
-import { NewProtocol } from "./newops/newProtocol";
-import { PsbtV2 } from "./newops/psbtv2";
-import { hashPublicKey } from "./hashPublicKey";
+import { BufferReader } from 'bitcoinjs-lib/types/bufferutils';
+import { hash256 } from "bitcoinjs-lib/types/crypto";
 import { pubkeyFromXpub } from "./bip32";
-import { Merkle } from "./newops/merkle";
+import Btc from "./Btc";
+import type { CreateTransactionArg } from "./createTransaction";
+import type { AddressFormat } from "./getWalletPublicKey";
+import { getWalletPublicKey } from "./getWalletPublicKey";
+import { hashPublicKey } from "./hashPublicKey";
+import { NewProtocol } from "./newops/newProtocol";
 import { createKey, DefaultDescriptorTemplate, WalletPolicy } from "./newops/policy";
-import { MerkelizedPsbt } from "./newops/merkelizedPsbt";
+import { PsbtV2 } from "./newops/psbtv2";
+import { serializeTransaction } from "./serializeTransaction";
+import type { Transaction } from "./types";
 
-export type { AddressFormat };
 /**
  * Bitcoin API.
  *
@@ -35,47 +23,11 @@ export type { AddressFormat };
  * const btc = new Btc(transport)
  */
 
-export default class BtcNew {
-  transport: Transport;
-
+export default class BtcNew extends Btc {
   constructor(transport: Transport, scrambleKey = "BTC") {
-    this.transport = transport;
-    transport.decorateAppAPIMethods(
-      this,
-      [
-        "getWalletPublicKey",
-        "signP2SHTransaction",
-        "signMessageNew",
-        "createPaymentTransactionNew",
-        "getTrustedInput",
-        "getTrustedInputBIP143",
-      ],
-      scrambleKey
-    );
+    super(transport, scrambleKey);
   }
 
-  /**
-   * @param path a BIP 32 path
-   * @param options an object with optional these fields:
-   *
-   * - verify (boolean) will ask user to confirm the address on the device
-   *
-   * - format ("legacy" | "p2sh" | "bech32" | "cashaddr") to use different bitcoin address formatter.
-   *
-   * NB The normal usage is to use:
-   *
-   * - legacy format with 44' paths
-   *
-   * - p2sh format with 49' paths
-   *
-   * - bech32 format with 173' paths
-   *
-   * - cashaddr in case of Bitcoin Cash
-   *
-   * @example
-   * btc.getWalletPublicKey("44'/0'/0'/0/0").then(o => o.bitcoinAddress)
-   * btc.getWalletPublicKey("49'/0'/0'/0/0", { format: "p2sh" }).then(o => o.bitcoinAddress)
-   */
   getWalletPublicKey(
     path: string,
     opts?: {
@@ -102,29 +54,6 @@ export default class BtcNew {
     }
 
     return getWalletPublicKey(this.transport, { ...options, path });
-  }
-
-  /**
-   * You can sign a message according to the Bitcoin Signature format and retrieve v, r, s given the message and the BIP 32 path of the account to sign.
-   * @example
-   btc.signMessageNew_async("44'/60'/0'/0'/0", Buffer.from("test").toString("hex")).then(function(result) {
-     var v = result['v'] + 27 + 4;
-     var signature = Buffer.from(v.toString(16) + result['r'] + result['s'], 'hex').toString('base64');
-     console.log("Signature : " + signature);
-   }).catch(function(ex) {console.log(ex);});
-   */
-  signMessageNew(
-    path: string,
-    messageHex: string
-  ): Promise<{
-    v: number;
-    r: string;
-    s: string;
-  }> {
-    return signMessage(this.transport, {
-      path,
-      messageHex,
-    });
   }
 
   /**
@@ -243,7 +172,7 @@ export default class BtcNew {
       }
 
       psbt.setInputPreviousTxId(i, inputTxid);
-      psbt.setInputOutputIndex(i, spentOutputIndex);
+      psbt.setInputOutputIndex(i, spentOutputIndex);      
     }
 
     for (let i = 0; i < outputCount; i++) {
@@ -283,6 +212,7 @@ export default class BtcNew {
     
     const p = new WalletPolicy(descriptorTemplate, createKey(masterFingerprint, accountPath, accountXpub));
     this.signPsbt(psbt, p);
+    return "";
   }  
 
   private signPsbt(psbt: PsbtV2, walletPolicy: WalletPolicy) {
@@ -306,101 +236,5 @@ export default class BtcNew {
     const amount = spentOutput.amount.readIntBE(0, 8)
     const witnessUtxo: WitnessUtxo = {script: spentOutput.script, value: amount}
     return witnessUtxo;
-  }
-
-  /**
-   * To obtain the signature of multisignature (P2SH) inputs, call signP2SHTransaction_async with the folowing parameters
-   * @param inputs is an array of [ transaction, output_index, redeem script, optional sequence ] where
-   * * transaction is the previously computed transaction object for this UTXO
-   * * output_index is the output in the transaction used as input for this UTXO (counting from 0)
-   * * redeem script is the mandatory redeem script associated to the current P2SH input
-   * * sequence is the sequence number to use for this input (when using RBF), or non present
-   * @param associatedKeysets is an array of BIP 32 paths pointing to the path to the private key used for each UTXO
-   * @param outputScriptHex is the hexadecimal serialized outputs of the transaction to sign
-   * @param lockTime is the optional lockTime of the transaction to sign, or default (0)
-   * @param sigHashType is the hash type of the transaction to sign, or default (all)
-   * @return the signed transaction ready to be broadcast
-   * @example
-  btc.signP2SHTransaction({
-  inputs: [ [tx, 1, "52210289b4a3ad52a919abd2bdd6920d8a6879b1e788c38aa76f0440a6f32a9f1996d02103a3393b1439d1693b063482c04bd40142db97bdf139eedd1b51ffb7070a37eac321030b9a409a1e476b0d5d17b804fcdb81cf30f9b99c6f3ae1178206e08bc500639853ae"] ],
-  associatedKeysets: ["0'/0/0"],
-  outputScriptHex: "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac"
-  }).then(result => ...);
-   */
-  signP2SHTransaction(arg: SignP2SHTransactionArg): Promise<string[]> {
-    if (arguments.length > 1) {
-      console.warn(
-        "@ledgerhq/hw-app-btc: signP2SHTransaction multi argument signature is deprecated. please switch to named parameters."
-      );
-    }
-
-    return signP2SHTransaction(this.transport, arg);
-  }
-
-  /**
-   * For each UTXO included in your transaction, create a transaction object from the raw serialized version of the transaction used in this UTXO.
-   * @example
-  const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc4af009f4d4dc57ae597ed0420b71010000008a47304402201f36a12c240dbf9e566bc04321050b1984cd6eaf6caee8f02bb0bfec08e3354b022012ee2aeadcbbfd1e92959f57c15c1c6debb757b798451b104665aa3010569b49014104090b15bde569386734abf2a2b99f9ca6a50656627e77de663ca7325702769986cf26cc9dd7fdea0af432c8e2becc867c932e1b9dd742f2a108997c2252e2bdebffffffff0281b72e00000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88aca0860100000000001976a9144533f5fb9b4817f713c48f0bfe96b9f50c476c9b88ac00000000");
-   */
-  splitTransaction(
-    transactionHex: string,
-    isSegwitSupported: boolean | null | undefined = false,
-    hasTimestamp = false,
-    hasExtraData = false,
-    additionals: Array<string> = []
-  ): Transaction {
-    return splitTransaction(
-      transactionHex,
-      isSegwitSupported,
-      hasTimestamp,
-      hasExtraData,
-      additionals
-    );
-  }
-
-  /**
-  @example
-  const tx1 = btc.splitTransaction("01000000014ea60aeac5252c14291d428915bd7ccd1bfc4af009f4d4dc57ae597ed0420b71010000008a47304402201f36a12c240dbf9e566bc04321050b1984cd6eaf6caee8f02bb0bfec08e3354b022012ee2aeadcbbfd1e92959f57c15c1c6debb757b798451b104665aa3010569b49014104090b15bde569386734abf2a2b99f9ca6a50656627e77de663ca7325702769986cf26cc9dd7fdea0af432c8e2becc867c932e1b9dd742f2a108997c2252e2bdebffffffff0281b72e00000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88aca0860100000000001976a9144533f5fb9b4817f713c48f0bfe96b9f50c476c9b88ac00000000");
-  const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
-  */
-  serializeTransactionOutputs(t: Transaction): Buffer {
-    return serializeTransactionOutputs(t);
-  }
-
-  // INTERNAL METHODS
-
-  getTrustedInput(
-    indexLookup: number,
-    transaction: Transaction,
-    additionals: Array<string> = []
-  ): Promise<string> {
-    return getTrustedInput(
-      this.transport,
-      indexLookup,
-      transaction,
-      additionals
-    );
-  }
-
-  //  return (txid || output_index || output_amount) as hex
-  getTrustedInputBIP143(
-    indexLookup: number,
-    transaction: Transaction,
-    additionals: Array<string> = []
-  ): string {
-    return getTrustedInputBIP143(
-      this.transport,
-      indexLookup,
-      transaction,
-      additionals
-    );
-  }
-
-  async btc2getPubkey(display: boolean, path: string): Promise<string> {
-    return getPubkey(this.transport, {path, display});
-  }
-  
-  async btc2getAddress(display: boolean, addressType: AddressType, path: string): Promise<string> {
-    return getAddress(this.transport, { display, addressType, path });
   }
 }
