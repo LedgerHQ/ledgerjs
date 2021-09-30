@@ -1,39 +1,7 @@
-import Transport from "@ledgerhq/hw-transport";
-import { BufferReader, BufferWriter } from "bitcoinjs-lib/types/bufferutils";
 import { sha256 } from "bitcoinjs-lib/types/crypto";
 import { createVarint } from "../varint";
-import { MerkelizedPsbt } from "./merkelizedPsbt";
-import { Merkle } from "./merkle";
-import { WalletPolicy } from "./policy";
-
-// export interface YieldHandler {
-//   yield(result: Buffer): void;
-// }
-
-// export class SignPsbtHandler implements YieldHandler {
-//   private psbt: MerkelizedPsbt;
-//   private walletPolicy: WalletPolicy;
-//   constructor(merkelizedPsbt: MerkelizedPsbt, walletPolicy: WalletPolicy) {
-//     this.psbt = merkelizedPsbt;
-//     this.walletPolicy = walletPolicy;
-//   }
-
-//   yield(clientCommand: Buffer): void {
-//     // Insert signature into psbt    
-//   }
-
-//   createClientCommandInterpreter(transport: Transport): ClientCommandInterpreter {
-//     const result = new ClientCommandInterpreter(transport, this);
-//     result.addPreimage(this.walletPolicy.serialize());
-//     // Prepare the ClientCommandInterpreter with necessary merkle trees
-//     // and preimages.
-//     return result;
-//   }
-
-
-// }
-
-
+import { hashLeaf, Merkle } from "./merkle";
+import { MerkleMap } from "./merkleMap";
 
 
 enum ClientCommandCode {
@@ -80,23 +48,23 @@ export class GetPreimageCommand extends ClientCommand {
   }
 
   execute(request: Buffer): Buffer {
-    let req = new BufferReader(request.subarray(1));
-  
-    if (req.readUInt8() != 0) {
+    let req = request.subarray(1);
+
+    // we expect no more data to read
+    if (req.length != 1 + 32) {
+      throw new Error("Invalid request, unexpected trailing data");
+    }
+
+    if (req[0] != 0) {
       throw new Error("Unsupported request, the first byte should be 0");
     }
 
     // read the hash
     const hash = Buffer.alloc(32);
     for (let i = 0; i < 32; i++) {
-      hash[i] = req.readUInt8();
+      hash[i] = req[1 + i];
     }
     const req_hash_hex = hash.toString("hex");
-
-    // we expect no more data to read
-    if (req.buffer.length != req.offset) {
-      throw new Error("Invalid request, unexpected trailing data");
-    }
 
     for (let [known_hash_hex, known_preimage] of this.known_preimages) {
       if (req_hash_hex === known_hash_hex) {
@@ -308,14 +276,18 @@ export class ClientCommandInterpreter {
     this.preimages[sha256(preimage).toString('hex')] = preimage;
   }
 
-  addKnownList(list: Buffer[]) {
-    // TODO
-    throw new Error("Not Implemented");
+  addKnownList(elements: Buffer[]) {
+    for (let el of elements) {
+      const preimage = Buffer.concat([Buffer.from([0]), el]);
+      this.addKnownPreimage(preimage);
+    }
+    const mt = new Merkle(elements.map(el => hashLeaf(el)));
+    this.roots[mt.getRoot().toString("hex")] = mt;
   }
 
-  addKnownMapping(keys: Buffer[], values: Buffer[]) {
-    // TODO
-    throw new Error("Not Implemented");
+  addKnownMapping(mm: MerkleMap) {
+    this.addKnownList(mm.keys.getLeaves());
+    this.addKnownList(mm.values.getLeaves());
   }
 
   execute(request: Buffer): Buffer {
@@ -332,67 +304,3 @@ export class ClientCommandInterpreter {
     return cmd.execute(request)
   }
 }
-
-// export class ClientCommandInterpreter {
-//   private roots: Map<string, Merkle> = new Map();
-//   private preimages: Map<string, Buffer> =  new Map();
-//   private transport: Transport;
-//   private yieldHandler: YieldHandler;
-//   constructor(transport: Transport, yieldHandler: YieldHandler) {
-//     this.transport = transport;
-//     this.yieldHandler = yieldHandler;
-//   }
-
-//   addPreimage(preimage: Buffer) {
-//     this.preimages[sha256(preimage).toString('hex')] = preimage;
-//   }
-
-//   async execute(clientCommand: Buffer) {
-//     while (true) {
-//       const response = this.handleCommand(clientCommand);
-//       const nextCommand = await this.send(response);
-//       const command = nextCommand[0];
-//       if (nextCommand[1] == 0x9000) {
-//         return
-//       }
-//       clientCommand = nextCommand[0];
-//     }
-//   }
-
-//   handleCommand(clientCommand: Buffer): Buffer {
-//     const commandCode = clientCommand.readUInt8(0);
-//     const command = clientCommand.slice(1);
-//     switch (commandCode) {
-//       case 0x10:
-//         return this.handleYield(command);
-//         break;
-//       case 0x40:
-//         return this.handleGetPreimage(command);
-//         break;
-//       case 0x41:
-//         return this.handleMerkleLeafProof(command);
-//         break;
-//       case 0x42:
-//         return this.handleMerkleLeafIndex(command);
-//         break;
-//       case 0xa0:
-//         return this.handleMoreElements(command);
-//         break;
-//     }
-//   }
-
-//   private async send(buffer: Buffer): Promise<[Buffer, number]> {
-//     const nextCommand = await this.transport.send(0xf8, 0x01, 0, 0, buffer, [0x9000, 0xe000]);
-//     const nextCommandStatus = nextCommand.readUInt16LE(nextCommand.length - 2);
-//     return [nextCommand.slice(0, -2), nextCommandStatus];
-//   }
-
-//   handleYield(buffer: Buffer): Buffer {
-//     this.yieldHandler.yield(buffer);
-//     return Buffer.of();
-//   }
-
-//   handleGetPreimage(buffer: Buffer): Buffer {
-    
-//   }
-// }

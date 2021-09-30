@@ -16,6 +16,9 @@ export class Merkle {
     size(): number {
       return this.leaves.length;
     }
+    getLeaves(): Buffer[] {
+      return this.leaves;
+    }
     getLeafHash(index: number): Buffer {
       return this.leafNodes[index].hash;
     }
@@ -89,7 +92,8 @@ function isPowerOf2(n: number): boolean {
 function hashNode(left: Buffer, right: Buffer): Buffer {
   return h(Buffer.concat([Buffer.of(1), left, right]));
 }
-function hashLeaf(buf: Buffer): Buffer {
+
+export function hashLeaf(buf: Buffer): Buffer {
   return hashConcat(Buffer.of(0), buf);
 }
 
