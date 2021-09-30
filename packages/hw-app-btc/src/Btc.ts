@@ -12,7 +12,7 @@ import type { CreateTransactionArg } from "./createTransaction";
 import { signP2SHTransaction } from "./signP2SHTransaction";
 import type { SignP2SHTransactionArg } from "./signP2SHTransaction";
 import { serializeTransactionOutputs } from "./serializeTransaction";
-import { SemVer } from "semver";
+import semver from "semver";
 import { NewProtocol } from "./newops/newProtocol";
 import BtcNew from "./BtcNew";
 import BtcOld from "./BtcOld";
@@ -234,8 +234,10 @@ export default class Btc {
 
   private async useNewApp(): Promise<boolean> {
     const a = await getAppAndVersion(this.transport);
-    // if ("btc" == a.name && 
-    // new NewProtocol(this.transport).
+    const isNewApp = semver.gte(a.version, "2.0.0")
+    if ((a.name == "Bitcoin" || a.name == "Bitcoin Test") && isNewApp) {
+      return true
+    }
     return false;
   }
 }
