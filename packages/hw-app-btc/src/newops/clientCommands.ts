@@ -143,7 +143,9 @@ export class GetMerkleLeafProofCommand extends ClientCommand {
     const n_leftover_elements = proof.length - n_response_elements;
 
     // Add to the queue any proof elements that do not fit the response
-    this.queue.push(...proof.slice(-n_leftover_elements));
+    if (n_leftover_elements > 0) {
+      this.queue.push(...proof.slice(-n_leftover_elements));
+    }
 
     return Buffer.concat([
       mt.getLeafHash(leaf_index),
