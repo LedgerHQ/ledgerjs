@@ -48,7 +48,6 @@ function finalize(psbt: PsbtV2) {
         writePush(scriptSig, legacyPubkeys[0]);
         psbt.setInputFinalScriptsig(i, scriptSig.buffer);
       }
-      psbt.setInputPartialSig(i, legacyPubkeys[0], )
     } else { // Taproot input
       const signature = psbt.getInputTapKeySig(i)
       if (signature.length != 64) {
@@ -60,7 +59,21 @@ function finalize(psbt: PsbtV2) {
       witnessBuf.writeSlice(signature);
       psbt.setInputFinalScriptwitness(i, witnessBuf.buffer);
     }    
+    clearFinalizedInput(psbt, i);
   }
+}
+
+function clearFinalizedInput(psbt: PsbtV2, inputIndex: number) {  
+  const keyTypes = [psbtIn.BIP32_DERIVATION, psbtIn.PARTIAL_SIG, psbtIn.TAP_BIP32_DERIVATION, psbtIn.TAP_KEY_SIG];
+  const witnessUtxoAvailable = psbt.isInputAvailable(inputIndex, psbtIn.WITNESS_UTXO, Buffer.of());  
+  const nonWitnessUtxoAvailable = psbt.isInputAvailable(inputIndex, psbtIn.NON_WITNESS_UTXO, Buffer.of());
+  if (witnessUtxoAvailable && nonWitnessUtxoAvailable) {
+    // Remove NON_WITNESS_UTXO for segwit v0 as it's only needed while signing. 
+    // Segwit v1 doesn't have NON_WITNESS_UTXO set.
+    // See https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki#cite_note-7
+    keyTypes.push(psbtIn.NON_WITNESS_UTXO);
+  }
+  psbt.deleteInputEntries(inputIndex, keyTypes)
 }
 
 function writePush(buf: BufferWriter, data: Buffer) {

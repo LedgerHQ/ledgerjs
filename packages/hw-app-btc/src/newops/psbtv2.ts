@@ -198,10 +198,10 @@ export class PsbtV2 {
     }
   }
 
-  clearFinalizedInput(inputIndex: number) {
+  deleteInputEntries(inputIndex: number, keyTypes: psbtIn[]) {
     const map = this.inputMaps[inputIndex]
     map.forEach((_v, k, m) => {
-      if (!this.isKeyType(k, [psbtIn.FINAL_SCRIPTSIG, psbtIn.FINAL_SCRIPTWITNESS, psbtIn.NON_WITNESS_UTXO, psbtIn.WITNESS_UTXO, psbtIn.PREVIOUS_TXID, psbtIn.OUTPUT_INDEX])) {
+      if (this.isKeyType(k, keyTypes)) {
         m.delete(k)
       }
     })
