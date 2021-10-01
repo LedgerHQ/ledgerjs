@@ -1,8 +1,9 @@
 import { BufferWriter } from "bitcoinjs-lib/types/bufferutils";
 import { sha256 } from "bitcoinjs-lib/types/crypto";
+import { pathArrayToString } from "../bip32";
 import { Merkle } from "./merkle";
 
-export type DefaultDescriptorTemplate = "pkh(@0)" | "sh(pkh(@0))" | "wpkh(@0)" | "tr(@0)";
+export type DefaultDescriptorTemplate = "pkh(@0)" | "sh(wpkh(@0))" | "wpkh(@0)" | "tr(@0)";
 
 export class WalletPolicy {
   descriptorTemplate: string;
@@ -34,10 +35,7 @@ export class WalletPolicy {
   }
 }
 
-export function createKey(masterFingerprint: Buffer, path: number[], xpub: string) {
-  // Limitation: bippath can't handle and empty path. It shouldn't affect us
-  // right now, but might in the future.
-  // TODO: Fix support for empty path.
-  const accountPath = bippath.fromPathArray(path).toString(true);
+export function createKey(masterFingerprint: Buffer, path: number[], xpub: string) {  
+  const accountPath = pathArrayToString(path);
   return `[${masterFingerprint.toString('hex')}/${accountPath}]${xpub}/**`;
 }

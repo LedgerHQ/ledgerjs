@@ -1,17 +1,12 @@
 import type Transport from "@ledgerhq/hw-transport";
-import { signMessage } from "./signMessage";
-import { getWalletPublicKey } from "./getWalletPublicKey";
-import type { AddressFormat } from "./getWalletPublicKey";
-import { splitTransaction } from "./splitTransaction";
-import { getTrustedInput } from "./getTrustedInput";
-import { getTrustedInputBIP143 } from "./getTrustedInputBIP143";
-import type { Transaction } from "./types";
-import { createTransaction } from "./createTransaction";
-import type { CreateTransactionArg } from "./createTransaction";
-import { signP2SHTransaction } from "./signP2SHTransaction";
-import type { SignP2SHTransactionArg } from "./signP2SHTransaction";
-import { serializeTransactionOutputs } from "./serializeTransaction";
 import Btc from "./Btc";
+import type { CreateTransactionArg } from "./createTransaction";
+import { createTransaction } from "./createTransaction";
+import type { AddressFormat } from "./getWalletPublicKey";
+import { getWalletPublicKey } from "./getWalletPublicKey";
+import { signMessage } from "./signMessage";
+import type { SignP2SHTransactionArg } from "./signP2SHTransaction";
+import { signP2SHTransaction } from "./signP2SHTransaction";
 export type { AddressFormat };
 /**
  * Bitcoin API.
@@ -59,21 +54,7 @@ export default class BtcOld extends Btc {
     bitcoinAddress: string;
     chainCode: string;
   }> {
-    let options;
-    if (arguments.length > 2 || typeof opts === "boolean") {
-      console.warn(
-        "btc.getWalletPublicKey deprecated signature used. Please switch to getWalletPublicKey(path, { format, verify })"
-      );
-      options = {
-        verify: !!opts,
-        // eslint-disable-next-line prefer-rest-params
-        format: arguments[2] ? "p2sh" : "legacy",
-      };
-    } else {
-      options = opts || {};
-    }
-
-    return getWalletPublicKey(this.transport, { ...options, path });
+    return getWalletPublicKey(this.transport, { ...opts, path });
   }
 
   /**

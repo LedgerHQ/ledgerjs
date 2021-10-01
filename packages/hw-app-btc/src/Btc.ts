@@ -1,21 +1,16 @@
 import type Transport from "@ledgerhq/hw-transport";
-import { signMessage } from "./signMessage";
-import { getAppAndVersion } from "./getAppAndVersion";
-import { getWalletPublicKey } from "./getWalletPublicKey";
-import type { AddressFormat } from "./getWalletPublicKey";
-import { splitTransaction } from "./splitTransaction";
-import { getTrustedInput } from "./getTrustedInput";
-import { getTrustedInputBIP143 } from "./getTrustedInputBIP143";
-import type { Transaction } from "./types";
-import { createTransaction } from "./createTransaction";
-import type { CreateTransactionArg } from "./createTransaction";
-import { signP2SHTransaction } from "./signP2SHTransaction";
-import type { SignP2SHTransactionArg } from "./signP2SHTransaction";
-import { serializeTransactionOutputs } from "./serializeTransaction";
 import semver from "semver";
-import { NewProtocol } from "./newops/newProtocol";
 import BtcNew from "./BtcNew";
 import BtcOld from "./BtcOld";
+import type { CreateTransactionArg } from "./createTransaction";
+import { getAppAndVersion } from "./getAppAndVersion";
+import { getTrustedInput } from "./getTrustedInput";
+import { getTrustedInputBIP143 } from "./getTrustedInputBIP143";
+import type { AddressFormat } from "./getWalletPublicKey";
+import { serializeTransactionOutputs } from "./serializeTransaction";
+import type { SignP2SHTransactionArg } from "./signP2SHTransaction";
+import { splitTransaction } from "./splitTransaction";
+import type { Transaction } from "./types";
 export type { AddressFormat };
 /**
  * Bitcoin API.
@@ -77,8 +72,21 @@ export default class Btc {
     bitcoinAddress: string;
     chainCode: string;
   }> {
+    let options;
+    if (arguments.length > 2 || typeof opts === "boolean") {
+      console.warn(
+        "btc.getWalletPublicKey deprecated signature used. Please switch to getWalletPublicKey(path, { format, verify })"
+      );
+      options = {
+        verify: !!opts,
+        // eslint-disable-next-line prefer-rest-params
+        format: arguments[2] ? "p2sh" : "legacy",
+      };
+    } else {
+      options = opts || {};
+    }
     return this.getCorrectImpl().then((impl) => {
-      return impl.getWalletPublicKey(path, opts);
+      return impl.getWalletPublicKey(path, options);
     });
   }
 
@@ -137,6 +145,11 @@ export default class Btc {
   }).then(res => ...);
    */
   createPaymentTransactionNew(arg: CreateTransactionArg): Promise<string> {
+    if (arguments.length > 1) {
+      console.warn(
+        "@ledgerhq/hw-app-btc: createPaymentTransactionNew multi argument signature is deprecated. please switch to named parameters."
+      );
+    }
     return this.getCorrectImpl().then((impl) => {
       return impl.createPaymentTransactionNew(arg);
     });

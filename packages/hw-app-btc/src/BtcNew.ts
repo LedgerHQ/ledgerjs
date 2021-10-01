@@ -1,34 +1,25 @@
 import type Transport from "@ledgerhq/hw-transport";
 import { WitnessUtxo } from "bip174/src/lib/interfaces";
-import bippath from "bip32-path";
 import { BufferReader } from 'bitcoinjs-lib/types/bufferutils';
 import { hash256 } from "bitcoinjs-lib/types/crypto";
-import { pubkeyFromXpub } from "./bip32";
+import { getXpubComponents, pathArrayToString, pathStringToArray, pubkeyFromXpub } from "./bip32";
 import Btc from "./Btc";
 import type { CreateTransactionArg } from "./createTransaction";
 import type { AddressFormat } from "./getWalletPublicKey";
-import { getWalletPublicKey } from "./getWalletPublicKey";
 import { hashPublicKey } from "./hashPublicKey";
+import { Client } from "./newops/client";
 import { NewProtocol } from "./newops/newProtocol";
 import { createKey, DefaultDescriptorTemplate, WalletPolicy } from "./newops/policy";
 import { PsbtV2 } from "./newops/psbtv2";
 import { serializeTransaction } from "./serializeTransaction";
 import type { Transaction } from "./types";
 
-/**
- * Bitcoin API.
- *
- * @example
- * import Btc from "@ledgerhq/hw-app-btc";
- * const btc = new Btc(transport)
- */
-
 export default class BtcNew extends Btc {
   constructor(transport: Transport, scrambleKey = "BTC") {
     super(transport, scrambleKey);
   }
 
-  getWalletPublicKey(
+  async getWalletPublicKey(
     path: string,
     opts?: {
       verify?: boolean;
@@ -38,22 +29,30 @@ export default class BtcNew extends Btc {
     publicKey: string;
     bitcoinAddress: string;
     chainCode: string;
-  }> {
-    let options;
-    if (arguments.length > 2 || typeof opts === "boolean") {
-      console.warn(
-        "btc.getWalletPublicKey deprecated signature used. Please switch to getWalletPublicKey(path, { format, verify })"
-      );
-      options = {
-        verify: !!opts,
-        // eslint-disable-next-line prefer-rest-params
-        format: arguments[2] ? "p2sh" : "legacy",
-      };
-    } else {
-      options = opts || {};
-    }
+  }> {    
+    const client = new Client(this.transport);
+    const xpub = await client.getPubkey(path, false);    
+    const components = getXpubComponents(xpub);
 
-    return getWalletPublicKey(this.transport, { ...options, path });
+    // Get an address for the specified path. If verify is true, we need to get the
+    // address from the device, which would require us to determine WalletPolicy. This
+    // requires twp extra queries to the device, one for the account xpub and one for
+    // master key fingerprint.
+    // If verify is false we *could* generate the address ourselves, but chose to
+    // get it from the device to save development time. However, it shouldn't take
+    // more than a few hours to implement local address generation.
+    const pathElements: number[] = pathStringToArray(path);
+    let display = opts?.verify ?? false;
+    const accountPath = pathElements.slice(0, -2);
+    const accountPathString = pathArrayToString(accountPath);
+    const accountXpub = await client.getPubkey(accountPathString, false);
+    const masterFingerprint = await client.getMasterFingerprint();
+    const descriptorTemplate = this.desciptorTemplateFromPath(accountPath);
+    const policy = new WalletPolicy(descriptorTemplate, createKey(masterFingerprint, accountPath, accountXpub));    
+
+    const changeAndIndex = pathElements.slice(-2, pathElements.length);
+    const address = await client.getWalletAddress(policy, Buffer.alloc(32, 0), changeAndIndex[0], changeAndIndex[1], display);    
+    return {publicKey: components.pubkey.toString('hex'), bitcoinAddress: address, chainCode: components.chaincode.toString('hex')};
   }
 
   /**
@@ -88,18 +87,10 @@ export default class BtcNew extends Btc {
    outputScriptHex: "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac"
   }).then(res => ...);
    */
-  createPaymentTransactionNew(arg: CreateTransactionArg): Promise<string> {
-    if (arguments.length > 1) {
-      console.warn(
-        "@ledgerhq/hw-app-btc: createPaymentTransactionNew multi argument signature is deprecated. please switch to named parameters."
-      );
-    }
+  async createPaymentTransactionNew(arg: CreateTransactionArg): Promise<string> {    
     if (arg.inputs.length == 0) {
       throw Error("No inputs");
     }    
-    return this.createTransaction(arg);
-  }
-  async createTransaction(arg: CreateTransactionArg): Promise<string> {    
     const psbt = new PsbtV2();
     const newProtocol = new NewProtocol(this.transport);
 
@@ -120,11 +111,6 @@ export default class BtcNew extends Btc {
     psbt.setGlobalPsbtVersion(2);
     psbt.setGlobalTxVersion(2);
 
-    // We assume all inputs belong to the same account, so we
-    // figure out the descriptor template while iterating the inputs.
-    // We only need one input, but we set it once for each input to
-    // reduce amount of code.
-    let descriptorTemplate: DefaultDescriptorTemplate = "wpkh(@0)";
     const masterFingerprint = await newProtocol.getMasterFingerprint();
     let accountXpub = "";
     let accountPath: number[] = [];    
@@ -138,8 +124,10 @@ export default class BtcNew extends Btc {
       const inputTxBuffer = serializeTransaction(inputTx, true);
       const inputTxid = hash256(inputTxBuffer);
 
-      const pathElements: number[] = bippath.fromString(arg.associatedKeysets[i]).toPathArray();
+      const pathElements: number[] = pathStringToArray(arg.associatedKeysets[i]);
       if (accountXpub == "") {
+        // We assume all inputs belong to the same account so we set
+        // the account xpub and path based on the first input.
         accountPath = pathElements.slice(0, -2);
         accountXpub = await newProtocol.getPubkey(false, accountPath);
       }
@@ -156,17 +144,14 @@ export default class BtcNew extends Btc {
           psbt.setInputNonWitnessUtxo(i, inputTxBuffer);
           const isWrappedSegwit = !arg.additionals.includes("bech32");
           if (isWrappedSegwit) {       
-            descriptorTemplate = "sh(pkh(@0))";
             psbt.setInputRedeemScript(i, this.createRedeemScript(pubkey));
           }
           psbt.setInputBip32Derivation(i, pubkey, masterFingerprint, pathElements);
         } else {
-          descriptorTemplate = "tr(@0)";
           psbt.setInputTapBip32Derivation(i, pubkey, [], masterFingerprint, pathElements)
         }
         psbt.setInputWitnessUtxo(i, spentOutput.amount, spentOutput.script)        
       } else {
-        descriptorTemplate = "pkh(@0)"
         psbt.setInputNonWitnessUtxo(i, inputTxBuffer);
         psbt.setInputBip32Derivation(i, pubkey, masterFingerprint, pathElements);
       }
@@ -185,7 +170,7 @@ export default class BtcNew extends Btc {
       // and one change output.
       const isChange = arg.changePath && i == outputCount-1;
       if (isChange) {
-        const derivationPath = bippath.fromString(arg.changePath).toPathArray();
+        const derivationPath = pathStringToArray(arg.changePath!);
         const xpubBase58 = await newProtocol.getPubkey(false, derivationPath);
         const pubkey = pubkeyFromXpub(xpubBase58);
 
@@ -210,10 +195,36 @@ export default class BtcNew extends Btc {
       psbt.setOutputScript(i, outputScript);      
     }
     
+    const descriptorTemplate = this.desciptorTemplateFromPath(accountPath);
     const p = new WalletPolicy(descriptorTemplate, createKey(masterFingerprint, accountPath, accountXpub));
     this.signPsbt(psbt, p);
     return "";
   }  
+
+  private desciptorTemplateFromPath(path: number[]): DefaultDescriptorTemplate {
+    if (path.length == 0) {
+      throw new Error("Path must not be empty. At least purpose element expected. Can't create descriptor template");
+    }
+    switch(path[0]) {
+      case 0x80000000 + 44:
+        // p2pkh
+        return "pkh(@0)";
+      case 0x80000000 + 48:
+        // p2sh
+        throw new Error("Non-segwit p2sh not implemented");
+      case 0x80000000 + 49:
+        // p2sh wrapped p2wphk
+        return "sh(wpkh(@0))"
+      case 0x80000000 + 84:
+        // p2wpkh
+        return "wpkh(@0)"
+      case 0x80000000 + 86:
+        // p2tr
+        return "tr(@0)";
+      default:
+        throw new Error(`Unexpected purpose ${path[0]}`);
+    }
+  }
 
   private signPsbt(psbt: PsbtV2, walletPolicy: WalletPolicy) {
     const newProtocol = new NewProtocol(this.transport);
