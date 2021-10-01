@@ -53,7 +53,7 @@ function maybeHexBuffer(
 const remapTransactionRelatedErrors = (e) => {
   if (e && e.statusCode === 0x6a80) {
     return new EthAppPleaseEnableContractData(
-      "Please enable Contract data on the Ethereum app Settings"
+      "Please enable Blind signing or Contract data in the Ethereum app Settings"
     );
   }
 
