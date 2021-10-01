@@ -140,11 +140,7 @@ export class PsbtV2 {
     this.setInput(inputIndex, psbtIn.SEQUENCE, b(), uint32LE(sequence));
   }
   getInputSequence(inputIndex: number): number {
-    try {
-      return this.getInput(inputIndex, psbtIn.SEQUENCE, b()).readUInt32LE(0);
-    } catch (e) {
-      return 0xffffffff;
-    }
+    return this.getInputOptional(inputIndex, psbtIn.SEQUENCE, b())?.readUInt32LE(0) ?? 0xffffffff;
   }
   setInputTapKeySig(inputIndex: number, sig: Buffer) {
     this.setInput(inputIndex, psbtIn.TAP_KEY_SIG, b(), sig);

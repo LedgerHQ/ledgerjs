@@ -4,7 +4,7 @@ export class BufferWriter {
   private bufs: Buffer[] = [];
 
   write(alloc: number, fn: (b: Buffer) => void) {
-    const b = Buffer.alloc(1);
+    const b = Buffer.alloc(alloc);
     fn(b)
     this.bufs.push(b);
   }

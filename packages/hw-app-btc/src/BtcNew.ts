@@ -102,12 +102,8 @@ export default class BtcNew extends Btc {
     if (arg.lockTime) {
       psbt.setGlobalFallbackLocktime(arg.lockTime);
     }
-
     psbt.setGlobalInputCount(arg.inputs.length);
-
     psbt.setGlobalOutputCount(outputCount);
-
-    const psbtVersionNumberBuf = Buffer.of(2);
     psbt.setGlobalPsbtVersion(2);
     psbt.setGlobalTxVersion(2);
 
