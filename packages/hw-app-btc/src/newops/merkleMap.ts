@@ -1,4 +1,3 @@
-import { BufferWriter } from "bitcoinjs-lib/types/bufferutils";
 import { createVarint } from "../varint";
 import { Merkle } from "./merkle";
 

@@ -1,6 +1,4 @@
-import { BigNumber } from 'bignumber.js'
-import { script } from 'bitcoinjs-lib';
-import { BufferReader, BufferWriter } from 'bitcoinjs-lib/types/bufferutils';
+import { BufferReader, BufferWriter } from "../buffertools";
 
 export enum psbtGlobal {
   TX_VERSION = 0x02,
@@ -20,6 +18,7 @@ export enum psbtIn {
   FINAL_SCRIPTWITNESS = 0x08,
   PREVIOUS_TXID = 0x0e,
   OUTPUT_INDEX = 0x0f,
+  SEQUENCE = 0x10,
   TAP_KEY_SIG = 0x13,
   TAP_BIP32_DERIVATION = 0x16,
 }
@@ -47,8 +46,8 @@ export class PsbtV2 {
   setGlobalFallbackLocktime(locktime: number) {
     this.setGlobal(psbtGlobal.FALLBACK_LOCKTIME, uint32LE(locktime));
   }
-  getGlobalFallbackLocktime(): number {
-    return this.getGlobal(psbtGlobal.FALLBACK_LOCKTIME).readUInt32LE(0);
+  getGlobalFallbackLocktime(): number | undefined {
+    return this.getGlobalOptional(psbtGlobal.FALLBACK_LOCKTIME)?.readUInt32LE(0);
   }
   setGlobalInputCount(inputCount: number) {
     this.setGlobal(psbtGlobal.INPUT_COUNT, varint(inputCount));
@@ -65,8 +64,8 @@ export class PsbtV2 {
   setGlobalTxModifiable(byte: Buffer) {
     this.setGlobal(psbtGlobal.TX_MODIFIABLE, byte);
   }
-  getGlobalTxModifiable(): Buffer {
-    return this.getGlobal(psbtGlobal.TX_MODIFIABLE);
+  getGlobalTxModifiable(): Buffer | undefined {
+    return this.getGlobalOptional(psbtGlobal.TX_MODIFIABLE);
   }
   setGlobalPsbtVersion(psbtVersion: number) {
     this.setGlobal(psbtGlobal.VERSION, uint32LE(psbtVersion));
@@ -78,36 +77,39 @@ export class PsbtV2 {
   setInputNonWitnessUtxo(inputIndex: number, transaction: Buffer) {
     this.setInput(inputIndex, psbtIn.NON_WITNESS_UTXO, b(), transaction)
   }
-  getInputNonWitnessUtxo(inputIndex: number): Buffer {
-    return this.getInput(inputIndex, psbtIn.NON_WITNESS_UTXO, b());
+  getInputNonWitnessUtxo(inputIndex: number): Buffer | undefined {
+    return this.getInputOptional(inputIndex, psbtIn.NON_WITNESS_UTXO, b());
   }
   setInputWitnessUtxo(inputIndex: number, amount: Buffer, scriptPubKey: Buffer) {
-    const buf = new BufferWriter(Buffer.alloc(8));
+    const buf = new BufferWriter();
     buf.writeSlice(amount);
     buf.writeVarSlice(scriptPubKey);
-    this.setInput(inputIndex, psbtIn.WITNESS_UTXO, b(), buf.buffer);
+    this.setInput(inputIndex, psbtIn.WITNESS_UTXO, b(), buf.buffer());
   }
-  getInputWitnessUtxo(inputIndex: number): { amount: Buffer, scriptPubKey: Buffer } {
-    const buf = new BufferReader(this.getInput(inputIndex, psbtIn.WITNESS_UTXO, b()));
+  getInputWitnessUtxo(inputIndex: number): { amount: Buffer, scriptPubKey: Buffer } | undefined {
+    const utxo = this.getInputOptional(inputIndex, psbtIn.WITNESS_UTXO, b())
+    if (!utxo) return undefined;
+    const buf = new BufferReader(utxo);
     return { amount: buf.readSlice(8), scriptPubKey: buf.readVarSlice() };
   }
   setInputPartialSig(inputIndex: number, pubkey: Buffer, signature: Buffer) {
     this.setInput(inputIndex, psbtIn.PARTIAL_SIG, pubkey, signature);
   }
-  getInputPartialSig(inputIndex: number, pubkey: Buffer): Buffer {
-    return this.getInput(inputIndex, psbtIn.PARTIAL_SIG, pubkey);
+  getInputPartialSig(inputIndex: number, pubkey: Buffer): Buffer | undefined {
+    return this.getInputOptional(inputIndex, psbtIn.PARTIAL_SIG, pubkey);
   }
   setInputRedeemScript(inputIndex: number, redeemScript: Buffer) {
     this.setInput(inputIndex, psbtIn.REDEEM_SCRIPT, b(), redeemScript);
   }
-  getInputRedeemScript(inputIndex: number): Buffer {
-    return this.getInput(inputIndex, psbtIn.REDEEM_SCRIPT, b());
+  getInputRedeemScript(inputIndex: number): Buffer | undefined{
+    return this.getInputOptional(inputIndex, psbtIn.REDEEM_SCRIPT, b());
   }
   setInputBip32Derivation(inputIndex: number, pubkey: Buffer, masterFingerprint: Buffer, path: number[]) {
     this.setInput(inputIndex, psbtIn.BIP32_DERIVATION, pubkey, this.encodeBip32Derivation(masterFingerprint, path))
   }
-  getInputBip32Derivation(inputIndex: number, pubkey: Buffer, masterFingerprint: Buffer, path: number[]): { masterFingerprint: Buffer, path: number[] } {
-    const buf = this.getInput(inputIndex, psbtIn.BIP32_DERIVATION, pubkey);
+  getInputBip32Derivation(inputIndex: number, pubkey: Buffer, masterFingerprint: Buffer, path: number[]): { masterFingerprint: Buffer, path: number[] } | undefined {
+    const buf = this.getInputOptional(inputIndex, psbtIn.BIP32_DERIVATION, pubkey);
+    if (!buf) return undefined;
     return this.decodeBip32Derivation(buf);
   }
   setInputFinalScriptsig(inputIndex: number, scriptSig: Buffer) {
@@ -125,14 +127,24 @@ export class PsbtV2 {
   setInputPreviousTxId(inputIndex: number, txid: Buffer) {
     this.setInput(inputIndex, psbtIn.PREVIOUS_TXID, b(), txid);
   }
-  getInputPreviousTxId(inputIndex: number): Buffer {
+  getInputPreviousTxid(inputIndex: number): Buffer {
     return this.getInput(inputIndex, psbtIn.PREVIOUS_TXID, b());
   }
   setInputOutputIndex(inputIndex: number, outputIndex: number) {
     this.setInput(inputIndex, psbtIn.OUTPUT_INDEX, b(), uint32LE(outputIndex));
   }
-  getInputOutputIndex(inputIndex: number) {
-    this.getInput(inputIndex, psbtIn.OUTPUT_INDEX, b()).readUInt32LE(0);
+  getInputOutputIndex(inputIndex: number): number {
+    return this.getInput(inputIndex, psbtIn.OUTPUT_INDEX, b()).readUInt32LE(0);
+  }
+  setInputSequence(inputIndex: number, sequence: number) {
+    this.setInput(inputIndex, psbtIn.SEQUENCE, b(), uint32LE(sequence));
+  }
+  getInputSequence(inputIndex: number): number {
+    try {
+      return this.getInput(inputIndex, psbtIn.SEQUENCE, b()).readUInt32LE(0);
+    } catch (e) {
+      return 0xffffffff;
+    }
   }
   setInputTapKeySig(inputIndex: number, sig: Buffer) {
     this.setInput(inputIndex, psbtIn.TAP_KEY_SIG, b(), sig);
@@ -186,18 +198,6 @@ export class PsbtV2 {
     return this.decodeTapBip32Derivation(buf);
   }
 
-  isInputAvailable(inputIndex: number, keyType: KeyType, keyData: Buffer): boolean {
-    try {
-      this.getInput(inputIndex, keyType, keyData);
-      return true;
-    } catch (e) {
-      if (e! instanceof NoSuchEntry) {
-        throw e;
-      }
-      return false;
-    }
-  }
-
   deleteInputEntries(inputIndex: number, keyTypes: psbtIn[]) {
     const map = this.inputMaps[inputIndex]
     map.forEach((_v, k, m) => {
@@ -226,7 +226,7 @@ export class PsbtV2 {
     from.forEach((v, k) => to[k] = Buffer.from(v))
   }
   serialize(): Buffer {
-    const buf = new BufferWriter(Buffer.of());
+    const buf = new BufferWriter();
     buf.writeSlice(Buffer.of(0x70, 0x73, 0x62, 0x74, 0xFF))
     serializeMap(buf, this.globalMap);
     this.inputMaps.forEach(map => {
@@ -235,7 +235,7 @@ export class PsbtV2 {
     this.outputMaps.forEach(map => {
       serializeMap(buf, map);
     })
-    return buf.buffer
+    return buf.buffer();
   }
 
   private getKeyDatas(map: Map<string, Buffer>, keyType: KeyType): Buffer[] {
@@ -256,7 +256,10 @@ export class PsbtV2 {
     this.globalMap[key.toString()] = new KeyPair(key, value);
   }
   private getGlobal(keyType: KeyType): Buffer {
-    return get(this.globalMap, keyType, b());
+    return get(this.globalMap, keyType, b(), false)!;
+  }
+  private getGlobalOptional(keyType: KeyType): Buffer | undefined {
+    return get(this.globalMap, keyType, b(), true);
   }
   private setInput(index: number, keyType: KeyType, keyData: Buffer, value: Buffer) {
     let map = this.inputMaps[index];
@@ -266,7 +269,10 @@ export class PsbtV2 {
     set(map, keyType, keyData, value)
   }
   private getInput(index: number, keyType: KeyType, keyData: Buffer): Buffer {
-    return get(this.inputMaps[index], keyType, keyData);
+    return get(this.inputMaps[index], keyType, keyData, false)!;
+  }
+  private getInputOptional(index: number, keyType: KeyType, keyData: Buffer): Buffer | undefined {
+    return get(this.inputMaps[index], keyType, keyData, true);
   }
   private setOutput(index: number, keyType: KeyType, keyData: Buffer, value: Buffer) {
     let map = this.outputMaps[index];
@@ -276,12 +282,15 @@ export class PsbtV2 {
     set(map, keyType, keyData, value)
   }
   private getOutput(index: number, keyType: KeyType, keyData: Buffer): Buffer {
-    return get(this.outputMaps[index], keyType, keyData);
+    return get(this.outputMaps[index], keyType, keyData, false)!;
+  }
+  private getOutputOptional(index: number, keyType: KeyType, keyData: Buffer): Buffer | undefined {
+    return get(this.outputMaps[index], keyType, keyData, true);
   }
   private encodeBip32Derivation(masterFingerprint: Buffer, path: number[]) {
-    const buf = new BufferWriter(Buffer.alloc(4 * (path.length + 1)));
+    const buf = new BufferWriter();
     this.writeBip32Derivation(buf, masterFingerprint, path);
-    return buf.buffer;
+    return buf.buffer();
   }
   private decodeBip32Derivation(buffer: Buffer): { masterFingerprint: Buffer, path: number[] } {
     const buf = new BufferReader(buffer);
@@ -302,13 +311,13 @@ export class PsbtV2 {
     return { masterFingerprint, path }
   }
   private encodeTapBip32Derivation(hashes: Buffer[], masterFingerprint: Buffer, path: number[]): Buffer {
-    const buf = new BufferWriter(Buffer.of());
+    const buf = new BufferWriter();
     buf.writeVarInt(hashes.length);
     hashes.forEach(h => {
       buf.writeSlice(h);
     });
     this.writeBip32Derivation(buf, masterFingerprint, path);
-    return buf.buffer;
+    return buf.buffer();
   }
   private decodeTapBip32Derivation(buffer: Buffer): { hashes: Buffer[], masterFingerprint: Buffer, path: number[] } {
     const buf = new BufferReader(buffer);
@@ -321,11 +330,14 @@ export class PsbtV2 {
     return { hashes, ...deriv };
   }
 }
-function get(map: Map<string, Buffer>, keyType: KeyType, keyData: Buffer): Buffer {
+function get(map: Map<string, Buffer>, keyType: KeyType, keyData: Buffer, acceptUndefined: boolean): Buffer | undefined {
   if (map) throw Error("No such map");
   const key = new Key(keyType, keyData);
   const value: Buffer = map[Key.toString()];
   if (!value) {
+    if (acceptUndefined) {
+      return undefined;
+    }
     const e = new Error("");
     throw new NoSuchEntry(key.toString());
   }
@@ -342,9 +354,9 @@ class Key {
     this.keyData = keyData;
   }
   toString(): string {
-    const buf = new BufferWriter(Buffer.of());
+    const buf = new BufferWriter();
     this.toBuffer(buf);
-    return buf.buffer.toString('hex');
+    return buf.buffer().toString('hex');
   }
   serialize(buf: BufferWriter) {
     buf.writeVarInt(1 + this.keyData.length);
@@ -392,9 +404,9 @@ function uint32LE(n: number): Buffer {
   return b;
 }
 function varint(n: number): Buffer {
-  const b = new BufferWriter(Buffer.alloc(1));
+  const b = new BufferWriter();
   b.writeVarInt(n)
-  return b.buffer;
+  return b.buffer();
 }
 function fromVarint(buf: Buffer): number {
   return new BufferReader(buf).readVarInt();

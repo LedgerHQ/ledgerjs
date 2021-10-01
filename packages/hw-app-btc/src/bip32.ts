@@ -29,7 +29,7 @@ export function pathArrayToString(pathElements: number[]): string {
   // Limitation: bippath can't handle and empty path. It shouldn't affect us
   // right now, but might in the future.
   // TODO: Fix support for empty path.
-  return bippath.fromPathArray(pathElements).toString());
+  return bippath.fromPathArray(pathElements).toString();
 }
 
 export function pathStringToArray(path: string): number[] {

@@ -13,11 +13,11 @@ export class MerkelizedPsbt extends PsbtV2 {
     psbt.copy(this);
     this.globalMerkleMap = this.createMerkleMap(this.globalMap);
 
-    for (let i = 0; i < this.getGlobalInputCount(), i++) {
+    for (let i = 0; i < this.getGlobalInputCount(); i++) {
       this.inputMerkleMaps[i] = this.createMerkleMap(this.inputMaps[i]);
     }
     this.inputMapCommitments = new Merkle([ ...this.inputMerkleMaps.values() ].map(v => v.commitment()));
-    for (let i = 0; i < this.getGlobalOutputCount(), i++) {
+    for (let i = 0; i < this.getGlobalOutputCount(); i++) {
       this.outputMerkleMaps[i] = this.createMerkleMap(this.outputMaps[i]);
     }
     this.outputMapCommitments = new Merkle([ ...this.outputMerkleMaps.values() ].map(v => v.commitment()));

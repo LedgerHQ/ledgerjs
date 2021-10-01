@@ -1,7 +1,5 @@
-import { script } from "bitcoinjs-lib";
-import { BufferWriter } from "bitcoinjs-lib/types/bufferutils";
-import { OP_DUP, OP_HASH160 } from "../constants";
-import { NoSuchEntry, psbtIn, PsbtV2 } from "./psbtv2";
+import { BufferWriter } from "../buffertools";
+import { psbtIn, PsbtV2 } from "./psbtv2";
 
 /**
  * 
@@ -12,52 +10,52 @@ function finalize(psbt: PsbtV2) {
   const inputCount = psbt.getGlobalInputCount();
   for (let i = 0; i < inputCount; i++) {
     const legacyPubkeys = psbt.getInputKeyDatas(i, psbtIn.PARTIAL_SIG);
-    const hasTaprootSig = psbt.isInputAvailable(i, psbtIn.TAP_KEY_SIG, Buffer.of())
-    if (legacyPubkeys.length == 0 && !hasTaprootSig) {
+    const taprootSig = psbt.getInputTapKeySig(i);
+    if (legacyPubkeys.length == 0 && !taprootSig) {
       throw Error(`No signature for input ${i} present`);
     }
     if (legacyPubkeys.length > 0) {
       if (legacyPubkeys.length > 1) {
         throw Error(`Expected exactly one signature, got ${legacyPubkeys.length}`);
       }
-      if (hasTaprootSig) {
+      if (taprootSig) {
         throw Error("Both taproot and non-taproot signatures present.");
       }
 
-      const isSegwitV0 = psbt.isInputAvailable(i, psbtIn.WITNESS_UTXO, Buffer.of());
-      const isWrappedSegwit = psbt.isInputAvailable(i, psbtIn.REDEEM_SCRIPT, Buffer.of());      
-      const signature = psbt.getInputPartialSig(i, legacyPubkeys[0]);
+      const isSegwitV0 = !!psbt.getInputWitnessUtxo(i);
+      const redeemScript = psbt.getInputRedeemScript(i);
+      const isWrappedSegwit = !!redeemScript   
+      const signature = psbt.getInputPartialSig(i, legacyPubkeys[0])!;
       if (isSegwitV0) {
-        const witnessBuf = new BufferWriter(Buffer.of());
+        const witnessBuf = new BufferWriter();
         witnessBuf.writeVarInt(2);
         witnessBuf.writeVarInt(signature.length);
         witnessBuf.writeSlice(signature);
         witnessBuf.writeVarInt(legacyPubkeys[0].length);
         witnessBuf.writeSlice(legacyPubkeys[0]);
-        psbt.setInputFinalScriptwitness(i, witnessBuf.buffer);                        
+        psbt.setInputFinalScriptwitness(i, witnessBuf.buffer());                        
         if (isWrappedSegwit) {
-          const scriptSig = new BufferWriter(Buffer.of());
-          const redeemScript = psbt.getInputRedeemScript(i);          
+          const scriptSig = new BufferWriter();
           writePush(scriptSig, redeemScript);
-          psbt.setInputFinalScriptsig(i, scriptSig.buffer);
+          psbt.setInputFinalScriptsig(i, scriptSig.buffer());
         }
       } else {
         // Legacy input
-        const scriptSig = new BufferWriter(Buffer.of());
+        const scriptSig = new BufferWriter();
         writePush(scriptSig, signature);
         writePush(scriptSig, legacyPubkeys[0]);
-        psbt.setInputFinalScriptsig(i, scriptSig.buffer);
+        psbt.setInputFinalScriptsig(i, scriptSig.buffer());
       }
     } else { // Taproot input
       const signature = psbt.getInputTapKeySig(i)
       if (signature.length != 64) {
         throw Error("Unexpected length of schnorr signature.");
       }
-      const witnessBuf = new BufferWriter(Buffer.of());
+      const witnessBuf = new BufferWriter();
       witnessBuf.writeVarInt(1);
       witnessBuf.writeVarInt(64);
       witnessBuf.writeSlice(signature);
-      psbt.setInputFinalScriptwitness(i, witnessBuf.buffer);
+      psbt.setInputFinalScriptwitness(i, witnessBuf.buffer());
     }    
     clearFinalizedInput(psbt, i);
   }
@@ -65,8 +63,8 @@ function finalize(psbt: PsbtV2) {
 
 function clearFinalizedInput(psbt: PsbtV2, inputIndex: number) {  
   const keyTypes = [psbtIn.BIP32_DERIVATION, psbtIn.PARTIAL_SIG, psbtIn.TAP_BIP32_DERIVATION, psbtIn.TAP_KEY_SIG];
-  const witnessUtxoAvailable = psbt.isInputAvailable(inputIndex, psbtIn.WITNESS_UTXO, Buffer.of());  
-  const nonWitnessUtxoAvailable = psbt.isInputAvailable(inputIndex, psbtIn.NON_WITNESS_UTXO, Buffer.of());
+  const witnessUtxoAvailable = !!psbt.getInputWitnessUtxo(inputIndex);  
+  const nonWitnessUtxoAvailable = !!psbt.getInputNonWitnessUtxo(inputIndex);
   if (witnessUtxoAvailable && nonWitnessUtxoAvailable) {
     // Remove NON_WITNESS_UTXO for segwit v0 as it's only needed while signing. 
     // Segwit v1 doesn't have NON_WITNESS_UTXO set.

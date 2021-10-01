@@ -1,11 +1,9 @@
-import bippath from "bip32-path";
 import Transport from "@ledgerhq/hw-transport";
 import { pathElementsToBuffer } from "../bip32";
-import { Psbt } from "bitcoinjs-lib";
 import { PsbtV2 } from "./psbtv2";
 import { MerkelizedPsbt } from "./merkelizedPsbt";
-import { BufferWriter } from "bitcoinjs-lib/types/bufferutils";
-import { ClientCommandInterpreter, SignPsbtClientCommandInterpreter, SignPsbtYieldHandler } from "./clientCommands";
+import { BufferWriter } from "../buffertools";
+import { ClientCommandInterpreter } from "./clientCommands";
 import { WalletPolicy } from "./policy";
 
 export type AddressType = 1/*legacy*/ |  2/*segwit*/ | 3/*nested_segwit*/; 
@@ -44,7 +42,7 @@ export class NewProtocol {
 
   async signPsbt(psbt: PsbtV2, walletPolicy: WalletPolicy, walletHMAC: Buffer = zero) {
     const merkelizedPsbt = new MerkelizedPsbt(psbt);
-    const buf = new BufferWriter(Buffer.alloc(6*32+3));
+    const buf = new BufferWriter();
     buf.writeSlice(merkelizedPsbt.getGlobalKeysValuesRoot());
     buf.writeVarInt(merkelizedPsbt.getGlobalInputCount());
     buf.writeSlice(merkelizedPsbt.getInputMapsRoot());
@@ -52,7 +50,7 @@ export class NewProtocol {
     buf.writeSlice(merkelizedPsbt.getOutputMapsRoot());    
     buf.writeSlice(walletPolicy.getWalletId());
     buf.writeSlice(walletHMAC);
-    const clientCommand = await this.send(0x04, buf.buffer, [0xe000]);
+    const clientCommand = await this.send(0x04, buf.buffer(), [0xe000]);
     const interpreter = new ClientCommandInterpreter(this.transport, new SignPsbtYieldHandler(merkelizedPsbt, walletPolicy));
     const result = await interpreter.execute(clientCommand);
   }

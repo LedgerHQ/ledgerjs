@@ -1,12 +1,12 @@
 import type Transport from "@ledgerhq/hw-transport";
 import { WitnessUtxo } from "bip174/src/lib/interfaces";
-import { BufferReader } from 'bitcoinjs-lib/types/bufferutils';
 import { hash256 } from "bitcoinjs-lib/types/crypto";
 import { getXpubComponents, pathArrayToString, pathStringToArray, pubkeyFromXpub } from "./bip32";
 import Btc from "./Btc";
 import type { CreateTransactionArg } from "./createTransaction";
 import type { AddressFormat } from "./getWalletPublicKey";
 import { hashPublicKey } from "./hashPublicKey";
+import { BufferReader } from "./buffertools";
 import { Client } from "./newops/client";
 import { NewProtocol } from "./newops/newProtocol";
 import { createKey, DefaultDescriptorTemplate, WalletPolicy } from "./newops/policy";
@@ -120,7 +120,9 @@ export default class BtcNew extends Btc {
       const spentOutputIndex = input[1] as unknown as number;
       const redeemScript = input[2] as string;
       const sequence = input[3] as unknown as number;
-
+      if (sequence) {
+        psbt.setInputSequence(i, sequence);        
+      }
       const inputTxBuffer = serializeTransaction(inputTx, true);
       const inputTxid = hash256(inputTxBuffer);
 
