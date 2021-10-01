@@ -1,19 +1,12 @@
-import bippath from "bip32-path";
 import Transport from "@ledgerhq/hw-transport";
 import { pathElementsToBuffer } from "../bip32";
-import { Psbt } from "bitcoinjs-lib";
 import { PsbtV2 } from "./psbtv2";
 import { MerkelizedPsbt } from "./merkelizedPsbt";
 import { ClientCommandInterpreter } from "./clientCommands";
 import { WalletPolicy } from "./policy";
 import { createVarint } from "../varint";
 
-export type AddressType = 1/*legacy*/ |  2/*segwit*/ | 3/*nested_segwit*/; 
-
-const zero = Buffer.alloc(32, 0);
-
 const CLA_BTC = 0xE1;
-
 const CLA_FRAMEWORK = 0xF0;
 
 enum BitcoinIns {
@@ -63,39 +56,68 @@ export class AppClient {
     return response.toString("ascii");
   }
 
-  // async getAddress(
-  //   display: boolean,
-  //   addressType: AddressType,
-  //   pathElements: number[]
-  // ): Promise<string> {
-  //   if (pathElements.length > 6) {
-  //     throw new Error("Path too long. At most 6 levels allowed.");
-  //   }
-  //   const pathBuf = pathElementsToBuffer(pathElements);
-  //   const buffer = Buffer.of(display ? 1 : 0, addressType, ...pathBuf);
-  //   const response = await this.send(0x01, buffer);
+  async getWalletAddress(walletPolicy: WalletPolicy, walletHMAC: Buffer | null, change: number, addressIndex: number, display: Boolean): Promise<string> {
+    if (change !== 0 && change !== 1) throw new Error("Change can only be 0 or 1");
+    if (addressIndex < 0 || !Number.isInteger(addressIndex)) throw new Error("Invalid address index");
 
-  //   return response.toString("ascii");
-  // }
+    if (walletHMAC?.length != 32) {
+      throw new Error("Invalid HMAC length");
+    }
 
-  async signPsbt(psbt: PsbtV2, walletPolicy: WalletPolicy, walletHMAC: Buffer = zero): Promise<Map<number, Buffer>> {
+    const clientInterpreter = new ClientCommandInterpreter();
+    clientInterpreter.addKnownList(walletPolicy.keys.map(k => Buffer.from(k, 'ascii')));
+    clientInterpreter.addKnownPreimage(walletPolicy.serialize());
+
+    const addressIndexBuffer = Buffer.alloc(4);
+    addressIndexBuffer.writeUInt32BE(addressIndex, 0);
+
+    const response = await this.makeRequest(BitcoinIns.GET_WALLET_ADDRESS, Buffer.concat([
+      Buffer.of(display ? 1 : 0),
+      walletPolicy.getWalletId(),
+      walletHMAC || Buffer.alloc(32, 0),
+      Buffer.of(change),
+      addressIndexBuffer,
+    ]), clientInterpreter);
+
+    return response.toString('ascii');
+  }
+
+
+  async signPsbt(psbt: PsbtV2, walletPolicy: WalletPolicy, walletHMAC: Buffer | null): Promise<Map<number, Buffer>> {
     const merkelizedPsbt = new MerkelizedPsbt(psbt);
 
-    const clientCommandInterpreter = new ClientCommandInterpreter();
+    if (walletHMAC?.length != 32) {
+      throw new Error("Invalid HMAC length");
+    }
 
-    // TODO: prepare ClientCommandInterpreter
+    const clientInterpreter = new ClientCommandInterpreter();
+
+    // prepare ClientCommandInterpreter
+    clientInterpreter.addKnownList(walletPolicy.keys.map(k => Buffer.from(k, 'ascii')));
+    clientInterpreter.addKnownPreimage(walletPolicy.serialize());
+
+    clientInterpreter.addKnownMapping(merkelizedPsbt.globalMerkleMap);
+    for (let [_, map] of merkelizedPsbt.inputMerkleMaps.entries()) {
+      clientInterpreter.addKnownMapping(map);
+    }
+    for (let [_, map] of merkelizedPsbt.outputMerkleMaps.entries()) {
+      clientInterpreter.addKnownMapping(map);
+    }
+
+    clientInterpreter.addKnownList(merkelizedPsbt.inputMapsCommitment.getLeaves());
+    clientInterpreter.addKnownList(merkelizedPsbt.outputMapsCommitment.getLeaves());
 
     this.makeRequest(BitcoinIns.SIGN_PSBT, Buffer.concat([
       merkelizedPsbt.getGlobalKeysValuesRoot(),
       createVarint(merkelizedPsbt.getGlobalInputCount()),
-      merkelizedPsbt.getInputMapsRoot(),
+      merkelizedPsbt.getInputsMapRoot(),
       createVarint(merkelizedPsbt.getGlobalOutputCount()),
-      merkelizedPsbt.getOutputMapsRoot(),    
+      merkelizedPsbt.getOutputsMapRoot(),    
       walletPolicy.getWalletId(),
-      walletHMAC,
-    ]), clientCommandInterpreter);
+      walletHMAC || Buffer.alloc(32, 0),
+    ]), clientInterpreter);
 
-    const yielded = clientCommandInterpreter.getYielded();
+    const yielded = clientInterpreter.getYielded();
 
     const ret: Map<number, Buffer> = new Map();
     for (let inputAndSig of yielded) {

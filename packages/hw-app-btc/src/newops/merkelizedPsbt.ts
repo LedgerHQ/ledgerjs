@@ -3,11 +3,11 @@ import { MerkleMap } from "./merkleMap";
 import { PsbtV2 } from "./psbtv2";
 
 export class MerkelizedPsbt extends PsbtV2 {   
-  private globalMerkleMap: MerkleMap;
-  private inputMerkleMaps = new Map<number, MerkleMap>();
-  private outputMerkleMaps = new Map<number, MerkleMap>();
-  private inputMapCommitments: Merkle;
-  private outputMapCommitments: Merkle;
+  public globalMerkleMap: MerkleMap;
+  public inputMerkleMaps = new Map<number, MerkleMap>();
+  public outputMerkleMaps = new Map<number, MerkleMap>();
+  public inputMapsCommitment: Merkle;
+  public outputMapsCommitment: Merkle;
   constructor(psbt: PsbtV2) {
     super();
     psbt.copy(this);
@@ -16,11 +16,12 @@ export class MerkelizedPsbt extends PsbtV2 {
     for (let i = 0; i < this.getGlobalInputCount(); i++) {
       this.inputMerkleMaps[i] = this.createMerkleMap(this.inputMaps[i]);
     }
-    this.inputMapCommitments = new Merkle([ ...this.inputMerkleMaps.values() ].map(v => v.commitment()));
+    this.inputMapsCommitment = new Merkle([ ...this.inputMerkleMaps.values() ].map(v => v.commitment()));
+
     for (let i = 0; i < this.getGlobalOutputCount(); i++) {
       this.outputMerkleMaps[i] = this.createMerkleMap(this.outputMaps[i]);
     }
-    this.outputMapCommitments = new Merkle([ ...this.outputMerkleMaps.values() ].map(v => v.commitment()));
+    this.outputMapsCommitment = new Merkle([ ...this.outputMerkleMaps.values() ].map(v => v.commitment()));
   }
   // These public functions are for MerkelizedPsbt.
   getGlobalSize(): number {
@@ -29,11 +30,11 @@ export class MerkelizedPsbt extends PsbtV2 {
   getGlobalKeysValuesRoot(): Buffer {
     return this.globalMerkleMap.commitment();
   }
-  getInputMapsRoot(): Buffer {
-    return this.inputMapCommitments.getRoot();
+  getInputsMapRoot(): Buffer {
+    return this.inputMapsCommitment.getRoot();
   }
-  getOutputMapsRoot(): Buffer {
-    return this.outputMapCommitments.getRoot();
+  getOutputsMapRoot(): Buffer {
+    return this.outputMapsCommitment.getRoot();
   }
 
   private createMerkleMap(map: Map<string, Buffer>): MerkleMap {
