@@ -1,4 +1,4 @@
-import { sha256 } from "bitcoinjs-lib/types/crypto";
+import { crypto } from "bitcoinjs-lib";
 
 export class Merkle {
     private leaves: Buffer[];
@@ -102,5 +102,5 @@ function hashConcat(bufA: Buffer, bufB: Buffer): Buffer {
 }
 
 function h(buf: Buffer): Buffer {
-  return sha256(buf)
+  return crypto.sha256(buf)
 }

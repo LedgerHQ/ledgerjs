@@ -1,4 +1,4 @@
-import { sha256 } from "bitcoinjs-lib/types/crypto";
+import { crypto } from "bitcoinjs-lib";
 import { createVarint } from "../varint";
 import { hashLeaf, Merkle } from "./merkle";
 import { MerkleMap } from "./merkleMap";
@@ -274,8 +274,12 @@ export class ClientCommandInterpreter {
     }
   }
 
+  getYielded(): Buffer[] {
+    return this.yielded;
+  }
+
   addKnownPreimage(preimage: Buffer) {
-    this.preimages[sha256(preimage).toString('hex')] = preimage;
+    this.preimages[crypto.sha256(preimage).toString('hex')] = preimage;
   }
 
   addKnownList(elements: Buffer[]) {

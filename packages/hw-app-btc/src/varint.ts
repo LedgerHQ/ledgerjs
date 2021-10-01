@@ -1,3 +1,5 @@
+// TODO: this does not support 64-bit varints!
+
 export function getVarint(data: Buffer, offset: number): [number, number] {
   if (data[offset] < 0xfd) {
     return [data[offset], 1];
