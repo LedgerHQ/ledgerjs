@@ -270,7 +270,7 @@ export class ClientCommandInterpreter {
       if (this.commands.has(cmd.code)) {
         throw new Error(`Multiple commands with code ${cmd.code}`);
       }
-      this.commands[cmd.code] = cmd;
+      this.commands.set(cmd.code, cmd);
     }
   }
 
@@ -279,7 +279,7 @@ export class ClientCommandInterpreter {
   }
 
   addKnownPreimage(preimage: Buffer) {
-    this.preimages[crypto.sha256(preimage).toString('hex')] = preimage;
+    this.preimages.set(crypto.sha256(preimage).toString('hex'), preimage);
   }
 
   addKnownList(elements: Buffer[]) {
@@ -288,7 +288,7 @@ export class ClientCommandInterpreter {
       this.addKnownPreimage(preimage);
     }
     const mt = new Merkle(elements.map(el => hashLeaf(el)));
-    this.roots[mt.getRoot().toString("hex")] = mt;
+    this.roots.set(mt.getRoot().toString("hex"), mt);
   }
 
   addKnownMapping(mm: MerkleMap) {
@@ -302,11 +302,11 @@ export class ClientCommandInterpreter {
     }
 
     const cmdCode = request[0];
-    const cmd = this.commands.get(cmdCode); 
+    const cmd = this.commands.get(cmdCode);
     if (!cmd) {
       throw new Error(`Unexpected command code ${cmdCode}`);
     }
 
-    return cmd.execute(request)
+    return cmd.execute(request); 
   }
 }

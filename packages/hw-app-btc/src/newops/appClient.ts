@@ -42,7 +42,7 @@ export class AppClient {
 
       response = await this.transport.send(CLA_FRAMEWORK, FrameworkIns.CONTINUE_INTERRUPTED, 0, 0, commandResponse, [0x9000, 0xE000]);
     }
-    return response;
+    return response.slice(0, -2); // drop the status word (can only be 0x9000 at this point)
   }
 
   async getPubkey(display: boolean, pathElements: number[]): Promise<string> {
@@ -60,7 +60,7 @@ export class AppClient {
     if (change !== 0 && change !== 1) throw new Error("Change can only be 0 or 1");
     if (addressIndex < 0 || !Number.isInteger(addressIndex)) throw new Error("Invalid address index");
 
-    if (walletHMAC?.length != 32) {
+    if (walletHMAC != null && walletHMAC.length != 32) {
       throw new Error("Invalid HMAC length");
     }
 
@@ -86,7 +86,7 @@ export class AppClient {
   async signPsbt(psbt: PsbtV2, walletPolicy: WalletPolicy, walletHMAC: Buffer | null): Promise<Map<number, Buffer>> {
     const merkelizedPsbt = new MerkelizedPsbt(psbt);
 
-    if (walletHMAC?.length != 32) {
+    if (walletHMAC != null && walletHMAC.length != 32) {
       throw new Error("Invalid HMAC length");
     }
 
