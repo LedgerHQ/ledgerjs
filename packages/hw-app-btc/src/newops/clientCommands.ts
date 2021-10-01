@@ -66,28 +66,27 @@ export class GetPreimageCommand extends ClientCommand {
     }
     const req_hash_hex = hash.toString("hex");
 
-    for (let [known_hash_hex, known_preimage] of this.known_preimages) {
-      if (req_hash_hex === known_hash_hex) {
-        const preimage_len_varint = createVarint(known_preimage.length);
+    const known_preimage = this.known_preimages.get(req_hash_hex);
+    if (known_preimage != undefined) {
+      const preimage_len_varint = createVarint(known_preimage.length);
 
-        // We can send at most 255 - len(preimage_len_out) - 1 bytes in a single message;
-        // the rest will be stored in the queue for GET_MORE_ELEMENTS
-        const max_payload_size = 255 - preimage_len_varint.length - 1;
+      // We can send at most 255 - len(preimage_len_out) - 1 bytes in a single message;
+      // the rest will be stored in the queue for GET_MORE_ELEMENTS
+      const max_payload_size = 255 - preimage_len_varint.length - 1;
 
-        const payload_size = Math.min(max_payload_size, known_preimage.length);
+      const payload_size = Math.min(max_payload_size, known_preimage.length);
 
-        if (payload_size < known_preimage.length) {
-          for (let i = payload_size; i < known_preimage.length; i++) {
-            this.queue.push(Buffer.from([known_preimage[i]]))
-          }
+      if (payload_size < known_preimage.length) {
+        for (let i = payload_size; i < known_preimage.length; i++) {
+          this.queue.push(Buffer.from([known_preimage[i]]))
         }
-
-        return Buffer.concat([
-          preimage_len_varint,
-          Buffer.from([payload_size]),
-          known_preimage.subarray(0, payload_size)
-        ]);
       }
+
+      return Buffer.concat([
+        preimage_len_varint,
+        Buffer.from([payload_size]),
+        known_preimage.subarray(0, payload_size)
+      ]);
     }
 
     throw Error(`Requested unknown preimage for: ${req_hash_hex}`)
@@ -126,7 +125,7 @@ export class GetMerkleLeafProofCommand extends ClientCommand {
 
     const mt = this.known_trees.get(hash_hex);
     if (!mt) {
-      throw Error(`Requested unknown preimage for: ${hash_hex}`);
+      throw Error(`Requested Merkle leaf proof for unknown tree: ${hash_hex}`);
     }
 
     if (leaf_index >= tree_size || mt.size() != tree_size) {
@@ -189,7 +188,7 @@ export class GetMerkleLeafIndexCommand extends ClientCommand {
 
     const mt = this.known_trees.get(root_hash_hex);
     if (!mt) {
-      throw Error(`Requested unknown preimage for: ${root_hash_hex}`);
+      throw Error(`Requested Merkle leaf index for unknown root: ${root_hash_hex}`);
     }
 
     let leaf_index = 0;
@@ -292,8 +291,8 @@ export class ClientCommandInterpreter {
   }
 
   addKnownMapping(mm: MerkleMap) {
-    this.addKnownList(mm.keys.getLeaves());
-    this.addKnownList(mm.values.getLeaves());
+    this.addKnownList(mm.keys);
+    this.addKnownList(mm.values);
   }
 
   execute(request: Buffer): Buffer {
@@ -307,6 +306,6 @@ export class ClientCommandInterpreter {
       throw new Error(`Unexpected command code ${cmdCode}`);
     }
 
-    return cmd.execute(request); 
+    return cmd.execute(request);
   }
 }

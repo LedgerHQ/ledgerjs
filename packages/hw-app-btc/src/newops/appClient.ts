@@ -7,7 +7,7 @@ import { WalletPolicy } from "./policy";
 import { createVarint } from "../varint";
 
 const CLA_BTC = 0xE1;
-const CLA_FRAMEWORK = 0xF0;
+const CLA_FRAMEWORK = 0xF8;
 
 enum BitcoinIns {
   GET_PUBKEY = 0x00,
@@ -112,7 +112,7 @@ export class AppClient {
       createVarint(merkelizedPsbt.getGlobalInputCount()),
       merkelizedPsbt.getInputsMapRoot(),
       createVarint(merkelizedPsbt.getGlobalOutputCount()),
-      merkelizedPsbt.getOutputsMapRoot(),    
+      merkelizedPsbt.getOutputsMapRoot(),
       walletPolicy.getWalletId(),
       walletHMAC || Buffer.alloc(32, 0),
     ]), clientInterpreter);

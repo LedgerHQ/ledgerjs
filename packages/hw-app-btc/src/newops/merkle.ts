@@ -60,7 +60,7 @@ function calculateRoot(leaves: Buffer[]): {root: Node, leaves: Node[]} {
     return {root: new Node(undefined, undefined, Buffer.alloc(32, 0)), leaves: []};
   }
   if (n == 1) {
-    const newNode = new Node(undefined, undefined, hashLeaf(leaves[0]))
+    const newNode = new Node(undefined, undefined, leaves[0])
     return {root: newNode, leaves: [newNode]};
   }
   const leftCount = highestPowerOf2LessThan(n)
