@@ -7,7 +7,7 @@ import type { CreateTransactionArg } from "./createTransaction";
 import type { AddressFormat } from "./getWalletPublicKey";
 import { hashPublicKey } from "./hashPublicKey";
 import { BufferReader } from "./buffertools";
-import { Client } from "./newops/client";
+import { AppClient as Client } from "./newops/appClient";
 import { NewProtocol } from "./newops/newProtocol";
 import { createKey, DefaultDescriptorTemplate, WalletPolicy } from "./newops/policy";
 import { PsbtV2 } from "./newops/psbtv2";
@@ -31,7 +31,7 @@ export default class BtcNew extends Btc {
     chainCode: string;
   }> {    
     const client = new Client(this.transport);
-    const xpub = await client.getPubkey(path, false);    
+    const xpub = await client.getPubkey(false, pathStringToArray(path));
     const components = getXpubComponents(xpub);
 
     // Get an address for the specified path. If verify is true, we need to get the
@@ -44,14 +44,13 @@ export default class BtcNew extends Btc {
     const pathElements: number[] = pathStringToArray(path);
     let display = opts?.verify ?? false;
     const accountPath = pathElements.slice(0, -2);
-    const accountPathString = pathArrayToString(accountPath);
-    const accountXpub = await client.getPubkey(accountPathString, false);
+    const accountXpub = await client.getPubkey(false, accountPath, false);
     const masterFingerprint = await client.getMasterFingerprint();
     const descriptorTemplate = this.desciptorTemplateFromPath(accountPath);
     const policy = new WalletPolicy(descriptorTemplate, createKey(masterFingerprint, accountPath, accountXpub));    
 
     const changeAndIndex = pathElements.slice(-2, pathElements.length);
-    const address = await client.getWalletAddress(policy, Buffer.alloc(32, 0), changeAndIndex[0], changeAndIndex[1], display);    
+    const address = await client.getWalletAddress(display, policy, Buffer.alloc(32, 0), changeAndIndex[0], changeAndIndex[1]);
     return {publicKey: components.pubkey.toString('hex'), bitcoinAddress: address, chainCode: components.chaincode.toString('hex')};
   }
 
