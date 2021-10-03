@@ -8,7 +8,6 @@ import type { AddressFormat } from "./getWalletPublicKey";
 import { hashPublicKey } from "./hashPublicKey";
 import { BufferReader } from "./buffertools";
 import { AppClient as Client } from "./newops/appClient";
-import { NewProtocol } from "./newops/newProtocol";
 import { createKey, DefaultDescriptorTemplate, WalletPolicy } from "./newops/policy";
 import { PsbtV2 } from "./newops/psbtv2";
 import { serializeTransaction } from "./serializeTransaction";
@@ -44,13 +43,13 @@ export default class BtcNew extends Btc {
     const pathElements: number[] = pathStringToArray(path);
     let display = opts?.verify ?? false;
     const accountPath = pathElements.slice(0, -2);
-    const accountXpub = await client.getPubkey(false, accountPath, false);
+    const accountXpub = await client.getPubkey(false, accountPath);
     const masterFingerprint = await client.getMasterFingerprint();
     const descriptorTemplate = this.desciptorTemplateFromPath(accountPath);
     const policy = new WalletPolicy(descriptorTemplate, createKey(masterFingerprint, accountPath, accountXpub));    
 
     const changeAndIndex = pathElements.slice(-2, pathElements.length);
-    const address = await client.getWalletAddress(display, policy, Buffer.alloc(32, 0), changeAndIndex[0], changeAndIndex[1]);
+    const address = await client.getWalletAddress(policy, Buffer.alloc(32, 0), changeAndIndex[0], changeAndIndex[1], display);
     return {publicKey: components.pubkey.toString('hex'), bitcoinAddress: address, chainCode: components.chaincode.toString('hex')};
   }
 
@@ -91,7 +90,7 @@ export default class BtcNew extends Btc {
       throw Error("No inputs");
     }    
     const psbt = new PsbtV2();
-    const newProtocol = new NewProtocol(this.transport);
+    const client = new Client(this.transport);
 
     const outputsConcat = Buffer.from(arg.outputScriptHex, 'hex');
     const outputsBufferReader = new BufferReader(outputsConcat);
@@ -106,7 +105,7 @@ export default class BtcNew extends Btc {
     psbt.setGlobalPsbtVersion(2);
     psbt.setGlobalTxVersion(2);
 
-    const masterFingerprint = await newProtocol.getMasterFingerprint();
+    const masterFingerprint = await client.getMasterFingerprint();
     let accountXpub = "";
     let accountPath: number[] = [];    
     for (let i = 0; i < arg.inputs.length; i++) {
@@ -126,9 +125,9 @@ export default class BtcNew extends Btc {
         // We assume all inputs belong to the same account so we set
         // the account xpub and path based on the first input.
         accountPath = pathElements.slice(0, -2);
-        accountXpub = await newProtocol.getPubkey(false, accountPath);
+        accountXpub = await client.getPubkey(false, accountPath);
       }
-      const xpubBase58 = await newProtocol.getPubkey(false, pathElements);
+      const xpubBase58 = await client.getPubkey(false, pathElements);
       
       const pubkey = pubkeyFromXpub(xpubBase58);
       if (arg.segwit) {        
@@ -168,7 +167,7 @@ export default class BtcNew extends Btc {
       const isChange = arg.changePath && i == outputCount-1;
       if (isChange) {
         const derivationPath = pathStringToArray(arg.changePath!);
-        const xpubBase58 = await newProtocol.getPubkey(false, derivationPath);
+        const xpubBase58 = await client.getPubkey(false, derivationPath);
         const pubkey = pubkeyFromXpub(xpubBase58);
 
         if (arg.segwit) {
@@ -224,8 +223,8 @@ export default class BtcNew extends Btc {
   }
 
   private signPsbt(psbt: PsbtV2, walletPolicy: WalletPolicy) {
-    const newProtocol = new NewProtocol(this.transport);
-    newProtocol.signPsbt(psbt, walletPolicy);
+    const client = new Client(this.transport);
+    client.signPsbt(psbt, walletPolicy, Buffer.alloc(32, 0));
   }
 
   private createRedeemScript(pubkey: Buffer): Buffer {
