@@ -1,7 +1,7 @@
 import { BufferWriter } from "../buffertools";
 import { PsbtV2 } from "./psbtv2";
 
-function extract(psbt: PsbtV2): Buffer {
+export function extract(psbt: PsbtV2): Buffer {
   const tx = new BufferWriter();
   tx.writeUInt32(psbt.getGlobalTxVersion());
   

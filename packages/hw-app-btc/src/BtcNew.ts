@@ -9,9 +9,11 @@ import { hashPublicKey } from "./hashPublicKey";
 import { BufferReader } from "./buffertools";
 import { AppClient as Client } from "./newops/appClient";
 import { createKey, DefaultDescriptorTemplate, WalletPolicy } from "./newops/policy";
-import { PsbtV2 } from "./newops/psbtv2";
+import { psbtIn, PsbtV2 } from "./newops/psbtv2";
 import { serializeTransaction } from "./serializeTransaction";
 import type { Transaction } from "./types";
+import { extract } from "./newops/psbtExtractor";
+import { finalize } from "./newops/psbtFinalizer";
 
 export default class BtcNew extends Btc {
   constructor(transport: Transport, scrambleKey = "BTC") {
@@ -193,9 +195,32 @@ export default class BtcNew extends Btc {
     
     const descriptorTemplate = this.desciptorTemplateFromPath(accountPath);
     const p = new WalletPolicy(descriptorTemplate, createKey(masterFingerprint, accountPath, accountXpub));
-    this.signPsbt(psbt, p);
-    return "";
+    return await this.signPsbt(psbt, p);
   }  
+
+  private async signPsbt(psbt: PsbtV2, walletPolicy: WalletPolicy): Promise<string> {
+    const client = new Client(this.transport);
+    const sigs: Map<number, Buffer> = await client.signPsbt(psbt, walletPolicy, Buffer.alloc(32, 0));
+    sigs.forEach((v, k) => {
+      // Note: Looking at BIP32 derivation does not work in the generic case.
+      // some inputs might not have a BIP32-derived pubkey.
+      const pubkeys = psbt.getInputKeyDatas(k, psbtIn.BIP32_DERIVATION);
+      let pubkey;
+      if (pubkeys.length != 1) {
+        pubkey = psbt.getInputKeyDatas(k, psbtIn.TAP_BIP32_DERIVATION);
+        if (pubkey.length == 0) {
+          throw Error(`Missing pubkey derivation for input ${k}`);
+        }
+        psbt.setInputTapKeySig(k, v);
+      } else {
+        pubkey = pubkeys[0]
+        psbt.setInputPartialSig(k, pubkey, v)
+      }
+    })
+    finalize(psbt);
+    const serializedTx = extract(psbt);
+    return serializedTx.toString('hex')
+  }
 
   private desciptorTemplateFromPath(path: number[]): DefaultDescriptorTemplate {
     if (path.length == 0) {
@@ -220,11 +245,6 @@ export default class BtcNew extends Btc {
       default:
         throw new Error(`Unexpected purpose ${path[0]}`);
     }
-  }
-
-  private signPsbt(psbt: PsbtV2, walletPolicy: WalletPolicy) {
-    const client = new Client(this.transport);
-    client.signPsbt(psbt, walletPolicy, Buffer.alloc(32, 0));
   }
 
   private createRedeemScript(pubkey: Buffer): Buffer {
