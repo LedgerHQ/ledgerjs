@@ -217,11 +217,11 @@ export class PsbtV2 {
       }
       const to = new Map();
       this.copyMap(m, to);
-      to[index] = to;
+      to.set(index, to);
     });
   }
   copyMap(from: Map<string, Buffer>, to: Map<string, Buffer>) {
-    from.forEach((v, k) => to[k] = Buffer.from(v))
+    from.forEach((v, k) => to.set(k, Buffer.from(v)));
   }
   serialize(): Buffer {
     const buf = new BufferWriter();
@@ -276,7 +276,7 @@ export class PsbtV2 {
   }
   private setGlobal(keyType: KeyType, value: Buffer) {
     const key = new Key(keyType, Buffer.of());
-    this.globalMap[key.toString()] = new KeyPair(key, value);
+    this.globalMap.set(key.toString(), value);
   }
   private getGlobal(keyType: KeyType): Buffer {
     return get(this.globalMap, keyType, b(), false)!;
@@ -354,9 +354,9 @@ export class PsbtV2 {
   }
 }
 function get(map: Map<string, Buffer>, keyType: KeyType, keyData: Buffer, acceptUndefined: boolean): Buffer | undefined {
-  if (map) throw Error("No such map");
+  if (!map) throw Error("No such map");
   const key = new Key(keyType, keyData);
-  const value: Buffer = map[Key.toString()];
+  const value = map.get(key.toString());
   if (!value) {
     if (acceptUndefined) {
       return undefined;
@@ -407,7 +407,7 @@ function createKey(buf: Buffer): Key {
 }
 function serializeMap(buf: BufferWriter, map: Map<String, Buffer>) {
   for (let k in map.keys) {
-    const value = map[k];
+    const value = map.get(k);
     const keyPair = new KeyPair(createKey(Buffer.from(k, 'hex')), value)
     keyPair.serialize(buf)
   }
@@ -419,7 +419,7 @@ function b(): Buffer {
 }
 function set(map: Map<String, Buffer>, keyType: KeyType, keyData: Buffer, value: Buffer) {
   const key = new Key(keyType, keyData);
-  map[key.toString()] = value;
+  map.set(key.toString(), value);
 }
 function uint32LE(n: number): Buffer {
   const b = Buffer.alloc(4)
