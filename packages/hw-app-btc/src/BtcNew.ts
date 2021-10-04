@@ -157,7 +157,7 @@ export default class BtcNew extends Btc {
     }
 
     for (let i = 0; i < outputCount; i++) {
-      const amount = outputsBufferReader.readSlice(8);
+      const amount = Number(outputsBufferReader.readSlice(8).readBigInt64LE(0));
       const outputScript = outputsBufferReader.readVarSlice();
 
       // The wallet always places the change output last.

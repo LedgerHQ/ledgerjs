@@ -173,11 +173,11 @@ export class PsbtV2 {
     const buf = this.getOutput(outputIndex, psbtOut.BIP_32_DERIVATION, pubkey);
     return this.decodeBip32Derivation(buf);
   }
-  setOutputAmount(outputIndex: number, amount: Buffer) {
-    this.setOutput(outputIndex, psbtOut.AMOUNT, b(), amount);
+  setOutputAmount(outputIndex: number, amount: number) {
+    this.setOutput(outputIndex, psbtOut.AMOUNT, b(), int64LE(amount));
   }
-  getOutputAmount(outputIndex: number): Buffer {
-    return this.getOutput(outputIndex, psbtOut.AMOUNT, b());
+  getOutputAmount(outputIndex: number): number {
+    return Number(this.getOutput(outputIndex, psbtOut.AMOUNT, b()).readBigInt64LE(0));
   }
   setOutputScript(outputIndex: number, scriptPubKey: Buffer) {
     this.setOutput(outputIndex, psbtOut.SCRIPT, b(), scriptPubKey)
@@ -397,6 +397,11 @@ function set(map: Map<String, Buffer>, keyType: KeyType, keyData: Buffer, value:
 function uint32LE(n: number): Buffer {
   const b = Buffer.alloc(4)
   b.writeUInt32LE(n, 0);
+  return b;
+}
+function int64LE(n: number): Buffer {
+  const b = Buffer.alloc(8)
+  b.writeBigInt64LE(BigInt(n), 0);
   return b;
 }
 function varint(n: number): Buffer {

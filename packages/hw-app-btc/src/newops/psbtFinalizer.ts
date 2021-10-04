@@ -6,7 +6,7 @@ import { psbtIn, PsbtV2 } from "./psbtv2";
  * @param psbt The psbt with all signatures added as partial sigs, either through PSBT_IN_PARTIAL_SIG or PSBT_IN_TAP_KEY_SIG
  */
 function finalize(psbt: PsbtV2) {
-  // First check that each input has a signature and that the signature is from the correct pubkey
+  // First check that each input has a signature
   const inputCount = psbt.getGlobalInputCount();
   for (let i = 0; i < inputCount; i++) {
     const legacyPubkeys = psbt.getInputKeyDatas(i, psbtIn.PARTIAL_SIG);
