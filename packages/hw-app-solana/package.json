@@ -32,6 +32,9 @@
         "@ledgerhq/hw-transport": "^6.7.0",
         "@ledgerhq/logs": "^6.2.0"
     },
+    "devDependencies": {
+        "@ledgerhq/hw-transport-node-speculos": "^6.7.0"
+    },
     "scripts": {
         "clean": "bash ../../script/clean.sh",
         "build": "bash ../../script/build.sh",

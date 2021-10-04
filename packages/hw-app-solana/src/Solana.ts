@@ -1,5 +1,12 @@
 import Transport from '@ledgerhq/hw-transport';
 
+const CLA = 0xe0;
+const INS = {
+    GET_VERSION: 0x04,
+    GET_ADDR: 0x05,
+    SIGN: 0x06,
+};
+
 /**
  * Solana API
  *
@@ -40,5 +47,12 @@ export default class Solana {
         return Promise.resolve('singed solana transaction');
     }
 
-    getAppConfiguration() {}
+    async getAppConfiguration(): Promise<{
+        version: string;
+    }> {
+        const [, , major, minor, patch] = await this.transport.send(CLA, INS.GET_VERSION, 0x00, 0x00);
+        return {
+            version: `${major}.${minor}.${patch}`,
+        };
+    }
 }
