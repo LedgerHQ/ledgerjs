@@ -30,6 +30,8 @@ export enum psbtOut {
   TAP_BIP32_DERIVATION = 0x07,
 }
 
+const PSBT_MAGIC_BYTES = Buffer.of(0x70, 0x73, 0x62, 0x74, 0xFF);
+
 export class NoSuchEntry extends Error { }
 
 export class PsbtV2 {
@@ -233,7 +235,32 @@ export class PsbtV2 {
     })
     return buf.buffer();
   }
-
+  deserialize(psbt: Buffer) {
+    const buf = new BufferReader(psbt);
+    if (!buf.readSlice(5).equals(PSBT_MAGIC_BYTES)) {
+      throw new Error("Invalid magic bytes")
+    }
+    while (this.readKeyPair(this.globalMap, buf));
+    for (let i = 0; i < this.getGlobalInputCount(); i++) {
+      this.inputMaps[i] = new Map();
+      while (this.readKeyPair(this.inputMaps[i], buf));
+    }
+    for (let i = 0; i < this.getGlobalOutputCount(); i++) {
+      this.outputMaps[i] = new Map();
+      while (this.readKeyPair(this.outputMaps[i], buf));
+    }
+  }
+  private readKeyPair(map: Map<string, Buffer>, buf: BufferReader): boolean {
+    const keyLen = buf.readVarInt();
+    if (keyLen == 0) {
+      return false;
+    }
+    const keyType = buf.readUInt8();
+    const keyData = buf.readSlice(keyLen-1);
+    const value = buf.readVarSlice();
+    set(map, keyType, keyData, value);
+    return true
+  }
   private getKeyDatas(map: Map<string, Buffer>, keyType: KeyType): Buffer[] {
     const result: Buffer[] = [];
     map.forEach((_v, k) => {
