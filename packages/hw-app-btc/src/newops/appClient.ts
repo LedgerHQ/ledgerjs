@@ -5,6 +5,7 @@ import { MerkelizedPsbt } from "./merkelizedPsbt";
 import { ClientCommandInterpreter } from "./clientCommands";
 import { WalletPolicy } from "./policy";
 import { createVarint } from "../varint";
+import { hashLeaf, Merkle } from "./merkle";
 
 const CLA_BTC = 0xE1;
 const CLA_FRAMEWORK = 0xF8;
@@ -97,22 +98,24 @@ export class AppClient {
     clientInterpreter.addKnownPreimage(walletPolicy.serialize());
 
     clientInterpreter.addKnownMapping(merkelizedPsbt.globalMerkleMap);
-    for (let [_, map] of merkelizedPsbt.inputMerkleMaps.entries()) {
+    for (let map of merkelizedPsbt.inputMerkleMaps) {
       clientInterpreter.addKnownMapping(map);
     }
-    for (let [_, map] of merkelizedPsbt.outputMerkleMaps.entries()) {
+    for (let map of merkelizedPsbt.outputMerkleMaps) {
       clientInterpreter.addKnownMapping(map);
     }
 
-    clientInterpreter.addKnownList(merkelizedPsbt.inputMapsCommitment.getLeaves());
-    clientInterpreter.addKnownList(merkelizedPsbt.outputMapsCommitment.getLeaves());
+    clientInterpreter.addKnownList(merkelizedPsbt.inputMapCommitments);
+    const inputMapsRoot = (new Merkle(merkelizedPsbt.inputMapCommitments.map(m => hashLeaf(m)))).getRoot();
+    clientInterpreter.addKnownList(merkelizedPsbt.outputMapCommitments);
+    const outputMapsRoot = (new Merkle(merkelizedPsbt.outputMapCommitments.map(m => hashLeaf(m)))).getRoot();
 
-    this.makeRequest(BitcoinIns.SIGN_PSBT, Buffer.concat([
+    await this.makeRequest(BitcoinIns.SIGN_PSBT, Buffer.concat([
       merkelizedPsbt.getGlobalKeysValuesRoot(),
       createVarint(merkelizedPsbt.getGlobalInputCount()),
-      merkelizedPsbt.getInputsMapRoot(),
+      inputMapsRoot,
       createVarint(merkelizedPsbt.getGlobalOutputCount()),
-      merkelizedPsbt.getOutputsMapRoot(),
+      outputMapsRoot,
       walletPolicy.getWalletId(),
       walletHMAC || Buffer.alloc(32, 0),
     ]), clientInterpreter);

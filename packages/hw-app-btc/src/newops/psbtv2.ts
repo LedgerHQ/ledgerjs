@@ -212,12 +212,9 @@ export class PsbtV2 {
   }
   copyMaps(from: Map<string, Buffer>[], to: Map<string, Buffer>[]) {
     from.forEach((m, index) => {
-      if (m === undefined) {
-        return;
-      }
-      const to = new Map();
-      this.copyMap(m, to);
-      to.set(index, to);
+      const to_index = new Map();
+      this.copyMap(m, to_index);
+      to[index] = to_index;
     });
   }
   copyMap(from: Map<string, Buffer>, to: Map<string, Buffer>) {
@@ -407,8 +404,8 @@ function createKey(buf: Buffer): Key {
 }
 function serializeMap(buf: BufferWriter, map: Map<String, Buffer>) {
   for (let k in map.keys) {
-    const value = map.get(k);
-    const keyPair = new KeyPair(createKey(Buffer.from(k, 'hex')), value!);
+    const value = map.get(k)!;
+    const keyPair = new KeyPair(createKey(Buffer.from(k, 'hex')), value)
     keyPair.serialize(buf)
   }
   buf.writeUInt8(0);

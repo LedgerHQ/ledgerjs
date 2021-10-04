@@ -7,7 +7,7 @@ export class MerkleMap {
   values: Buffer[];
   valuesTree: Merkle;
   /**
-   * @param keys Sorted list of keys
+   * @param keys Sorted list of (unhashed) keys
    * @param values values, in corresponding order as the keys, and of equal length
    */
   constructor(keys: Buffer[], values: Buffer[]) {    
@@ -17,15 +17,15 @@ export class MerkleMap {
 
     // Sanity check: verify that keys are actually sorted and with no duplicates
     for (let i = 0; i < keys.length - 1; i++) {
-      if (keys[i] >= keys[i + 1]) {
+      if (keys[i].toString("hex") >= keys[i + 1].toString("hex")) {
         throw new Error("keys must be in strictly increasing order");
       }
     }
 
     this.keys = keys;
-    this.keysTree = new Merkle(keys.map((buf: Buffer) => hashLeaf(buf)));
+    this.keysTree = new Merkle(keys.map(k => hashLeaf(k)));
     this.values = values;
-    this.valuesTree = new Merkle(values.map((buf: Buffer) => hashLeaf(buf)));
+    this.valuesTree = new Merkle(values.map(v => hashLeaf(v)));
   }
 
   commitment(): Buffer {
