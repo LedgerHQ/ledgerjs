@@ -16,7 +16,7 @@ test("getAppConfiguration", async () => {
     expect(result).toEqual({ version: "1.0.6" });
 });
 
-test("getAddress", async () => {
+test("getAddress without display", async () => {
     const transport = await openTransportReplayer(
         RecordStore.fromString(`
             => e005000015058000002c800001f5800000008000000080000000
@@ -25,7 +25,20 @@ test("getAddress", async () => {
     );
     const solana = new Solana(transport);
     const result = await solana.getAddress("44'/501'/0'/0'/0'", false);
-    //TODO: add true to confirm
+    expect(result).toEqual({
+        address: "b618MxXG8ALdrfbQsUihobzfbQkgvkXzAiRL4RazWYEga89j5",
+    });
+});
+
+test("getAddress with display", async () => {
+    const transport = await openTransportReplayer(
+        RecordStore.fromString(`
+            => e005010015058000002c800001f5800000008000000080000000
+            <= 4d65a10662b9759d62bb59048366705454654cf4f9b4b3525cf314429e46c6919000
+        `)
+    );
+    const solana = new Solana(transport);
+    const result = await solana.getAddress("44'/501'/0'/0'/0'", true);
     expect(result).toEqual({
         address: "b618MxXG8ALdrfbQsUihobzfbQkgvkXzAiRL4RazWYEga89j5",
     });
@@ -48,4 +61,25 @@ test("signTransaction", async () => {
     expect(result).toEqual(
         "1ad0702faddc8b2072c59547637c10e6affad2f186b69cf3288f2b029de2e309e1d73b73eb925a79f7b0d026ee07203d714e15807267001fbd3914de76a5490e"
     );
+});
+
+test("should accept only hardened bip32 paths", async () => {
+    const notFullyHardenedPaths = [
+        "44'/501'/0/0'/0'",
+        "44'/501'/0'/0/0'",
+        "44'/501'/0'/0'/0",
+    ];
+
+    const expectThrows = async (fn: (solana: Solana) => Promise<unknown>) => {
+        const transport = await openTransportReplayer(new RecordStore());
+        const solana = new Solana(transport);
+        return expect(fn(solana)).rejects.toThrow("must be hardened");
+    };
+
+    for (const path of notFullyHardenedPaths) {
+        await expectThrows((solana) => solana.getAddress(path));
+        await expectThrows((solana) =>
+            solana.signTransaction(path, Buffer.alloc(0))
+        );
+    }
 });
