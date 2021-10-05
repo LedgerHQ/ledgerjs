@@ -16,6 +16,12 @@ Ledger Hardware Wallet Solana JavaScript bindings.
     *   [Examples][3]
     *   [getAddress][4]
         *   [Parameters][5]
+        *   [Examples][6]
+    *   [signTransaction][7]
+        *   [Parameters][8]
+        *   [Examples][9]
+    *   [getAppConfiguration][10]
+        *   [Examples][11]
 
 ## Solana
 
@@ -23,26 +29,61 @@ Solana API
 
 ### Parameters
 
-*   ``  
-*   `scrambleKey`   (optional, default `'solana_default_scramble_key'`)
+*   `transport` **Transport** a transport for sending commands to a device
+*   `scrambleKey`  a scramble key (optional, default `"solana_default_scramble_key"`)
 
 ### Examples
 
 ```javascript
 import Solana from "@ledgerhq/hw-app-solana";
-const solana = new Solana(transport)
+const solana = new Solana(transport);
 ```
 
 ### getAddress
 
-Get address
+Get Solana address (public key) for a BIP32 path.
 
 #### Parameters
 
-*   `path` **[string][6]** a BIP32 path
-*   `display` **[boolean][7]?** enable/sidable display
+*   `path` **[string][12]** a BIP32 path. All indices of the path must be hardened.
+*   `display` **[boolean][13]** flag to show display (optional, default `false`)
 
-Returns **[Promise][8]<{publicKey: [string][6], address: [string][6]}>** string
+#### Examples
+
+```javascript
+solana.getAddress("44'/501'/0'").then(r => r.address)
+```
+
+Returns **[Promise][14]<{address: [string][12]}>** an object with the address field
+
+### signTransaction
+
+Sign a Solana transaction.
+
+#### Parameters
+
+*   `path` **[string][12]** a BIP32 path. All indices of the path must be hardened.
+*   `txBuffer` **[Buffer][15]** serialized transaction
+
+#### Examples
+
+```javascript
+solana.signTransaction("44'/501'/0'", txBuffer).then(r => r.signature)
+```
+
+Returns **[Promise][14]<{signature: [Buffer][15]}>** an object with the signature field
+
+### getAppConfiguration
+
+Get application configuration.
+
+#### Examples
+
+```javascript
+solana.getAppConfiguration()
+```
+
+Returns **[Promise][14]<{version: [string][12]}>** an object with the version field
 
 [1]: #solana
 
@@ -54,8 +95,22 @@ Returns **[Promise][8]<{publicKey: [string][6], address: [string][6]}>** string
 
 [5]: #parameters-1
 
-[6]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
+[6]: #examples-1
 
-[7]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
+[7]: #signtransaction
 
-[8]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise
+[8]: #parameters-2
+
+[9]: #examples-2
+
+[10]: #getappconfiguration
+
+[11]: #examples-3
+
+[12]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String
+
+[13]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean
+
+[14]: https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise
+
+[15]: https://nodejs.org/api/buffer.html

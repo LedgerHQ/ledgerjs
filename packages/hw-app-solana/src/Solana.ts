@@ -24,15 +24,21 @@ const HARDENED_MIN = 0x80000000;
 /**
  * Solana API
  *
+ * @param transport a transport for sending commands to a device
+ * @param scrambleKey a scramble key
+ *
  * @example
  * import Solana from "@ledgerhq/hw-app-solana";
- * const solana = new Solana(transport)
+ * const solana = new Solana(transport);
  */
 export default class Solana {
+    private transport: Transport;
+
     constructor(
-        private transport: Transport,
+        transport: Transport,
         scrambleKey = "solana_default_scramble_key"
     ) {
+        this.transport = transport;
         this.transport.decorateAppAPIMethods(
             this,
             ["getAddress", "signTransaction", "getAppConfiguration"],
@@ -41,11 +47,14 @@ export default class Solana {
     }
 
     /**
-     * Get address
+     * Get Solana address (public key) for a BIP32 path.
      *
-     * @param path a BIP32 path
-     * @param display should display or not
-     * @returns string
+     * @param path a BIP32 path. All indices of the path must be hardened.
+     * @param display flag to show display
+     * @returns an object with the address field
+     *
+     * @example
+     * solana.getAddress("44'/501'/0'").then(r => r.address)
      */
     async getAddress(
         path: string,
@@ -66,6 +75,17 @@ export default class Solana {
         };
     }
 
+    /**
+     * Sign a Solana transaction.
+     *
+     * @param path a BIP32 path. All indices of the path must be hardened.
+     * @param txBuffer serialized transaction
+     *
+     * @returns an object with the signature field
+     *
+     * @example
+     * solana.signTransaction("44'/501'/0'", txBuffer).then(r => r.signature)
+     */
     async signTransaction(
         path: string,
         txBuffer: Buffer
@@ -90,6 +110,14 @@ export default class Solana {
         };
     }
 
+    /**
+     * Get application configuration.
+     *
+     * @returns an object with the version field
+     *
+     * @example
+     * solana.getAppConfiguration()
+     */
     async getAppConfiguration(): Promise<{
         version: string;
     }> {
@@ -119,9 +147,8 @@ export default class Solana {
         }
         return buf;
     }
-    /*
-     * Helper for chunked send of large payloads
-     */
+
+    // send chunked if payload size exceeds maximum for a call
     private async sendToDevice(
         instruction: number,
         p1: number,
