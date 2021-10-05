@@ -30,7 +30,8 @@
         "@ledgerhq/cryptoassets": "^6.8.1",
         "@ledgerhq/errors": "^6.2.0",
         "@ledgerhq/hw-transport": "^6.7.0",
-        "@ledgerhq/logs": "^6.2.0"
+        "@ledgerhq/logs": "^6.2.0",
+        "bip32-path": "^0.4.2"
     },
     "devDependencies": {
         "@ledgerhq/hw-transport-node-speculos": "^6.7.0"
