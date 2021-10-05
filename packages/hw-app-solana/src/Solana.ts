@@ -93,11 +93,10 @@ export default class Solana {
     async getAppConfiguration(): Promise<{
         version: string;
     }> {
-        const [, , major, minor, patch] = await this.transport.send(
-            LEDGER_CLA,
+        const [, , major, minor, patch] = await this.sendToDevice(
             INS.GET_VERSION,
-            0x00,
-            0x00
+            P1_NON_CONFIRM,
+            Buffer.alloc(0)
         );
         return {
             version: `${major}.${minor}.${patch}`,
@@ -128,8 +127,8 @@ export default class Solana {
         p1: number,
         payload: Buffer
     ) {
-        var p2 = 0;
-        var payload_offset = 0;
+        let p2 = 0;
+        let payload_offset = 0;
 
         if (payload.length > MAX_PAYLOAD) {
             while (payload.length - payload_offset > MAX_PAYLOAD) {
@@ -148,7 +147,7 @@ export default class Solana {
                 );
                 if (reply.length != 2) {
                     throw new TransportError(
-                        "solana_send: Received unexpected reply payload",
+                        "sendToDevice: Received unexpected reply payload",
                         "UnexpectedReplyPayload"
                     );
                 }
