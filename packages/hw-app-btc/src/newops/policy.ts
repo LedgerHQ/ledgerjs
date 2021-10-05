@@ -39,5 +39,5 @@ export class WalletPolicy {
 
 export function createKey(masterFingerprint: Buffer, path: number[], xpub: string) {  
   const accountPath = pathArrayToString(path);
-  return `[${masterFingerprint.toString('hex')}/${accountPath}]${xpub}/**`;
+  return `[${masterFingerprint.toString('hex')}${accountPath.substring(1)}]${xpub}/**`;
 }

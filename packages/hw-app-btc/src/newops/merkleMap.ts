@@ -23,9 +23,9 @@ export class MerkleMap {
     }
 
     this.keys = keys;
-    this.keysTree = new Merkle(keys.map(hashLeaf));
+    this.keysTree = new Merkle(keys.map((buf: Buffer) => hashLeaf(buf)));
     this.values = values;
-    this.valuesTree = new Merkle(values.map(hashLeaf));
+    this.valuesTree = new Merkle(values.map((buf: Buffer) => hashLeaf(buf)));
   }
 
   commitment(): Buffer {

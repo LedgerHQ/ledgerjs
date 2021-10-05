@@ -408,7 +408,7 @@ function createKey(buf: Buffer): Key {
 function serializeMap(buf: BufferWriter, map: Map<String, Buffer>) {
   for (let k in map.keys) {
     const value = map.get(k);
-    const keyPair = new KeyPair(createKey(Buffer.from(k, 'hex')), value)
+    const keyPair = new KeyPair(createKey(Buffer.from(k, 'hex')), value!);
     keyPair.serialize(buf)
   }
   buf.writeUInt8(0);

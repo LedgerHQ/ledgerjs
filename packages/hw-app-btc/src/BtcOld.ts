@@ -1,5 +1,4 @@
 import type Transport from "@ledgerhq/hw-transport";
-import Btc from "./Btc";
 import type { CreateTransactionArg } from "./createTransaction";
 import { createTransaction } from "./createTransaction";
 import type { AddressFormat } from "./getWalletPublicKey";
@@ -16,9 +15,10 @@ export type { AddressFormat };
  * const btc = new Btc(transport)
  */
 
-export default class BtcOld extends Btc {
+export default class BtcOld {
+  transport: Transport
   constructor(transport: Transport, scrambleKey = "BTC") {
-    super(transport, scrambleKey);
+    this.transport = transport;
   }
 
   /**

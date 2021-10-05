@@ -7,6 +7,7 @@ import { getAppAndVersion } from "./getAppAndVersion";
 import { getTrustedInput } from "./getTrustedInput";
 import { getTrustedInputBIP143 } from "./getTrustedInputBIP143";
 import type { AddressFormat } from "./getWalletPublicKey";
+import { AppClient } from "./newops/appClient";
 import { serializeTransactionOutputs } from "./serializeTransaction";
 import type { SignP2SHTransactionArg } from "./signP2SHTransaction";
 import { splitTransaction } from "./splitTransaction";
@@ -107,9 +108,8 @@ export default class Btc {
     r: string;
     s: string;
   }> {
-    return this.getCorrectImpl().then((impl) => {
-      return impl.signMessageNew(path, messageHex);
-    });
+    return this.old().signMessageNew(path, messageHex);
+    
   }
 
   /**
@@ -175,9 +175,7 @@ export default class Btc {
   }).then(result => ...);
    */
   signP2SHTransaction(arg: SignP2SHTransactionArg): Promise<string[]> {
-    return this.getCorrectImpl().then((impl) => {
-      return impl.signP2SHTransaction(arg);
-    });
+    return this.old().signP2SHTransaction(arg);
   }
 
   /**
@@ -236,15 +234,20 @@ export default class Btc {
     );
   }
 
-  private async getCorrectImpl(): Promise<Btc> {
+  private async getCorrectImpl(): Promise<BtcOld | BtcNew> {
     const isNewApp = await this.useNewApp()
     if (isNewApp) {
-      return new BtcNew(this.transport);
+      return this.new();
     } else {
-      return new BtcOld(this.transport);
+      return this.old();
     }
   }
-
+  private old(): BtcOld {
+    return new BtcOld(this.transport);
+  }
+  private new(): BtcNew {
+    return new BtcNew(new AppClient(this.transport));
+  }
   private async useNewApp(): Promise<boolean> {
     const a = await getAppAndVersion(this.transport);
     const isNewApp = semver.gte(a.version, "2.0.0")
