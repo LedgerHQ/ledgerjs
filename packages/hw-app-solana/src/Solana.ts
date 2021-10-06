@@ -113,20 +113,26 @@ export default class Solana {
     /**
      * Get application configuration.
      *
-     * @returns an object with the version field
+     * @returns application config object
      *
      * @example
-     * solana.getAppConfiguration()
+     * solana.getAppConfiguration().then(r => r.version)
      */
-    async getAppConfiguration(): Promise<{
-        version: string;
-    }> {
-        const [, , major, minor, patch] = await this.sendToDevice(
+    async getAppConfiguration(): Promise<AppConfig> {
+        const [
+            blindSigningEnabled,
+            pubKeyDisplayMode,
+            major,
+            minor,
+            patch,
+        ] = await this.sendToDevice(
             INS.GET_VERSION,
             P1_NON_CONFIRM,
             Buffer.alloc(0)
         );
         return {
+            blindSigningEnabled: Boolean(blindSigningEnabled),
+            pubKeyDisplayMode,
             version: `${major}.${minor}.${patch}`,
         };
     }
@@ -195,3 +201,14 @@ export default class Solana {
         return reply.slice(0, reply.length - 2);
     }
 }
+
+enum PubKeyDisplayMode {
+    LONG,
+    SHORT,
+}
+
+type AppConfig = {
+    blindSigningEnabled: boolean;
+    pubKeyDisplayMode: PubKeyDisplayMode;
+    version: string;
+};

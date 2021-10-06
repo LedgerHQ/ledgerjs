@@ -13,7 +13,11 @@ test("getAppConfiguration", async () => {
     );
     const solana = new Solana(transport);
     const result = await solana.getAppConfiguration();
-    expect(result).toEqual({ version: "1.0.6" });
+    expect(result).toEqual({
+        version: "1.0.6",
+        blindSigningEnabled: false,
+        pubKeyDisplayMode: 0,
+    });
 });
 
 test("getAddress without display", async () => {
@@ -65,6 +69,8 @@ test("signTransaction", async () => {
 
 test("should accept only hardened bip32 paths", async () => {
     const notFullyHardenedPaths = [
+        "44/501'/0/0'/0'",
+        "44'/501/0'/0'/0'",
         "44'/501'/0/0'/0'",
         "44'/501'/0'/0/0'",
         "44'/501'/0'/0'/0",
@@ -84,6 +90,8 @@ test("should accept only hardened bip32 paths", async () => {
     }
 });
 
+// NOTE: if ledger returns error 6808 - enable blind signing in settings
+// should work without it in the test though
 test("chunked payload (payload length > MAX_PAYLOAD)", async () => {
     const transport = await openTransportReplayer(
         RecordStore.fromString(`
