@@ -9,13 +9,11 @@ Ledger Hardware Wallet Solana JavaScript bindings.
 
 ## Notes
 
-To run `speculos-smoke` test make sure [speculos](https://github.com/LedgerHQ/speculos) running (on port 9999) with [Solana app](https://github.com/LedgerHQ/app-solana) installed on it. Then run the command from root workspace:
+To run `speculos-smoke` test make sure [Speculos](https://github.com/LedgerHQ/speculos) running (apdu port 9999 and api rest endpoint http://0.0.0.0:5000) with [Solana app](https://github.com/LedgerHQ/app-solana) installed on it. Then run the command from root workspace:
 
 ```bash
 $ yarn run ts-node packages/hw-app-solana/tests/speculos-smoke.ts
 ```
-
-It's an interactive test so you should approve the transactions on speculos.
 
 ## Troubleshooting
 
