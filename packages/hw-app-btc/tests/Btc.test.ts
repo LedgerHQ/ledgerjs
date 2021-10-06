@@ -3,10 +3,13 @@ import {
   RecordStore,
 } from "@ledgerhq/hw-transport-mocker";
 import Btc from "../src/Btc";
+import BtcOld from "../src/BtcOld";
 
 test("btc.getWalletPublicKey", async () => {
   const transport = await openTransportReplayer(
     RecordStore.fromString(`
+      => b001000000
+      <= 0107426974636f696e06312e332e323301029000
       => e040000011048000002c800000008000000000000000
       <= 410486b865b52b753d0a84d09bc20063fab5d8453ec33c215d4019a5801c9c6438b917770b2782e29a9ecc6edb67cd1f0fbf05ec4c1236884b6d686d6be3b1588abb2231334b453654666641724c683466564d36756f517a7673597135767765744a63564dbce80dd580792cd18af542790e56aa813178dc28644bb5f03dbd44c85f2d2e7a9000
     `)
@@ -25,6 +28,8 @@ test("btc.getWalletPublicKey", async () => {
 test("btc 2", async () => {
   const transport = await openTransportReplayer(
     RecordStore.fromString(`
+    => b001000000
+    <= 0107426974636f696e06312e332e323301029000
     => b001000000
     <= 0107426974636f696e06312e332e323301029000
     => e042000009000000010100000001
@@ -159,6 +164,8 @@ test("btc 4", async () => {
 test("btc seg multi", async () => {
   const transport = await openTransportReplayer(
     RecordStore.fromString(`
+    => b001000000
+    <= 0107426974636f696e06312e332e323301029000
     => b001000000
     <= 0107426974636f696e06312e332e323201029000
     => e040000015058000003180000001800000050000000000000000
