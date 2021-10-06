@@ -250,7 +250,7 @@ export default class Btc {
   }
   private async useNewApp(): Promise<boolean> {
     const a = await getAppAndVersion(this.transport);
-    const isNewApp = semver.gte(a.version, "2.0.0")
+    const isNewApp = semver.major(a.version) >= 2
     if ((a.name == "Bitcoin" || a.name == "Bitcoin Test") && isNewApp) {
       return true
     }
