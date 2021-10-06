@@ -1,7 +1,6 @@
 import Transport, { TransportError } from "@ledgerhq/hw-transport";
 
 import BIPPath from "bip32-path";
-import bs58check from "bs58check";
 
 const P1_NON_CONFIRM = 0x00;
 const P1_CONFIRM = 0x01;
@@ -36,7 +35,7 @@ export default class Solana {
 
     constructor(
         transport: Transport,
-        scrambleKey = "solana_default_scramble_key"
+        scrambleKey: string = "solana_default_scramble_key"
     ) {
         this.transport = transport;
         this.transport.decorateAppAPIMethods(
@@ -60,7 +59,7 @@ export default class Solana {
         path: string,
         display: boolean = false
     ): Promise<{
-        address: string;
+        address: Buffer;
     }> {
         const pathBuffer = this.pathToBuffer(path);
 
@@ -71,7 +70,7 @@ export default class Solana {
         );
 
         return {
-            address: bs58check.encode(addressBuffer),
+            address: addressBuffer,
         };
     }
 

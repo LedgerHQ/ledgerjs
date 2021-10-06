@@ -28,10 +28,10 @@ test("getAddress without display", async () => {
         `)
     );
     const solana = new Solana(transport);
-    const result = await solana.getAddress("44'/501'/0'/0'/0'", false);
-    expect(result).toEqual({
-        address: "b618MxXG8ALdrfbQsUihobzfbQkgvkXzAiRL4RazWYEga89j5",
-    });
+    const { address } = await solana.getAddress("44'/501'/0'/0'/0'", false);
+    expect(address.toString("hex")).toEqual(
+        "4d65a10662b9759d62bb59048366705454654cf4f9b4b3525cf314429e46c691"
+    );
 });
 
 test("getAddress with display", async () => {
@@ -42,10 +42,10 @@ test("getAddress with display", async () => {
         `)
     );
     const solana = new Solana(transport);
-    const result = await solana.getAddress("44'/501'/0'/0'/0'", true);
-    expect(result).toEqual({
-        address: "b618MxXG8ALdrfbQsUihobzfbQkgvkXzAiRL4RazWYEga89j5",
-    });
+    const { address } = await solana.getAddress("44'/501'/0'/0'/0'", true);
+    expect(address.toString("hex")).toEqual(
+        "4d65a10662b9759d62bb59048366705454654cf4f9b4b3525cf314429e46c691"
+    );
 });
 
 test("signTransaction", async () => {
@@ -90,8 +90,6 @@ test("should accept only hardened bip32 paths", async () => {
     }
 });
 
-// NOTE: if ledger returns error 6808 - enable blind signing in settings
-// should work without it in the test though
 test("chunked payload (payload length > MAX_PAYLOAD)", async () => {
     const transport = await openTransportReplayer(
         RecordStore.fromString(`
