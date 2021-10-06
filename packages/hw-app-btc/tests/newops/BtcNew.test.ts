@@ -6,6 +6,7 @@ import { getXpubComponents, pathArrayToString } from "../../src/bip32";
 import BtcNew from "../../src/BtcNew";
 import { AppClient } from "../../src/newops/appClient";
 import { DefaultDescriptorTemplate, WalletPolicy } from "../../src/newops/policy";
+import ecc from "tiny-secp256k1";
 
 test("getWalletPublicKey p2pkh", async () => {
   await testGetWalletPublicKey("m/44'/1'/0'", "pkh(@0)");
@@ -36,11 +37,21 @@ async function testGetWalletPublicKey(accountPath: string, expectedDescriptorTem
   client.mockGetWalletAddressResponse(new WalletPolicy(expectedDescriptorTemplate, key), 0, 0, "testaddress");
 
   var btcNew = new BtcNew(client);
-  const result = await btcNew.getWalletPublicKey(path)
-  expect(result.bitcoinAddress).toEqual("testaddress");  
-  const expectedXpub = getXpubComponents(keyXpub);
-  expect(result.chainCode).toEqual(expectedXpub.chaincode.toString('hex'));
-  expect(result.publicKey).toEqual(expectedXpub.pubkey.toString('hex'));
+  const result = await btcNew.getWalletPublicKey(path);
+  verifyGetWalletPublicKeyResult(result, keyXpub, "testaddress");
+
+  const resultAccount = await btcNew.getWalletPublicKey(accountPath);
+  verifyGetWalletPublicKeyResult(resultAccount, accountXpub);
+}
+
+function verifyGetWalletPublicKeyResult(result:  {publicKey: string; bitcoinAddress: string; chainCode: string;},
+  expectedXpub: string, expectedAddress?: string) {
+  if (expectedAddress) expect(result.bitcoinAddress).toEqual("testaddress");
+  const expectedComponents = getXpubComponents(expectedXpub);
+  const expectedPubKey = Buffer.from(ecc.pointCompress(expectedComponents.pubkey, false));
+  expect(expectedPubKey.length).toEqual(65);
+  expect(result.chainCode).toEqual(expectedComponents.chaincode.toString('hex'));  
+  expect(result.publicKey).toEqual(expectedPubKey.toString('hex'));
 }
 
 const masterFingerprint = Buffer.of(1, 2, 3, 4);
