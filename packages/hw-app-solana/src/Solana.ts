@@ -1,4 +1,6 @@
-import Transport, { TransportError } from "@ledgerhq/hw-transport";
+import Transport from "@ledgerhq/hw-transport";
+
+import { StatusCodes } from "@ledgerhq/errors";
 
 import BIPPath from "bip32-path";
 
@@ -17,6 +19,10 @@ const INS = {
     GET_ADDR: 0x05,
     SIGN: 0x06,
 };
+
+enum EXTRA_STATUS_CODES {
+    BLIND_SIGNATURE_REQUIRED = 0x6808,
+}
 
 const HARDENED_MIN = 0x80000000;
 
@@ -159,6 +165,17 @@ export default class Solana {
         p1: number,
         payload: Buffer
     ) {
+        /*
+         * By default transport will throw if status code is not OK.
+         * For some pyaloads we need to enable blind sign in the app settings
+         * and this is reported with StatusCodes.MISSING_CRITICAL_PARAMETER first byte prefix
+         * so we handle it and show a user friendly error message.
+         */
+        const acceptStatusList = [
+            StatusCodes.OK,
+            EXTRA_STATUS_CODES.BLIND_SIGNATURE_REQUIRED,
+        ];
+
         let p2 = 0;
         let payload_offset = 0;
 
@@ -175,14 +192,10 @@ export default class Solana {
                     instruction,
                     p1,
                     p2 | P2_MORE,
-                    buf
+                    buf,
+                    acceptStatusList
                 );
-                if (reply.length != 2) {
-                    throw new TransportError(
-                        "sendToDevice: Received unexpected reply payload",
-                        "UnexpectedReplyPayload"
-                    );
-                }
+                this.throwOnFailure(reply);
                 p2 |= P2_EXTEND;
             }
         }
@@ -194,10 +207,27 @@ export default class Solana {
             instruction,
             p1,
             p2,
-            buf
+            buf,
+            acceptStatusList
         );
 
+        this.throwOnFailure(reply);
+
         return reply.slice(0, reply.length - 2);
+    }
+
+    private throwOnFailure(reply: Buffer) {
+        // transport makes sure reply has a valid length
+        const status = reply.readUInt16BE(reply.length - 2);
+
+        switch (status) {
+            case EXTRA_STATUS_CODES.BLIND_SIGNATURE_REQUIRED:
+                throw new Error(
+                    "Missing a parameter. Try enabling blind signature in the app"
+                );
+            default:
+                return;
+        }
     }
 }
 

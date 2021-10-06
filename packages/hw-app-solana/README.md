@@ -19,7 +19,7 @@ It's an interactive test so you should approve the transactions on speculos.
 
 ## Troubleshooting
 
-If ledger returns error `6808` - enable blind signing in settings (jest tests should work without it).
+If ledger returns error `6808` - enable blind signature in settings (not needed for unit testing).
 
 ## API
 

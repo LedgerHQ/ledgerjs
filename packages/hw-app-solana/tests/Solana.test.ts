@@ -110,3 +110,17 @@ test("chunked payload (payload length > MAX_PAYLOAD)", async () => {
         "d9ed529ab24ab4e796c006cf85e7e51db85825b31d3477dd3bf8350745b7a9cdc29840442d96dbeca73289a06841655d9f5c342bd6f697dcfdb6dadf8a078404"
     );
 });
+
+test("report blind signature required", async () => {
+    const transport = await openTransportReplayer(
+        RecordStore.fromString(`
+            => e004000000
+            <= 6808
+        `)
+    );
+    const solana = new Solana(transport);
+
+    return expect(solana.getAppConfiguration()).rejects.toThrow(
+        "blind signature"
+    );
+});
