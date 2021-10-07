@@ -109,7 +109,6 @@ export default class Btc {
     s: string;
   }> {
     return this.old().signMessageNew(path, messageHex);
-    
   }
 
   /**
@@ -189,7 +188,7 @@ export default class Btc {
     hasTimestamp = false,
     hasExtraData = false,
     additionals: Array<string> = []
-  ): Transaction {   
+  ): Transaction {
     return splitTransaction(
       transactionHex,
       isSegwitSupported,
@@ -235,7 +234,7 @@ export default class Btc {
   }
 
   private async getCorrectImpl(): Promise<BtcOld | BtcNew> {
-    const isNewApp = await this.useNewApp()
+    const isNewApp = await this.useNewApp();
     if (isNewApp) {
       return this.new();
     } else {
@@ -250,9 +249,9 @@ export default class Btc {
   }
   private async useNewApp(): Promise<boolean> {
     const a = await getAppAndVersion(this.transport);
-    const isNewApp = semver.major(a.version) >= 2
+    const isNewApp = semver.major(a.version) >= 2;
     if ((a.name == "Bitcoin" || a.name == "Bitcoin Test") && isNewApp) {
-      return true
+      return true;
     }
     return false;
   }

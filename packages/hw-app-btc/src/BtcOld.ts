@@ -18,7 +18,7 @@ export type { AddressFormat };
 export default class BtcOld {
   transport: Transport;
 
-  constructor(transport: Transport, scrambleKey = "BTC") {
+  constructor(transport: Transport) {
     this.transport = transport;
   }
 
@@ -119,7 +119,6 @@ export default class BtcOld {
         "@ledgerhq/hw-app-btc: createPaymentTransactionNew multi argument signature is deprecated. please switch to named parameters."
       );
     }
-    
     return createTransaction(this.transport, arg);
   }
 
