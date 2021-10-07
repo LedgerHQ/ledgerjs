@@ -24,6 +24,7 @@ import { ethers } from "ethers";
 import { byContractAddressAndChainId } from "./erc20";
 import { loadInfosForContractMethod } from "./contracts";
 import type { PluginsLoadConfig } from "./contracts";
+import { getNFTInfo } from "./nfts";
 
 export type StarkQuantizationType =
   | "eth"
@@ -308,17 +309,33 @@ export default class Eth {
     }
 
     const provideForContract = async (address) => {
-      const erc20Info = byContractAddressAndChainId(address, chainIdTruncated);
-      if (erc20Info) {
+      const nftInfo = await getNFTInfo(address, chainIdTruncated);
+      if (nftInfo) {
         log(
           "ethereum",
-          "loading erc20token info for " +
-            erc20Info.contractAddress +
+          "loading nft info for " +
+            nftInfo.contractAddress +
             " (" +
-            erc20Info.ticker +
+            nftInfo.collectionName +
             ")"
         );
-        await provideERC20TokenInformation(this.transport, erc20Info.data);
+        await provideNFTInformation(this.transport, nftInfo.data);
+      } else {
+        const erc20Info = byContractAddressAndChainId(
+          address,
+          chainIdTruncated
+        );
+        if (erc20Info) {
+          log(
+            "ethereum",
+            "loading erc20token info for " +
+              erc20Info.contractAddress +
+              " (" +
+              erc20Info.ticker +
+              ")"
+          );
+          await provideERC20TokenInformation(this.transport, erc20Info.data);
+        }
       }
     };
 
@@ -1253,6 +1270,18 @@ function provideERC20TokenInformation(
         // we return a flag to know if the call was effective or not
         return false;
       }
+      throw e;
+    }
+  );
+}
+
+function provideNFTInformation(
+  transport: Transport,
+  data: Buffer
+): Promise<boolean> {
+  return transport.send(0xe0, 0x14, 0x00, 0x00, data).then(
+    () => true,
+    (e) => {
       throw e;
     }
   );

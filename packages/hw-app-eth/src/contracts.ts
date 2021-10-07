@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getNFTInfo } from "./nfts";
 
 type ContractMethod = {
   payload: string;
@@ -36,6 +37,18 @@ export const loadInfosForContractMethod = async (
     ...defaultPluginsLoadConfig,
     ...userPluginsLoadConfig,
   };
+
+  const nftInfo = await getNFTInfo(contractAddress, chainId);
+  if (nftInfo) {
+    return {
+      payload: nftInfo.data.toString("hex"),
+      signature: "",
+      plugin: "ERC721",
+      erc20OfInterest: [],
+      abi: null,
+    };
+  }
+
   let data = !baseURL
     ? {}
     : await axios
