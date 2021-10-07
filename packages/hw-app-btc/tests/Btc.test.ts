@@ -3,7 +3,6 @@ import {
   RecordStore,
 } from "@ledgerhq/hw-transport-mocker";
 import Btc from "../src/Btc";
-import BtcOld from "../src/BtcOld";
 
 test("btc.getWalletPublicKey", async () => {
   const transport = await openTransportReplayer(

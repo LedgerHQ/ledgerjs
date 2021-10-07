@@ -6,7 +6,11 @@ import type { CreateTransactionArg } from "./createTransaction";
 import type { AddressFormat } from "./getWalletPublicKey";
 import { hashPublicKey } from "./hashPublicKey";
 import { AppClient as Client } from "./newops/appClient";
-import { createKey, DefaultDescriptorTemplate, WalletPolicy } from "./newops/policy";
+import {
+  createKey,
+  DefaultDescriptorTemplate,
+  WalletPolicy,
+} from "./newops/policy";
 import { extract } from "./newops/psbtExtractor";
 import { finalize } from "./newops/psbtFinalizer";
 import { psbtIn, PsbtV2 } from "./newops/psbtv2";
@@ -15,7 +19,7 @@ import type { Transaction } from "./types";
 import ecc from "tiny-secp256k1";
 
 export default class BtcNew {
-  constructor(private client: Client) { }
+  constructor(private client: Client) {}
 
   async getWalletPublicKey(
     path: string,
@@ -31,29 +35,38 @@ export default class BtcNew {
     const pathElements: number[] = pathStringToArray(path);
     const xpub = await this.client.getPubkey(false, pathElements);
 
-    let display = opts?.verify ?? false;
+    const display = opts?.verify ?? false;
     const address = await this.getWalletAddress(pathElements, display);
     const components = getXpubComponents(xpub);
-    const uncompressedPubkey = Buffer.from(ecc.pointCompress(components.pubkey, false));
-    return { publicKey: uncompressedPubkey.toString('hex'), bitcoinAddress: address, chainCode: components.chaincode.toString('hex') };
+    const uncompressedPubkey = Buffer.from(
+      ecc.pointCompress(components.pubkey, false)
+    );
+    return {
+      publicKey: uncompressedPubkey.toString("hex"),
+      bitcoinAddress: address,
+      chainCode: components.chaincode.toString("hex"),
+    };
   }
 
   /**
    * Get an address for the specified path.
-   * 
-   * If display is true, we must get the address from the device, which would require 
-   * us to determine WalletPolicy. This requires two *extra* queries to the device, one 
+   *
+   * If display is true, we must get the address from the device, which would require
+   * us to determine WalletPolicy. This requires two *extra* queries to the device, one
    * for the account xpub and one for master key fingerprint.
-   * 
+   *
    * If display is false we *could* generate the address ourselves, but chose to
    * get it from the device to save development time. However, it shouldn't take
-   * more than a few hours to implement local address generation. 
-   * 
+   * more than a few hours to implement local address generation.
+   *
    * Moreover, if the path is not for a leaf, ie accountPath+/X/Y, there is no
    * way to get the address from the device. In this case we have to create it
-   * ourselves, but we don't at this time, and instead return an empty ("") address.    
+   * ourselves, but we don't at this time, and instead return an empty ("") address.
    */
-  private async getWalletAddress(pathElements: number[], display: boolean): Promise<string> {
+  private async getWalletAddress(
+    pathElements: number[],
+    display: boolean
+  ): Promise<string> {
     const accountPathLength = this.accountPathLength(pathElements);
     if (accountPathLength + 2 != pathElements.length) {
       return "";
@@ -62,9 +75,18 @@ export default class BtcNew {
     const accountXpub = await this.client.getPubkey(false, accountPath);
     const masterFingerprint = await this.client.getMasterFingerprint();
     const descriptorTemplate = this.desciptorTemplateFromPath(accountPath);
-    const policy = new WalletPolicy(descriptorTemplate, createKey(masterFingerprint, accountPath, accountXpub));
+    const policy = new WalletPolicy(
+      descriptorTemplate,
+      createKey(masterFingerprint, accountPath, accountXpub)
+    );
     const changeAndIndex = pathElements.slice(-2, pathElements.length);
-    return this.client.getWalletAddress(policy, Buffer.alloc(32, 0), changeAndIndex[0], changeAndIndex[1], display);
+    return this.client.getWalletAddress(
+      policy,
+      Buffer.alloc(32, 0),
+      changeAndIndex[0],
+      changeAndIndex[1],
+      display
+    );
   }
 
   private accountPathLength(pathElements: number[]): number {
@@ -108,13 +130,15 @@ export default class BtcNew {
    outputScriptHex: "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac"
   }).then(res => ...);
    */
-  async createPaymentTransactionNew(arg: CreateTransactionArg): Promise<string> {
+  async createPaymentTransactionNew(
+    arg: CreateTransactionArg
+  ): Promise<string> {
     if (arg.inputs.length == 0) {
       throw Error("No inputs");
     }
     const psbt = new PsbtV2();
 
-    const outputsConcat = Buffer.from(arg.outputScriptHex, 'hex');
+    const outputsConcat = Buffer.from(arg.outputScriptHex, "hex");
     const outputsBufferReader = new BufferReader(outputsConcat);
     const outputCount = outputsBufferReader.readVarInt();
     psbt.setGlobalTxVersion(2);
@@ -133,16 +157,18 @@ export default class BtcNew {
     for (let i = 0; i < arg.inputs.length; i++) {
       const input = arg.inputs[i];
       const inputTx = input[0];
-      const spentOutputIndex = input[1] as unknown as number;
-      const redeemScript = input[2] as string;
-      const sequence = input[3] as unknown as number;
+      const spentOutputIndex = (input[1] as unknown) as number;
+      // const redeemScript = input[2] as string;
+      const sequence = (input[3] as unknown) as number;
       if (sequence) {
         psbt.setInputSequence(i, sequence);
       }
       const inputTxBuffer = serializeTransaction(inputTx, true);
       const inputTxid = crypto.hash256(inputTxBuffer);
 
-      const pathElements: number[] = pathStringToArray(arg.associatedKeysets[i]);
+      const pathElements: number[] = pathStringToArray(
+        arg.associatedKeysets[i]
+      );
       if (accountXpub == "") {
         // We assume all inputs belong to the same account so we set
         // the account xpub and path based on the first input.
@@ -154,24 +180,40 @@ export default class BtcNew {
       const pubkey = pubkeyFromXpub(xpubBase58);
       if (arg.segwit) {
         if (!inputTx.outputs) {
-          throw Error("Missing outputs array in transaction to sign")
+          throw Error("Missing outputs array in transaction to sign");
         }
         const spentOutput = inputTx.outputs[spentOutputIndex];
-        const segwitVersion = spentOutput.script.readUInt8(0)
+        const segwitVersion = spentOutput.script.readUInt8(0);
         if (segwitVersion == 0) {
           psbt.setInputNonWitnessUtxo(i, inputTxBuffer);
           const isWrappedSegwit = !arg.additionals.includes("bech32");
           if (isWrappedSegwit) {
             psbt.setInputRedeemScript(i, this.createRedeemScript(pubkey));
           }
-          psbt.setInputBip32Derivation(i, pubkey, masterFingerprint, pathElements);
+          psbt.setInputBip32Derivation(
+            i,
+            pubkey,
+            masterFingerprint,
+            pathElements
+          );
         } else {
-          psbt.setInputTapBip32Derivation(i, pubkey, [], masterFingerprint, pathElements)
+          psbt.setInputTapBip32Derivation(
+            i,
+            pubkey,
+            [],
+            masterFingerprint,
+            pathElements
+          );
         }
-        psbt.setInputWitnessUtxo(i, spentOutput.amount, spentOutput.script)
+        psbt.setInputWitnessUtxo(i, spentOutput.amount, spentOutput.script);
       } else {
         psbt.setInputNonWitnessUtxo(i, inputTxBuffer);
-        psbt.setInputBip32Derivation(i, pubkey, masterFingerprint, pathElements);
+        psbt.setInputBip32Derivation(
+          i,
+          pubkey,
+          masterFingerprint,
+          pathElements
+        );
       }
 
       psbt.setInputPreviousTxId(i, inputTxid);
@@ -188,6 +230,7 @@ export default class BtcNew {
       // and one change output.
       const isChange = arg.changePath && i == outputCount - 1;
       if (isChange) {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const derivationPath = pathStringToArray(arg.changePath!);
         const xpubBase58 = await this.client.getPubkey(false, derivationPath);
         const pubkey = pubkeyFromXpub(xpubBase58);
@@ -195,18 +238,38 @@ export default class BtcNew {
         if (arg.segwit) {
           const isWrappedSegwit = !arg.additionals.includes("bech32");
           let segwitVersion = 0;
-          if (isWrappedSegwit) { // wrapped p2wphk, only v0 can use wrapping
+          if (isWrappedSegwit) {
+            // wrapped p2wphk, only v0 can use wrapping
             psbt.setOutputRedeemScript(i, this.createRedeemScript(pubkey));
           } else {
             segwitVersion = outputScript.readUInt8(0);
           }
-          if (segwitVersion == 0) { // p2wpkh or wrapped p2wphk               
-            psbt.setOutputBip32Derivation(i, pubkey, masterFingerprint, derivationPath);
-          } else { // p2tr
-            psbt.setOutputTapBip32Derivation(i, pubkey, [], masterFingerprint, derivationPath);
+          if (segwitVersion == 0) {
+            // p2wpkh or wrapped p2wphk
+            psbt.setOutputBip32Derivation(
+              i,
+              pubkey,
+              masterFingerprint,
+              derivationPath
+            );
+          } else {
+            // p2tr
+            psbt.setOutputTapBip32Derivation(
+              i,
+              pubkey,
+              [],
+              masterFingerprint,
+              derivationPath
+            );
           }
-        } else { // p2pkh
-          psbt.setOutputBip32Derivation(i, pubkey, masterFingerprint, derivationPath);
+        } else {
+          // p2pkh
+          psbt.setOutputBip32Derivation(
+            i,
+            pubkey,
+            masterFingerprint,
+            derivationPath
+          );
         }
       }
       psbt.setOutputAmount(i, amount);
@@ -214,12 +277,22 @@ export default class BtcNew {
     }
 
     const descriptorTemplate = this.desciptorTemplateFromPath(accountPath);
-    const p = new WalletPolicy(descriptorTemplate, createKey(masterFingerprint, accountPath, accountXpub));
+    const p = new WalletPolicy(
+      descriptorTemplate,
+      createKey(masterFingerprint, accountPath, accountXpub)
+    );
     return await this.signPsbt(psbt, p);
   }
 
-  private async signPsbt(psbt: PsbtV2, walletPolicy: WalletPolicy): Promise<string> {
-    const sigs: Map<number, Buffer> = await this.client.signPsbt(psbt, walletPolicy, Buffer.alloc(32, 0));
+  private async signPsbt(
+    psbt: PsbtV2,
+    walletPolicy: WalletPolicy
+  ): Promise<string> {
+    const sigs: Map<number, Buffer> = await this.client.signPsbt(
+      psbt,
+      walletPolicy,
+      Buffer.alloc(32, 0)
+    );
     sigs.forEach((v, k) => {
       // Note: Looking at BIP32 derivation does not work in the generic case.
       // some inputs might not have a BIP32-derived pubkey.
@@ -232,18 +305,20 @@ export default class BtcNew {
         }
         psbt.setInputTapKeySig(k, v);
       } else {
-        pubkey = pubkeys[0]
-        psbt.setInputPartialSig(k, pubkey, v)
+        pubkey = pubkeys[0];
+        psbt.setInputPartialSig(k, pubkey, v);
       }
-    })
+    });
     finalize(psbt);
     const serializedTx = extract(psbt);
-    return serializedTx.toString('hex')
+    return serializedTx.toString("hex");
   }
 
   private desciptorTemplateFromPath(path: number[]): DefaultDescriptorTemplate {
     if (path.length == 0) {
-      throw new Error("Path must not be empty. At least purpose element expected. Can't create descriptor template");
+      throw new Error(
+        "Path must not be empty. At least purpose element expected. Can't create descriptor template"
+      );
     }
     switch (path[0]) {
       case 0x80000000 + 44:
@@ -254,10 +329,10 @@ export default class BtcNew {
         throw new Error("Non-segwit p2sh not implemented");
       case 0x80000000 + 49:
         // p2sh wrapped p2wphk
-        return "sh(wpkh(@0))"
+        return "sh(wpkh(@0))";
       case 0x80000000 + 84:
         // p2wpkh
-        return "wpkh(@0)"
+        return "wpkh(@0)";
       case 0x80000000 + 86:
         // p2tr
         return "tr(@0)";
@@ -271,16 +346,22 @@ export default class BtcNew {
     return Buffer.concat([Buffer.from("160014", "hex"), pubkeyHash]);
   }
 
-  private createWitnessUtxo(inputTx: Transaction, outputIndex: number): WitnessUtxo {
+  private createWitnessUtxo(
+    inputTx: Transaction,
+    outputIndex: number
+  ): WitnessUtxo {
     if (!inputTx.outputs) {
-      throw Error(`No outputs in spent tx`)
+      throw Error("No outputs in spent tx");
     }
     if (inputTx.outputs.length <= outputIndex) {
-      throw Error(`Spent output index ${outputIndex} doesn't exist`)
+      throw Error(`Spent output index ${outputIndex} doesn't exist`);
     }
     const spentOutput = inputTx.outputs[outputIndex];
-    const amount = spentOutput.amount.readIntBE(0, 8)
-    const witnessUtxo: WitnessUtxo = { script: spentOutput.script, value: amount }
+    const amount = spentOutput.amount.readIntBE(0, 8);
+    const witnessUtxo: WitnessUtxo = {
+      script: spentOutput.script,
+      value: amount,
+    };
     return witnessUtxo;
   }
 }
