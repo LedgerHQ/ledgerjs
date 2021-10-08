@@ -33,15 +33,19 @@
     "@ledgerhq/errors": "^6.2.0",
     "@ledgerhq/hw-transport": "^6.7.0",
     "@ledgerhq/logs": "^6.2.0",
-    "react-native": "^0.65.1",
     "rxjs": "6"
   },
   "devDependencies": {
-    "@types/react-native": "^0.65.1"
+    "@types/react-native": "^0.65.1",
+    "yarn-add-no-save": "^1.0.3"
+  },
+  "peerDependencies": {
+    "react-native": "*"
   },
   "scripts": {
+    "peers": "add-no-save --peer-deps",
     "clean": "bash ../../script/clean.sh",
-    "build": "bash ../../script/build.sh",
+    "build": "yarn peers && bash ../../script/build.sh",
     "watch": "bash ../../script/watch.sh",
     "doc": "bash ../../script/doc.sh"
   },
