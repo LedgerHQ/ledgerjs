@@ -78,6 +78,25 @@ const ethereumUnits = (name, code) => [
 ];
 
 const cryptocurrenciesById: Record<string, CryptoCurrency> = {
+  near: {
+    type: "CryptoCurrency",
+    id: "near",
+    coinType: 397,
+    name: "NEAR",
+    managerAppName: "NEAR",
+    ticker: "NEAR",
+    scheme: "near",
+    color: "#000",
+    family: "near",
+    units: [
+      {
+        name: "NEAR",
+        code: "NEAR",
+        magnitude: 24,
+      },
+    ],
+    explorerViews: [],
+  },
   aeternity: {
     type: "CryptoCurrency",
     id: "aeternity",
@@ -426,24 +445,36 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
-  bnb: {
+  bsc: {
     type: "CryptoCurrency",
-    id: "bnb",
-    coinType: 714,
-    name: "BNB",
-    managerAppName: "Binance Chain",
+    id: "bsc",
+    coinType: 60,
+    name: "Binance Smart Chain",
+    managerAppName: "Binance Smart Chain",
     ticker: "BNB",
-    scheme: "bnb",
+    scheme: "bsc",
     color: "#F0B90A",
-    family: "bnb",
+    family: "ethereum",
+    ethereumLikeInfo: {
+      baseChain: "mainnet",
+      chainId: 56,
+      networkId: 56,
+      hardfork: "muirGlacier",
+    },
     units: [
       {
         name: "BNB",
         code: "BNB",
-        magnitude: 8,
+        magnitude: 18,
       },
     ],
-    explorerViews: [],
+    explorerViews: [
+      {
+        tx: "https://bscscan.com/tx/$hash",
+        address: "https://bscscan.com/address/$address",
+        token: "https://bscscan.com/token/$contractAddress?a=$address",
+      },
+    ],
   },
   callisto: {
     type: "CryptoCurrency",
@@ -889,7 +920,10 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     family: "ethereum",
     blockAvgTime: 15,
     ethereumLikeInfo: {
+      baseChain: "mainnet",
       chainId: 1,
+      networkId: 1,
+      hardfork: "petersburg",
     },
     explorerViews: [
       {
@@ -912,7 +946,10 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     family: "ethereum",
     blockAvgTime: 15,
     ethereumLikeInfo: {
+      baseChain: "mainnet",
       chainId: 61,
+      networkId: 1,
+      hardfork: "dao",
     },
     explorerViews: [
       {
@@ -1927,6 +1964,32 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
+  songbird: {
+    type: "CryptoCurrency",
+    id: "songbird",
+    coinType: 60,
+    name: "Songbird",
+    managerAppName: "Songbird",
+    ticker: "SGB",
+    scheme: "songbird",
+    color: "#000000",
+    family: "ethereum",
+    ethereumLikeInfo: {
+      baseChain: "mainnet",
+      chainId: 19,
+      networkId: 19,
+      hardfork: "berlin",
+    },
+    units: ethereumUnits("SGB", "SGB"),
+    explorerViews: [
+      {
+        tx:
+          "https://songbird-explorer.flare.network/tx/$hash/internal-transactions",
+        address:
+          "https://songbird-explorer.flare.network/address/$address/transactions",
+      },
+    ],
+  },
   nem: {
     type: "CryptoCurrency",
     id: "nem",
@@ -2187,8 +2250,8 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        tx: "https://chain.stealth.org/tx/$hash",
-        address: "https://chain.stealth.org/address/$address",
+        tx: "https://www.stealthmonitor.org/transactions/$hash",
+        address: "https://www.stealthmonitor.org/address/$address",
       },
     ],
   },
@@ -2725,7 +2788,10 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     family: "ethereum",
     blockAvgTime: 15,
     ethereumLikeInfo: {
+      baseChain: "ropsten",
       chainId: 3, // ropsten
+      networkId: 3,
+      hardfork: "petersburg",
     },
     explorerViews: [
       {
@@ -2787,6 +2853,30 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       {
         tx: "https://crypto.org/explorer/croeseid/tx/$hash",
         address: "https://crypto.org/explorer/croeseid/account/$address",
+      },
+    ],
+  },
+  filecoin: {
+    type: "CryptoCurrency",
+    id: "filecoin",
+    coinType: 461,
+    name: "filecoin",
+    managerAppName: "Filecoin",
+    ticker: "FIL",
+    scheme: "filecoin",
+    color: "#000",
+    family: "filecoin",
+    units: [
+      {
+        name: "FIL",
+        code: "FIL",
+        magnitude: 18,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://filfox.info/en/message/$hash",
+        address: "https://filfox.info/en/address/$address",
       },
     ],
   },

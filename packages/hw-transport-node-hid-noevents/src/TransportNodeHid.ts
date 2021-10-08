@@ -10,7 +10,11 @@ import { ledgerUSBVendorId } from "@ledgerhq/devices";
 import hidFraming from "@ledgerhq/devices/lib/hid-framing";
 import { identifyUSBProductId, identifyProductName } from "@ledgerhq/devices";
 import { DeviceModel } from "@ledgerhq/devices";
-import { TransportError, DisconnectedDevice } from "@ledgerhq/errors";
+import {
+  TransportError,
+  DisconnectedDevice,
+  DisconnectedDeviceDuringOperation,
+} from "@ledgerhq/errors";
 
 const filterInterface = (device) =>
   ["win32", "darwin"].includes(process.platform)
@@ -21,8 +25,6 @@ export function getDevices(): (Device & { deviceName?: string })[] {
   return HID.devices(ledgerUSBVendorId, 0x0).filter(filterInterface);
 }
 
-const isDisconnectedError = (e) =>
-  e && e.message && e.message.indexOf("HID") >= 0;
 /**
  * node-hid Transport minimal implementation
  * @example
@@ -108,13 +110,14 @@ export default class TransportNodeHidNoEvents extends Transport {
     try {
       this.device.write(data);
       return Promise.resolve();
-    } catch (e) {
-      if (isDisconnectedError(e)) {
+    } catch (e: any) {
+      const maybeMappedError =
+        e && e.message ? new DisconnectedDeviceDuringOperation(e.message) : e;
+      if (maybeMappedError instanceof DisconnectedDeviceDuringOperation) {
         this.setDisconnected();
-        return Promise.reject(new DisconnectedDevice(e.message));
       }
 
-      return Promise.reject(e);
+      return Promise.reject(maybeMappedError);
     }
   };
   readHID = (): Promise<Buffer> =>
@@ -125,12 +128,15 @@ export default class TransportNodeHidNoEvents extends Transport {
         }
 
         if (e) {
-          if (isDisconnectedError(e)) {
+          const maybeMappedError =
+            e && e.message
+              ? new DisconnectedDeviceDuringOperation(e.message)
+              : e;
+          if (maybeMappedError instanceof DisconnectedDeviceDuringOperation) {
             this.setDisconnected();
-            return reject(new DisconnectedDevice(e.message));
           }
 
-          reject(e);
+          reject(maybeMappedError);
         } else {
           const buffer = Buffer.from(res);
           resolve(buffer);

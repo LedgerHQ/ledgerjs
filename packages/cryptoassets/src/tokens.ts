@@ -3,6 +3,7 @@ import { getCryptoCurrencyById } from "./currencies";
 import erc20tokens from "../data/erc20";
 import trc10tokens from "../data/trc10";
 import trc20tokens from "../data/trc20";
+import bep20tokens from "../data/bep20";
 import asatokens from "../data/asa";
 const emptyArray = [];
 const tokensArray: TokenCurrency[] = [];
@@ -12,9 +13,11 @@ const tokensByCryptoCurrencyWithDelisted: Record<string, TokenCurrency[]> = {};
 const tokensById: Record<string, TokenCurrency> = {};
 const tokensByTicker: Record<string, TokenCurrency> = {};
 const tokensByAddress: Record<string, TokenCurrency> = {};
+const tokensByCurrencyAddress: Record<string, TokenCurrency> = {};
 addTokens(erc20tokens.map(convertERC20));
 addTokens(trc10tokens.map(convertTRONTokens("trc10")));
 addTokens(trc20tokens.map(convertTRONTokens("trc20")));
+addTokens(bep20tokens.map(convertBEP20));
 addTokens(asatokens.map(convertAlgorandASATokens));
 type TokensListOptions = {
   withDelisted: boolean;
@@ -82,13 +85,24 @@ export function findTokenById(id: string): TokenCurrency | null | undefined {
   return tokensById[id];
 }
 
-/**
- *
- */
+let deprecatedDisplayed = false;
 export function findTokenByAddress(
   address: string
 ): TokenCurrency | null | undefined {
+  if (!deprecatedDisplayed) {
+    deprecatedDisplayed = true;
+    console.warn(
+      "findTokenByAddress is deprecated. use findTokenByAddressInCurrency"
+    );
+  }
   return tokensByAddress[address.toLowerCase()];
+}
+
+export function findTokenByAddressInCurrency(
+  address: string,
+  currencyId: string
+): TokenCurrency | null | undefined {
+  return tokensByCurrencyAddress[currencyId + ":" + address.toLowerCase()];
 }
 
 /**
@@ -139,8 +153,10 @@ function addTokens(list: TokenCurrency[]) {
       tokensByTicker[token.ticker] = token;
     }
 
-    tokensByAddress[token.contractAddress.toLowerCase()] = token;
+    const lowCaseContract = token.contractAddress.toLowerCase();
+    tokensByAddress[lowCaseContract] = token;
     const { parentCurrency } = token;
+    tokensByCurrencyAddress[parentCurrency.id + ":" + lowCaseContract] = token;
 
     if (!(parentCurrency.id in tokensByCryptoCurrency)) {
       tokensByCryptoCurrency[parentCurrency.id] = [];
@@ -184,6 +200,41 @@ function convertERC20([
     compoundFor: compoundFor
       ? parentCurrencyId + "/erc20/" + compoundFor
       : undefined,
+    units: [
+      {
+        name,
+        code: ticker,
+        magnitude,
+      },
+    ],
+  };
+}
+
+function convertBEP20([
+  parentCurrencyId,
+  token,
+  ticker,
+  magnitude,
+  name,
+  ledgerSignature,
+  contractAddress,
+  disableCountervalue,
+  delisted,
+  countervalueTicker,
+]): TokenCurrency {
+  const parentCurrency = getCryptoCurrencyById(parentCurrencyId);
+  return {
+    type: "TokenCurrency",
+    id: parentCurrencyId + "/bep20/" + token,
+    ledgerSignature,
+    contractAddress,
+    parentCurrency,
+    tokenType: "bep20",
+    name,
+    ticker,
+    delisted,
+    disableCountervalue: !!parentCurrency.isTestnetFor || !!disableCountervalue,
+    countervalueTicker,
     units: [
       {
         name,

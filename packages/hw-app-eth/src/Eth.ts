@@ -21,8 +21,9 @@ import { EthAppPleaseEnableContractData } from "@ledgerhq/errors";
 import type Transport from "@ledgerhq/hw-transport";
 import { BigNumber } from "bignumber.js";
 import { ethers } from "ethers";
-import { byContractAddress } from "./erc20";
-import { getInfosForContractMethod } from "./contracts";
+import { byContractAddressAndChainId } from "./erc20";
+import { loadInfosForContractMethod } from "./contracts";
+import type { PluginsLoadConfig } from "./contracts";
 
 export type StarkQuantizationType =
   | "eth"
@@ -52,7 +53,7 @@ function maybeHexBuffer(
 const remapTransactionRelatedErrors = (e) => {
   if (e && e.statusCode === 0x6a80) {
     return new EthAppPleaseEnableContractData(
-      "Please enable Contract data on the Ethereum app Settings"
+      "Please enable Blind signing or Contract data in the Ethereum app Settings"
     );
   }
 
@@ -68,9 +69,19 @@ const remapTransactionRelatedErrors = (e) => {
 
 export default class Eth {
   transport: Transport;
+  pluginsLoadConfig: PluginsLoadConfig;
 
-  constructor(transport: Transport, scrambleKey = "w0w") {
+  setPluginsLoadConfig(pluginsLoadConfig: PluginsLoadConfig): void {
+    this.pluginsLoadConfig = pluginsLoadConfig;
+  }
+
+  constructor(
+    transport: Transport,
+    scrambleKey = "w0w",
+    pluginsLoadConfig: PluginsLoadConfig = {}
+  ) {
     this.transport = transport;
+    this.pluginsLoadConfig = pluginsLoadConfig;
     transport.decorateAppAPIMethods(
       this,
       [
@@ -164,8 +175,8 @@ export default class Eth {
    * @param {*} info: a blob from "erc20.js" utilities that contains all token information.
    *
    * @example
-   * import { byContractAddress } from "@ledgerhq/hw-app-eth/erc20"
-   * const zrxInfo = byContractAddress("0xe41d2489571d322189246dafa5ebde1f4699f498")
+   * import { byContractAddressAndChainId } from "@ledgerhq/hw-app-eth/erc20"
+   * const zrxInfo = byContractAddressAndChainId("0xe41d2489571d322189246dafa5ebde1f4699f498", chainId)
    * if (zrxInfo) await appEth.provideERC20TokenInformation(zrxInfo)
    * const signed = await appEth.signTransaction(path, rawTxHex)
    */
@@ -188,48 +199,82 @@ export default class Eth {
   }> {
     const paths = splitPath(path);
     let offset = 0;
+
     const rawTx = Buffer.from(rawTxHex, "hex");
+    const VALID_TYPES = [1, 2];
+    const txType = VALID_TYPES.includes(rawTx[0]) ? rawTx[0] : null;
+    const rlpData = txType === null ? rawTx : rawTx.slice(1, rawTxHex.length);
+
     const toSend: Buffer[] = [];
     let response;
     // Check if the TX is encoded following EIP 155
-    let rlpTx = ethers.utils.RLP.decode("0x" + rawTxHex).map((hex) =>
+    const rlpTx = ethers.utils.RLP.decode(rlpData).map((hex) =>
       Buffer.from(hex.slice(2), "hex")
     );
 
-    let rlpOffset = 0;
-    let chainIdPrefix = "";
+    let vrsOffset = 0;
+    let chainId = new BigNumber(0);
+    let chainIdTruncated = 0;
 
-    if (rlpTx.length > 6) {
+    const rlpDecoded = ethers.utils.RLP.decode(rlpData);
+
+    let decodedTx;
+    if (txType === 2) {
+      // EIP1559
+      decodedTx = {
+        data: rlpDecoded[7],
+        to: rlpDecoded[5],
+        chainId: rlpTx[0],
+      };
+    } else if (txType === 1) {
+      // EIP2930
+      decodedTx = {
+        data: rlpDecoded[6],
+        to: rlpDecoded[4],
+        chainId: rlpTx[0],
+      };
+    } else {
+      // Legacy tx
+      decodedTx = {
+        data: rlpDecoded[5],
+        to: rlpDecoded[3],
+        // Default to 1 for non EIP 155 txs
+        chainId: rlpTx.length > 6 ? rlpTx[6] : Buffer.from("0x01", "hex"),
+      };
+    }
+
+    if (txType === null && rlpTx.length > 6) {
       const rlpVrs = Buffer.from(
         ethers.utils.RLP.encode(rlpTx.slice(-3)).slice(2),
         "hex"
       );
 
-      rlpOffset = rawTx.length - (rlpVrs.length - 1);
+      vrsOffset = rawTx.length - (rlpVrs.length - 1);
 
       // First byte > 0xf7 means the length of the list length doesn't fit in a single byte.
       if (rlpVrs[0] > 0xf7) {
-        // Increment rlpOffset to account for that extra byte.
-        rlpOffset++;
+        // Increment vrsOffset to account for that extra byte.
+        vrsOffset++;
 
         // Compute size of the list length.
         const sizeOfListLen = rlpVrs[0] - 0xf7;
 
         // Increase rlpOffset by the size of the list length.
-        rlpOffset += sizeOfListLen - 1;
+        vrsOffset += sizeOfListLen - 1;
       }
+    }
 
-      const chainIdSrc: any = rlpTx[6];
-      const chainIdBuf = Buffer.alloc(4);
-      chainIdSrc.copy(chainIdBuf, 4 - chainIdSrc.length);
-      chainIdPrefix = (chainIdBuf.readUInt32BE(0) * 2 + 35)
-        .toString(16)
-        .slice(0, -2);
-
-      // Drop the low byte, that comes from the ledger.
-      if (chainIdPrefix.length % 2 === 1) {
-        chainIdPrefix = "0" + chainIdPrefix;
+    const chainIdSrc = decodedTx.chainId;
+    if (chainIdSrc) {
+      // Using BigNumber because chainID could be any uint256.
+      chainId = new BigNumber(chainIdSrc.toString("hex"), 16);
+      const chainIdTruncatedBuf = Buffer.alloc(4);
+      if (chainIdSrc.length > 4) {
+        chainIdSrc.copy(chainIdTruncatedBuf);
+      } else {
+        chainIdSrc.copy(chainIdTruncatedBuf, 4 - chainIdSrc.length);
       }
+      chainIdTruncated = chainIdTruncatedBuf.readUInt32BE(0);
     }
 
     while (offset !== rawTx.length) {
@@ -239,9 +284,9 @@ export default class Eth {
           ? rawTx.length - offset
           : maxChunkSize;
 
-      if (rlpOffset != 0 && offset + chunkSize == rlpOffset) {
+      if (vrsOffset != 0 && offset + chunkSize >= vrsOffset) {
         // Make sure that the chunk doesn't end right on the EIP 155 marker if set
-        chunkSize--;
+        chunkSize = rawTx.length - offset;
       }
 
       const buffer = Buffer.alloc(
@@ -262,14 +307,8 @@ export default class Eth {
       offset += chunkSize;
     }
 
-    rlpTx = ethers.utils.RLP.decode("0x" + rawTxHex);
-
-    const decodedTx = {
-      data: rlpTx[5],
-      to: rlpTx[3],
-    };
     const provideForContract = async (address) => {
-      const erc20Info = byContractAddress(address);
+      const erc20Info = byContractAddressAndChainId(address, chainIdTruncated);
       if (erc20Info) {
         log(
           "ethereum",
@@ -285,7 +324,12 @@ export default class Eth {
 
     if (decodedTx.data.length >= 10) {
       const selector = decodedTx.data.substring(0, 10);
-      const infos = getInfosForContractMethod(decodedTx.to, selector);
+      const infos = await loadInfosForContractMethod(
+        decodedTx.to,
+        selector,
+        chainIdTruncated,
+        this.pluginsLoadConfig
+      );
 
       if (infos) {
         const { plugin, payload, signature, erc20OfInterest, abi } = infos;
@@ -324,7 +368,30 @@ export default class Eth {
         })
     ).then(
       () => {
-        const v = chainIdPrefix + response.slice(0, 1).toString("hex");
+        const response_byte: number = response.slice(0, 1)[0];
+        let v = "";
+
+        if (chainId.times(2).plus(35).plus(1).isGreaterThan(255)) {
+          const oneByteChainId = (chainIdTruncated * 2 + 35) % 256;
+
+          const ecc_parity = response_byte - oneByteChainId;
+
+          if (txType != null) {
+            // For EIP2930 and EIP1559 tx, v is simply the parity.
+            v = ecc_parity % 2 == 1 ? "00" : "01";
+          } else {
+            // Legacy type transaction with a big chain ID
+            v = chainId.times(2).plus(35).plus(ecc_parity).toString(16);
+          }
+        } else {
+          v = response_byte.toString(16);
+        }
+
+        // Make sure v has is prefixed with a 0 if its length is odd ("1" -> "01").
+        if (v.length % 2 == 1) {
+          v = "0" + v;
+        }
+
         const r = response.slice(1, 1 + 32).toString("hex");
         const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
         return {

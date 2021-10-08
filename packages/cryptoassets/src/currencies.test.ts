@@ -3,7 +3,11 @@ import {
   getFiatCurrencyByTicker,
   hasFiatCurrencyTicker,
 } from "./fiats";
-import { listTokens, findTokenById } from "./tokens";
+import {
+  listTokens,
+  findTokenById,
+  findTokenByAddressInCurrency,
+} from "./tokens";
 import {
   listCryptoCurrencies,
   hasCryptoCurrencyId,
@@ -148,6 +152,32 @@ test("tokens are correct", () => {
       expect(typeof t).toBe("object");
     }
   }
+});
+
+test("findTokenByAddressInCurrency", () => {
+  expect(
+    findTokenByAddressInCurrency(
+      "0x111111111117dC0aa78b770fA6A738034120C302",
+      "bsc"
+    )
+  ).toMatchObject({
+    id: "bsc/bep20/1inch_token",
+  });
+  expect(
+    findTokenByAddressInCurrency(
+      "0x111111111117dC0aa78b770fA6A738034120C302",
+      "ethereum"
+    )
+  ).toMatchObject({
+    id: "ethereum/erc20/1inch_token",
+  });
+  expect(findTokenByAddressInCurrency("0x0", "bsc")).toBe(undefined);
+  expect(
+    findTokenByAddressInCurrency(
+      "0x111111111117dC0aa78b770fA6A738034120C302",
+      "tron"
+    )
+  ).toBe(undefined);
 });
 
 test("fiats list is sorted by ticker", () => {

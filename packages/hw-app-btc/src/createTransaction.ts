@@ -85,7 +85,7 @@ export async function createTransaction(
     try {
       const a = await getAppAndVersion(transport);
       useTrustedInputForSegwit = shouldUseTrustedInputForSegwit(a);
-    } catch (e) {
+    } catch (e: any) {
       if (e.statusCode === 0x6d00) {
         useTrustedInputForSegwit = false;
       } else {

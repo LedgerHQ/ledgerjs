@@ -13,9 +13,9 @@ Ledger Hardware Wallet ETH JavaScript bindings.
 
 #### Table of Contents
 
--   [getInfosForContractMethod](#getinfosforcontractmethod)
+-   [loadInfosForContractMethod](#loadinfosforcontractmethod)
     -   [Parameters](#parameters)
--   [byContractAddress](#bycontractaddress)
+-   [byContractAddressAndChainId](#bycontractaddressandchainid)
     -   [Parameters](#parameters-1)
 -   [list](#list)
 -   [Eth](#eth)
@@ -61,7 +61,7 @@ Ledger Hardware Wallet ETH JavaScript bindings.
     -   [setExternalPlugin](#setexternalplugin)
         -   [Parameters](#parameters-18)
 
-### getInfosForContractMethod
+### loadInfosForContractMethod
 
 Retrieve the metadatas a given contract address and a method selector
 
@@ -69,14 +69,19 @@ Retrieve the metadatas a given contract address and a method selector
 
 -   `contractAddress` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 -   `selector` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `chainId` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+-   `userPluginsLoadConfig` **PluginsLoadConfig** 
 
-### byContractAddress
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;(ContractMethod | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))>** 
+
+### byContractAddressAndChainId
 
 Retrieve the token information by a given contract address if any
 
 #### Parameters
 
 -   `contract` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+-   `chainId` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 
 Returns **(TokenInfo | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))** 
 
@@ -94,6 +99,7 @@ Ethereum API
 
 -   `transport` **Transport** 
 -   `scrambleKey`   (optional, default `"w0w"`)
+-   `pluginsLoadConfig` **PluginsLoadConfig**  (optional, default `{}`)
 
 #### Examples
 
@@ -136,8 +142,8 @@ calling this contract address to display the proper token information to the use
 ##### Examples
 
 ```javascript
-import { byContractAddress } from "@ledgerhq/hw-app-eth/erc20"
-const zrxInfo = byContractAddress("0xe41d2489571d322189246dafa5ebde1f4699f498")
+import { byContractAddressAndChainId } from "@ledgerhq/hw-app-eth/erc20"
+const zrxInfo = byContractAddressAndChainId("0xe41d2489571d322189246dafa5ebde1f4699f498", chainId)
 if (zrxInfo) await appEth.provideERC20TokenInformation(zrxInfo)
 const signed = await appEth.signTransaction(path, rawTxHex)
 ```

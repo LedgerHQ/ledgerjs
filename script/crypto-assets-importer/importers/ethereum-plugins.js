@@ -4,10 +4,9 @@ const { readFileJSON } = require("../utils");
 const mapObject = (obj, fn) => Object.fromEntries(Object.entries(obj).map(fn));
 
 module.exports = {
-  paths: ["dapps/ethereum"],
-  output: "data/dapps/ethereum.js",
+  paths: ["dapps/ethereum", "dapps/bsc"],
+  output: "ethereum.json", // to be put in crypto assets list
   outputTemplate: (data) =>
-    "module.exports = " +
     JSON.stringify(
       data.reduce(
         (acc, obj) => ({
@@ -20,9 +19,9 @@ module.exports = {
       2
     ),
 
-  loader: async ({ folder, id }) => {
+  loader: async ({ signatureFolder, folder, id }) => {
     const [signatures, bare] = await Promise.all([
-      readFileJSON(path.join(folder, id, "b2c_signatures.json")),
+      readFileJSON(path.join(signatureFolder, id, "b2c_signatures.json")),
       readFileJSON(path.join(folder, id, "b2c.json")),
     ]);
 
@@ -30,16 +29,20 @@ module.exports = {
 
     const abisList = await Promise.all(
       addresses.map((address) =>
-        readFileJSON(
-          path.join(folder, id, "abis", `${address}.abi.json`)
-        ).catch(() => {})
+        readFileJSON(path.join(folder, id, "abis", `${address}.abi.json`))
+          .catch(() =>
+            readFileJSON(path.join(folder, id, "abis", `${address}.json`))
+          )
+          .catch((e) => {
+            console.warn(`${id} ${address} failed to load`, e);
+          })
       )
     );
 
     const abis = addresses.reduce(
       (acc, address, i) => ({
         ...acc,
-        [address]: abisList[i],
+        [address.toLowerCase()]: abisList[i],
       }),
       {}
     );
@@ -47,15 +50,15 @@ module.exports = {
     return bare.contracts.reduce(
       (acc, contract) => ({
         ...acc,
-        [contract.address]: {
+        [contract.address.toLowerCase()]: {
           ...mapObject(contract.selectors, ([selector, data]) => [
             selector,
             {
-              ...(signatures[contract.address][selector] || {}),
+              ...(signatures[contract.address.toLowerCase()][selector] || {}),
               erc20OfInterest: data.erc20OfInterest,
             },
           ]),
-          abi: abis[contract.address],
+          abi: abis[contract.address.toLowerCase()],
         },
       }),
       {}

@@ -1,13 +1,12 @@
 const path = require("path");
 const Buffer = require("buffer").Buffer;
 const { readFileJSON } = require("../utils");
+const {
+  getCryptoCurrencyById,
+} = require("../../../packages/cryptoassets/lib/currencies");
 
-const inferChainId = (common) =>
-  common.blockchain_name === "foundation"
-    ? 1
-    : common.blockchain_name === "ropsten"
-    ? 3
-    : null;
+const inferChainId = (common, folder) =>
+  getCryptoCurrencyById(common.blockchain_name).ethereumLikeInfo.chainId;
 
 const asUint4be = (n) => {
   const b = Buffer.alloc(4);
@@ -16,7 +15,11 @@ const asUint4be = (n) => {
 };
 
 module.exports = {
-  paths: ["tokens/ethereum/erc20", "tokens/ethereum_ropsten/erc20"],
+  paths: [
+    "tokens/ethereum/erc20",
+    "tokens/ethereum_ropsten/erc20",
+    "tokens/bsc/bep20",
+  ],
   id: "erc20",
   output: "data/erc20-signatures.js",
 
@@ -29,10 +32,10 @@ module.exports = {
   outputTemplate: (data) =>
     "module.exports = " + JSON.stringify(data.toString("base64")) + ";",
 
-  loader: ({ folder, id }) =>
+  loader: ({ signatureFolder, folder, id }) =>
     Promise.all([
       readFileJSON(path.join(folder, id, "common.json")),
-      readFileJSON(path.join(folder, id, "ledger_signature.json")),
+      readFileJSON(path.join(signatureFolder, id, "ledger_signature.json")),
     ]).then(([common, ledgerSignature]) => {
       const decimals = asUint4be(common.decimals);
       const contractAddress = Buffer.from(
@@ -40,7 +43,7 @@ module.exports = {
         "hex"
       );
       const ticker = Buffer.from(common.ticker, "ascii");
-      const chainId = asUint4be(inferChainId(common));
+      const chainId = asUint4be(inferChainId(common, folder));
       const signature = Buffer.from(ledgerSignature, "hex");
       return Buffer.concat([
         Buffer.from([ticker.length]),
