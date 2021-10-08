@@ -237,10 +237,11 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       {
         tx: "https://cchain.explorer.avax.network/tx/$hash",
         address: "https://cchain.explorer.avax.network/address/$address",
-        token: "https://cchain.explorer.avax.network/token/$contractAddress?a=$address",
+        token:
+          "https://cchain.explorer.avax.network/token/$contractAddress?a=$address",
       },
     ],
-  },  
+  },
   banano: {
     type: "CryptoCurrency",
     id: "banano",
@@ -1299,8 +1300,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        tx:
-          "https://www.kin.org/blockchainInfoPage/?&dataType=public&header=Transaction&id=$hash",
+        tx: "https://www.kin.org/blockchainInfoPage/?&dataType=public&header=Transaction&id=$hash",
         address:
           "https://www.kin.org/blockchainAccount/?&dataType=public&header=accountID&id=$address",
       },
