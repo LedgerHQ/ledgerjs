@@ -1337,8 +1337,10 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        tx: "https://www.kin.org/blockchainInfoPage/?&dataType=public&header=Transaction&id=$hash",
-        address: "https://www.kin.org/blockchainAccount/?&dataType=public&header=accountID&id=$address",
+        tx:
+          "https://www.kin.org/blockchainInfoPage/?&dataType=public&header=Transaction&id=$hash",
+        address:
+          "https://www.kin.org/blockchainAccount/?&dataType=public&header=accountID&id=$address",
       },
     ],
   },
