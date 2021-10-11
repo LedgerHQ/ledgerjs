@@ -36,7 +36,12 @@ export default class BtcNew {
     const xpub = await this.client.getPubkey(false, pathElements);
 
     const display = opts?.verify ?? false;
-    const address = await this.getWalletAddress(pathElements, display);
+
+    const address = await this.getWalletAddress(
+      pathElements,
+      accountTypeFrom(opts?.format ?? "legacy"),
+      display
+    );
     const components = getXpubComponents(xpub);
     const uncompressedPubkey = Buffer.from(
       ecc.pointCompress(components.pubkey, false)
@@ -65,6 +70,7 @@ export default class BtcNew {
    */
   private async getWalletAddress(
     pathElements: number[],
+    accountType: AccountType,
     display: boolean
   ): Promise<string> {
     const accountPathLength = this.accountPathLength(pathElements);
@@ -74,9 +80,8 @@ export default class BtcNew {
     const accountPath = pathElements.slice(0, accountPathLength);
     const accountXpub = await this.client.getPubkey(false, accountPath);
     const masterFingerprint = await this.client.getMasterFingerprint();
-    const descriptorTemplate = this.desciptorTemplateFromPath(accountPath);
     const policy = new WalletPolicy(
-      descriptorTemplate,
+      accountType,
       createKey(masterFingerprint, accountPath, accountXpub)
     );
     const changeAndIndex = pathElements.slice(-2, pathElements.length);
@@ -108,14 +113,15 @@ export default class BtcNew {
    * * sequence is the sequence number to use for this input (when using RBF), or non present
    * @param associatedKeysets is an array of BIP 32 paths pointing to the path to the private key used for each UTXO
    * @param changePath is an optional BIP 32 path pointing to the path to the public key used to compute the change address
-   * @param outputScriptHex is the hexadecimal serialized outputs of the transaction to sign
+   * @param outputScriptHex is the hexadecimal serialized outputs of the transaction to sign, including leading vararg voutCount
    * @param lockTime is the optional lockTime of the transaction to sign, or default (0)
    * @param sigHashType is the hash type of the transaction to sign, or default (all)
-   * @param segwit is an optional boolean indicating wether to use segwit or not
+   * @param segwit is an optional boolean indicating wether to use segwit or not. This includes wrapped segwit.
    * @param initialTimestamp is an optional timestamp of the function call to use for coins that necessitate timestamps only, (not the one that the tx will include)
    * @param additionals list of additionnal options
    * 
    * - "bech32" for spending native segwit outputs
+   * - "bech32m" for spending segwit v1+ outptus
    * - "abc" for bch
    * - "gold" for btg
    * - "bipxxx" for using BIPxxx
@@ -138,90 +144,43 @@ export default class BtcNew {
     }
     const psbt = new PsbtV2();
 
-    const outputsConcat = Buffer.from(arg.outputScriptHex, "hex");
-    const outputsBufferReader = new BufferReader(outputsConcat);
-    const outputCount = outputsBufferReader.readVarInt();
-    psbt.setGlobalTxVersion(2);
+    const accountType = accountTypeFromArg(arg);
 
+    psbt.setGlobalTxVersion(2);
     if (arg.lockTime) {
       psbt.setGlobalFallbackLocktime(arg.lockTime);
     }
     psbt.setGlobalInputCount(arg.inputs.length);
-    psbt.setGlobalOutputCount(outputCount);
     psbt.setGlobalPsbtVersion(2);
     psbt.setGlobalTxVersion(2);
 
-    const masterFingerprint = await this.client.getMasterFingerprint();
+    const masterFp = await this.client.getMasterFingerprint();
     let accountXpub = "";
     let accountPath: number[] = [];
     for (let i = 0; i < arg.inputs.length; i++) {
-      const input = arg.inputs[i];
-      const inputTx = input[0];
-      const spentOutputIndex = (input[1] as unknown) as number;
-      // const redeemScript = input[2] as string;
-      const sequence = (input[3] as unknown) as number;
-      if (sequence) {
-        psbt.setInputSequence(i, sequence);
-      }
-      const inputTxBuffer = serializeTransaction(inputTx, true);
-      const inputTxid = crypto.hash256(inputTxBuffer);
-
-      const pathElements: number[] = pathStringToArray(
-        arg.associatedKeysets[i]
-      );
+      const pathElems: number[] = pathStringToArray(arg.associatedKeysets[i]);
       if (accountXpub == "") {
         // We assume all inputs belong to the same account so we set
         // the account xpub and path based on the first input.
-        accountPath = pathElements.slice(0, -2);
+        accountPath = pathElems.slice(0, -2);
         accountXpub = await this.client.getPubkey(false, accountPath);
       }
-      const xpubBase58 = await this.client.getPubkey(false, pathElements);
-
-      const pubkey = pubkeyFromXpub(xpubBase58);
-      if (arg.segwit) {
-        if (!inputTx.outputs) {
-          throw Error("Missing outputs array in transaction to sign");
-        }
-        const spentOutput = inputTx.outputs[spentOutputIndex];
-        const segwitVersion = spentOutput.script.readUInt8(0);
-        if (segwitVersion == 0) {
-          psbt.setInputNonWitnessUtxo(i, inputTxBuffer);
-          const isWrappedSegwit = !arg.additionals.includes("bech32");
-          if (isWrappedSegwit) {
-            psbt.setInputRedeemScript(i, this.createRedeemScript(pubkey));
-          }
-          psbt.setInputBip32Derivation(
-            i,
-            pubkey,
-            masterFingerprint,
-            pathElements
-          );
-        } else {
-          psbt.setInputTapBip32Derivation(
-            i,
-            pubkey,
-            [],
-            masterFingerprint,
-            pathElements
-          );
-        }
-        psbt.setInputWitnessUtxo(i, spentOutput.amount, spentOutput.script);
-      } else {
-        psbt.setInputNonWitnessUtxo(i, inputTxBuffer);
-        psbt.setInputBip32Derivation(
-          i,
-          pubkey,
-          masterFingerprint,
-          pathElements
-        );
-      }
-
-      psbt.setInputPreviousTxId(i, inputTxid);
-      psbt.setInputOutputIndex(i, spentOutputIndex);
+      await this.setInput(
+        psbt,
+        i,
+        arg.inputs[i],
+        pathElems,
+        accountType,
+        masterFp
+      );
     }
 
+    const outputsConcat = Buffer.from(arg.outputScriptHex, "hex");
+    const outputsBufferReader = new BufferReader(outputsConcat);
+    const outputCount = outputsBufferReader.readVarInt();
+    psbt.setGlobalOutputCount(outputCount);
     for (let i = 0; i < outputCount; i++) {
-      const amount = Number(outputsBufferReader.readSlice(8).readBigInt64LE(0));
+      const amount = Number(outputsBufferReader.readUInt64());
       const outputScript = outputsBufferReader.readVarSlice();
 
       // The wallet always places the change output last.
@@ -231,57 +190,86 @@ export default class BtcNew {
       const isChange = arg.changePath && i == outputCount - 1;
       if (isChange) {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const derivationPath = pathStringToArray(arg.changePath!);
-        const xpubBase58 = await this.client.getPubkey(false, derivationPath);
+        const changePath = pathStringToArray(arg.changePath!);
+        const xpubBase58 = await this.client.getPubkey(false, changePath);
         const pubkey = pubkeyFromXpub(xpubBase58);
 
-        if (arg.segwit) {
-          const isWrappedSegwit = !arg.additionals.includes("bech32");
-          let segwitVersion = 0;
-          if (isWrappedSegwit) {
-            // wrapped p2wphk, only v0 can use wrapping
-            psbt.setOutputRedeemScript(i, this.createRedeemScript(pubkey));
-          } else {
-            segwitVersion = outputScript.readUInt8(0);
-          }
-          if (segwitVersion == 0) {
-            // p2wpkh or wrapped p2wphk
-            psbt.setOutputBip32Derivation(
-              i,
-              pubkey,
-              masterFingerprint,
-              derivationPath
-            );
-          } else {
-            // p2tr
-            psbt.setOutputTapBip32Derivation(
-              i,
-              pubkey,
-              [],
-              masterFingerprint,
-              derivationPath
-            );
-          }
-        } else {
-          // p2pkh
-          psbt.setOutputBip32Derivation(
-            i,
-            pubkey,
-            masterFingerprint,
-            derivationPath
-          );
+        if (accountType == AccountType.p2pkh) {
+          psbt.setOutputBip32Derivation(i, pubkey, masterFp, changePath);
+        } else if (accountType == AccountType.p2wpkh) {
+          psbt.setOutputBip32Derivation(i, pubkey, masterFp, changePath);
+        } else if (accountType == AccountType.p2wpkhWrapped) {
+          const redeemScript = this.createRedeemScript(pubkey);
+          psbt.setOutputRedeemScript(i, redeemScript);
+          psbt.setOutputBip32Derivation(i, pubkey, masterFp, changePath);
+        } else if (accountType == AccountType.p2tr) {
+          psbt.setOutputTapBip32Derivation(i, pubkey, [], masterFp, changePath);
         }
       }
       psbt.setOutputAmount(i, amount);
       psbt.setOutputScript(i, outputScript);
     }
 
-    const descriptorTemplate = this.desciptorTemplateFromPath(accountPath);
-    const p = new WalletPolicy(
-      descriptorTemplate,
-      createKey(masterFingerprint, accountPath, accountXpub)
-    );
+    const key = createKey(masterFp, accountPath, accountXpub);
+    const p = new WalletPolicy(accountType, key);
     return await this.signPsbt(psbt, p);
+  }
+
+  private async setInput(
+    psbt: PsbtV2,
+    i: number,
+    input: [
+      Transaction,
+      number,
+      string | null | undefined,
+      number | null | undefined
+    ],
+    pathElements: number[],
+    accountType: AccountType,
+    masterFP: Buffer
+  ): Promise<void> {
+    const inputTx = input[0];
+    const spentOutputIndex = input[1];
+    const redeemScript = input[2];
+    const sequence = input[3];
+    if (sequence) {
+      psbt.setInputSequence(i, sequence);
+    }
+    const inputTxBuffer = serializeTransaction(inputTx, true);
+    const inputTxid = crypto.hash256(inputTxBuffer);
+    const xpubBase58 = await this.client.getPubkey(false, pathElements);
+
+    const pubkey = pubkeyFromXpub(xpubBase58);
+    if (!inputTx.outputs)
+      throw Error("Missing outputs array in transaction to sign");
+    const spentOutput = inputTx.outputs[spentOutputIndex];
+
+    if (accountType == AccountType.p2pkh) {
+      psbt.setInputNonWitnessUtxo(i, inputTxBuffer);
+      psbt.setInputBip32Derivation(i, pubkey, masterFP, pathElements);
+    } else if (accountType == AccountType.p2wpkh) {
+      psbt.setInputNonWitnessUtxo(i, inputTxBuffer);
+      psbt.setInputBip32Derivation(i, pubkey, masterFP, pathElements);
+      psbt.setInputWitnessUtxo(i, spentOutput.amount, spentOutput.script);
+    } else if (accountType == AccountType.p2wpkhWrapped) {
+      psbt.setInputNonWitnessUtxo(i, inputTxBuffer);
+      psbt.setInputBip32Derivation(i, pubkey, masterFP, pathElements);
+      if (!redeemScript) {
+        throw new Error("Missing redeemScript for p2wpkhWrapped input");
+      }
+      const expectedRedeemScript = this.createRedeemScript(pubkey);
+      if (redeemScript != expectedRedeemScript.toString("hex")) {
+        throw new Error("Unexpected redeemScript");
+      }
+      psbt.setInputRedeemScript(i, expectedRedeemScript);
+      psbt.setInputWitnessUtxo(i, spentOutput.amount, spentOutput.script);
+    } else if (accountType == AccountType.p2tr) {
+      psbt.setInputTapBip32Derivation(i, pubkey, [], masterFP, pathElements);
+      psbt.setInputWitnessUtxo(i, spentOutput.amount, spentOutput.script);
+    }
+
+    psbt.setInputPreviousTxId(i, inputTxid);
+    psbt.setInputOutputIndex(i, spentOutputIndex);
   }
 
   private async signPsbt(
@@ -343,7 +331,7 @@ export default class BtcNew {
 
   private createRedeemScript(pubkey: Buffer): Buffer {
     const pubkeyHash = hashPublicKey(pubkey);
-    return Buffer.concat([Buffer.from("160014", "hex"), pubkeyHash]);
+    return Buffer.concat([Buffer.from("0014", "hex"), pubkeyHash]);
   }
 
   private createWitnessUtxo(
@@ -364,4 +352,26 @@ export default class BtcNew {
     };
     return witnessUtxo;
   }
+}
+
+enum AccountType {
+  p2pkh = "pkh(@0)",
+  p2wpkh = "wpkh(@0)",
+  p2wpkhWrapped = "sh(wpkh(@0))",
+  p2tr = "tr(@0)",
+}
+
+function accountTypeFrom(addressFormat: AddressFormat): AccountType {
+  if (addressFormat == "legacy") return AccountType.p2pkh;
+  if (addressFormat == "p2sh") return AccountType.p2wpkhWrapped;
+  if (addressFormat == "bech32") return AccountType.p2wpkh;
+  if (addressFormat == "bech32m") return AccountType.p2tr;
+  throw new Error("Unsupported address format " + addressFormat);
+}
+
+function accountTypeFromArg(arg: CreateTransactionArg): AccountType {
+  if (arg.additionals.includes("bech32m")) return AccountType.p2tr;
+  if (arg.additionals.includes("bech32")) return AccountType.p2wpkh;
+  if (arg.segwit) return AccountType.p2wpkhWrapped;
+  return AccountType.p2pkh;
 }

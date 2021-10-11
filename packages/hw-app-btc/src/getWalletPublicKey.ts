@@ -4,7 +4,12 @@ import { bip32asBuffer } from "./bip32";
 /**
  * address format is one of legacy | p2sh | bech32 | cashaddr
  */
-export type AddressFormat = "legacy" | "p2sh" | "bech32" | "cashaddr";
+export type AddressFormat =
+  | "legacy"
+  | "p2sh"
+  | "bech32"
+  | "bech32m"
+  | "cashaddr";
 const addressFormatMap = {
   legacy: 0,
   p2sh: 1,

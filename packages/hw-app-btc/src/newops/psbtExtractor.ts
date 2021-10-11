@@ -1,10 +1,11 @@
+import { bip32asBuffer } from "../bip32";
 import { BufferWriter } from "../buffertools";
 import { PsbtV2 } from "./psbtv2";
 
 export function extract(psbt: PsbtV2): Buffer {
   const tx = new BufferWriter();
   tx.writeUInt32(psbt.getGlobalTxVersion());
-  
+
   const isSegwit = !!psbt.getInputWitnessUtxo(0);
   if (isSegwit) {
     tx.writeSlice(Buffer.of(0, 1));
@@ -12,23 +13,19 @@ export function extract(psbt: PsbtV2): Buffer {
   const inputCount = psbt.getGlobalInputCount();
   tx.writeVarInt(inputCount);
   const witnessWriter = new BufferWriter();
-  let lockTime = 0;
   for (let i = 0; i < inputCount; i++) {
     tx.writeSlice(psbt.getInputPreviousTxid(i));
     tx.writeUInt32(psbt.getInputOutputIndex(i));
-    tx.writeVarSlice(psbt.getInputFinalScriptsig(i));
-    tx.writeUInt32(psbt.getInputSequence(i));        
+    tx.writeVarSlice(psbt.getInputFinalScriptsig(i) ?? Buffer.of());
+    tx.writeUInt32(psbt.getInputSequence(i));
     if (isSegwit) {
       witnessWriter.writeSlice(psbt.getInputFinalScriptwitness(i));
-    } 
+    }
   }
   const outputCount = psbt.getGlobalOutputCount();
   tx.writeVarInt(outputCount);
   for (let i = 0; i < outputCount; i++) {
-    const amount = psbt.getOutputAmount(i);
-    const amountBuf = Buffer.alloc(8);
-    amountBuf.writeBigInt64LE(BigInt(amount), 0);
-    tx.writeSlice(amountBuf);
+    tx.writeUInt64(BigInt(psbt.getOutputAmount(i)));
     tx.writeVarSlice(psbt.getOutputScript(i));
   }
   tx.writeSlice(witnessWriter.buffer());

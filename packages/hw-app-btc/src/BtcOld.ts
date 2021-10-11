@@ -55,6 +55,9 @@ export default class BtcOld {
     bitcoinAddress: string;
     chainCode: string;
   }> {
+    if (opts?.format === "bech32m") {
+      throw new Error("Unsupported address format bech32m");
+    }
     return getWalletPublicKey(this.transport, { ...opts, path });
   }
 

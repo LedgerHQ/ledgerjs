@@ -144,8 +144,8 @@ export class PsbtV2 {
   setInputFinalScriptsig(inputIndex: number, scriptSig: Buffer) {
     this.setInput(inputIndex, psbtIn.FINAL_SCRIPTSIG, b(), scriptSig);
   }
-  getInputFinalScriptsig(inputIndex: number): Buffer {
-    return this.getInput(inputIndex, psbtIn.FINAL_SCRIPTSIG, b());
+  getInputFinalScriptsig(inputIndex: number): Buffer | undefined {
+    return this.getInputOptional(inputIndex, psbtIn.FINAL_SCRIPTSIG, b());
   }
   setInputFinalScriptwitness(inputIndex: number, scriptWitness: Buffer) {
     this.setInput(inputIndex, psbtIn.FINAL_SCRIPTWITNESS, b(), scriptWitness);
@@ -178,8 +178,8 @@ export class PsbtV2 {
   setInputTapKeySig(inputIndex: number, sig: Buffer) {
     this.setInput(inputIndex, psbtIn.TAP_KEY_SIG, b(), sig);
   }
-  getInputTapKeySig(inputIndex: number): Buffer {
-    return this.getInput(inputIndex, psbtIn.TAP_KEY_SIG, b());
+  getInputTapKeySig(inputIndex: number): Buffer | undefined {
+    return this.getInputOptional(inputIndex, psbtIn.TAP_KEY_SIG, b());
   }
   setInputTapBip32Derivation(
     inputIndex: number,
@@ -229,11 +229,11 @@ export class PsbtV2 {
     return this.decodeBip32Derivation(buf);
   }
   setOutputAmount(outputIndex: number, amount: number) {
-    this.setOutput(outputIndex, psbtOut.AMOUNT, b(), int64LE(amount));
+    this.setOutput(outputIndex, psbtOut.AMOUNT, b(), uint64LE(amount));
   }
   getOutputAmount(outputIndex: number): number {
     return Number(
-      this.getOutput(outputIndex, psbtOut.AMOUNT, b()).readBigInt64LE(0)
+      this.getOutput(outputIndex, psbtOut.AMOUNT, b()).readBigUInt64LE(0)
     );
   }
   setOutputScript(outputIndex: number, scriptPubKey: Buffer) {
@@ -337,7 +337,7 @@ export class PsbtV2 {
   }
   private isKeyType(hexKey: string, keyTypes: KeyType[]): boolean {
     const keyType = Buffer.from(hexKey.substring(0, 2), "hex").readUInt8(0);
-    return keyType in keyTypes;
+    return keyTypes.some((k) => k == keyType);
   }
   private setGlobal(keyType: KeyType, value: Buffer) {
     const key = new Key(keyType, Buffer.of());
@@ -355,11 +355,16 @@ export class PsbtV2 {
     keyData: Buffer,
     value: Buffer
   ) {
-    const map = this.inputMaps[index];
-    if (!map) {
-      this.inputMaps[index] = new Map();
+    set(this.getMap(index, this.inputMaps), keyType, keyData, value);
+  }
+  private getMap(
+    index: number,
+    maps: Map<string, Buffer>[]
+  ): Map<string, Buffer> {
+    if (maps[index]) {
+      return maps[index];
     }
-    set(map, keyType, keyData, value);
+    return (maps[index] = new Map());
   }
   private getInput(index: number, keyType: KeyType, keyData: Buffer): Buffer {
     return get(this.inputMaps[index], keyType, keyData, false)!;
@@ -377,11 +382,7 @@ export class PsbtV2 {
     keyData: Buffer,
     value: Buffer
   ) {
-    const map = this.outputMaps[index];
-    if (!map) {
-      this.outputMaps[index] = new Map();
-    }
-    set(map, keyType, keyData, value);
+    set(this.getMap(index, this.outputMaps), keyType, keyData, value);
   }
   private getOutput(index: number, keyType: KeyType, keyData: Buffer): Buffer {
     return get(this.outputMaps[index], keyType, keyData, false)!;
@@ -532,9 +533,9 @@ function uint32LE(n: number): Buffer {
   b.writeUInt32LE(n, 0);
   return b;
 }
-function int64LE(n: number): Buffer {
+function uint64LE(n: number): Buffer {
   const b = Buffer.alloc(8);
-  b.writeBigInt64LE(BigInt(n), 0);
+  b.writeBigUInt64LE(BigInt(n), 0);
   return b;
 }
 function varint(n: number): Buffer {
