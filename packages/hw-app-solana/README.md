@@ -57,9 +57,12 @@ const solana = new Solana(transport);
 
 Get Solana address (public key) for a BIP32 path.
 
+Because Solana uses Ed25519 keypairs, as per SLIP-0010
+all derivation-path indexes will be promoted to hardened indexes.
+
 #### Parameters
 
-*   `path` **[string][12]** a BIP32 path. All indices of the path must be hardened.
+*   `path` **[string][12]** a BIP32 path
 *   `display` **[boolean][13]** flag to show display (optional, default `false`)
 
 #### Examples
@@ -76,7 +79,7 @@ Sign a Solana transaction.
 
 #### Parameters
 
-*   `path` **[string][12]** a BIP32 path. All indices of the path must be hardened.
+*   `path` **[string][12]** a BIP32 path
 *   `txBuffer` **[Buffer][15]** serialized transaction
 
 #### Examples

@@ -67,29 +67,6 @@ test("signTransaction", async () => {
   );
 });
 
-test("should accept only hardened bip32 paths", async () => {
-  const notFullyHardenedPaths = [
-    "44/501'/0/0'/0'",
-    "44'/501/0'/0'/0'",
-    "44'/501'/0/0'/0'",
-    "44'/501'/0'/0/0'",
-    "44'/501'/0'/0'/0",
-  ];
-
-  const expectThrows = async (fn: (solana: Solana) => Promise<unknown>) => {
-    const transport = await openTransportReplayer(new RecordStore());
-    const solana = new Solana(transport);
-    return expect(fn(solana)).rejects.toThrow("must be hardened");
-  };
-
-  for (const path of notFullyHardenedPaths) {
-    await expectThrows((solana) => solana.getAddress(path));
-    await expectThrows((solana) =>
-      solana.signTransaction(path, Buffer.alloc(0))
-    );
-  }
-});
-
 test("chunked payload (payload length > MAX_PAYLOAD)", async () => {
   const transport = await openTransportReplayer(
     RecordStore.fromString(`
@@ -109,6 +86,14 @@ test("chunked payload (payload length > MAX_PAYLOAD)", async () => {
   expect(result).toEqual(
     "d9ed529ab24ab4e796c006cf85e7e51db85825b31d3477dd3bf8350745b7a9cdc29840442d96dbeca73289a06841655d9f5c342bd6f697dcfdb6dadf8a078404"
   );
+});
+
+test("should throw on invalid derivation path", async () => {
+  const transport = await openTransportReplayer(new RecordStore());
+  const solana = new Solana(transport);
+  return expect(
+    solana.getAddress("some invalid derivation path", false)
+  ).rejects.toThrow("input");
 });
 
 test("report blind signature required", async () => {

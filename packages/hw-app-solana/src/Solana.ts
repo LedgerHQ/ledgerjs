@@ -24,8 +24,6 @@ enum EXTRA_STATUS_CODES {
   BLIND_SIGNATURE_REQUIRED = 0x6808,
 }
 
-const HARDENED_MIN = 0x80000000;
-
 /**
  * Solana API
  *
@@ -56,7 +54,10 @@ export default class Solana {
   /**
    * Get Solana address (public key) for a BIP32 path.
    *
-   * @param path a BIP32 path. All indices of the path must be hardened.
+   * Because Solana uses Ed25519 keypairs, as per SLIP-0010
+   * all derivation-path indexes will be promoted to hardened indexes.
+   *
+   * @param path a BIP32 path
    * @param display flag to show display
    * @returns an object with the address field
    *
@@ -87,7 +88,7 @@ export default class Solana {
   /**
    * Sign a Solana transaction.
    *
-   * @param path a BIP32 path. All indices of the path must be hardened.
+   * @param path a BIP32 path
    * @param txBuffer serialized transaction
    *
    * @returns an object with the signature field
@@ -146,11 +147,14 @@ export default class Solana {
     };
   }
 
-  private pathToBuffer(path: string) {
+  private pathToBuffer(originalPath: string) {
+    const path = originalPath
+      .split("/")
+      .map((value) =>
+        value.endsWith("'") || value.endsWith("h") ? value : value + "'"
+      )
+      .join("/");
     const pathNums: number[] = BIPPath.fromString(path).toPathArray();
-    if (pathNums.some((num) => num < HARDENED_MIN)) {
-      throw new Error("All path indices must be hardened");
-    }
     return this.serializePath(pathNums);
   }
 
