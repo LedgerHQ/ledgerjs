@@ -7,8 +7,8 @@ import { WalletPolicy } from "./policy";
 import { createVarint } from "../varint";
 import { hashLeaf, Merkle } from "./merkle";
 
-const CLA_BTC = 0xE1;
-const CLA_FRAMEWORK = 0xF8;
+const CLA_BTC = 0xe1;
+const CLA_FRAMEWORK = 0xf8;
 
 enum BitcoinIns {
   GET_PUBKEY = 0x00,
@@ -23,7 +23,6 @@ enum FrameworkIns {
   CONTINUE_INTERRUPTED = 0x01,
 }
 
-
 export class AppClient {
   transport: Transport;
 
@@ -31,9 +30,16 @@ export class AppClient {
     this.transport = transport;
   }
 
-  private async makeRequest(ins: BitcoinIns, data: Buffer, cci?: ClientCommandInterpreter): Promise<Buffer> {
-    let response: Buffer = await this.transport.send(CLA_BTC, ins, 0, 0, data, [0x9000, 0xE000])
-    while (response.readUInt16BE(response.length - 2) === 0xE000) {
+  private async makeRequest(
+    ins: BitcoinIns,
+    data: Buffer,
+    cci?: ClientCommandInterpreter
+  ): Promise<Buffer> {
+    let response: Buffer = await this.transport.send(CLA_BTC, ins, 0, 0, data, [
+      0x9000,
+      0xe000,
+    ]);
+    while (response.readUInt16BE(response.length - 2) === 0xe000) {
       if (!cci) {
         throw new Error("Unexpected SW_INTERRUPTED_EXECUTION");
       }
@@ -41,7 +47,14 @@ export class AppClient {
       const hwRequest = response.slice(0, -2);
       const commandResponse = cci.execute(hwRequest);
 
-      response = await this.transport.send(CLA_FRAMEWORK, FrameworkIns.CONTINUE_INTERRUPTED, 0, 0, commandResponse, [0x9000, 0xE000]);
+      response = await this.transport.send(
+        CLA_FRAMEWORK,
+        FrameworkIns.CONTINUE_INTERRUPTED,
+        0,
+        0,
+        commandResponse,
+        [0x9000, 0xe000]
+      );
     }
     return response.slice(0, -2); // drop the status word (can only be 0x9000 at this point)
   }
@@ -50,41 +63,61 @@ export class AppClient {
     if (pathElements.length > 6) {
       throw new Error("Path too long. At most 6 levels allowed.");
     }
-    const response = await this.makeRequest(BitcoinIns.GET_PUBKEY, Buffer.concat([
-      Buffer.of(display ? 1 : 0),
-      pathElementsToBuffer(pathElements),
-    ]));
+    const response = await this.makeRequest(
+      BitcoinIns.GET_PUBKEY,
+      Buffer.concat([
+        Buffer.of(display ? 1 : 0),
+        pathElementsToBuffer(pathElements),
+      ])
+    );
     return response.toString("ascii");
   }
 
-  async getWalletAddress(walletPolicy: WalletPolicy, walletHMAC: Buffer | null, change: number, addressIndex: number, display: Boolean): Promise<string> {
-    if (change !== 0 && change !== 1) throw new Error("Change can only be 0 or 1");
-    if (addressIndex < 0 || !Number.isInteger(addressIndex)) throw new Error("Invalid address index");
+  async getWalletAddress(
+    walletPolicy: WalletPolicy,
+    walletHMAC: Buffer | null,
+    change: number,
+    addressIndex: number,
+    display: boolean
+  ): Promise<string> {
+    if (change !== 0 && change !== 1)
+      throw new Error("Change can only be 0 or 1");
+    if (addressIndex < 0 || !Number.isInteger(addressIndex))
+      throw new Error("Invalid address index");
 
     if (walletHMAC != null && walletHMAC.length != 32) {
       throw new Error("Invalid HMAC length");
     }
 
     const clientInterpreter = new ClientCommandInterpreter();
-    clientInterpreter.addKnownList(walletPolicy.keys.map(k => Buffer.from(k, 'ascii')));
+    clientInterpreter.addKnownList(
+      walletPolicy.keys.map((k) => Buffer.from(k, "ascii"))
+    );
     clientInterpreter.addKnownPreimage(walletPolicy.serialize());
 
     const addressIndexBuffer = Buffer.alloc(4);
     addressIndexBuffer.writeUInt32BE(addressIndex, 0);
 
-    const response = await this.makeRequest(BitcoinIns.GET_WALLET_ADDRESS, Buffer.concat([
-      Buffer.of(display ? 1 : 0),
-      walletPolicy.getWalletId(),
-      walletHMAC || Buffer.alloc(32, 0),
-      Buffer.of(change),
-      addressIndexBuffer,
-    ]), clientInterpreter);
+    const response = await this.makeRequest(
+      BitcoinIns.GET_WALLET_ADDRESS,
+      Buffer.concat([
+        Buffer.of(display ? 1 : 0),
+        walletPolicy.getWalletId(),
+        walletHMAC || Buffer.alloc(32, 0),
+        Buffer.of(change),
+        addressIndexBuffer,
+      ]),
+      clientInterpreter
+    );
 
-    return response.toString('ascii');
+    return response.toString("ascii");
   }
 
-
-  async signPsbt(psbt: PsbtV2, walletPolicy: WalletPolicy, walletHMAC: Buffer | null): Promise<Map<number, Buffer>> {
+  async signPsbt(
+    psbt: PsbtV2,
+    walletPolicy: WalletPolicy,
+    walletHMAC: Buffer | null
+  ): Promise<Map<number, Buffer>> {
     const merkelizedPsbt = new MerkelizedPsbt(psbt);
 
     if (walletHMAC != null && walletHMAC.length != 32) {
@@ -94,36 +127,46 @@ export class AppClient {
     const clientInterpreter = new ClientCommandInterpreter();
 
     // prepare ClientCommandInterpreter
-    clientInterpreter.addKnownList(walletPolicy.keys.map(k => Buffer.from(k, 'ascii')));
+    clientInterpreter.addKnownList(
+      walletPolicy.keys.map((k) => Buffer.from(k, "ascii"))
+    );
     clientInterpreter.addKnownPreimage(walletPolicy.serialize());
 
     clientInterpreter.addKnownMapping(merkelizedPsbt.globalMerkleMap);
-    for (let map of merkelizedPsbt.inputMerkleMaps) {
+    for (const map of merkelizedPsbt.inputMerkleMaps) {
       clientInterpreter.addKnownMapping(map);
     }
-    for (let map of merkelizedPsbt.outputMerkleMaps) {
+    for (const map of merkelizedPsbt.outputMerkleMaps) {
       clientInterpreter.addKnownMapping(map);
     }
 
     clientInterpreter.addKnownList(merkelizedPsbt.inputMapCommitments);
-    const inputMapsRoot = (new Merkle(merkelizedPsbt.inputMapCommitments.map(m => hashLeaf(m)))).getRoot();
+    const inputMapsRoot = new Merkle(
+      merkelizedPsbt.inputMapCommitments.map((m) => hashLeaf(m))
+    ).getRoot();
     clientInterpreter.addKnownList(merkelizedPsbt.outputMapCommitments);
-    const outputMapsRoot = (new Merkle(merkelizedPsbt.outputMapCommitments.map(m => hashLeaf(m)))).getRoot();
+    const outputMapsRoot = new Merkle(
+      merkelizedPsbt.outputMapCommitments.map((m) => hashLeaf(m))
+    ).getRoot();
 
-    await this.makeRequest(BitcoinIns.SIGN_PSBT, Buffer.concat([
-      merkelizedPsbt.getGlobalKeysValuesRoot(),
-      createVarint(merkelizedPsbt.getGlobalInputCount()),
-      inputMapsRoot,
-      createVarint(merkelizedPsbt.getGlobalOutputCount()),
-      outputMapsRoot,
-      walletPolicy.getWalletId(),
-      walletHMAC || Buffer.alloc(32, 0),
-    ]), clientInterpreter);
+    await this.makeRequest(
+      BitcoinIns.SIGN_PSBT,
+      Buffer.concat([
+        merkelizedPsbt.getGlobalKeysValuesRoot(),
+        createVarint(merkelizedPsbt.getGlobalInputCount()),
+        inputMapsRoot,
+        createVarint(merkelizedPsbt.getGlobalOutputCount()),
+        outputMapsRoot,
+        walletPolicy.getWalletId(),
+        walletHMAC || Buffer.alloc(32, 0),
+      ]),
+      clientInterpreter
+    );
 
     const yielded = clientInterpreter.getYielded();
 
     const ret: Map<number, Buffer> = new Map();
-    for (let inputAndSig of yielded) {
+    for (const inputAndSig of yielded) {
       ret[inputAndSig[0]] = inputAndSig.slice(1);
     }
     return ret;
@@ -133,4 +176,3 @@ export class AppClient {
     return this.makeRequest(BitcoinIns.GET_MASTER_FINGERPRINT, Buffer.of());
   }
 }
-

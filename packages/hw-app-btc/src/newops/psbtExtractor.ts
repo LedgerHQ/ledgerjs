@@ -1,4 +1,3 @@
-import { bip32asBuffer } from "../bip32";
 import { BufferWriter } from "../buffertools";
 import { PsbtV2 } from "./psbtv2";
 

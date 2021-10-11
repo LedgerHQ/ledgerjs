@@ -10,9 +10,9 @@ export class MerkleMap {
    * @param keys Sorted list of (unhashed) keys
    * @param values values, in corresponding order as the keys, and of equal length
    */
-  constructor(keys: Buffer[], values: Buffer[]) {    
+  constructor(keys: Buffer[], values: Buffer[]) {
     if (keys.length != values.length) {
-      throw new Error("keys and values should have the same length")
+      throw new Error("keys and values should have the same length");
     }
 
     // Sanity check: verify that keys are actually sorted and with no duplicates
@@ -23,9 +23,9 @@ export class MerkleMap {
     }
 
     this.keys = keys;
-    this.keysTree = new Merkle(keys.map(k => hashLeaf(k)));
+    this.keysTree = new Merkle(keys.map((k) => hashLeaf(k)));
     this.values = values;
-    this.valuesTree = new Merkle(values.map(v => hashLeaf(v)));
+    this.valuesTree = new Merkle(values.map((v) => hashLeaf(v)));
   }
 
   commitment(): Buffer {
@@ -33,8 +33,7 @@ export class MerkleMap {
     return Buffer.concat([
       createVarint(this.keys.length),
       this.keysTree.getRoot(),
-      this.valuesTree.getRoot()
+      this.valuesTree.getRoot(),
     ]);
   }
 }
-

@@ -3,20 +3,18 @@ import { createVarint } from "../varint";
 import { hashLeaf, Merkle } from "./merkle";
 import { MerkleMap } from "./merkleMap";
 
-
 enum ClientCommandCode {
-    YIELD = 0x10,
-    GET_PREIMAGE = 0x40,
-    GET_MERKLE_LEAF_PROOF = 0x41,
-    GET_MERKLE_LEAF_INDEX = 0x42,
-    GET_MORE_ELEMENTS = 0xA0,
+  YIELD = 0x10,
+  GET_PREIMAGE = 0x40,
+  GET_MERKLE_LEAF_PROOF = 0x41,
+  GET_MERKLE_LEAF_INDEX = 0x42,
+  GET_MORE_ELEMENTS = 0xa0,
 }
 
 abstract class ClientCommand {
   abstract code: ClientCommandCode;
   abstract execute(request: Buffer): Buffer;
 }
-
 
 export class YieldCommand extends ClientCommand {
   private results: Buffer[];
@@ -30,10 +28,9 @@ export class YieldCommand extends ClientCommand {
 
   execute(request: Buffer): Buffer {
     this.results.push(Buffer.from(request.subarray(1)));
-    return Buffer.from('');
-  };
+    return Buffer.from("");
+  }
 }
-
 
 export class GetPreimageCommand extends ClientCommand {
   private known_preimages: Map<string, Buffer>;
@@ -48,7 +45,7 @@ export class GetPreimageCommand extends ClientCommand {
   }
 
   execute(request: Buffer): Buffer {
-    let req = request.subarray(1);
+    const req = request.subarray(1);
 
     // we expect no more data to read
     if (req.length != 1 + 32) {
@@ -78,21 +75,20 @@ export class GetPreimageCommand extends ClientCommand {
 
       if (payload_size < known_preimage.length) {
         for (let i = payload_size; i < known_preimage.length; i++) {
-          this.queue.push(Buffer.from([known_preimage[i]]))
+          this.queue.push(Buffer.from([known_preimage[i]]));
         }
       }
 
       return Buffer.concat([
         preimage_len_varint,
         Buffer.from([payload_size]),
-        known_preimage.subarray(0, payload_size)
+        known_preimage.subarray(0, payload_size),
       ]);
     }
 
-    throw Error(`Requested unknown preimage for: ${req_hash_hex}`)
-  };
+    throw Error(`Requested unknown preimage for: ${req_hash_hex}`);
+  }
 }
-
 
 export class GetMerkleLeafProofCommand extends ClientCommand {
   private known_trees: Map<string, Merkle>;
@@ -120,8 +116,8 @@ export class GetMerkleLeafProofCommand extends ClientCommand {
     }
     const hash_hex = hash.toString("hex");
 
-    const tree_size = req.readUInt32BE(32)
-    const leaf_index = req.readUInt32BE(32 + 4)
+    const tree_size = req.readUInt32BE(32);
+    const leaf_index = req.readUInt32BE(32 + 4);
 
     const mt = this.known_trees.get(hash_hex);
     if (!mt) {
@@ -133,12 +129,17 @@ export class GetMerkleLeafProofCommand extends ClientCommand {
     }
 
     if (this.queue.length != 0) {
-      throw Error("This command should not execute when the queue is not empty.")
+      throw Error(
+        "This command should not execute when the queue is not empty."
+      );
     }
 
     const proof = mt.getProof(leaf_index);
 
-    const n_response_elements = Math.min(Math.floor((255 - 32 - 1 - 1) / 32), proof.length)
+    const n_response_elements = Math.min(
+      Math.floor((255 - 32 - 1 - 1) / 32),
+      proof.length
+    );
     const n_leftover_elements = proof.length - n_response_elements;
 
     // Add to the queue any proof elements that do not fit the response
@@ -150,9 +151,9 @@ export class GetMerkleLeafProofCommand extends ClientCommand {
       mt.getLeafHash(leaf_index),
       Buffer.from([proof.length]),
       Buffer.from([n_response_elements]),
-      ...proof.slice(0, n_response_elements)
+      ...proof.slice(0, n_response_elements),
     ]);
-  };
+  }
 }
 
 export class GetMerkleLeafIndexCommand extends ClientCommand {
@@ -188,7 +189,9 @@ export class GetMerkleLeafIndexCommand extends ClientCommand {
 
     const mt = this.known_trees.get(root_hash_hex);
     if (!mt) {
-      throw Error(`Requested Merkle leaf index for unknown root: ${root_hash_hex}`);
+      throw Error(
+        `Requested Merkle leaf index for unknown root: ${root_hash_hex}`
+      );
     }
 
     let leaf_index = 0;
@@ -200,13 +203,9 @@ export class GetMerkleLeafIndexCommand extends ClientCommand {
         break;
       }
     }
-    return Buffer.concat([
-      Buffer.from([found]),
-      createVarint(leaf_index)
-    ]);
-  };
+    return Buffer.concat([Buffer.from([found]), createVarint(leaf_index)]);
+  }
 }
-
 
 export class GetMoreElementsCommand extends ClientCommand {
   queue: Buffer[];
@@ -229,8 +228,10 @@ export class GetMoreElementsCommand extends ClientCommand {
 
     // all elements should have the same length
     const element_len = this.queue[0].length;
-    if (this.queue.some(el => el.length != element_len)) {
-      throw new Error("The queue contains elements with different byte length, which is not expected");
+    if (this.queue.some((el) => el.length != element_len)) {
+      throw new Error(
+        "The queue contains elements with different byte length, which is not expected"
+      );
     }
 
     const max_elements = Math.floor(253 / element_len);
@@ -241,14 +242,14 @@ export class GetMoreElementsCommand extends ClientCommand {
     return Buffer.concat([
       Buffer.from([n_returned_elements]),
       Buffer.from([element_len]),
-      ...returned_elements
+      ...returned_elements,
     ]);
-  };
+  }
 }
 
 export class ClientCommandInterpreter {
   private roots: Map<string, Merkle> = new Map();
-  private preimages: Map<string, Buffer> =  new Map();
+  private preimages: Map<string, Buffer> = new Map();
 
   private yielded: Buffer[] = [];
 
@@ -265,7 +266,7 @@ export class ClientCommandInterpreter {
       new GetMoreElementsCommand(this.queue),
     ];
 
-    for (let cmd of commands) {
+    for (const cmd of commands) {
       if (this.commands.has(cmd.code)) {
         throw new Error(`Multiple commands with code ${cmd.code}`);
       }
@@ -277,27 +278,27 @@ export class ClientCommandInterpreter {
     return this.yielded;
   }
 
-  addKnownPreimage(preimage: Buffer) {
-    this.preimages.set(crypto.sha256(preimage).toString('hex'), preimage);
+  addKnownPreimage(preimage: Buffer): void {
+    this.preimages.set(crypto.sha256(preimage).toString("hex"), preimage);
   }
 
-  addKnownList(elements: Buffer[]) {
-    for (let el of elements) {
+  addKnownList(elements: Buffer[]): void {
+    for (const el of elements) {
       const preimage = Buffer.concat([Buffer.from([0]), el]);
       this.addKnownPreimage(preimage);
     }
-    const mt = new Merkle(elements.map(el => hashLeaf(el)));
+    const mt = new Merkle(elements.map((el) => hashLeaf(el)));
     this.roots.set(mt.getRoot().toString("hex"), mt);
   }
 
-  addKnownMapping(mm: MerkleMap) {
+  addKnownMapping(mm: MerkleMap): void {
     this.addKnownList(mm.keys);
     this.addKnownList(mm.values);
   }
 
   execute(request: Buffer): Buffer {
     if (request.length == 0) {
-      throw new Error("Unexpected empty command")
+      throw new Error("Unexpected empty command");
     }
 
     const cmdCode = request[0];
