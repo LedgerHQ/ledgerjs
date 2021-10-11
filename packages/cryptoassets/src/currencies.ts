@@ -232,6 +232,35 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [],
   },
+  avalanche: {
+    type: "CryptoCurrency",
+    id: "avalanche",
+    coinType: 9000,
+    name: "Avalanche",
+    managerAppName: "Avalanche",
+    ticker: "AVAX",
+    scheme: "avalanche",
+    color: "#E84142",
+    family: "ethereum",
+    units: [
+      {
+        name: "AVAX",
+        code: "AVAX",
+        magnitude: 18,
+      },
+    ],
+    ethereumLikeInfo: {
+      chainId: 43114,
+    },
+    explorerViews: [
+      {
+        tx: "https://cchain.explorer.avax.network/tx/$hash",
+        address: "https://cchain.explorer.avax.network/address/$address",
+        token:
+          "https://cchain.explorer.avax.network/token/$contractAddress?a=$address",
+      },
+    ],
+  },
   banano: {
     type: "CryptoCurrency",
     id: "banano",
@@ -1308,10 +1337,8 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        tx:
-          "https://www.kin.org/blockchainInfoPage/?&dataType=public&header=Transaction&id=$hash",
-        address:
-          "https://www.kin.org/blockchainAccount/?&dataType=public&header=accountID&id=$address",
+        tx: "https://www.kin.org/blockchainInfoPage/?&dataType=public&header=Transaction&id=$hash",
+        address: "https://www.kin.org/blockchainAccount/?&dataType=public&header=accountID&id=$address",
       },
     ],
   },
