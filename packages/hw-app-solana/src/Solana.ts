@@ -15,13 +15,13 @@ const MAX_PAYLOAD = 255;
 const LEDGER_CLA = 0xe0;
 
 const INS = {
-    GET_VERSION: 0x04,
-    GET_ADDR: 0x05,
-    SIGN: 0x06,
+  GET_VERSION: 0x04,
+  GET_ADDR: 0x05,
+  SIGN: 0x06,
 };
 
 enum EXTRA_STATUS_CODES {
-    BLIND_SIGNATURE_REQUIRED = 0x6808,
+  BLIND_SIGNATURE_REQUIRED = 0x6808,
 }
 
 const HARDENED_MIN = 0x80000000;
@@ -37,207 +37,204 @@ const HARDENED_MIN = 0x80000000;
  * const solana = new Solana(transport);
  */
 export default class Solana {
-    private transport: Transport;
+  private transport: Transport;
 
-    constructor(
-        transport: Transport,
-        scrambleKey: string = "solana_default_scramble_key"
-    ) {
-        this.transport = transport;
-        this.transport.decorateAppAPIMethods(
-            this,
-            ["getAddress", "signTransaction", "getAppConfiguration"],
-            scrambleKey
-        );
+  constructor(
+    transport: Transport,
+    // the type annotation is needed for doc generator
+    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
+    scrambleKey: string = "solana_default_scramble_key"
+  ) {
+    this.transport = transport;
+    this.transport.decorateAppAPIMethods(
+      this,
+      ["getAddress", "signTransaction", "getAppConfiguration"],
+      scrambleKey
+    );
+  }
+
+  /**
+   * Get Solana address (public key) for a BIP32 path.
+   *
+   * @param path a BIP32 path. All indices of the path must be hardened.
+   * @param display flag to show display
+   * @returns an object with the address field
+   *
+   * @example
+   * solana.getAddress("44'/501'/0'").then(r => r.address)
+   */
+  async getAddress(
+    path: string,
+    // the type annotation is needed for doc generator
+    // eslint-disable-next-line @typescript-eslint/no-inferrable-types
+    display: boolean = false
+  ): Promise<{
+    address: Buffer;
+  }> {
+    const pathBuffer = this.pathToBuffer(path);
+
+    const addressBuffer = await this.sendToDevice(
+      INS.GET_ADDR,
+      display ? P1_CONFIRM : P1_NON_CONFIRM,
+      pathBuffer
+    );
+
+    return {
+      address: addressBuffer,
+    };
+  }
+
+  /**
+   * Sign a Solana transaction.
+   *
+   * @param path a BIP32 path. All indices of the path must be hardened.
+   * @param txBuffer serialized transaction
+   *
+   * @returns an object with the signature field
+   *
+   * @example
+   * solana.signTransaction("44'/501'/0'", txBuffer).then(r => r.signature)
+   */
+  async signTransaction(
+    path: string,
+    txBuffer: Buffer
+  ): Promise<{
+    signature: Buffer;
+  }> {
+    const pathBuffer = this.pathToBuffer(path);
+    // Ledger app supports only a single derivation path per call ATM
+    const pathsCountBuffer = Buffer.alloc(1);
+    pathsCountBuffer.writeUInt8(1, 0);
+
+    const payload = Buffer.concat([pathsCountBuffer, pathBuffer, txBuffer]);
+
+    const signatureBuffer = await this.sendToDevice(
+      INS.SIGN,
+      P1_CONFIRM,
+      payload
+    );
+
+    return {
+      signature: signatureBuffer,
+    };
+  }
+
+  /**
+   * Get application configuration.
+   *
+   * @returns application config object
+   *
+   * @example
+   * solana.getAppConfiguration().then(r => r.version)
+   */
+  async getAppConfiguration(): Promise<AppConfig> {
+    const [
+      blindSigningEnabled,
+      pubKeyDisplayMode,
+      major,
+      minor,
+      patch,
+    ] = await this.sendToDevice(
+      INS.GET_VERSION,
+      P1_NON_CONFIRM,
+      Buffer.alloc(0)
+    );
+    return {
+      blindSigningEnabled: Boolean(blindSigningEnabled),
+      pubKeyDisplayMode,
+      version: `${major}.${minor}.${patch}`,
+    };
+  }
+
+  private pathToBuffer(path: string) {
+    const pathNums: number[] = BIPPath.fromString(path).toPathArray();
+    if (pathNums.some((num) => num < HARDENED_MIN)) {
+      throw new Error("All path indices must be hardened");
     }
+    return this.serializePath(pathNums);
+  }
 
-    /**
-     * Get Solana address (public key) for a BIP32 path.
-     *
-     * @param path a BIP32 path. All indices of the path must be hardened.
-     * @param display flag to show display
-     * @returns an object with the address field
-     *
-     * @example
-     * solana.getAddress("44'/501'/0'").then(r => r.address)
+  private serializePath(path: number[]) {
+    const buf = Buffer.alloc(1 + path.length * 4);
+    buf.writeUInt8(path.length, 0);
+    for (const [i, num] of path.entries()) {
+      buf.writeUInt32BE(num, 1 + i * 4);
+    }
+    return buf;
+  }
+
+  // send chunked if payload size exceeds maximum for a call
+  private async sendToDevice(instruction: number, p1: number, payload: Buffer) {
+    /*
+     * By default transport will throw if status code is not OK.
+     * For some pyaloads we need to enable blind sign in the app settings
+     * and this is reported with StatusCodes.MISSING_CRITICAL_PARAMETER first byte prefix
+     * so we handle it and show a user friendly error message.
      */
-    async getAddress(
-        path: string,
-        display: boolean = false
-    ): Promise<{
-        address: Buffer;
-    }> {
-        const pathBuffer = this.pathToBuffer(path);
+    const acceptStatusList = [
+      StatusCodes.OK,
+      EXTRA_STATUS_CODES.BLIND_SIGNATURE_REQUIRED,
+    ];
 
-        const addressBuffer = await this.sendToDevice(
-            INS.GET_ADDR,
-            display ? P1_CONFIRM : P1_NON_CONFIRM,
-            pathBuffer
-        );
+    let p2 = 0;
+    let payload_offset = 0;
 
-        return {
-            address: addressBuffer,
-        };
-    }
-
-    /**
-     * Sign a Solana transaction.
-     *
-     * @param path a BIP32 path. All indices of the path must be hardened.
-     * @param txBuffer serialized transaction
-     *
-     * @returns an object with the signature field
-     *
-     * @example
-     * solana.signTransaction("44'/501'/0'", txBuffer).then(r => r.signature)
-     */
-    async signTransaction(
-        path: string,
-        txBuffer: Buffer
-    ): Promise<{
-        signature: Buffer;
-    }> {
-        const pathBuffer = this.pathToBuffer(path);
-        // Ledger app supports only a single derivation path per call ATM
-        const pathsCountBuffer = Buffer.alloc(1);
-        pathsCountBuffer.writeUInt8(1, 0);
-
-        const payload = Buffer.concat([pathsCountBuffer, pathBuffer, txBuffer]);
-
-        const signatureBuffer = await this.sendToDevice(
-            INS.SIGN,
-            P1_CONFIRM,
-            payload
-        );
-
-        return {
-            signature: signatureBuffer,
-        };
-    }
-
-    /**
-     * Get application configuration.
-     *
-     * @returns application config object
-     *
-     * @example
-     * solana.getAppConfiguration().then(r => r.version)
-     */
-    async getAppConfiguration(): Promise<AppConfig> {
-        const [
-            blindSigningEnabled,
-            pubKeyDisplayMode,
-            major,
-            minor,
-            patch,
-        ] = await this.sendToDevice(
-            INS.GET_VERSION,
-            P1_NON_CONFIRM,
-            Buffer.alloc(0)
-        );
-        return {
-            blindSigningEnabled: Boolean(blindSigningEnabled),
-            pubKeyDisplayMode,
-            version: `${major}.${minor}.${patch}`,
-        };
-    }
-
-    private pathToBuffer(path: string) {
-        const pathNums: number[] = BIPPath.fromString(path).toPathArray();
-        if (pathNums.some((num) => num < HARDENED_MIN)) {
-            throw new Error("All path indices must be hardened");
-        }
-        return this.serializePath(pathNums);
-    }
-
-    private serializePath(path: number[]) {
-        const buf = Buffer.alloc(1 + path.length * 4);
-        buf.writeUInt8(path.length, 0);
-        for (const [i, num] of path.entries()) {
-            buf.writeUInt32BE(num, 1 + i * 4);
-        }
-        return buf;
-    }
-
-    // send chunked if payload size exceeds maximum for a call
-    private async sendToDevice(
-        instruction: number,
-        p1: number,
-        payload: Buffer
-    ) {
-        /*
-         * By default transport will throw if status code is not OK.
-         * For some pyaloads we need to enable blind sign in the app settings
-         * and this is reported with StatusCodes.MISSING_CRITICAL_PARAMETER first byte prefix
-         * so we handle it and show a user friendly error message.
-         */
-        const acceptStatusList = [
-            StatusCodes.OK,
-            EXTRA_STATUS_CODES.BLIND_SIGNATURE_REQUIRED,
-        ];
-
-        let p2 = 0;
-        let payload_offset = 0;
-
-        if (payload.length > MAX_PAYLOAD) {
-            while (payload.length - payload_offset > MAX_PAYLOAD) {
-                const buf = payload.slice(
-                    payload_offset,
-                    payload_offset + MAX_PAYLOAD
-                );
-                payload_offset += MAX_PAYLOAD;
-                // console.log( "send", (p2 | P2_MORE).toString(16), buf.length.toString(16), buf);
-                const reply = await this.transport.send(
-                    LEDGER_CLA,
-                    instruction,
-                    p1,
-                    p2 | P2_MORE,
-                    buf,
-                    acceptStatusList
-                );
-                this.throwOnFailure(reply);
-                p2 |= P2_EXTEND;
-            }
-        }
-
-        const buf = payload.slice(payload_offset);
-        // console.log("send", p2.toString(16), buf.length.toString(16), buf);
+    if (payload.length > MAX_PAYLOAD) {
+      while (payload.length - payload_offset > MAX_PAYLOAD) {
+        const buf = payload.slice(payload_offset, payload_offset + MAX_PAYLOAD);
+        payload_offset += MAX_PAYLOAD;
+        // console.log( "send", (p2 | P2_MORE).toString(16), buf.length.toString(16), buf);
         const reply = await this.transport.send(
-            LEDGER_CLA,
-            instruction,
-            p1,
-            p2,
-            buf,
-            acceptStatusList
+          LEDGER_CLA,
+          instruction,
+          p1,
+          p2 | P2_MORE,
+          buf,
+          acceptStatusList
         );
-
         this.throwOnFailure(reply);
-
-        return reply.slice(0, reply.length - 2);
+        p2 |= P2_EXTEND;
+      }
     }
 
-    private throwOnFailure(reply: Buffer) {
-        // transport makes sure reply has a valid length
-        const status = reply.readUInt16BE(reply.length - 2);
+    const buf = payload.slice(payload_offset);
+    // console.log("send", p2.toString(16), buf.length.toString(16), buf);
+    const reply = await this.transport.send(
+      LEDGER_CLA,
+      instruction,
+      p1,
+      p2,
+      buf,
+      acceptStatusList
+    );
 
-        switch (status) {
-            case EXTRA_STATUS_CODES.BLIND_SIGNATURE_REQUIRED:
-                throw new Error(
-                    "Missing a parameter. Try enabling blind signature in the app"
-                );
-            default:
-                return;
-        }
+    this.throwOnFailure(reply);
+
+    return reply.slice(0, reply.length - 2);
+  }
+
+  private throwOnFailure(reply: Buffer) {
+    // transport makes sure reply has a valid length
+    const status = reply.readUInt16BE(reply.length - 2);
+
+    switch (status) {
+      case EXTRA_STATUS_CODES.BLIND_SIGNATURE_REQUIRED:
+        throw new Error(
+          "Missing a parameter. Try enabling blind signature in the app"
+        );
+      default:
+        return;
     }
+  }
 }
 
 enum PubKeyDisplayMode {
-    LONG,
-    SHORT,
+  LONG,
+  SHORT,
 }
 
 type AppConfig = {
-    blindSigningEnabled: boolean;
-    pubKeyDisplayMode: PubKeyDisplayMode;
-    version: string;
+  blindSigningEnabled: boolean;
+  pubKeyDisplayMode: PubKeyDisplayMode;
+  version: string;
 };
