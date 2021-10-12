@@ -65,7 +65,7 @@ export default class HttpTransport extends Transport {
       );
     }
 
-    const body = await response.data;
+    const body: any = await response.data;
     if (body.error) throw body.error;
     log("apdu", "<= " + body.data);
     return Buffer.from(body.data, "hex");
