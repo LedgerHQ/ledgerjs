@@ -1,3 +1,6 @@
+import bs58 from "bs58";
+import RIPEMD160 from "ripemd160";
+import sha from "sha.js";
 import type Transport from "@ledgerhq/hw-transport";
 import type { CreateTransactionArg } from "./createTransaction";
 import { createTransaction } from "./createTransaction";
@@ -7,6 +10,7 @@ import { signMessage } from "./signMessage";
 import type { SignP2SHTransactionArg } from "./signP2SHTransaction";
 import { signP2SHTransaction } from "./signP2SHTransaction";
 export type { AddressFormat };
+
 /**
  * Bitcoin API.
  *
@@ -20,6 +24,37 @@ export default class BtcOld {
 
   constructor(transport: Transport) {
     this.transport = transport;
+  }
+
+  async getWalletXpub({
+    path,
+    xpubVersion,
+    index,
+  }: {
+    path: string;
+    xpubVersion: number;
+    index: number;
+  }): Promise<string> {
+    const parentDerivation = await getWalletPublicKey(this.transport, {
+      path: path.split("/").slice(0, 2).join("/"),
+    });
+    const accountDerivation = await getWalletPublicKey(this.transport, {
+      path,
+    });
+    const fingerprint = makeFingerprint(
+      compressPublicKeySECP256(Buffer.from(parentDerivation.publicKey, "hex"))
+    );
+    const xpub = makeXpub({
+      version: xpubVersion,
+      depth: 3,
+      parentFingerprint: fingerprint,
+      index,
+      chainCode: Buffer.from(accountDerivation.chainCode, "hex"),
+      pubKey: compressPublicKeySECP256(
+        Buffer.from(accountDerivation.publicKey, "hex")
+      ),
+    });
+    return xpub;
   }
 
   /**
@@ -153,4 +188,55 @@ export default class BtcOld {
 
     return signP2SHTransaction(this.transport, arg);
   }
+}
+
+function makeFingerprint(compressedPubKey) {
+  return hash160(compressedPubKey).slice(0, 4);
+}
+
+function asBufferUInt32BE(n) {
+  const buf = Buffer.allocUnsafe(4);
+  buf.writeUInt32BE(n, 0);
+  return buf;
+}
+
+const compressPublicKeySECP256 = (publicKey: Buffer) =>
+  Buffer.concat([
+    Buffer.from([0x02 + (publicKey[64] & 0x01)]),
+    publicKey.slice(1, 33),
+  ]);
+
+function makeXpub({
+  version,
+  depth,
+  parentFingerprint,
+  index,
+  chainCode,
+  pubKey,
+}) {
+  const indexBuffer = asBufferUInt32BE(index);
+  indexBuffer[0] |= 0x80;
+  const extendedKeyBytes = Buffer.concat([
+    asBufferUInt32BE(version),
+    Buffer.from([depth]),
+    parentFingerprint,
+    indexBuffer,
+    chainCode,
+    pubKey,
+  ]);
+  const checksum = hash256(extendedKeyBytes).slice(0, 4);
+  return bs58.encode(Buffer.concat([extendedKeyBytes, checksum]));
+}
+
+function sha256(buffer: Buffer | string) {
+  return sha("sha256").update(buffer).digest();
+}
+function hash256(buffer: Buffer | string) {
+  return sha256(sha256(buffer));
+}
+function ripemd160(buffer: Buffer | string) {
+  return new RIPEMD160().update(buffer).digest();
+}
+function hash160(buffer: Buffer | string) {
+  return ripemd160(sha256(buffer));
 }

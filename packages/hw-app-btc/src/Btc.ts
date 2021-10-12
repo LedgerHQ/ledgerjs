@@ -29,6 +29,7 @@ export default class Btc {
     transport.decorateAppAPIMethods(
       this,
       [
+        "getWalletXpub",
         "getWalletPublicKey",
         "signP2SHTransaction",
         "signMessageNew",
@@ -38,6 +39,22 @@ export default class Btc {
       ],
       scrambleKey
     );
+  }
+
+  /**
+   * Get an XPUB with a ledger device
+   * @param arg derivation parameter
+   * - path: a BIP 32 path of the account level. e.g. `84'/0'/0'`
+   * - xpubVersion: the XPUBVersion of the coin used. (use @ledgerhq/currencies if needed)
+   * - index: index of the account
+   * @returns XPUB of the account
+   */
+  getWalletXpub(arg: {
+    path: string;
+    xpubVersion: number;
+    index: number;
+  }): Promise<string> {
+    return this.getCorrectImpl().then((impl) => impl.getWalletXpub(arg));
   }
 
   /**
@@ -233,6 +250,7 @@ export default class Btc {
     );
   }
 
+  // TODO: we should save in a field what was the latest app and not ask each time in the lifecycle of a new Btc()
   private async getCorrectImpl(): Promise<BtcOld | BtcNew> {
     const isNewApp = await this.useNewApp();
     if (isNewApp) {

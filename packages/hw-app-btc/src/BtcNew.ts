@@ -16,6 +16,19 @@ import { pointCompress } from "tiny-secp256k1";
 export default class BtcNew {
   constructor(private client: Client) {}
 
+  async getWalletXpub({
+    path,
+    xpubVersion,
+    index,
+  }: {
+    path: string;
+    xpubVersion: number;
+    index: number;
+  }): Promise<string> {
+    console.log("todo implement", path, xpubVersion, index);
+    throw new Error("NOT IMPLEMENTED YET");
+  }
+
   async getWalletPublicKey(
     path: string,
     opts?: {
