@@ -14,3 +14,7 @@ This repository hosts the `@ledgerhq/*` JavaScript libraries.
 
 > NB. for the 3 points above, the best is to have integration of Prettier,
 > ESlint, Flowtype in your text editor (there are plugin for most editors).
+
+## Documentation
+
+* [documentation.js](https://documentation.js.org/) for generation markdown documentations of libraries. You can run `yarn doc`.
