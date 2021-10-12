@@ -1,8 +1,9 @@
 import type Transport from "@ledgerhq/hw-transport";
 import semver from "semver";
-import BtcNew from "./BtcNew";
+import BtcNew, { newSupportedApps } from "./BtcNew";
 import BtcOld from "./BtcOld";
 import type { CreateTransactionArg } from "./createTransaction";
+import type { AppAndVersion } from "./getAppAndVersion";
 import { getAppAndVersion } from "./getAppAndVersion";
 import { getTrustedInput } from "./getTrustedInput";
 import { getTrustedInputBIP143 } from "./getTrustedInputBIP143";
@@ -245,27 +246,39 @@ export default class Btc {
     );
   }
 
-  // TODO: we should save in a field what was the latest app and not ask each time in the lifecycle of a new Btc()
+  // cache the underlying implementation (only once)
+  private _lazyImpl: BtcOld | BtcNew | null = null;
   private async getCorrectImpl(): Promise<BtcOld | BtcNew> {
-    const isNewApp = await this.useNewApp();
-    if (isNewApp) {
-      return this.new();
+    const { _lazyImpl } = this;
+    if (_lazyImpl) return _lazyImpl;
+    const impl = await this.inferCorrectImpl();
+    this._lazyImpl = impl;
+    return impl;
+  }
+
+  // cache the appAndVersion data to not recalculate it
+  private _lazyAppAndVersion: AppAndVersion | null = null;
+  private async fetchAppAndVersion(): Promise<AppAndVersion> {
+    const { _lazyAppAndVersion } = this;
+    if (_lazyAppAndVersion) return _lazyAppAndVersion;
+    const appAndVersion = await getAppAndVersion(this.transport);
+    this._lazyAppAndVersion = appAndVersion;
+    return appAndVersion;
+  }
+
+  private async inferCorrectImpl(): Promise<BtcOld | BtcNew> {
+    const appAndVersion = await this.fetchAppAndVersion();
+    const canUseNewImplementation =
+      newSupportedApps.includes(appAndVersion.name) &&
+      semver.major(appAndVersion.version) >= 2;
+    if (!canUseNewImplementation) {
+      return new BtcOld(this.transport);
     } else {
-      return this.old();
+      return new BtcNew(new AppClient(this.transport));
     }
   }
+
   private old(): BtcOld {
     return new BtcOld(this.transport);
-  }
-  private new(): BtcNew {
-    return new BtcNew(new AppClient(this.transport));
-  }
-  private async useNewApp(): Promise<boolean> {
-    const a = await getAppAndVersion(this.transport);
-    const isNewApp = semver.major(a.version) >= 2;
-    if ((a.name == "Bitcoin" || a.name == "Bitcoin Test") && isNewApp) {
-      return true;
-    }
-    return false;
   }
 }

@@ -18,6 +18,8 @@ import { serializeTransaction } from "./serializeTransaction";
 import type { Transaction } from "./types";
 import { pointCompress } from "tiny-secp256k1";
 
+export const newSupportedApps = ["Bitcoin", "Bitcoin Test"];
+
 export default class BtcNew {
   constructor(private client: Client) {}
 
