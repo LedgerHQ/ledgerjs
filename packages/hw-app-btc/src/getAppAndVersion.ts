@@ -1,12 +1,15 @@
 import invariant from "invariant";
 import Transport from "@ledgerhq/hw-transport";
-export const getAppAndVersion = async (
-  transport: Transport
-): Promise<{
+
+export type AppAndVersion = {
   name: string;
   version: string;
   flags: number | Buffer;
-}> => {
+};
+
+export const getAppAndVersion = async (
+  transport: Transport
+): Promise<AppAndVersion> => {
   const r = await transport.send(0xb0, 0x01, 0x00, 0x00);
   let i = 0;
   const format = r[i++];

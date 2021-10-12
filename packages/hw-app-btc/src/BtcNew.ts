@@ -27,6 +27,8 @@ import {
   OP_HASH160,
 } from "./constants";
 
+export const newSupportedApps = ["Bitcoin", "Bitcoin Test"];
+
 export default class BtcNew {
   constructor(private client: Client) {}
 
