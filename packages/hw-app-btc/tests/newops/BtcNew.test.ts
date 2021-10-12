@@ -48,12 +48,17 @@ test("Sign p2pkh", async () => {
 });
 test("Sign p2wpkh wrapped", async () => {
   await runSignTransactionTest(wrappedP2wpkh);
+  await runSignTransactionTest(wrappedP2wpkhTwoInputs);
 });
 test("Sign p2wpkh", async () => {
   await runSignTransactionTest(p2wpkh);
+  await runSignTransactionTest(p2wpkhTwoInputs);
 });
 test("Sign p2tr", async () => {
   await runSignTransactionTest(p2tr);
+});
+test("Fail", () => {
+  throw new Error();
 });
 
 async function runSignTransactionTest(testTx: CoreTx) {
@@ -111,7 +116,7 @@ function addressFormatFromDescriptorTemplate(descTemp: DefaultDescriptorTemplate
   if (descTemp == "pkh(@0)") return "legacy";
   if (descTemp == "wpkh(@0)") return "bech32";
   if (descTemp == "sh(wpkh(@0))") return "p2sh";
-  fail();
+  throw new Error();
 }
 
 enum AccountType {
@@ -132,7 +137,7 @@ function getPubkey(inputIndex: number, accountType: AccountType, testTx: CoreTx,
   if (accountType == AccountType.p2wpkh || accountType == AccountType.p2wpkhInP2sh) {
     return Buffer.from(testTx.vin[inputIndex].txinwitness![1], "hex");
   }
-  fail();
+  throw new Error();
 }
 
 function getSignature(testTxInput: CoreInput, accountType: AccountType): Buffer {
@@ -146,12 +151,15 @@ function getSignature(testTxInput: CoreInput, accountType: AccountType): Buffer 
   if (accountType == AccountType.p2wpkh || accountType == AccountType.p2wpkhInP2sh) {
     return Buffer.from(testTxInput.txinwitness![0], "hex");
   }
-  fail();
+  throw new Error();
 }
 
 function getAccountType(coreInput: CoreInput, btc: Btc): AccountType {
   const spentTx = spentTxs[coreInput.txid];
-  const splitSpentTx = btc. splitTransaction(spentTx, !!coreInput.txinwitness);
+  if (!spentTx) {
+    throw new Error("Spent tx " + coreInput.txid + " unavailable.");
+  }
+  const splitSpentTx = btc.splitTransaction(spentTx, !!coreInput.txinwitness);
   const spentOutput = splitSpentTx.outputs![coreInput.vout];
   const script = spentOutput.script;
   if (script.length == 34 && script[0] == 0x51) {
@@ -518,4 +526,122 @@ const p2pkh: CoreTx = {
   "confirmations": 1,
   "time": 1633611385,
   "blocktime": 1633611385
+};
+const p2wpkhTwoInputs = {
+  "txid": "1913b7b5ffdcb5f32b9aca1f5eec2a189e7c66650f82b560eae211265fc995b7",
+  "hash": "c3439dcd3489373c586c7aed48c32f2b5d9c71aad24acd765a61684d98690a3f",
+  "version": 2,
+  "size": 388,
+  "vsize": 226,
+  "weight": 904,
+  "locktime": 0,
+  "vin": [
+    {
+      "txid": "5512d5788d4c26117f093de91223ef384c3fb22799810a92e3304bb6f0819224",
+      "vout": 1,
+      "scriptSig": {
+        "asm": "0014c1ac0d63d0258ea1b6fe90ef72d0c35d8d773dd3",
+        "hex": "160014c1ac0d63d0258ea1b6fe90ef72d0c35d8d773dd3"
+      },
+      "txinwitness": [
+        "30440220543617c5f4504dc29d34d2d06d0d7733dac4ec418b77c67feefb29f3f82ba3d80220690b784c52c3375f4ba9e64cc5c0aeb6a1b9fc6aadda0062905c06ce3bbba57501",
+        "02fb255ed920db5c2f507289202eb60a160e5a067ee7e30199a4ed81b74c22e441"
+      ],
+      "sequence": 4294967295
+    },
+    {
+      "txid": "28ad5054e029252d72da37f13fce66212d7f7763845b4a8c4aaf78e897b2bf9f",
+      "vout": 1,
+      "scriptSig": {
+        "asm": "0014c1ac0d63d0258ea1b6fe90ef72d0c35d8d773dd3",
+        "hex": "160014c1ac0d63d0258ea1b6fe90ef72d0c35d8d773dd3"
+      },
+      "txinwitness": [
+        "3044022049e7f3015a33ccdb015fe3891667564fd37111272df57e58447645c7bad8fed0022074d1e93ba946453896d0f0bc500df3a1e0d5bb5ad10cd9906736d5fbaebadd5801",
+        "02fb255ed920db5c2f507289202eb60a160e5a067ee7e30199a4ed81b74c22e441"
+      ],
+      "sequence": 4294967295
+    }
+  ],
+  "vout": [
+    {
+      "value": 0.01800000,
+      "n": 0,
+      "scriptPubKey": {
+        "asm": "OP_DUP OP_HASH160 f73384bcc3951ab6a75541ff79a9a51f82056ed8 OP_EQUALVERIFY OP_CHECKSIG",
+        "hex": "76a914f73384bcc3951ab6a75541ff79a9a51f82056ed888ac",
+        "address": "n442v1DrXQNim9gjjctKjyGVoe717hNdtG",
+        "type": "pubkeyhash"
+      }
+    }
+  ],
+  "hex": "02000000000102249281f0b64b30e3920a819927b23f4c38ef2312e93d097f11264c8d78d512550100000017160014c1ac0d63d0258ea1b6fe90ef72d0c35d8d773dd3ffffffff9fbfb297e878af4a8c4a5b8463777f2d2166ce3ff137da722d2529e05450ad280100000017160014c1ac0d63d0258ea1b6fe90ef72d0c35d8d773dd3ffffffff0140771b00000000001976a914f73384bcc3951ab6a75541ff79a9a51f82056ed888ac024730440220543617c5f4504dc29d34d2d06d0d7733dac4ec418b77c67feefb29f3f82ba3d80220690b784c52c3375f4ba9e64cc5c0aeb6a1b9fc6aadda0062905c06ce3bbba575012102fb255ed920db5c2f507289202eb60a160e5a067ee7e30199a4ed81b74c22e44102473044022049e7f3015a33ccdb015fe3891667564fd37111272df57e58447645c7bad8fed0022074d1e93ba946453896d0f0bc500df3a1e0d5bb5ad10cd9906736d5fbaebadd58012102fb255ed920db5c2f507289202eb60a160e5a067ee7e30199a4ed81b74c22e44100000000",
+  "blockhash": "00000000025a711e6cd4bce9138dc852232a4494afbf36d8bb80499a786da2a4",
+  "confirmations": 1,
+  "time": 1633944124,
+  "blocktime": 1633944124
+};
+const wrappedP2wpkhTwoInputs = {
+  "txid": "c03119b538c78f56c8ce2e6cc5fc6998d447eeef42e34c12692764a3f1a3da7c",
+  "hash": "6b3812304554a6964e43a6971ac533046f4be101e39609f72179856916e20268",
+  "version": 2,
+  "size": 420,
+  "vsize": 257,
+  "weight": 1026,
+  "locktime": 0,
+  "vin": [
+    {
+      "txid": "9075ef8fd97f92ff0db344322873f12c42b29661c3960801e05114ba8adcabd6",
+      "vout": 0,
+      "scriptSig": {
+        "asm": "0014e4a7ff7c7e16cb6f15914938e2b92e2801220250",
+        "hex": "160014e4a7ff7c7e16cb6f15914938e2b92e2801220250"
+      },
+      "txinwitness": [
+        "30450221008a777087167aaeda51cf3532da368a7541630cd7274068ae4353aa1e9e32d7850220628ad0f414ae4cfb7a6dcd590b0e21e003b2ff638c5fc9aaad9b411783b03e3301",
+        "02de057221383ed65635568e38d4305d9120a4e68e205734a5f95a8feea3dd5f53"
+      ],
+      "sequence": 4294967293
+    },
+    {
+      "txid": "d36d3ba59981dab0dad0e02dafa9fa97ad51f4e5a47ffad3ad8544bdb251b70f",
+      "vout": 0,
+      "scriptSig": {
+        "asm": "001442721355859d8f2a461a5badfb19e59a61935692",
+        "hex": "16001442721355859d8f2a461a5badfb19e59a61935692"
+      },
+      "txinwitness": [
+        "3045022100e49eac220605239d702261c5929e4544e2d3ea70f3372527cee7f6cb31dabd24022015b67591a07e15a7a35ac5cc775e2abbc7fdf41983ad14438961e76029aee52c01",
+        "02783edf31f3a8845c6350d17a254a73561c02f1d00c69a8972fd91472c1920105"
+      ],
+      "sequence": 4294967293
+    }
+  ],
+  "vout": [
+    {
+      "value": 0.03532507,
+      "n": 0,
+      "scriptPubKey": {
+        "asm": "OP_HASH160 deb26fa74cb3bb95cd00213172397ec91c5fc9ba OP_EQUAL",
+        "hex": "a914deb26fa74cb3bb95cd00213172397ec91c5fc9ba87",
+        "address": "2NDYjkqA8jUpMAqU2rBaSumb5bqa41Ri5BM",
+        "type": "scripthash"
+      }
+    },
+    {
+      "value": 0.00069944,
+      "n": 1,
+      "scriptPubKey": {
+        "asm": "OP_HASH160 c0a4669d0b6fd3ce7b22e158ac160f2e656f2592 OP_EQUAL",
+        "hex": "a914c0a4669d0b6fd3ce7b22e158ac160f2e656f259287",
+        "address": "2NAopftKM5sNgM7AueL7Cin9NsFv8ykBkUA",
+        "type": "scripthash"
+      }
+    }
+  ],
+  "hex": "02000000000102d6abdc8aba1451e0010896c36196b2422cf173283244b30dff927fd98fef75900000000017160014e4a7ff7c7e16cb6f15914938e2b92e2801220250fdffffff0fb751b2bd4485add3fa7fa4e5f451ad97faa9af2de0d0dab0da8199a53b6dd3000000001716001442721355859d8f2a461a5badfb19e59a61935692fdffffff02dbe635000000000017a914deb26fa74cb3bb95cd00213172397ec91c5fc9ba87381101000000000017a914c0a4669d0b6fd3ce7b22e158ac160f2e656f259287024830450221008a777087167aaeda51cf3532da368a7541630cd7274068ae4353aa1e9e32d7850220628ad0f414ae4cfb7a6dcd590b0e21e003b2ff638c5fc9aaad9b411783b03e33012102de057221383ed65635568e38d4305d9120a4e68e205734a5f95a8feea3dd5f5302483045022100e49eac220605239d702261c5929e4544e2d3ea70f3372527cee7f6cb31dabd24022015b67591a07e15a7a35ac5cc775e2abbc7fdf41983ad14438961e76029aee52c012102783edf31f3a8845c6350d17a254a73561c02f1d00c69a8972fd91472c192010500000000",
+  "blockhash": "00000000025a711e6cd4bce9138dc852232a4494afbf36d8bb80499a786da2a4",
+  "confirmations": 1,
+  "time": 1633944124,
+  "blocktime": 1633944124
 };

@@ -1,4 +1,3 @@
-import { WitnessUtxo } from "bip174/src/lib/interfaces";
 import { crypto } from "bitcoinjs-lib";
 import { getXpubComponents, pathStringToArray, pubkeyFromXpub } from "./bip32";
 import { BufferReader } from "./buffertools";
@@ -6,17 +5,13 @@ import type { CreateTransactionArg } from "./createTransaction";
 import type { AddressFormat } from "./getWalletPublicKey";
 import { hashPublicKey } from "./hashPublicKey";
 import { AppClient as Client } from "./newops/appClient";
-import {
-  createKey,
-  DefaultDescriptorTemplate,
-  WalletPolicy,
-} from "./newops/policy";
+import { createKey, WalletPolicy } from "./newops/policy";
 import { extract } from "./newops/psbtExtractor";
 import { finalize } from "./newops/psbtFinalizer";
 import { psbtIn, PsbtV2 } from "./newops/psbtv2";
 import { serializeTransaction } from "./serializeTransaction";
 import type { Transaction } from "./types";
-import ecc from "tiny-secp256k1";
+import { pointCompress } from "tiny-secp256k1";
 
 export default class BtcNew {
   constructor(private client: Client) {}
@@ -44,7 +39,7 @@ export default class BtcNew {
     );
     const components = getXpubComponents(xpub);
     const uncompressedPubkey = Buffer.from(
-      ecc.pointCompress(components.pubkey, false)
+      pointCompress(components.pubkey, false)
     );
     return {
       publicKey: uncompressedPubkey.toString("hex"),
@@ -302,55 +297,9 @@ export default class BtcNew {
     return serializedTx.toString("hex");
   }
 
-  private desciptorTemplateFromPath(path: number[]): DefaultDescriptorTemplate {
-    if (path.length == 0) {
-      throw new Error(
-        "Path must not be empty. At least purpose element expected. Can't create descriptor template"
-      );
-    }
-    switch (path[0]) {
-      case 0x80000000 + 44:
-        // p2pkh
-        return "pkh(@0)";
-      case 0x80000000 + 48:
-        // p2sh
-        throw new Error("Non-segwit p2sh not implemented");
-      case 0x80000000 + 49:
-        // p2sh wrapped p2wphk
-        return "sh(wpkh(@0))";
-      case 0x80000000 + 84:
-        // p2wpkh
-        return "wpkh(@0)";
-      case 0x80000000 + 86:
-        // p2tr
-        return "tr(@0)";
-      default:
-        throw new Error(`Unexpected purpose ${path[0]}`);
-    }
-  }
-
   private createRedeemScript(pubkey: Buffer): Buffer {
     const pubkeyHash = hashPublicKey(pubkey);
     return Buffer.concat([Buffer.from("0014", "hex"), pubkeyHash]);
-  }
-
-  private createWitnessUtxo(
-    inputTx: Transaction,
-    outputIndex: number
-  ): WitnessUtxo {
-    if (!inputTx.outputs) {
-      throw Error("No outputs in spent tx");
-    }
-    if (inputTx.outputs.length <= outputIndex) {
-      throw Error(`Spent output index ${outputIndex} doesn't exist`);
-    }
-    const spentOutput = inputTx.outputs[outputIndex];
-    const amount = spentOutput.amount.readIntBE(0, 8);
-    const witnessUtxo: WitnessUtxo = {
-      script: spentOutput.script,
-      value: amount,
-    };
-    return witnessUtxo;
   }
 }
 

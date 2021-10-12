@@ -30,11 +30,13 @@
     "@ledgerhq/hw-transport": "^6.7.0",
     "@ledgerhq/logs": "^6.2.0",
     "bip32-path": "^0.4.2",
-    "bitcoinjs-lib": "5.2.0",
+    "bitcoinjs-lib": "^5.2.0",
     "invariant": "^2.2.4",
     "ripemd160": "2",
     "semver": "^7.3.5",
-    "sha.js": "2"
+    "sha.js": "2",
+    "tiny-secp256k1": "^2.0.0",
+    "varuint-bitcoin": "^1.1.2"
   },
   "scripts": {
     "clean": "bash ../../script/clean.sh",
