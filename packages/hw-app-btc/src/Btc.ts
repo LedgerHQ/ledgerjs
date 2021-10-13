@@ -46,14 +46,9 @@ export default class Btc {
    * @param arg derivation parameter
    * - path: a BIP 32 path of the account level. e.g. `84'/0'/0'`
    * - xpubVersion: the XPUBVersion of the coin used. (use @ledgerhq/currencies if needed)
-   * - index: index of the account
    * @returns XPUB of the account
    */
-  getWalletXpub(arg: {
-    path: string;
-    xpubVersion: number;
-    index: number;
-  }): Promise<string> {
+  getWalletXpub(arg: { path: string; xpubVersion: number }): Promise<string> {
     return this.getCorrectImpl().then((impl) => impl.getWalletXpub(arg));
   }
 

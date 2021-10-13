@@ -1,5 +1,10 @@
 import { crypto } from "bitcoinjs-lib";
-import { getXpubComponents, pathStringToArray, pubkeyFromXpub } from "./bip32";
+import {
+  getXpubComponents,
+  hardenedPathOf,
+  pathStringToArray,
+  pubkeyFromXpub,
+} from "./bip32";
 import { BufferReader } from "./buffertools";
 import type { CreateTransactionArg } from "./createTransaction";
 import type { AddressFormat } from "./getWalletPublicKey";
@@ -19,14 +24,19 @@ export default class BtcNew {
   async getWalletXpub({
     path,
     xpubVersion,
-    index,
   }: {
     path: string;
     xpubVersion: number;
-    index: number;
   }): Promise<string> {
-    console.log("todo implement", path, xpubVersion, index);
-    throw new Error("NOT IMPLEMENTED YET");
+    const pathElements: number[] = pathStringToArray(path);
+    const xpub = await this.client.getPubkey(false, pathElements);
+    const xpubComponents = getXpubComponents(xpub);
+    if (xpubComponents.version != xpubVersion) {
+      throw new Error(
+        `Expected xpub version ${xpubVersion} doesn't match the xpub version from the device ${xpubComponents.version}`
+      );
+    }
+    return xpub;
   }
 
   async getWalletPublicKey(
@@ -81,11 +91,10 @@ export default class BtcNew {
     accountType: AccountType,
     display: boolean
   ): Promise<string> {
-    const accountPathLength = this.accountPathLength(pathElements);
-    if (accountPathLength + 2 != pathElements.length) {
+    const accountPath = hardenedPathOf(pathElements);
+    if (accountPath.length + 2 != pathElements.length) {
       return "";
     }
-    const accountPath = pathElements.slice(0, accountPathLength);
     const accountXpub = await this.client.getPubkey(false, accountPath);
     const masterFingerprint = await this.client.getMasterFingerprint();
     const policy = new WalletPolicy(
@@ -100,15 +109,6 @@ export default class BtcNew {
       changeAndIndex[1],
       display
     );
-  }
-
-  private accountPathLength(pathElements: number[]): number {
-    for (let i = pathElements.length - 1; i >= 0; i--) {
-      if (pathElements[i] >= 0x80000000) {
-        return i + 1;
-      }
-    }
-    return 0;
   }
 
   /**

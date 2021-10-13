@@ -4,35 +4,132 @@ import {
 } from "@ledgerhq/hw-transport-mocker";
 import Btc from "../src/Btc";
 
-/*
 test("btc.getWalletXpub", async () => {
+  /*
+This is how I generate the xpub
+Mainnet:
+prv: 0x0488ade4 = 76066276
+pub: 0x0488b21e = 76067358
+Testnet:
+prv: 0x04358394 = 70615956
+pub: 0x043587cf = 70617039
+
+versionpriv=70615956
+versionpub=70617039
+seed=be388c569b4a6846c847e882e09f000000000000000000000000e255bcd17cb8
+m=`bx hd-new -v $versionpriv $seed`
+m_44h=`bx hd-private -d --index 44 $m`
+m_44h_0h=`bx hd-private -d --index 0 $m_44h`
+M_44h_0h=`bx hd-to-public -v $versionpub $m_44h_0h`
+m_44h_0h_17h=`bx hd-private -d --index 17 $m_44h_0h`
+M_44h_0h_17h=`bx hd-to-public -v $versionpub $m_44h_0h_17h`
+echo "M_44h_0h_17h xpub: $M_44h_0h_17h"
+echo "M_44h_0h: `bx base58check-decode $M_44h_0h`"
+echo "M_44h_0h_17h: `bx base58check-decode $M_44h_0h_17h`"
+
+Output (note that version (4) should be prepended to payload):
+M_44h_0h_17h xpub: tpubDDn3XrB65rhCzRh4fsD8gogX9gFvGcEmP3jZtGbdxK7Mn25gipFB68vLFyqZ43i4e5Z7p6rki7THyb2PeH1D3NkLm5EUFzbUzyafp872GKa
+M_44h_0h: wrapper
+{
+    checksum 2142374336
+    payload 3587cf026d874e2b800000008bd937d416de7020952cc8e2c99ce9ac7e01265e31ceb8e47bf9c3
+7f46f8abbd035d4a72237572a91e13818fa38cedabe6174569cc9a319012f75150d5c0a0639d
+    version 4
+}
+M_44h_0h_17h: wrapper
+{
+    checksum 4186623970
+    payload 3587cf03ee6e81fd80000011c071c6f2d05cbc9ea9a04951b238086ce1608cf00020c3cab85b36
+aac5fdd59102250dfdfb84c1efd160ed0e10ebac845d0e4b04277174630ba56de96bbd3afb21
+    version 4
+}
+
+The xpub bytes (from bip32) are
+4 byte: version bytes (mainnet: 0x0488B21E public, 0x0488ADE4 private; testnet: 0x043587CF public, 0x04358394 private)
+1 byte: depth: 0x00 for master nodes, 0x01 for level-1 derived keys, ....
+4 bytes: the fingerprint of the parent's key (0x00000000 if master key)
+4 bytes: child number. This is ser32(i) for i in xi = xpar/i, with xi the key being serialized. (0x00000000 if master key)
+32 bytes: the chain code
+33 bytes: the public key or private key data (serP(K) for public keys, 0x00 || ser256(k) for private keys)
+
+M_44h_0h_17h:
+043587cf
+03
+ee6e81fd
+80000011
+c071c6f2d05cbc9ea9a04951b238086ce1608cf00020c3cab85b36aac5fdd591
+02250dfdfb84c1efd160ed0e10ebac845d0e4b04277174630ba56de96bbd3afb21
+
+M_44h_0h:
+043587cf
+02
+6d874e2b
+80000000
+8bd937d416de7020952cc8e2c99ce9ac7e01265e31ceb8e47bf9c37f46f8abbd
+035d4a72237572a91e13818fa38cedabe6174569cc9a319012f75150d5c0a0639d
+
+Uncompress (a bit covoluted, but works):
+prv=`bx hd-to-ec -p $versionpriv $m_44h_0h_17h`
+bx ec-to-public -u ${prv:2}
+04250dfdfb84c1efd160ed0e10ebac845d0e4b04277174630ba56de96bbd3afb21fc6c04ce0d5a0cbd784fdabc99d16269c27cf3842fe8440f1f21b8af900f0eaa
+pubCompr=`bx ec-to-public ${prv:2}`
+bx ec-to-address $pubCompr
+16Y97ByhyboePhTYMMmFj1tq5Cy1bDq8jT
+
+prv=`bx hd-to-ec -p $versionpriv $m_44h_0h`
+bx ec-to-public -u ${prv:2}
+045d4a72237572a91e13818fa38cedabe6174569cc9a319012f75150d5c0a0639d54eafd13a68d079b7a67764800c6a981825ef52384f08c3925109188ab21bc09
+pubCompr=`bx ec-to-public ${prv:2}`
+bx ec-to-address $pubCompr
+1NjiCsVBuKDT62LmaUd7WZZZBK2gPAkisb
+
+These translates to
+  pubkeylen(1) || pubkeyuncompressed(65) || addrLen(1) || address || chaincode(32)
+
+Expected response for m/44'/0'/17':
+41
+04250dfdfb84c1efd160ed0e10ebac845d0e4b04277174630ba56de96bbd3afb21fc6c04ce0d5a0cbd784fdabc99d16269c27cf3842fe8440f1f21b8af900f0eaa
+22
+ascii(16Y97ByhyboePhTYMMmFj1tq5Cy1bDq8jT)
+c071c6f2d05cbc9ea9a04951b238086ce1608cf00020c3cab85b36aac5fdd591
+
+Expected response for m/44'/0':
+41
+045d4a72237572a91e13818fa38cedabe6174569cc9a319012f75150d5c0a0639d54eafd13a68d079b7a67764800c6a981825ef52384f08c3925109188ab21bc09
+22
+ascii(1NjiCsVBuKDT62LmaUd7WZZZBK2gPAkisb)
+8bd937d416de7020952cc8e2c99ce9ac7e01265e31ceb8e47bf9c37f46f8abbd
+*/
+  /*eslint-disable */
+  const pubkeyParent = "045d4a72237572a91e13818fa38cedabe6174569cc9a319012f75150d5c0a0639d54eafd13a68d079b7a67764800c6a981825ef52384f08c3925109188ab21bc09";
+  const addrParent = Buffer.from("1NjiCsVBuKDT62LmaUd7WZZZBK2gPAkisb", "ascii").toString("hex");
+  const ccParent = "8bd937d416de7020952cc8e2c99ce9ac7e01265e31ceb8e47bf9c37f46f8abbd";
+  const responseParent = `41${pubkeyParent}22${addrParent}${ccParent}`;
+
+  const pubkeyAcc = "04250dfdfb84c1efd160ed0e10ebac845d0e4b04277174630ba56de96bbd3afb21fc6c04ce0d5a0cbd784fdabc99d16269c27cf3842fe8440f1f21b8af900f0eaa";
+  const addrAcc = Buffer.from("16Y97ByhyboePhTYMMmFj1tq5Cy1bDq8jT", "ascii").toString("hex");
+  const ccAcc = "c071c6f2d05cbc9ea9a04951b238086ce1608cf00020c3cab85b36aac5fdd591";
+  /*eslint-enable */
+  const responseAcc = `41${pubkeyAcc}22${addrAcc}${ccAcc}`;
   const transport = await openTransportReplayer(
     RecordStore.fromString(`
     => b001000000
     <= 0107426974636f696e06312e332e323301029000
-    => e040000209028000005480000000
-    <= 41043188c7e9e184aa3f6c2967b9b2b19a5966efe88c526ac091687642540573ecfb4c988261e7b0b876c6aec0b393518676232b34289a5bfc0cc78cc2ef735fa5122a626331713636353767686b3368306e75786b717466716a6c383637637771796a6e63777677346c66386ccdddd55f0385b0a53a4803e47f24df989a42b4e3b0b1dda17c41f4381e5301cb9000
-    => e016000000
-    <= 000000050107426974636f696e034254439000
-    => e040000209028000005480000000
-    <= 41043188c7e9e184aa3f6c2967b9b2b19a5966efe88c526ac091687642540573ecfb4c988261e7b0b876c6aec0b393518676232b34289a5bfc0cc78cc2ef735fa5122a626331713636353767686b3368306e75786b717466716a6c383637637771796a6e63777677346c66386ccdddd55f0385b0a53a4803e47f24df989a42b4e3b0b1dda17c41f4381e5301cb9000
-    => e04000020d03800000548000000080000000
-    <= 4104985c77e031db7909b5bab541828faac7719bc3ac205907da16f379e693eb012217195cbb49c53854d1bfec204470abc73ab4fb51338653e5236c6a6ae57d34422a62633171723561783039386b6a73706a396c3737797a3234746e3733737878776d736367617479756533529d8a9f14d7c1b543bd6f288f167b3232e03fec8fe88746d74e958d1a101a489000  
+    => e040000009028000002c80000000
+    <= ${responseParent}9000
+    => e04000000d038000002c8000000080000011
+    <= ${responseAcc}9000  
     `)
   );
   const btc = new Btc(transport);
-  try {
-    const result = await btc.getWalletXpub({
-      path: "84'/0'/0'",
-      xpubVersion: 0x0488b21e,
-      index: 0,
-    });
-    expect(result).toEqual("");
-  } catch (e) {
-    console.log(e);
-  }
+  const result = await btc.getWalletXpub({
+    path: "44'/0'/17'",
+    xpubVersion: 0x043587cf, // mainnet
+  });
+  const expectedXpub =
+    "tpubDDn3XrB65rhCzRh4fsD8gogX9gFvGcEmP3jZtGbdxK7Mn25gipFB68vLFyqZ43i4e5Z7p6rki7THyb2PeH1D3NkLm5EUFzbUzyafp872GKa";
+  expect(result).toEqual(expectedXpub);
 });
-*/
 
 test("btc.getWalletPublicKey", async () => {
   const transport = await openTransportReplayer(

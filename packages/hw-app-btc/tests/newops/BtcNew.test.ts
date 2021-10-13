@@ -43,6 +43,12 @@ test("getWalletPublicKey p2tr", async () => {
   await testGetWalletPublicKey("m/17'", "tr(@0)");
 });
 
+test("getWalletXpub normal path", async () => {
+  await testGetWalletXpub("m/11'/12'");
+  await testGetWalletXpub("m/11");
+  await testGetWalletXpub("m/44'/0'/0'");
+});
+
 test("Sign p2pkh", async () => {
   await runSignTransactionTest(p2pkh);
 });
@@ -195,6 +201,15 @@ function createInput(coreInput: CoreInput, btc: Btc): [Transaction, number, stri
 async function createClient(): Promise<[MockClient, TransportReplayer]> {
   const transport = await openTransportReplayer(RecordStore.fromString(""));
   return [new MockClient(transport), transport];
+}
+
+async function testGetWalletXpub(path: string, version = 0x043587cf) {
+  const [client] = await createClient();
+  const expectedXpub = "tpubDCwYjpDhUdPGP5rS3wgNg13mTrrjBuG8V9VpWbyptX6TRPbNoZVXsoVUSkCjmQ8jJycjuDKBb9eataSymXakTTaGifxR6kmVsfFehH1ZgJT";
+  client.mockGetPubkeyResponse(path, expectedXpub);
+  const btc = new BtcNew(client);
+  const result = await btc.getWalletXpub({path: path, xpubVersion: version});
+  expect(result).toEqual(expectedXpub);
 }
 async function testGetWalletPublicKey(
   accountPath: string,

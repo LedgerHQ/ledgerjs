@@ -9,6 +9,7 @@ import { getWalletPublicKey } from "./getWalletPublicKey";
 import { signMessage } from "./signMessage";
 import type { SignP2SHTransactionArg } from "./signP2SHTransaction";
 import { signP2SHTransaction } from "./signP2SHTransaction";
+import { pathArrayToString, pathStringToArray } from "./bip32";
 export type { AddressFormat };
 
 /**
@@ -29,14 +30,14 @@ export default class BtcOld {
   async getWalletXpub({
     path,
     xpubVersion,
-    index,
   }: {
     path: string;
     xpubVersion: number;
-    index: number;
   }): Promise<string> {
+    const pathElements = pathStringToArray(path);
+    const parentPath = pathElements.slice(0, -1);
     const parentDerivation = await getWalletPublicKey(this.transport, {
-      path: path.split("/").slice(0, 2).join("/"),
+      path: pathArrayToString(parentPath),
     });
     const accountDerivation = await getWalletPublicKey(this.transport, {
       path,
@@ -44,16 +45,14 @@ export default class BtcOld {
     const fingerprint = makeFingerprint(
       compressPublicKeySECP256(Buffer.from(parentDerivation.publicKey, "hex"))
     );
-    const xpub = makeXpub({
-      version: xpubVersion,
-      depth: 3,
-      parentFingerprint: fingerprint,
-      index,
-      chainCode: Buffer.from(accountDerivation.chainCode, "hex"),
-      pubKey: compressPublicKeySECP256(
-        Buffer.from(accountDerivation.publicKey, "hex")
-      ),
-    });
+    const xpub = makeXpub(
+      xpubVersion,
+      pathElements.length,
+      fingerprint,
+      pathElements[pathElements.length - 1],
+      Buffer.from(accountDerivation.chainCode, "hex"),
+      compressPublicKeySECP256(Buffer.from(accountDerivation.publicKey, "hex"))
+    );
     return xpub;
   }
 
@@ -194,7 +193,7 @@ function makeFingerprint(compressedPubKey) {
   return hash160(compressedPubKey).slice(0, 4);
 }
 
-function asBufferUInt32BE(n) {
+function asBufferUInt32BE(n: number): Buffer {
   const buf = Buffer.allocUnsafe(4);
   buf.writeUInt32BE(n, 0);
   return buf;
@@ -206,14 +205,14 @@ const compressPublicKeySECP256 = (publicKey: Buffer) =>
     publicKey.slice(1, 33),
   ]);
 
-function makeXpub({
-  version,
-  depth,
-  parentFingerprint,
-  index,
-  chainCode,
-  pubKey,
-}) {
+function makeXpub(
+  version: number,
+  depth: number,
+  parentFingerprint: Buffer,
+  index: number,
+  chainCode: Buffer,
+  pubKey: Buffer
+) {
   const indexBuffer = asBufferUInt32BE(index);
   indexBuffer[0] |= 0x80;
   const extendedKeyBytes = Buffer.concat([

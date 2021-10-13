@@ -33,10 +33,20 @@ export function pubkeyFromXpub(xpub: string): Buffer {
 
 export function getXpubComponents(
   xpub: string
-): { chaincode: Buffer; pubkey: Buffer } {
-  const xpubBuf = bs58check.decode(xpub);
+): { chaincode: Buffer; pubkey: Buffer, version: number } {
+  const xpubBuf: Buffer = bs58check.decode(xpub);
   return {
     chaincode: xpubBuf.slice(13, 13 + 32),
     pubkey: xpubBuf.slice(xpubBuf.length - 33),
+    version: xpubBuf.readUInt32BE(0),
   };
+}
+
+export function hardenedPathOf(pathElements: number[]): number[] {
+  for (let i = pathElements.length - 1; i >= 0; i--) {
+    if (pathElements[i] >= 0x80000000) {
+      return pathElements.slice(0, i + 1);
+    }
+  }
+  return [];
 }
