@@ -12,7 +12,7 @@ const CLA_FRAMEWORK = 0xf8;
 
 enum BitcoinIns {
   GET_PUBKEY = 0x00,
-  // GET_ADDRESS = 0x01,
+  // GET_ADDRESS = 0x01, // Removed from app
   REGISTER_WALLET = 0x02,
   GET_WALLET_ADDRESS = 0x03,
   SIGN_PSBT = 0x04,
