@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-app-btc",
-  "version": "6.7.0",
+  "version": "6.9.1-taproot.0",
   "description": "Ledger Hardware Wallet Bitcoin Application API",
   "keywords": [
     "Ledger",
@@ -27,8 +27,8 @@
   "types": "lib/Btc.d.ts",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/hw-transport": "^6.7.0",
-    "@ledgerhq/logs": "^6.2.0",
+    "@ledgerhq/hw-transport": "^6.9.1-taproot.0",
+    "@ledgerhq/logs": "^6.9.1-taproot.0",
     "bip32-path": "^0.4.2",
     "bitcoinjs-lib": "^5.2.0",
     "bs58": "^4.0.1",
