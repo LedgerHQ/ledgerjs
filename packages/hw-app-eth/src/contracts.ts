@@ -40,51 +40,132 @@ export const loadInfosForContractMethod = async (
 
   const nftInfo = await getNFTInfo(contractAddress, chainId);
   if (nftInfo) {
+    const contractBuffer = Buffer.from(contractAddress.slice(2), "hex");
+    const selectorBuffer = Buffer.from(selector.slice(2), "hex");
+
+    // Placeholder
+    const erc721 = Buffer.from([0x06, 0x45, 0x52, 0x43, 0x37, 0x32, 0x31]); // "ERC721"
+    // Placeholder
+    const sig = Buffer.from([
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+      42,
+    ]);
+
+    const payload = Buffer.concat([
+      erc721,
+      contractBuffer,
+      selectorBuffer,
+      sig,
+    ]).toString("hex");
+
     return {
-      payload: nftInfo.data.toString("hex"),
+      payload: payload,
       signature: "",
-      plugin: "ERC721",
+      plugin: "ERC721", // placeholder
       erc20OfInterest: [],
       abi: null,
     };
-  }
+  } else {
+    let data = !baseURL
+      ? {}
+      : await axios
+          .get(`${baseURL}/plugins/ethereum.json`)
+          .then((r) => r.data)
+          .catch((e) => {
+            if (
+              e.response &&
+              400 <= e.response.status &&
+              e.response.status < 500
+            ) {
+              return null; // not found cases can be ignored to allow future changes in endpoint without failing a signature to be done.
+            }
+            throw e;
+          });
 
-  let data = !baseURL
-    ? {}
-    : await axios
-        .get(`${baseURL}/plugins/ethereum.json`)
-        .then((r) => r.data)
-        .catch((e) => {
-          if (
-            e.response &&
-            400 <= e.response.status &&
-            e.response.status < 500
-          ) {
-            return null; // not found cases can be ignored to allow future changes in endpoint without failing a signature to be done.
-          }
-          throw e;
-        });
+    if (extraPlugins) {
+      data = { ...data, ...extraPlugins };
+    }
 
-  if (extraPlugins) {
-    data = { ...data, ...extraPlugins };
-  }
+    if (!data) return;
 
-  if (!data) return;
+    const lcSelector = selector.toLowerCase();
+    const lcContractAddress = contractAddress.toLowerCase();
 
-  const lcSelector = selector.toLowerCase();
-  const lcContractAddress = contractAddress.toLowerCase();
+    if (lcContractAddress in data) {
+      const contractSelectors = data[lcContractAddress];
 
-  if (lcContractAddress in data) {
-    const contractSelectors = data[lcContractAddress];
-
-    if (lcSelector in contractSelectors) {
-      return {
-        payload: contractSelectors[lcSelector]["serialized_data"],
-        signature: contractSelectors[lcSelector]["signature"],
-        plugin: contractSelectors[lcSelector]["plugin"],
-        erc20OfInterest: contractSelectors[lcSelector]["erc20OfInterest"],
-        abi: contractSelectors["abi"],
-      };
+      if (lcSelector in contractSelectors) {
+        return {
+          payload: contractSelectors[lcSelector]["serialized_data"],
+          signature: contractSelectors[lcSelector]["signature"],
+          plugin: contractSelectors[lcSelector]["plugin"],
+          erc20OfInterest: contractSelectors[lcSelector]["erc20OfInterest"],
+          abi: contractSelectors["abi"],
+        };
+      }
     }
   }
 };

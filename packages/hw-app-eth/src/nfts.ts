@@ -7,13 +7,14 @@ type NftInfo = {
 };
 
 const BACKEND_URL = "https://nft.staging.aws.ledger.fr/v1/chains/";
+const ETHEREUM_MAINNET = 1;
 
 export const getNFTInfo = async (
   contractAddress: string,
   chainId: number
 ): Promise<NftInfo | undefined> => {
   let chain = "";
-  if (chainId == 1) {
+  if (chainId == ETHEREUM_MAINNET) {
     chain = "eth";
   }
 
@@ -22,22 +23,23 @@ export const getNFTInfo = async (
     .get(url)
     .then((r) => r.data)
     .catch((e) => {
-      if (e.response && 400 <= e.response.status && e.response.status < 500) {
-        return null; // not found cases can be ignored to allow future changes in endpoint without failing a signature to be done.
+      if (e.response && 400 <= e.response.status && e.response.status <= 504) {
+        return null; // not found cases can be ignored to allow fall back to blind signing.
       }
       throw e;
     });
-  if (data.length < 3) {
+  if (!data) {
     return;
   }
 
   let j = 2;
-  const collectionNameLength = data.slice(j, j + 1);
+  const payload = data["payload"];
+  const collectionNameLength = payload.slice(j, j + 1);
   j += 1;
-  const collectionName = data.slice(j, j + collectionNameLength).toString();
+  const collectionName = payload.slice(j, j + collectionNameLength).toString();
   return {
     contractAddress: contractAddress,
     collectionName: collectionName,
-    data: data,
+    data: Buffer.from(payload, "hex"),
   };
 };
