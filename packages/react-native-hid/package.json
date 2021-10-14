@@ -43,9 +43,8 @@
     "react-native": "*"
   },
   "scripts": {
-    "peers": "add-no-save --peer-deps",
     "clean": "bash ../../script/clean.sh",
-    "build": "yarn peers && bash ../../script/build.sh",
+    "build": "bash ../../script/build.sh",
     "watch": "bash ../../script/watch.sh",
     "doc": "bash ../../script/doc.sh"
   },
