@@ -141,6 +141,7 @@ export default class Btc {
    * @param additionals list of additionnal options
    *
    * - "bech32" for spending native segwit outputs
+   * - "bech32m" for spending native segwit outputs
    * - "abc" for bch
    * - "gold" for btg
    * - "bipxxx" for using BIPxxx

@@ -63,13 +63,12 @@ export function finalize(psbt: PsbtV2): void {
       if (!signature) {
         throw Error("No taproot signature found");
       }
-      if (signature.length != 64) {
+      if (signature.length != 64 && signature.length != 65) {
         throw Error("Unexpected length of schnorr signature.");
       }
       const witnessBuf = new BufferWriter();
       witnessBuf.writeVarInt(1);
-      witnessBuf.writeVarInt(64);
-      witnessBuf.writeSlice(signature);
+      witnessBuf.writeVarSlice(signature);
       psbt.setInputFinalScriptwitness(i, witnessBuf.buffer());
     }
     clearFinalizedInput(psbt, i);
