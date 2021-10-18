@@ -2143,10 +2143,22 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       {
         name: "SOL",
         code: "SOL",
-        magnitude: 8,
+        magnitude: 9,
+      },
+      {
+        name: "lamports",
+        code: "lamports",
+        magnitude: 0,
       },
     ],
-    explorerViews: [],
+    explorerViews: [
+      {
+        address: "https://explorer.solana.com/",
+      },
+      {
+        address: "https://solanabeach.io/",
+      },
+    ],
   },
   stakenet: {
     type: "CryptoCurrency",
