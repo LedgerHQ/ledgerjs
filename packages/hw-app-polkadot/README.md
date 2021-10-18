@@ -13,13 +13,13 @@ Ledger Hardware Wallet Polkadot JavaScript bindings.
 
 #### Table of Contents
 
--   [Polkadot](#polkadot)
-    -   [Parameters](#parameters)
-    -   [Examples](#examples)
-    -   [getAddress](#getaddress)
-        -   [Parameters](#parameters-1)
-    -   [sign](#sign)
-        -   [Parameters](#parameters-2)
+*   [Polkadot](#polkadot)
+    *   [Parameters](#parameters)
+    *   [Examples](#examples)
+    *   [getAddress](#getaddress)
+        *   [Parameters](#parameters-1)
+    *   [sign](#sign)
+        *   [Parameters](#parameters-2)
 
 ### Polkadot
 
@@ -27,7 +27,7 @@ Polkadot API
 
 #### Parameters
 
--   `transport` **Transport** 
+*   `transport` **Transport** 
 
 #### Examples
 
@@ -40,10 +40,10 @@ const polkadot = new Polkadot(transport)
 
 ##### Parameters
 
--   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
--   `requireConfirmation` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** if true, user must valid if the address is correct on the device (optional, default `false`)
+*   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `requireConfirmation` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** if true, user must valid if the address is correct on the device (optional, default `false`)
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{pubKey: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), address: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), return_code: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)}>** 
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{pubKey: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), address: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), return_code: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)}>** 
 
 #### sign
 
@@ -51,7 +51,7 @@ Sign a payload
 
 ##### Parameters
 
--   `path` **any** 
--   `message` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** payload
+*   `path` **any** 
+*   `message` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** payload
 
 Returns **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** signed payload to be broadcasted

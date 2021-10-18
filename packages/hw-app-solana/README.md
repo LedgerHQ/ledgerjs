@@ -25,17 +25,17 @@ If ledger returns error `6808` - enable blind signature in settings (not needed 
 
 #### Table of Contents
 
--   [Solana](#solana)
-    -   [Parameters](#parameters)
-    -   [Examples](#examples)
-    -   [getAddress](#getaddress)
-        -   [Parameters](#parameters-1)
-        -   [Examples](#examples-1)
-    -   [signTransaction](#signtransaction)
-        -   [Parameters](#parameters-2)
-        -   [Examples](#examples-2)
-    -   [getAppConfiguration](#getappconfiguration)
-        -   [Examples](#examples-3)
+*   [Solana](#solana)
+    *   [Parameters](#parameters)
+    *   [Examples](#examples)
+    *   [getAddress](#getaddress)
+        *   [Parameters](#parameters-1)
+        *   [Examples](#examples-1)
+    *   [signTransaction](#signtransaction)
+        *   [Parameters](#parameters-2)
+        *   [Examples](#examples-2)
+    *   [getAppConfiguration](#getappconfiguration)
+        *   [Examples](#examples-3)
 
 ### Solana
 
@@ -43,8 +43,8 @@ Solana API
 
 #### Parameters
 
--   `transport` **Transport** a transport for sending commands to a device
--   `scrambleKey` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a scramble key (optional, default `"solana_default_scramble_key"`)
+*   `transport` **Transport** a transport for sending commands to a device
+*   `scrambleKey` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a scramble key (optional, default `"solana_default_scramble_key"`)
 
 #### Examples
 
@@ -62,8 +62,8 @@ all derivation-path indexes will be promoted to hardened indexes.
 
 ##### Parameters
 
--   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a BIP32 path
--   `display` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** flag to show display (optional, default `false`)
+*   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a BIP32 path
+*   `display` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** flag to show display (optional, default `false`)
 
 ##### Examples
 
@@ -71,7 +71,7 @@ all derivation-path indexes will be promoted to hardened indexes.
 solana.getAddress("44'/501'/0'").then(r => r.address)
 ```
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{address: [Buffer](https://nodejs.org/api/buffer.html)}>** an object with the address field
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{address: [Buffer](https://nodejs.org/api/buffer.html)}>** an object with the address field
 
 #### signTransaction
 
@@ -79,8 +79,8 @@ Sign a Solana transaction.
 
 ##### Parameters
 
--   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a BIP32 path
--   `txBuffer` **[Buffer](https://nodejs.org/api/buffer.html)** serialized transaction
+*   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a BIP32 path
+*   `txBuffer` **[Buffer](https://nodejs.org/api/buffer.html)** serialized transaction
 
 ##### Examples
 
@@ -88,7 +88,7 @@ Sign a Solana transaction.
 solana.signTransaction("44'/501'/0'", txBuffer).then(r => r.signature)
 ```
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{signature: [Buffer](https://nodejs.org/api/buffer.html)}>** an object with the signature field
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{signature: [Buffer](https://nodejs.org/api/buffer.html)}>** an object with the signature field
 
 #### getAppConfiguration
 
@@ -100,4 +100,4 @@ Get application configuration.
 solana.getAppConfiguration().then(r => r.version)
 ```
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;AppConfig>** application config object
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<AppConfig>** application config object
