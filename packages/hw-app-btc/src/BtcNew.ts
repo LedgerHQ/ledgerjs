@@ -1,4 +1,6 @@
 import { crypto } from "bitcoinjs-lib";
+import { pointCompress, pointAddScalar } from "tiny-secp256k1";
+import semver from "semver";
 import {
   getXpubComponents,
   hardenedPathOf,
@@ -17,7 +19,6 @@ import { finalize } from "./newops/psbtFinalizer";
 import { psbtIn, PsbtV2 } from "./newops/psbtv2";
 import { serializeTransaction } from "./serializeTransaction";
 import type { Transaction } from "./types";
-import { pointCompress, pointAddScalar } from "tiny-secp256k1";
 import {
   HASH_SIZE,
   OP_CHECKSIG,
@@ -26,8 +27,16 @@ import {
   OP_EQUALVERIFY,
   OP_HASH160,
 } from "./constants";
+import { AppAndVersion } from "./getAppAndVersion";
 
-export const newSupportedApps = ["Bitcoin", "Bitcoin Test"];
+const newSupportedApps = ["Bitcoin", "Bitcoin Test"];
+
+export function canSupportApp(appAndVersion: AppAndVersion): boolean {
+  return (
+    newSupportedApps.includes(appAndVersion.name) &&
+    semver.major(appAndVersion.version) >= 2
+  );
+}
 
 export default class BtcNew {
   constructor(private client: Client) {}

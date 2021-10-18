@@ -1,6 +1,5 @@
 import type Transport from "@ledgerhq/hw-transport";
-import semver from "semver";
-import BtcNew, { newSupportedApps } from "./BtcNew";
+import BtcNew, { canSupportApp } from "./BtcNew";
 import BtcOld from "./BtcOld";
 import type { CreateTransactionArg } from "./createTransaction";
 import { getAppAndVersion } from "./getAppAndVersion";
@@ -258,9 +257,7 @@ export default class Btc {
 
   private async inferCorrectImpl(): Promise<BtcOld | BtcNew> {
     const appAndVersion = await getAppAndVersion(this.transport);
-    const canUseNewImplementation =
-      newSupportedApps.includes(appAndVersion.name) &&
-      semver.major(appAndVersion.version) >= 2;
+    const canUseNewImplementation = canSupportApp(appAndVersion);
     if (!canUseNewImplementation) {
       return new BtcOld(this.transport);
     } else {
