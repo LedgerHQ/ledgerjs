@@ -17,11 +17,12 @@ import { finalize } from "./newops/psbtFinalizer";
 import { psbtIn, PsbtV2 } from "./newops/psbtv2";
 import { serializeTransaction } from "./serializeTransaction";
 import type { Transaction } from "./types";
-import { pointCompress } from "tiny-secp256k1";
+import { pointCompress, pointAddScalar } from "tiny-secp256k1";
 import {
   HASH_SIZE,
   OP_CHECKSIG,
   OP_DUP,
+  OP_EQUAL,
   OP_EQUALVERIFY,
   OP_HASH160,
 } from "./constants";
@@ -200,6 +201,7 @@ export default class BtcNew {
       arg.changePath
     );
     psbt.setGlobalOutputCount(outputCount);
+    let changeFound = !changeData;
     for (let i = 0; i < outputCount; i++) {
       const amount = Number(outputsBufferReader.readUInt64());
       const outputScript = outputsBufferReader.readVarSlice();
@@ -207,8 +209,11 @@ export default class BtcNew {
       // We won't know if we're paying to ourselves, because
       // there's no information in the input arg to support this.
       // We only have the changePath.
+      // One exception is if there are multiple outputs to the
+      // change address.
       const isChange = changeData && outputScript.equals(changeData?.script);
       if (isChange) {
+        changeFound = true;
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const changePath = pathStringToArray(arg.changePath!);
         const pubkey = changeData.pubkey;
@@ -227,6 +232,12 @@ export default class BtcNew {
       }
       psbt.setOutputAmount(i, amount);
       psbt.setOutputScript(i, outputScript);
+    }
+    if (!changeFound) {
+      throw new Error(
+        "Change script not found among outputs! " +
+          changeData?.script.toString("hex")
+      );
     }
 
     const key = createKey(masterFp, accountPath, accountXpub);
@@ -377,15 +388,17 @@ function outputScriptOf(
   } else if (accountType == AccountType.p2wpkhWrapped) {
     redeemScript = createRedeemScript(pubkey);
     const scriptHash = hashPublicKey(redeemScript);
-    buf.writeSlice(Buffer.of(OP_DUP, HASH_SIZE));
+    buf.writeSlice(Buffer.of(OP_HASH160, HASH_SIZE));
     buf.writeSlice(scriptHash);
-    buf.writeUInt8(OP_EQUALVERIFY);
+    buf.writeUInt8(OP_EQUAL);
   } else if (accountType == AccountType.p2wpkh) {
     buf.writeSlice(Buffer.of(0, HASH_SIZE));
     buf.writeSlice(pubkeyHash);
   } else if (accountType == AccountType.p2tr) {
-    buf.writeSlice(Buffer.of(1, 32));
-    buf.writeSlice(pubkey);
+    console.log("Internal key: " + pubkey.toString("hex"));
+    const outputKey = getTaprootOutputKey(pubkey);
+    buf.writeSlice(Buffer.of(0x51, 32)); // push1, pubkeylen
+    buf.writeSlice(outputKey);
   }
   return { script: buf.buffer(), redeemScript };
 }
@@ -403,4 +416,34 @@ function accountTypeFromArg(arg: CreateTransactionArg): AccountType {
   if (arg.additionals.includes("bech32")) return AccountType.p2wpkh;
   if (arg.segwit) return AccountType.p2wpkhWrapped;
   return AccountType.p2pkh;
+}
+
+/*
+The following two functions are copied from wallet-btc and adapte.
+They should be moved to a library to avoid code reuse. 
+*/
+function hashTapTweak(x: Buffer): Buffer {
+  // hash_tag(x) = SHA256(SHA256(tag) || SHA256(tag) || x), see BIP340
+  // See https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki#specification
+  const h = crypto.sha256(Buffer.from("TapTweak", "utf-8"));
+  return crypto.sha256(Buffer.concat([h, h, x]));
+}
+
+function getTaprootOutputKey(internalPubkey: Buffer): Buffer {
+  if (internalPubkey.length != 32) {
+    throw new Error("Expected 32 byte pubkey. Got " + internalPubkey.length);
+  }
+  // A BIP32 derived key can be converted to a schnorr pubkey by dropping
+  // the first byte, which represent the oddness/evenness. In schnorr all
+  // pubkeys are even.
+  // https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki#public-key-conversion
+  const evenEcdsaPubkey = Buffer.concat([Buffer.of(0x02), internalPubkey]);
+  const tweak = hashTapTweak(internalPubkey);
+
+  // Q = P + int(hash_TapTweak(bytes(P)))G
+  const outputEcdsaKey = Buffer.from(pointAddScalar(evenEcdsaPubkey, tweak));
+  // Convert to schnorr.
+  const outputSchnorrKey = outputEcdsaKey.slice(1);
+  // Create address
+  return outputSchnorrKey;
 }
