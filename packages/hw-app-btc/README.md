@@ -13,38 +13,64 @@ Ledger Hardware Wallet BTC JavaScript bindings. Also supports many altcoins.
 
 #### Table of Contents
 
--   [Btc](#btc)
-    -   [Parameters](#parameters)
-    -   [Examples](#examples)
-    -   [getWalletPublicKey](#getwalletpublickey)
-        -   [Parameters](#parameters-1)
-        -   [Examples](#examples-1)
-    -   [signMessageNew](#signmessagenew)
-        -   [Parameters](#parameters-2)
-        -   [Examples](#examples-2)
-    -   [createPaymentTransactionNew](#createpaymenttransactionnew)
-        -   [Parameters](#parameters-3)
-        -   [Examples](#examples-3)
-    -   [signP2SHTransaction](#signp2shtransaction)
-        -   [Parameters](#parameters-4)
-        -   [Examples](#examples-4)
-    -   [splitTransaction](#splittransaction)
-        -   [Parameters](#parameters-5)
-        -   [Examples](#examples-5)
-    -   [serializeTransactionOutputs](#serializetransactionoutputs)
-        -   [Parameters](#parameters-6)
-        -   [Examples](#examples-6)
--   [CreateTransactionArg](#createtransactionarg)
-    -   [Properties](#properties)
--   [AddressFormat](#addressformat)
--   [serializeTransactionOutputs](#serializetransactionoutputs-1)
-    -   [Parameters](#parameters-7)
-    -   [Examples](#examples-7)
--   [SignP2SHTransactionArg](#signp2shtransactionarg)
-    -   [Properties](#properties-1)
--   [TransactionInput](#transactioninput)
--   [TransactionOutput](#transactionoutput)
--   [Transaction](#transaction)
+*   [Btc](#btc)
+    *   [Parameters](#parameters)
+    *   [Examples](#examples)
+    *   [getWalletXpub](#getwalletxpub)
+        *   [Parameters](#parameters-1)
+    *   [getWalletPublicKey](#getwalletpublickey)
+        *   [Parameters](#parameters-2)
+        *   [Examples](#examples-1)
+    *   [signMessageNew](#signmessagenew)
+        *   [Parameters](#parameters-3)
+        *   [Examples](#examples-2)
+    *   [createPaymentTransactionNew](#createpaymenttransactionnew)
+        *   [Parameters](#parameters-4)
+        *   [Examples](#examples-3)
+    *   [signP2SHTransaction](#signp2shtransaction)
+        *   [Parameters](#parameters-5)
+        *   [Examples](#examples-4)
+    *   [splitTransaction](#splittransaction)
+        *   [Parameters](#parameters-6)
+        *   [Examples](#examples-5)
+    *   [serializeTransactionOutputs](#serializetransactionoutputs)
+        *   [Parameters](#parameters-7)
+        *   [Examples](#examples-6)
+*   [createPaymentTransactionNew](#createpaymenttransactionnew-1)
+    *   [Parameters](#parameters-8)
+    *   [Examples](#examples-7)
+*   [BtcOld](#btcold)
+    *   [Parameters](#parameters-9)
+    *   [Examples](#examples-8)
+    *   [getWalletPublicKey](#getwalletpublickey-1)
+        *   [Parameters](#parameters-10)
+        *   [Examples](#examples-9)
+    *   [signMessageNew](#signmessagenew-1)
+        *   [Parameters](#parameters-11)
+        *   [Examples](#examples-10)
+    *   [createPaymentTransactionNew](#createpaymenttransactionnew-2)
+        *   [Parameters](#parameters-12)
+        *   [Examples](#examples-11)
+    *   [signP2SHTransaction](#signp2shtransaction-1)
+        *   [Parameters](#parameters-13)
+        *   [Examples](#examples-12)
+*   [CreateTransactionArg](#createtransactionarg)
+    *   [Properties](#properties)
+*   [AddressFormat](#addressformat)
+*   [constructor](#constructor)
+    *   [Parameters](#parameters-14)
+*   [constructor](#constructor-1)
+    *   [Parameters](#parameters-15)
+*   [finalize](#finalize)
+    *   [Parameters](#parameters-16)
+*   [serializeTransactionOutputs](#serializetransactionoutputs-1)
+    *   [Parameters](#parameters-17)
+    *   [Examples](#examples-13)
+*   [SignP2SHTransactionArg](#signp2shtransactionarg)
+    *   [Properties](#properties-1)
+*   [TransactionInput](#transactioninput)
+*   [TransactionOutput](#transactionoutput)
+*   [Transaction](#transaction)
 
 ### Btc
 
@@ -52,8 +78,8 @@ Bitcoin API.
 
 #### Parameters
 
--   `transport` **Transport** 
--   `scrambleKey`   (optional, default `"BTC"`)
+*   `transport` **Transport** 
+*   `scrambleKey`   (optional, default `"BTC"`)
 
 #### Examples
 
@@ -62,21 +88,32 @@ import Btc from "@ledgerhq/hw-app-btc";
 const btc = new Btc(transport)
 ```
 
+#### getWalletXpub
+
+Get an XPUB with a ledger device
+
+##### Parameters
+
+*   `arg` **{path: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), xpubVersion: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)}** derivation parameter*   path: a BIP 32 path of the account level. e.g. `84'/0'/0'`
+    *   xpubVersion: the XPUBVersion of the coin used. (use @ledgerhq/currencies if needed)
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** XPUB of the account
+
 #### getWalletPublicKey
 
 ##### Parameters
 
--   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a BIP 32 path
--   `opts` **{verify: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, format: [AddressFormat](#addressformat)?}?** 
--   `options`  an object with optional these fields:-   verify (boolean) will ask user to confirm the address on the device
+*   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a BIP 32 path
+*   `opts` **{verify: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, format: [AddressFormat](#addressformat)?}?** 
+*   `options`  an object with optional these fields:*   verify (boolean) will ask user to confirm the address on the device
 
-    -   format ("legacy" | "p2sh" | "bech32" | "cashaddr") to use different bitcoin address formatter.NB The normal usage is to use:-   legacy format with 44' paths
+    *   format ("legacy" | "p2sh" | "bech32" | "bech32m" | "cashaddr") to use different bitcoin address formatter.NB The normal usage is to use:*   legacy format with 44' paths
 
-    -   p2sh format with 49' paths
+    *   p2sh format with 49' paths
 
-    -   bech32 format with 173' paths
+    *   bech32 format with 173' paths
 
-    -   cashaddr in case of Bitcoin Cash
+    *   cashaddr in case of Bitcoin Cash
 
 ##### Examples
 
@@ -85,7 +122,7 @@ btc.getWalletPublicKey("44'/0'/0'/0/0").then(o => o.bitcoinAddress)
 btc.getWalletPublicKey("49'/0'/0'/0/0", { format: "p2sh" }).then(o => o.bitcoinAddress)
 ```
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{publicKey: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), bitcoinAddress: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), chainCode: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** 
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{publicKey: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), bitcoinAddress: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), chainCode: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** 
 
 #### signMessageNew
 
@@ -93,8 +130,8 @@ You can sign a message according to the Bitcoin Signature format and retrieve v,
 
 ##### Parameters
 
--   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
--   `messageHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `messageHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
 ##### Examples
 
@@ -106,7 +143,7 @@ console.log("Signature : " + signature);
 }).catch(function(ex) {console.log(ex);});
 ```
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{v: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), r: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), s: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** 
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{v: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), r: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), s: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** 
 
 #### createPaymentTransactionNew
 
@@ -114,25 +151,26 @@ To sign a transaction involving standard (P2PKH) inputs, call createTransaction 
 
 ##### Parameters
 
--   `arg` **[CreateTransactionArg](#createtransactionarg)** 
--   `inputs`  is an array of [ transaction, output_index, optional redeem script, optional sequence ] where-   transaction is the previously computed transaction object for this UTXO
-    -   output_index is the output in the transaction used as input for this UTXO (counting from 0)
-    -   redeem script is the optional redeem script to use when consuming a Segregated Witness input
-    -   sequence is the sequence number to use for this input (when using RBF), or non present
--   `associatedKeysets`  is an array of BIP 32 paths pointing to the path to the private key used for each UTXO
--   `changePath`  is an optional BIP 32 path pointing to the path to the public key used to compute the change address
--   `outputScriptHex`  is the hexadecimal serialized outputs of the transaction to sign
--   `lockTime`  is the optional lockTime of the transaction to sign, or default (0)
--   `sigHashType`  is the hash type of the transaction to sign, or default (all)
--   `segwit`  is an optional boolean indicating wether to use segwit or not
--   `initialTimestamp`  is an optional timestamp of the function call to use for coins that necessitate timestamps only, (not the one that the tx will include)
--   `additionals`  list of additionnal options-   "bech32" for spending native segwit outputs
-    -   "abc" for bch
-    -   "gold" for btg
-    -   "bipxxx" for using BIPxxx
-    -   "sapling" to indicate a zec transaction is supporting sapling (to be set over block 419200)
--   `expiryHeight`  is an optional Buffer for zec overwinter / sapling Txs
--   `useTrustedInputForSegwit`  trust inputs for segwit transactions
+*   `arg` **[CreateTransactionArg](#createtransactionarg)** 
+*   `inputs`  is an array of \[ transaction, output_index, optional redeem script, optional sequence ] where*   transaction is the previously computed transaction object for this UTXO
+    *   output_index is the output in the transaction used as input for this UTXO (counting from 0)
+    *   redeem script is the optional redeem script to use when consuming a Segregated Witness input
+    *   sequence is the sequence number to use for this input (when using RBF), or non present
+*   `associatedKeysets`  is an array of BIP 32 paths pointing to the path to the private key used for each UTXO
+*   `changePath`  is an optional BIP 32 path pointing to the path to the public key used to compute the change address
+*   `outputScriptHex`  is the hexadecimal serialized outputs of the transaction to sign
+*   `lockTime`  is the optional lockTime of the transaction to sign, or default (0)
+*   `sigHashType`  is the hash type of the transaction to sign, or default (all)
+*   `segwit`  is an optional boolean indicating wether to use segwit or not
+*   `initialTimestamp`  is an optional timestamp of the function call to use for coins that necessitate timestamps only, (not the one that the tx will include)
+*   `additionals`  list of additionnal options*   "bech32" for spending native segwit outputs
+    *   "bech32m" for spending native segwit outputs
+    *   "abc" for bch
+    *   "gold" for btg
+    *   "bipxxx" for using BIPxxx
+    *   "sapling" to indicate a zec transaction is supporting sapling (to be set over block 419200)
+*   `expiryHeight`  is an optional Buffer for zec overwinter / sapling Txs
+*   `useTrustedInputForSegwit`  trust inputs for segwit transactions
 
 ##### Examples
 
@@ -144,7 +182,7 @@ outputScriptHex: "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d
 }).then(res => ...);
 ```
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** the signed transaction ready to be broadcast
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** the signed transaction ready to be broadcast
 
 #### signP2SHTransaction
 
@@ -152,15 +190,15 @@ To obtain the signature of multisignature (P2SH) inputs, call signP2SHTransactio
 
 ##### Parameters
 
--   `arg` **[SignP2SHTransactionArg](#signp2shtransactionarg)** 
--   `inputs`  is an array of [ transaction, output_index, redeem script, optional sequence ] where-   transaction is the previously computed transaction object for this UTXO
-    -   output_index is the output in the transaction used as input for this UTXO (counting from 0)
-    -   redeem script is the mandatory redeem script associated to the current P2SH input
-    -   sequence is the sequence number to use for this input (when using RBF), or non present
--   `associatedKeysets`  is an array of BIP 32 paths pointing to the path to the private key used for each UTXO
--   `outputScriptHex`  is the hexadecimal serialized outputs of the transaction to sign
--   `lockTime`  is the optional lockTime of the transaction to sign, or default (0)
--   `sigHashType`  is the hash type of the transaction to sign, or default (all)
+*   `arg` **[SignP2SHTransactionArg](#signp2shtransactionarg)** 
+*   `inputs`  is an array of \[ transaction, output_index, redeem script, optional sequence ] where*   transaction is the previously computed transaction object for this UTXO
+    *   output_index is the output in the transaction used as input for this UTXO (counting from 0)
+    *   redeem script is the mandatory redeem script associated to the current P2SH input
+    *   sequence is the sequence number to use for this input (when using RBF), or non present
+*   `associatedKeysets`  is an array of BIP 32 paths pointing to the path to the private key used for each UTXO
+*   `outputScriptHex`  is the hexadecimal serialized outputs of the transaction to sign
+*   `lockTime`  is the optional lockTime of the transaction to sign, or default (0)
+*   `sigHashType`  is the hash type of the transaction to sign, or default (all)
 
 ##### Examples
 
@@ -172,7 +210,7 @@ outputScriptHex: "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d
 }).then(result => ...);
 ```
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>>** the signed transaction ready to be broadcast
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>>** the signed transaction ready to be broadcast
 
 #### splitTransaction
 
@@ -180,11 +218,11 @@ For each UTXO included in your transaction, create a transaction object from the
 
 ##### Parameters
 
--   `transactionHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
--   `isSegwitSupported` **([boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))**  (optional, default `false`)
--   `hasTimestamp`   (optional, default `false`)
--   `hasExtraData`   (optional, default `false`)
--   `additionals` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>**  (optional, default `[]`)
+*   `transactionHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `isSegwitSupported` **([boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))**  (optional, default `false`)
+*   `hasTimestamp`   (optional, default `false`)
+*   `hasExtraData`   (optional, default `false`)
+*   `additionals` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>**  (optional, default `[]`)
 
 ##### Examples
 
@@ -198,7 +236,7 @@ Returns **[Transaction](#transaction)**
 
 ##### Parameters
 
--   `t` **[Transaction](#transaction)** 
+*   `t` **[Transaction](#transaction)** 
 
 ##### Examples
 
@@ -209,39 +247,230 @@ const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
 
 Returns **[Buffer](https://nodejs.org/api/buffer.html)** 
 
+### createPaymentTransactionNew
+
+To sign a transaction involving standard (P2PKH) inputs, call createTransaction with the following parameters
+
+#### Parameters
+
+*   `arg` **[CreateTransactionArg](#createtransactionarg)** 
+*   `inputs`  is an array of \[ transaction, output_index, optional redeem script, optional sequence ] where*   transaction is the previously computed transaction object for this UTXO
+    *   output_index is the output in the transaction used as input for this UTXO (counting from 0)
+    *   redeem script is the optional redeem script to use when consuming a Segregated Witness input
+    *   sequence is the sequence number to use for this input (when using RBF), or non present
+*   `associatedKeysets`  is an array of BIP 32 paths pointing to the path to the private key used for each UTXO
+*   `changePath`  is an optional BIP 32 path pointing to the path to the public key used to compute the change address
+*   `outputScriptHex`  is the hexadecimal serialized outputs of the transaction to sign, including leading vararg voutCount
+*   `lockTime`  is the optional lockTime of the transaction to sign, or default (0)
+*   `sigHashType`  is the hash type of the transaction to sign, or default (all)
+*   `segwit`  is an optional boolean indicating wether to use segwit or not. This includes wrapped segwit.
+*   `initialTimestamp`  is an optional timestamp of the function call to use for coins that necessitate timestamps only, (not the one that the tx will include)
+*   `additionals`  list of additionnal options*   "bech32" for spending native segwit outputs
+    *   "bech32m" for spending segwit v1+ outptus
+    *   "abc" for bch
+    *   "gold" for btg
+    *   "bipxxx" for using BIPxxx
+    *   "sapling" to indicate a zec transaction is supporting sapling (to be set over block 419200)
+*   `expiryHeight`  is an optional Buffer for zec overwinter / sapling Txs
+*   `useTrustedInputForSegwit`  trust inputs for segwit transactions. If app version >= 1.4.0 this should be true.
+
+#### Examples
+
+```javascript
+btc.createTransaction({
+inputs: [ [tx1, 1] ],
+associatedKeysets: ["0'/0/0"],
+outputScriptHex: "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac"
+}).then(res => ...);
+```
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** the signed transaction ready to be broadcast
+
+### BtcOld
+
+Bitcoin API.
+
+#### Parameters
+
+*   `transport` **Transport** 
+
+#### Examples
+
+```javascript
+import Btc from "@ledgerhq/hw-app-btc";
+const btc = new Btc(transport)
+```
+
+#### getWalletPublicKey
+
+##### Parameters
+
+*   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a BIP 32 path
+*   `opts` **{verify: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, format: [AddressFormat](#addressformat)?}?** 
+*   `options`  an object with optional these fields:*   verify (boolean) will ask user to confirm the address on the device
+
+    *   format ("legacy" | "p2sh" | "bech32" | "cashaddr") to use different bitcoin address formatter.NB The normal usage is to use:*   legacy format with 44' paths
+
+    *   p2sh format with 49' paths
+
+    *   bech32 format with 173' paths
+
+    *   cashaddr in case of Bitcoin Cash
+
+##### Examples
+
+```javascript
+btc.getWalletPublicKey("44'/0'/0'/0/0").then(o => o.bitcoinAddress)
+btc.getWalletPublicKey("49'/0'/0'/0/0", { format: "p2sh" }).then(o => o.bitcoinAddress)
+```
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{publicKey: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), bitcoinAddress: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), chainCode: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** 
+
+#### signMessageNew
+
+You can sign a message according to the Bitcoin Signature format and retrieve v, r, s given the message and the BIP 32 path of the account to sign.
+
+##### Parameters
+
+*   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `messageHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+
+##### Examples
+
+```javascript
+btc.signMessageNew_async("44'/60'/0'/0'/0", Buffer.from("test").toString("hex")).then(function(result) {
+var v = result['v'] + 27 + 4;
+var signature = Buffer.from(v.toString(16) + result['r'] + result['s'], 'hex').toString('base64');
+console.log("Signature : " + signature);
+}).catch(function(ex) {console.log(ex);});
+```
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{v: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), r: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), s: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** 
+
+#### createPaymentTransactionNew
+
+To sign a transaction involving standard (P2PKH) inputs, call createTransaction with the following parameters
+
+##### Parameters
+
+*   `arg` **[CreateTransactionArg](#createtransactionarg)** 
+*   `inputs`  is an array of \[ transaction, output_index, optional redeem script, optional sequence ] where*   transaction is the previously computed transaction object for this UTXO
+    *   output_index is the output in the transaction used as input for this UTXO (counting from 0)
+    *   redeem script is the optional redeem script to use when consuming a Segregated Witness input
+    *   sequence is the sequence number to use for this input (when using RBF), or non present
+*   `associatedKeysets`  is an array of BIP 32 paths pointing to the path to the private key used for each UTXO
+*   `changePath`  is an optional BIP 32 path pointing to the path to the public key used to compute the change address
+*   `outputScriptHex`  is the hexadecimal serialized outputs of the transaction to sign
+*   `lockTime`  is the optional lockTime of the transaction to sign, or default (0)
+*   `sigHashType`  is the hash type of the transaction to sign, or default (all)
+*   `segwit`  is an optional boolean indicating wether to use segwit or not
+*   `initialTimestamp`  is an optional timestamp of the function call to use for coins that necessitate timestamps only, (not the one that the tx will include)
+*   `additionals`  list of additionnal options*   "bech32" for spending native segwit outputs
+    *   "abc" for bch
+    *   "gold" for btg
+    *   "bipxxx" for using BIPxxx
+    *   "sapling" to indicate a zec transaction is supporting sapling (to be set over block 419200)
+*   `expiryHeight`  is an optional Buffer for zec overwinter / sapling Txs
+*   `useTrustedInputForSegwit`  trust inputs for segwit transactions
+
+##### Examples
+
+```javascript
+btc.createTransaction({
+inputs: [ [tx1, 1] ],
+associatedKeysets: ["0'/0/0"],
+outputScriptHex: "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac"
+}).then(res => ...);
+```
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** the signed transaction ready to be broadcast
+
+#### signP2SHTransaction
+
+To obtain the signature of multisignature (P2SH) inputs, call signP2SHTransaction_async with the folowing parameters
+
+##### Parameters
+
+*   `arg` **[SignP2SHTransactionArg](#signp2shtransactionarg)** 
+*   `inputs`  is an array of \[ transaction, output_index, redeem script, optional sequence ] where*   transaction is the previously computed transaction object for this UTXO
+    *   output_index is the output in the transaction used as input for this UTXO (counting from 0)
+    *   redeem script is the mandatory redeem script associated to the current P2SH input
+    *   sequence is the sequence number to use for this input (when using RBF), or non present
+*   `associatedKeysets`  is an array of BIP 32 paths pointing to the path to the private key used for each UTXO
+*   `outputScriptHex`  is the hexadecimal serialized outputs of the transaction to sign
+*   `lockTime`  is the optional lockTime of the transaction to sign, or default (0)
+*   `sigHashType`  is the hash type of the transaction to sign, or default (all)
+
+##### Examples
+
+```javascript
+btc.signP2SHTransaction({
+inputs: [ [tx, 1, "52210289b4a3ad52a919abd2bdd6920d8a6879b1e788c38aa76f0440a6f32a9f1996d02103a3393b1439d1693b063482c04bd40142db97bdf139eedd1b51ffb7070a37eac321030b9a409a1e476b0d5d17b804fcdb81cf30f9b99c6f3ae1178206e08bc500639853ae"] ],
+associatedKeysets: ["0'/0/0"],
+outputScriptHex: "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac"
+}).then(result => ...);
+```
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>>** the signed transaction ready to be broadcast
+
 ### CreateTransactionArg
 
-Type: {inputs: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;\[[Transaction](#transaction), [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), ([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined)), ([number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))]>, associatedKeysets: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>, changePath: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?, outputScriptHex: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), lockTime: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, sigHashType: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, segwit: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, initialTimestamp: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, additionals: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>, expiryHeight: [Buffer](https://nodejs.org/api/buffer.html)?, useTrustedInputForSegwit: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, onDeviceStreaming: function (arg0: {progress: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), total: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), index: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)}): void?, onDeviceSignatureRequested: function (): void?, onDeviceSignatureGranted: function (): void?}
+Type: {inputs: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<\[[Transaction](#transaction), [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), ([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined)), ([number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))]>, associatedKeysets: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>, changePath: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?, outputScriptHex: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), lockTime: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, sigHashType: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, segwit: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, initialTimestamp: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, additionals: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>, expiryHeight: [Buffer](https://nodejs.org/api/buffer.html)?, useTrustedInputForSegwit: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, onDeviceStreaming: function (arg0: {progress: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), total: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), index: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)}): void?, onDeviceSignatureRequested: function (): void?, onDeviceSignatureGranted: function (): void?}
 
 #### Properties
 
--   `inputs` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;\[[Transaction](#transaction), [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), ([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined)), ([number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))]>** 
--   `associatedKeysets` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** 
--   `changePath` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** 
--   `outputScriptHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
--   `lockTime` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
--   `sigHashType` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
--   `segwit` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** 
--   `initialTimestamp` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
--   `additionals` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** 
--   `expiryHeight` **[Buffer](https://nodejs.org/api/buffer.html)?** 
--   `useTrustedInputForSegwit` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** 
--   `onDeviceStreaming` **function (arg0: {progress: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), total: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), index: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)}): void?** 
--   `onDeviceSignatureRequested` **function (): void?** 
--   `onDeviceSignatureGranted` **function (): void?** 
+*   `inputs` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<\[[Transaction](#transaction), [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), ([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined)), ([number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))]>** 
+*   `associatedKeysets` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** 
+*   `changePath` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** 
+*   `outputScriptHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `lockTime` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
+*   `sigHashType` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
+*   `segwit` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** 
+*   `initialTimestamp` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
+*   `additionals` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** 
+*   `expiryHeight` **[Buffer](https://nodejs.org/api/buffer.html)?** 
+*   `useTrustedInputForSegwit` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** 
+*   `onDeviceStreaming` **function (arg0: {progress: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), total: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), index: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)}): void?** 
+*   `onDeviceSignatureRequested` **function (): void?** 
+*   `onDeviceSignatureGranted` **function (): void?** 
 
 ### AddressFormat
 
 address format is one of legacy | p2sh | bech32 | cashaddr
 
-Type: (`"legacy"` \| `"p2sh"` \| `"bech32"` \| `"cashaddr"`)
+Type: (`"legacy"` | `"p2sh"` | `"bech32"` | `"bech32m"` | `"cashaddr"`)
+
+### constructor
+
+#### Parameters
+
+*   `keys` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[Buffer](https://nodejs.org/api/buffer.html)>** Sorted list of (unhashed) keys
+*   `values` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[Buffer](https://nodejs.org/api/buffer.html)>** values, in corresponding order as the keys, and of equal length
+
+### constructor
+
+For now, we only support default descriptor templates.
+
+#### Parameters
+
+*   `descriptorTemplate` **DefaultDescriptorTemplate** 
+*   `key` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+
+### finalize
+
+#### Parameters
+
+*   `psbt` **PsbtV2** The psbt with all signatures added as partial sigs, either through PSBT_IN_PARTIAL_SIG or PSBT_IN_TAP_KEY_SIG
+
+Returns **void** 
 
 ### serializeTransactionOutputs
 
 #### Parameters
 
--   `$0` **[Transaction](#transaction)** 
-    -   `$0.outputs`  
+*   `$0` **[Transaction](#transaction)** 
+
+    *   `$0.outputs`  
 
 #### Examples
 
@@ -254,17 +483,17 @@ Returns **[Buffer](https://nodejs.org/api/buffer.html)**
 
 ### SignP2SHTransactionArg
 
-Type: {inputs: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;\[[Transaction](#transaction), [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), ([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined)), ([number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))]>, associatedKeysets: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>, outputScriptHex: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), lockTime: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, sigHashType: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, segwit: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, transactionVersion: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?}
+Type: {inputs: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<\[[Transaction](#transaction), [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), ([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined)), ([number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))]>, associatedKeysets: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>, outputScriptHex: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), lockTime: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, sigHashType: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?, segwit: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, transactionVersion: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?}
 
 #### Properties
 
--   `inputs` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;\[[Transaction](#transaction), [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), ([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined)), ([number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))]>** 
--   `associatedKeysets` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** 
--   `outputScriptHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
--   `lockTime` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
--   `sigHashType` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
--   `segwit` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** 
--   `transactionVersion` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
+*   `inputs` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<\[[Transaction](#transaction), [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), ([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined)), ([number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))]>** 
+*   `associatedKeysets` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** 
+*   `outputScriptHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `lockTime` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
+*   `sigHashType` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
+*   `segwit` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** 
+*   `transactionVersion` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
 
 ### TransactionInput
 

@@ -1,6 +1,6 @@
 {
     "name": "@ledgerhq/hw-app-solana",
-    "version": "6.8.2",
+    "version": "6.9.1-taproot.0",
     "description": "Ledger Hardware Wallet Solana Application API",
     "keywords": [
         "Ledger",
@@ -27,13 +27,13 @@
     "types": "lib/Solana.d.ts",
     "license": "Apache-2.0",
     "dependencies": {
-        "@ledgerhq/errors": "^6.2.0",
-        "@ledgerhq/hw-transport": "^6.7.0",
-        "@ledgerhq/logs": "^6.2.0",
+        "@ledgerhq/errors": "^6.9.1-taproot.0",
+        "@ledgerhq/hw-transport": "^6.9.1-taproot.0",
+        "@ledgerhq/logs": "^6.9.1-taproot.0",
         "bip32-path": "^0.4.2"
     },
     "devDependencies": {
-        "@ledgerhq/hw-transport-node-speculos": "^6.7.0",
+        "@ledgerhq/hw-transport-node-speculos": "^6.9.1-taproot.0",
         "axios": "^0.22.0"
     },
     "scripts": {

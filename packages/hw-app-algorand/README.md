@@ -13,12 +13,12 @@ Ledger Hardware Wallet Algorand JavaScript bindings.
 
 #### Table of Contents
 
--   [Algorand](#algorand)
-    -   [Parameters](#parameters)
-    -   [Examples](#examples)
-    -   [getAddress](#getaddress)
-        -   [Parameters](#parameters-1)
-        -   [Examples](#examples-1)
+*   [Algorand](#algorand)
+    *   [Parameters](#parameters)
+    *   [Examples](#examples)
+    *   [getAddress](#getaddress)
+        *   [Parameters](#parameters-1)
+        *   [Examples](#examples-1)
 
 ### Algorand
 
@@ -26,7 +26,7 @@ Cosmos API
 
 #### Parameters
 
--   `transport` **Transport** 
+*   `transport` **Transport** 
 
 #### Examples
 
@@ -41,8 +41,8 @@ get Algorajt address for a given BIP 32 path.
 
 ##### Parameters
 
--   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
--   `boolDisplay` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** 
+*   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
+*   `boolDisplay` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** 
 
 ##### Examples
 
@@ -50,4 +50,4 @@ get Algorajt address for a given BIP 32 path.
 cosmos.getAddress("44'/60'/0'/0/0").then(o => o.address)
 ```
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{publicKey: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), address: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** an object with a publicKey, address and (optionally) chainCode
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{publicKey: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), address: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** an object with a publicKey, address and (optionally) chainCode

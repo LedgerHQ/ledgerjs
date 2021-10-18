@@ -1,16 +1,17 @@
 import type Transport from "@ledgerhq/hw-transport";
-import { signMessage } from "./signMessage";
-import { getWalletPublicKey } from "./getWalletPublicKey";
-import type { AddressFormat } from "./getWalletPublicKey";
-import { splitTransaction } from "./splitTransaction";
+import semver from "semver";
+import BtcNew from "./BtcNew";
+import BtcOld from "./BtcOld";
+import type { CreateTransactionArg } from "./createTransaction";
+import { getAppAndVersion } from "./getAppAndVersion";
 import { getTrustedInput } from "./getTrustedInput";
 import { getTrustedInputBIP143 } from "./getTrustedInputBIP143";
-import type { Transaction } from "./types";
-import { createTransaction } from "./createTransaction";
-import type { CreateTransactionArg } from "./createTransaction";
-import { signP2SHTransaction } from "./signP2SHTransaction";
-import type { SignP2SHTransactionArg } from "./signP2SHTransaction";
+import type { AddressFormat } from "./getWalletPublicKey";
+import { AppClient } from "./newops/appClient";
 import { serializeTransactionOutputs } from "./serializeTransaction";
+import type { SignP2SHTransactionArg } from "./signP2SHTransaction";
+import { splitTransaction } from "./splitTransaction";
+import type { Transaction } from "./types";
 export type { AddressFormat };
 /**
  * Bitcoin API.
@@ -28,6 +29,7 @@ export default class Btc {
     transport.decorateAppAPIMethods(
       this,
       [
+        "getWalletXpub",
         "getWalletPublicKey",
         "signP2SHTransaction",
         "signMessageNew",
@@ -40,12 +42,23 @@ export default class Btc {
   }
 
   /**
+   * Get an XPUB with a ledger device
+   * @param arg derivation parameter
+   * - path: a BIP 32 path of the account level. e.g. `84'/0'/0'`
+   * - xpubVersion: the XPUBVersion of the coin used. (use @ledgerhq/currencies if needed)
+   * @returns XPUB of the account
+   */
+  getWalletXpub(arg: { path: string; xpubVersion: number }): Promise<string> {
+    return this.getCorrectImpl().then((impl) => impl.getWalletXpub(arg));
+  }
+
+  /**
    * @param path a BIP 32 path
    * @param options an object with optional these fields:
    *
    * - verify (boolean) will ask user to confirm the address on the device
    *
-   * - format ("legacy" | "p2sh" | "bech32" | "cashaddr") to use different bitcoin address formatter.
+   * - format ("legacy" | "p2sh" | "bech32" | "bech32m" | "cashaddr") to use different bitcoin address formatter.
    *
    * NB The normal usage is to use:
    *
@@ -85,8 +98,9 @@ export default class Btc {
     } else {
       options = opts || {};
     }
-
-    return getWalletPublicKey(this.transport, { ...options, path });
+    return this.getCorrectImpl().then((impl) => {
+      return impl.getWalletPublicKey(path, options);
+    });
   }
 
   /**
@@ -106,10 +120,7 @@ export default class Btc {
     r: string;
     s: string;
   }> {
-    return signMessage(this.transport, {
-      path,
-      messageHex,
-    });
+    return this.old().signMessageNew(path, messageHex);
   }
 
   /**
@@ -130,6 +141,7 @@ export default class Btc {
    * @param additionals list of additionnal options
    *
    * - "bech32" for spending native segwit outputs
+   * - "bech32m" for spending native segwit outputs
    * - "abc" for bch
    * - "gold" for btg
    * - "bipxxx" for using BIPxxx
@@ -150,8 +162,9 @@ export default class Btc {
         "@ledgerhq/hw-app-btc: createPaymentTransactionNew multi argument signature is deprecated. please switch to named parameters."
       );
     }
-
-    return createTransaction(this.transport, arg);
+    return this.getCorrectImpl().then((impl) => {
+      return impl.createPaymentTransactionNew(arg);
+    });
   }
 
   /**
@@ -174,13 +187,7 @@ export default class Btc {
   }).then(result => ...);
    */
   signP2SHTransaction(arg: SignP2SHTransactionArg): Promise<string[]> {
-    if (arguments.length > 1) {
-      console.warn(
-        "@ledgerhq/hw-app-btc: signP2SHTransaction multi argument signature is deprecated. please switch to named parameters."
-      );
-    }
-
-    return signP2SHTransaction(this.transport, arg);
+    return this.old().signP2SHTransaction(arg);
   }
 
   /**
@@ -237,5 +244,29 @@ export default class Btc {
       transaction,
       additionals
     );
+  }
+
+  // TODO: we should save in a field what was the latest app and not ask each time in the lifecycle of a new Btc()
+  private async getCorrectImpl(): Promise<BtcOld | BtcNew> {
+    const isNewApp = await this.useNewApp();
+    if (isNewApp) {
+      return this.new();
+    } else {
+      return this.old();
+    }
+  }
+  private old(): BtcOld {
+    return new BtcOld(this.transport);
+  }
+  private new(): BtcNew {
+    return new BtcNew(new AppClient(this.transport));
+  }
+  private async useNewApp(): Promise<boolean> {
+    const a = await getAppAndVersion(this.transport);
+    const isNewApp = semver.major(a.version) >= 2;
+    if ((a.name == "Bitcoin" || a.name == "Bitcoin Test") && isNewApp) {
+      return true;
+    }
+    return false;
   }
 }

@@ -77,7 +77,7 @@ export default class SpeculosTransport extends Transport {
     apduSocket.on("data", (data) => {
       try {
         this.resolveExchange(decodeAPDUPayload(data));
-      } catch (e) {
+      } catch (e: any) {
         this.rejectExchange(e);
       }
     });
