@@ -51,8 +51,8 @@ export async function runSignTransaction(
     outputWriter.writeUInt64(BigInt(Number.parseFloat((output.value * 100000000).toFixed(8))));
     outputWriter.writeVarSlice(Buffer.from(output.scriptPubKey.hex, "hex"));    
   });
-  const outputScriptHex = outputWriter.buffer().toString("hex");
-  
+  const outputScriptHex = outputWriter.buffer().toString("hex");  
+
   const arg: CreateTransactionArg = {    
     inputs,
     additionals,
@@ -62,7 +62,6 @@ export async function runSignTransaction(
     lockTime: testTx.locktime,
     segwit: accountType != AccountType.p2pkh,    
   };
-  client.mockGetPubkeyResponse(arg.changePath!, creatDummyXpub(Buffer.alloc(32, 0)));
   const tx = await btcNew.createPaymentTransactionNew(arg);
   return tx;
 };
@@ -130,7 +129,7 @@ function getAccountType(coreInput: CoreInput, btc: Btc): AccountType {
   return AccountType.p2pkh;
 }
 
-function creatDummyXpub(pubkey: Buffer): string {
+export function creatDummyXpub(pubkey: Buffer): string {
   const xpubDecoded = bs58check.decode("tpubDHcN44A4UHqdHJZwBxgTbu8Cy87ZrZkN8tQnmJGhcijHqe4rztuvGcD4wo36XSviLmiqL5fUbDnekYaQ7LzAnaqauBb9RsyahsTTFHdeJGd");
   const pubkey33 = pubkey.length == 33 ? pubkey : Buffer.concat([Buffer.of(2), pubkey]);
   xpubDecoded.fill(pubkey33, xpubDecoded.length-33);

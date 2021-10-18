@@ -10,7 +10,7 @@ import {
   WalletPolicy
 } from "../../src/newops/policy";
 import { PsbtV2 } from "../../src/newops/psbtv2";
-import { AccountType, addressFormatFromDescriptorTemplate, masterFingerprint, runSignTransaction, TestingClient } from "./integrationtools";
+import { AccountType, addressFormatFromDescriptorTemplate, creatDummyXpub, masterFingerprint, runSignTransaction, TestingClient } from "./integrationtools";
 import { CoreTx, p2pkh, p2tr, p2wpkh, p2wpkhTwoInputs, wrappedP2wpkh, wrappedP2wpkhTwoInputs } from "./testtx";
 
 test("getWalletPublicKey p2pkh", async () => {
@@ -51,15 +51,18 @@ function testPaths(type: AccountType): {ins: string[], out?: string} {
     basePath + "0/2",
     basePath + "1/2",
   ];
-  return {ins, out: basePath + "1/3"};
+  return {ins};
 }
 
 test("Sign p2pkh", async () => {
-  await runSignTransactionTest(p2pkh, AccountType.p2pkh);
+  const changePubkey = "037ed58c914720772c59f7a1e7e76fba0ef95d7c5667119798586301519b9ad2cf";
+  await runSignTransactionTest(p2pkh, AccountType.p2pkh, changePubkey);
 });
 test("Sign p2wpkh wrapped", async () => {
-  await runSignTransactionTest(wrappedP2wpkh, AccountType.p2wpkhInP2sh);
-  await runSignTransactionTest(wrappedP2wpkhTwoInputs, AccountType.p2wpkhInP2sh);
+  let changePubkey = "03efc6b990c1626d08bd176aab0e545a4f55c627c7ddee878d12bbbc46a126177a";
+  await runSignTransactionTest(wrappedP2wpkh, AccountType.p2wpkhInP2sh, changePubkey);
+  changePubkey = "031175a985c56e310ce3496a819229b427a2172920fd20b5972dda62758c6def09";
+  await runSignTransactionTest(wrappedP2wpkhTwoInputs, AccountType.p2wpkhInP2sh, changePubkey);
 });
 test("Sign p2wpkh", async () => {
   await runSignTransactionTest(p2wpkh, AccountType.p2wpkh);
@@ -69,11 +72,15 @@ test("Sign p2tr", async () => {
   await runSignTransactionTest(p2tr, AccountType.p2tr);
 });
 
-async function runSignTransactionTest(testTx: CoreTx, accountType: AccountType) {
+async function runSignTransactionTest(testTx: CoreTx, accountType: AccountType, changePubkey?: string) {
   const [client, transport] = await createClient();
   const accountXpub = "tpubDCwYjpDhUdPGP5rS3wgNg13mTrrjBuG8V9VpWbyptX6TRPbNoZVXsoVUSkCjmQ8jJycjuDKBb9eataSymXakTTaGifxR6kmVsfFehH1ZgJT";
   client.mockGetPubkeyResponse(`m/${accountType}/1'/0'`, accountXpub);
   const paths = testPaths(accountType);
+  if (changePubkey) {
+    paths.out =  `m/${accountType}/1'/0'` + "/1/3";
+    client.mockGetPubkeyResponse(paths.out, creatDummyXpub(Buffer.from(changePubkey, "hex")));
+  }
   const tx = await runSignTransaction(testTx, paths, client, transport);
   expect(tx).toEqual(testTx.hex);
   await transport.close();

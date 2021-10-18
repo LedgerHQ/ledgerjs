@@ -13,17 +13,17 @@ Ledger Hardware Wallet XRP JavaScript bindings.
 
 #### Table of Contents
 
--   [Xrp](#xrp)
-    -   [Parameters](#parameters)
-    -   [Examples](#examples)
-    -   [getAddress](#getaddress)
-        -   [Parameters](#parameters-1)
-        -   [Examples](#examples-1)
-    -   [signTransaction](#signtransaction)
-        -   [Parameters](#parameters-2)
-        -   [Examples](#examples-2)
-    -   [getAppConfiguration](#getappconfiguration)
-        -   [Examples](#examples-3)
+*   [Xrp](#xrp)
+    *   [Parameters](#parameters)
+    *   [Examples](#examples)
+    *   [getAddress](#getaddress)
+        *   [Parameters](#parameters-1)
+        *   [Examples](#examples-1)
+    *   [signTransaction](#signtransaction)
+        *   [Parameters](#parameters-2)
+        *   [Examples](#examples-2)
+    *   [getAppConfiguration](#getappconfiguration)
+        *   [Examples](#examples-3)
 
 ### Xrp
 
@@ -31,8 +31,8 @@ XRP API
 
 #### Parameters
 
--   `transport` **Transport** 
--   `scrambleKey`   (optional, default `"XRP"`)
+*   `transport` **Transport** 
+*   `scrambleKey`   (optional, default `"XRP"`)
 
 #### Examples
 
@@ -86,10 +86,10 @@ get XRP address for a given BIP 32 path.
 
 ##### Parameters
 
--   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
--   `display` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** optionally enable or not the display
--   `chainCode` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** optionally enable or not the chainCode request
--   `ed25519` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** optionally enable or not the ed25519 curve (secp256k1 is default)
+*   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
+*   `display` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** optionally enable or not the display
+*   `chainCode` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** optionally enable or not the chainCode request
+*   `ed25519` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** optionally enable or not the ed25519 curve (secp256k1 is default)
 
 ##### Examples
 
@@ -98,7 +98,7 @@ const result = await xrp.getAddress("44'/144'/0'/0/0");
 const { publicKey, address } = result;
 ```
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{publicKey: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), address: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), chainCode: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?}>** an object with a publicKey, address and (optionally) chainCode
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{publicKey: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), address: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), chainCode: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?}>** an object with a publicKey, address and (optionally) chainCode
 
 #### signTransaction
 
@@ -109,11 +109,11 @@ hex.
 
 ##### Parameters
 
--   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
--   `rawTxHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a raw hex string representing a serialized transaction blob.
-           This parameter can be encoded using [ripple-binary-codec](https://www.npmjs.com/package/ripple-binary-codec).
-           See <https://xrpl.org/serialization.html> for more documentation on the serialization format.
--   `ed25519` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** optionally enable or not the ed25519 curve (secp256k1 is default)
+*   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
+*   `rawTxHex` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a raw hex string representing a serialized transaction blob.
+    This parameter can be encoded using [ripple-binary-codec](https://www.npmjs.com/package/ripple-binary-codec).
+    See <https://xrpl.org/serialization.html> for more documentation on the serialization format.
+*   `ed25519` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** optionally enable or not the ed25519 curve (secp256k1 is default)
 
 ##### Examples
 
@@ -121,7 +121,7 @@ hex.
 const signature = await xrp.signTransaction("44'/144'/0'/0/0", "12000022800000002400000002614000000001315D3468400000000000000C73210324E5F600B52BB3D9246D49C4AB1722BA7F32B7A3E4F9F2B8A1A28B9118CC36C48114F31B152151B6F42C1D61FE4139D34B424C8647D183142ECFC1831F6E979C6DA907E88B1CAD602DB59E2F");
 ```
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** a signature as hex string
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** a signature as hex string
 
 #### getAppConfiguration
 
@@ -137,4 +137,4 @@ const result = await xrp.getAppConfiguration();
 }
 ```
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{version: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** an object with a version
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{version: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** an object with a version
