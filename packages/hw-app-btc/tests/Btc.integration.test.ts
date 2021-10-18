@@ -1,11 +1,22 @@
 // import Transport from "@ledgerhq/hw-transport-node-hid";
-import SpeculosTransport from "@ledgerhq/hw-transport-node-speculos";
-import BtcNew from "../src/BtcNew";
-import Btc from "../src/Btc";
-import { AppClient } from "../src/newops/appClient";
-import { getXpubComponents } from "../src/bip32";
-import { compressPublicKey } from "../src/compressPublicKey";
 import Transport from "@ledgerhq/hw-transport";
+import SpeculosTransport from "@ledgerhq/hw-transport-node-speculos";
+import { getXpubComponents } from "../src/bip32";
+import Btc from "../src/Btc";
+import BtcNew from "../src/BtcNew";
+import { compressPublicKey } from "../src/compressPublicKey";
+import { AppClient } from "../src/newops/appClient";
+import { runSignTransaction, TestingClient } from "./newops/integrationtools";
+import {
+  CoreTx,
+  p2wpkhWrapped2in2out as p2wpkhWrapped2inWithChange,
+  speculosP2pkh,
+  speculosP2pkhWithChange,
+  speculosP2tr,
+  speculosP2trWithChange,
+  speculosP2wpkh2inWithChange,
+} from "./newops/testtx";
+import { approveTransaction } from "./speculosclient";
 
 const xpubs = {
   "m/44'/1'/0'":
@@ -23,23 +34,116 @@ const xpubs = {
   "m/86'/1'/4'/1/12":
     "tpubDHTZ815MvTaRmo6Qg1rnU6TEU4ZkWyA56jA1UgpmMcBGomnSsyo34EZLoctzZY9MTJ6j7bhccceUeXZZLxZj5vgkVMYfcZ7DNPsyRdFpS3f",
 };
-/*
-const addresses = {
-  "m/44'/1'/0'/0/0": "mz5vLWdM1wHVGSmXUkhKVvZbJ2g4epMXSm",
-  "m/84'/1'/0'/0/0": "tb1qzdr7s2sr0dwmkwx033r4nujzk86u0cy6fmzfjk",
-  "m/49'/1'/0'/0/0": "2MyHkbusvLomaarGYMqyq7q9pSBYJRwWcsw",
-};
-*/
-test("Basic happypath BtcOld test", async () => {
+
+// async function listAddresses(paths: string[], addressFormat: AddressFormat) {
+//   const tr = await transport();
+//   const client = new AppClient(tr);
+//   const btc = new BtcNew(client);
+//   let result = "";
+//   for (let i = 0; i < paths.length; i++) {
+//     const addr = await btc.getWalletPublicKey(paths[i], {
+//       format: addressFormat,
+//     });
+//     result += paths[i] + ": " + addr.bitcoinAddress + "\n";
+//   }
+//   await tr.close();
+//   console.log(result);
+// }
+
+jest.setTimeout(1000000);
+test("Speculos p2pkh", async () => {
+  const ins = ["m/44'/1'/0'/0/0"];
+  const tx = await testSigning(speculosP2pkh, { ins });
+  expect(tx).toEqual(speculosP2pkh.hex);
+});
+
+test("Speculos p2tr", async () => {
+  const ins = ["m/86'/1'/0'/0/0"];
+  const tx = await testSigning(speculosP2tr, { ins });
+  checkIgnoreWitness(speculosP2tr, tx);
+});
+
+test("Speculos p2tr with change", async () => {
+  const ins = ["m/86'/1'/0'/0/1"];
+  const out = "m/86'/1'/0'/1/0";
+  const tx = await testSigning(speculosP2trWithChange, { ins, out });
+  checkIgnoreWitness(speculosP2trWithChange, tx);
+});
+
+test("Speculos p2wpkhWrapped with change", async () => {
+  const ins = ["m/49'/1'/0'/1/0", "m/49'/1'/0'/0/2"];
+  const out = "m/49'/1'/0'/1/1";
+  const tx = await testSigning(p2wpkhWrapped2inWithChange, { ins, out });
+  expect(tx).toEqual(p2wpkhWrapped2inWithChange.hex);
+});
+
+test("Speculoas p2wpkh with change", async () => {
+  const ins = ["m/84'/1'/0'/0/1", "m/84'/1'/0'/1/4"];
+  const out = "m/84'/1'/0'/1/5";
+  const tx = await testSigning(speculosP2wpkh2inWithChange, { ins, out });
+  expect(tx).toEqual(speculosP2wpkh2inWithChange.hex);
+});
+
+test("Speculos p2pkh with change", async () => {
+  const ins = ["m/44'/1'/0'/1/0", "m/44'/1'/0'/0/3"];
+  const out = "m/44'/1'/0'/1/2";
+  // Pay 0.005 tBTC to mz5vLWdM1wHVGSmXUkhKVvZbJ2g4epMXSm
+  const tx = await testSigning(speculosP2pkhWithChange, { ins, out });
+  expect(tx).toEqual(speculosP2pkhWithChange.hex);
+});
+
+async function testSigning(
+  testTx: CoreTx,
+  paths: { ins: string[]; out?: string }
+): Promise<string> {
+  const tr = await transport();
+  const client = new TestingClient(tr);
+  // Automatically accept a transaction
+  //acceptTx(tr, testTx.vout.length - (paths.out ? 1 : 0));
+  await approveTransaction();
+  const tx = await runSignTransaction(testTx, paths, client, tr);
+  await tr.close();
+  return tx;
+}
+
+/**
+ * Schnorr signatures use a true random nonce, which makes two
+ * signatures of the same message and key different, so we can't
+ * compare the witness data in full, hence this function.
+ */
+function checkIgnoreWitness(testTx: CoreTx, actualTx: string) {
+  expect(actualTx.length).toEqual(testTx.hex.length);
+  let expBaseTx = testTx.hex;
+  let actBaseTx = actualTx;
+  // Clean out the witness data items, but not the witness as a whole,
+  // meaning we will compare number of witness items for example.
+  testTx.vin.forEach((input) => {
+    if (!input.txinwitness) {
+      return;
+    }
+    input.txinwitness.forEach((value) => {
+      const index = expBaseTx.indexOf(value);
+      expBaseTx =
+        expBaseTx.substring(0, index) +
+        expBaseTx.substring(index + value.length);
+      actBaseTx =
+        actBaseTx.substring(0, index) +
+        actBaseTx.substring(index + value.length);
+    });
+  });
+  expect(actBaseTx).toEqual(expBaseTx);
+}
+
+test("getWalletPublicKey BtcOld", async () => {
   await runGetWalletPublicKey("old");
 });
 
-test("Basic happypath BtcNew test", async () => {
+test("getWalletPublicKey BtcNew", async () => {
   await runGetWalletPublicKey("new");
 });
 
-async function transport() {
-  return await SpeculosTransport.open({ apduPort: 9999 });
+async function transport(): Promise<SpeculosTransport> {
+  return await SpeculosTransport.open({ apduPort: 9999, buttonPort: 9998 });
 }
 
 async function impl(

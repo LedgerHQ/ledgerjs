@@ -33,7 +33,7 @@ export function pubkeyFromXpub(xpub: string): Buffer {
 
 export function getXpubComponents(
   xpub: string
-): { chaincode: Buffer; pubkey: Buffer, version: number } {
+): { chaincode: Buffer; pubkey: Buffer; version: number } {
   const xpubBuf: Buffer = bs58check.decode(xpub);
   return {
     chaincode: xpubBuf.slice(13, 13 + 32),

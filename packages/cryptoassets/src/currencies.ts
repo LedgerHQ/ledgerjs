@@ -2185,6 +2185,9 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
   },
   stratis: {
+    terminated: {
+      link: "https://support.ledger.com/",
+    },
     type: "CryptoCurrency",
     id: "stratis",
     coinType: 105,
@@ -2221,6 +2224,9 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
   },
   stealthcoin: {
+    terminated: {
+      link: "https://support.ledger.com/",
+    },
     type: "CryptoCurrency",
     id: "stealthcoin",
     coinType: 125,

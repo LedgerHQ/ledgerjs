@@ -122,6 +122,8 @@ export class PsbtV2 {
     masterFingerprint: Buffer,
     path: number[]
   ) {
+    if (pubkey.length != 33)
+      throw new Error("Invalid pubkey length: " + pubkey.length);
     this.setInput(
       inputIndex,
       psbtIn.BIP32_DERIVATION,
@@ -188,6 +190,8 @@ export class PsbtV2 {
     masterFingerprint: Buffer,
     path: number[]
   ) {
+    if (pubkey.length != 32)
+      throw new Error("Invalid pubkey length: " + pubkey.length);
     const buf = this.encodeTapBip32Derivation(hashes, masterFingerprint, path);
     this.setInput(inputIndex, psbtIn.TAP_BIP32_DERIVATION, pubkey, buf);
   }

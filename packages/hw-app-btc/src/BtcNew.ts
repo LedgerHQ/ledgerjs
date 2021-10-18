@@ -2,10 +2,11 @@ import { crypto } from "bitcoinjs-lib";
 import {
   getXpubComponents,
   hardenedPathOf,
+  pathArrayToString,
   pathStringToArray,
   pubkeyFromXpub,
 } from "./bip32";
-import { BufferReader } from "./buffertools";
+import { BufferReader, BufferWriter } from "./buffertools";
 import type { CreateTransactionArg } from "./createTransaction";
 import type { AddressFormat } from "./getWalletPublicKey";
 import { hashPublicKey } from "./hashPublicKey";
@@ -16,7 +17,15 @@ import { finalize } from "./newops/psbtFinalizer";
 import { psbtIn, PsbtV2 } from "./newops/psbtv2";
 import { serializeTransaction } from "./serializeTransaction";
 import type { Transaction } from "./types";
-import { pointCompress } from "tiny-secp256k1";
+import { pointCompress, pointAddScalar } from "tiny-secp256k1";
+import {
+  HASH_SIZE,
+  OP_CHECKSIG,
+  OP_DUP,
+  OP_EQUAL,
+  OP_EQUALVERIFY,
+  OP_HASH160,
+} from "./constants";
 
 export const newSupportedApps = ["Bitcoin", "Bitcoin Test"];
 
@@ -188,29 +197,36 @@ export default class BtcNew {
     const outputsConcat = Buffer.from(arg.outputScriptHex, "hex");
     const outputsBufferReader = new BufferReader(outputsConcat);
     const outputCount = outputsBufferReader.readVarInt();
+    const changeData = await this.outputScriptAt(
+      accountPath,
+      accountType,
+      arg.changePath
+    );
     psbt.setGlobalOutputCount(outputCount);
+    let changeFound = !changeData;
     for (let i = 0; i < outputCount; i++) {
       const amount = Number(outputsBufferReader.readUInt64());
       const outputScript = outputsBufferReader.readVarSlice();
 
-      // The wallet always places the change output last.
-      // But we won't know if we're paying to ourselves, because
-      // we'd have one output at index <outputCount-1 for ourselves
-      // and one change output.
-      const isChange = arg.changePath && i == outputCount - 1;
+      // We won't know if we're paying to ourselves, because
+      // there's no information in the input arg to support this.
+      // We only have the changePath.
+      // One exception is if there are multiple outputs to the
+      // change address.
+      const isChange = changeData && outputScript.equals(changeData?.script);
       if (isChange) {
+        changeFound = true;
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const changePath = pathStringToArray(arg.changePath!);
-        const xpubBase58 = await this.client.getPubkey(false, changePath);
-        const pubkey = pubkeyFromXpub(xpubBase58);
+        const pubkey = changeData.pubkey;
 
         if (accountType == AccountType.p2pkh) {
           psbt.setOutputBip32Derivation(i, pubkey, masterFp, changePath);
         } else if (accountType == AccountType.p2wpkh) {
           psbt.setOutputBip32Derivation(i, pubkey, masterFp, changePath);
         } else if (accountType == AccountType.p2wpkhWrapped) {
-          const redeemScript = this.createRedeemScript(pubkey);
-          psbt.setOutputRedeemScript(i, redeemScript);
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          psbt.setOutputRedeemScript(i, changeData.redeemScript!);
           psbt.setOutputBip32Derivation(i, pubkey, masterFp, changePath);
         } else if (accountType == AccountType.p2tr) {
           psbt.setOutputTapBip32Derivation(i, pubkey, [], masterFp, changePath);
@@ -219,10 +235,43 @@ export default class BtcNew {
       psbt.setOutputAmount(i, amount);
       psbt.setOutputScript(i, outputScript);
     }
+    if (!changeFound) {
+      throw new Error(
+        "Change script not found among outputs! " +
+          changeData?.script.toString("hex")
+      );
+    }
 
     const key = createKey(masterFp, accountPath, accountXpub);
     const p = new WalletPolicy(accountType, key);
     return await this.signPsbt(psbt, p);
+  }
+
+  private async outputScriptAt(
+    accountPath: number[],
+    accountType: AccountType,
+    path: string | undefined
+  ): Promise<
+    { script: Buffer; redeemScript?: Buffer; pubkey: Buffer } | undefined
+  > {
+    if (!path) return undefined;
+    const pathElems = pathStringToArray(path);
+    // Make sure path is in our account, otherwise something fishy is probably
+    // going on.
+    for (let i = 0; i < accountPath.length; i++) {
+      if (accountPath[i] != pathElems[i]) {
+        throw new Error(
+          `Path ${path} not in account ${pathArrayToString(accountPath)}`
+        );
+      }
+    }
+    const xpub = await this.client.getPubkey(false, pathElems);
+    let pubkey = pubkeyFromXpub(xpub);
+    if (accountType == AccountType.p2tr) {
+      pubkey = pubkey.slice(1);
+    }
+    const script = outputScriptOf(pubkey, accountType);
+    return { ...script, pubkey };
   }
 
   private async setInput(
@@ -267,14 +316,15 @@ export default class BtcNew {
       if (!redeemScript) {
         throw new Error("Missing redeemScript for p2wpkhWrapped input");
       }
-      const expectedRedeemScript = this.createRedeemScript(pubkey);
+      const expectedRedeemScript = createRedeemScript(pubkey);
       if (redeemScript != expectedRedeemScript.toString("hex")) {
         throw new Error("Unexpected redeemScript");
       }
       psbt.setInputRedeemScript(i, expectedRedeemScript);
       psbt.setInputWitnessUtxo(i, spentOutput.amount, spentOutput.script);
     } else if (accountType == AccountType.p2tr) {
-      psbt.setInputTapBip32Derivation(i, pubkey, [], masterFP, pathElements);
+      const xonly = pubkey.slice(1);
+      psbt.setInputTapBip32Derivation(i, xonly, [], masterFP, pathElements);
       psbt.setInputWitnessUtxo(i, spentOutput.amount, spentOutput.script);
     }
 
@@ -297,6 +347,7 @@ export default class BtcNew {
       const pubkeys = psbt.getInputKeyDatas(k, psbtIn.BIP32_DERIVATION);
       let pubkey;
       if (pubkeys.length != 1) {
+        // No legacy BIP32_DERIVATION, assume we're using taproot.
         pubkey = psbt.getInputKeyDatas(k, psbtIn.TAP_BIP32_DERIVATION);
         if (pubkey.length == 0) {
           throw Error(`Missing pubkey derivation for input ${k}`);
@@ -311,11 +362,6 @@ export default class BtcNew {
     const serializedTx = extract(psbt);
     return serializedTx.toString("hex");
   }
-
-  private createRedeemScript(pubkey: Buffer): Buffer {
-    const pubkeyHash = hashPublicKey(pubkey);
-    return Buffer.concat([Buffer.from("0014", "hex"), pubkeyHash]);
-  }
 }
 
 enum AccountType {
@@ -323,6 +369,40 @@ enum AccountType {
   p2wpkh = "wpkh(@0)",
   p2wpkhWrapped = "sh(wpkh(@0))",
   p2tr = "tr(@0)",
+}
+
+function createRedeemScript(pubkey: Buffer): Buffer {
+  const pubkeyHash = hashPublicKey(pubkey);
+  return Buffer.concat([Buffer.from("0014", "hex"), pubkeyHash]);
+}
+
+function outputScriptOf(
+  pubkey: Buffer,
+  accountType: AccountType
+): { script: Buffer; redeemScript?: Buffer } {
+  const buf = new BufferWriter();
+  const pubkeyHash = hashPublicKey(pubkey);
+  let redeemScript: Buffer | undefined;
+  if (accountType == AccountType.p2pkh) {
+    buf.writeSlice(Buffer.of(OP_DUP, OP_HASH160, HASH_SIZE));
+    buf.writeSlice(pubkeyHash);
+    buf.writeSlice(Buffer.of(OP_EQUALVERIFY, OP_CHECKSIG));
+  } else if (accountType == AccountType.p2wpkhWrapped) {
+    redeemScript = createRedeemScript(pubkey);
+    const scriptHash = hashPublicKey(redeemScript);
+    buf.writeSlice(Buffer.of(OP_HASH160, HASH_SIZE));
+    buf.writeSlice(scriptHash);
+    buf.writeUInt8(OP_EQUAL);
+  } else if (accountType == AccountType.p2wpkh) {
+    buf.writeSlice(Buffer.of(0, HASH_SIZE));
+    buf.writeSlice(pubkeyHash);
+  } else if (accountType == AccountType.p2tr) {
+    console.log("Internal key: " + pubkey.toString("hex"));
+    const outputKey = getTaprootOutputKey(pubkey);
+    buf.writeSlice(Buffer.of(0x51, 32)); // push1, pubkeylen
+    buf.writeSlice(outputKey);
+  }
+  return { script: buf.buffer(), redeemScript };
 }
 
 function accountTypeFrom(addressFormat: AddressFormat): AccountType {
@@ -338,4 +418,34 @@ function accountTypeFromArg(arg: CreateTransactionArg): AccountType {
   if (arg.additionals.includes("bech32")) return AccountType.p2wpkh;
   if (arg.segwit) return AccountType.p2wpkhWrapped;
   return AccountType.p2pkh;
+}
+
+/*
+The following two functions are copied from wallet-btc and adapte.
+They should be moved to a library to avoid code reuse. 
+*/
+function hashTapTweak(x: Buffer): Buffer {
+  // hash_tag(x) = SHA256(SHA256(tag) || SHA256(tag) || x), see BIP340
+  // See https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki#specification
+  const h = crypto.sha256(Buffer.from("TapTweak", "utf-8"));
+  return crypto.sha256(Buffer.concat([h, h, x]));
+}
+
+function getTaprootOutputKey(internalPubkey: Buffer): Buffer {
+  if (internalPubkey.length != 32) {
+    throw new Error("Expected 32 byte pubkey. Got " + internalPubkey.length);
+  }
+  // A BIP32 derived key can be converted to a schnorr pubkey by dropping
+  // the first byte, which represent the oddness/evenness. In schnorr all
+  // pubkeys are even.
+  // https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki#public-key-conversion
+  const evenEcdsaPubkey = Buffer.concat([Buffer.of(0x02), internalPubkey]);
+  const tweak = hashTapTweak(internalPubkey);
+
+  // Q = P + int(hash_TapTweak(bytes(P)))G
+  const outputEcdsaKey = Buffer.from(pointAddScalar(evenEcdsaPubkey, tweak));
+  // Convert to schnorr.
+  const outputSchnorrKey = outputEcdsaKey.slice(1);
+  // Create address
+  return outputSchnorrKey;
 }

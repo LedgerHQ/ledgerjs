@@ -167,7 +167,7 @@ export class AppClient {
 
     const ret: Map<number, Buffer> = new Map();
     for (const inputAndSig of yielded) {
-      ret[inputAndSig[0]] = inputAndSig.slice(1);
+      ret.set(inputAndSig[0], inputAndSig.slice(1));
     }
     return ret;
   }
