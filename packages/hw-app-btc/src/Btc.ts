@@ -256,18 +256,8 @@ export default class Btc {
     return impl;
   }
 
-  // cache the appAndVersion data to not recalculate it
-  private _lazyAppAndVersion: AppAndVersion | null = null;
-  private async fetchAppAndVersion(): Promise<AppAndVersion> {
-    const { _lazyAppAndVersion } = this;
-    if (_lazyAppAndVersion) return _lazyAppAndVersion;
-    const appAndVersion = await getAppAndVersion(this.transport);
-    this._lazyAppAndVersion = appAndVersion;
-    return appAndVersion;
-  }
-
   private async inferCorrectImpl(): Promise<BtcOld | BtcNew> {
-    const appAndVersion = await this.fetchAppAndVersion();
+    const appAndVersion = await getAppAndVersion(this.transport);
     const canUseNewImplementation =
       newSupportedApps.includes(appAndVersion.name) &&
       semver.major(appAndVersion.version) >= 2;
