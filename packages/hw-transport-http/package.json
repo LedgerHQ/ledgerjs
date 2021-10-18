@@ -30,7 +30,7 @@
     "@ledgerhq/errors": "^6.9.1-taproot.0",
     "@ledgerhq/hw-transport": "^6.9.1-taproot.0",
     "@ledgerhq/logs": "^6.9.1-taproot.0",
-    "axios": "^0.22.0",
+    "axios": "^0.23.0",
     "ws": "7"
   },
   "scripts": {
