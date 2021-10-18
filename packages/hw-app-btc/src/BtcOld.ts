@@ -21,10 +21,16 @@ export type { AddressFormat };
  */
 
 export default class BtcOld {
-  transport: Transport;
+  constructor(private transport: Transport) {}
 
-  constructor(transport: Transport) {
-    this.transport = transport;
+  private derivationsCache = {};
+  private async derivatePath(path: string) {
+    if (this.derivationsCache[path]) return this.derivationsCache[path];
+    const res = await getWalletPublicKey(this.transport, {
+      path,
+    });
+    this.derivationsCache[path] = res;
+    return res;
   }
 
   async getWalletXpub({
@@ -36,12 +42,10 @@ export default class BtcOld {
   }): Promise<string> {
     const pathElements = pathStringToArray(path);
     const parentPath = pathElements.slice(0, -1);
-    const parentDerivation = await getWalletPublicKey(this.transport, {
-      path: pathArrayToString(parentPath),
-    });
-    const accountDerivation = await getWalletPublicKey(this.transport, {
-      path,
-    });
+    const parentDerivation = await this.derivatePath(
+      pathArrayToString(parentPath)
+    );
+    const accountDerivation = await this.derivatePath(path);
     const fingerprint = makeFingerprint(
       compressPublicKeySECP256(Buffer.from(parentDerivation.publicKey, "hex"))
     );
