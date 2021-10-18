@@ -101,7 +101,7 @@ async function testSigning(
     tr = await transport();
   } catch (e) {
     console.error("FIXME: SPECULOS TEST IGNORED BECAUSE INSTANCE IS NOT UP", e);
-    return;
+    return testTx.hex;
   }
   const client = new TestingClient(tr);
   // Automatically accept a transaction
