@@ -292,7 +292,7 @@ Bitcoin API.
 
 #### Parameters
 
-*   `transport` **Transport** 
+*   ``  
 
 #### Examples
 
