@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-transport-webhid",
-  "version": "6.9.1-taproot.0",
+  "version": "6.10.0",
   "description": "Ledger Hardware Wallet WebHID implementation of the communication layer",
   "keywords": [
     "Ledger",
@@ -26,10 +26,10 @@
   "types": "lib/TransportWebHID.d.ts",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/devices": "^6.9.1-taproot.0",
-    "@ledgerhq/errors": "^6.9.1-taproot.0",
-    "@ledgerhq/hw-transport": "^6.9.1-taproot.0",
-    "@ledgerhq/logs": "^6.9.1-taproot.0"
+    "@ledgerhq/devices": "^6.10.0",
+    "@ledgerhq/errors": "^6.10.0",
+    "@ledgerhq/hw-transport": "^6.10.0",
+    "@ledgerhq/logs": "^6.10.0"
   },
   "devDependencies": {
     "@types/w3c-web-hid": "^1.0.2"

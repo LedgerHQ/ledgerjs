@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/devices",
-  "version": "6.9.1-taproot.0",
+  "version": "6.10.0",
   "description": "Ledger devices",
   "keywords": [
     "Ledger"
@@ -24,8 +24,8 @@
     "@types/semver": "^7.3.8"
   },
   "dependencies": {
-    "@ledgerhq/errors": "^6.9.1-taproot.0",
-    "@ledgerhq/logs": "^6.9.1-taproot.0",
+    "@ledgerhq/errors": "^6.10.0",
+    "@ledgerhq/logs": "^6.10.0",
     "rxjs": "6",
     "semver": "^7.3.5"
   },

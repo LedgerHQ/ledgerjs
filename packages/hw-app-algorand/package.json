@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-app-algorand",
-  "version": "6.9.1-taproot.0",
+  "version": "6.10.0",
   "description": "Ledger Hardware Wallet Algorand Application API",
   "keywords": [
     "Ledger",
@@ -27,8 +27,8 @@
   "types": "lib/Algorand.d.ts",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/errors": "^6.9.1-taproot.0",
-    "@ledgerhq/hw-transport": "^6.9.1-taproot.0",
+    "@ledgerhq/errors": "^6.10.0",
+    "@ledgerhq/hw-transport": "^6.10.0",
     "bip32-path": "^0.4.2",
     "hi-base32": "^0.5.1",
     "js-sha512": "^0.8.0",
