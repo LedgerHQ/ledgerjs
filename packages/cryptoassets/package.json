@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/cryptoassets",
-  "version": "6.9.1-taproot.0",
+  "version": "6.10.0-taproot.0",
   "description": "Ledger crypto-assets list",
   "keywords": [
     "Ledger"
