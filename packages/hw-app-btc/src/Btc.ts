@@ -3,7 +3,6 @@ import semver from "semver";
 import BtcNew, { newSupportedApps } from "./BtcNew";
 import BtcOld from "./BtcOld";
 import type { CreateTransactionArg } from "./createTransaction";
-import type { AppAndVersion } from "./getAppAndVersion";
 import { getAppAndVersion } from "./getAppAndVersion";
 import { getTrustedInput } from "./getTrustedInput";
 import { getTrustedInputBIP143 } from "./getTrustedInputBIP143";
