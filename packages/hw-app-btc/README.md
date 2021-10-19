@@ -36,36 +36,59 @@ Ledger Hardware Wallet BTC JavaScript bindings. Also supports many altcoins.
     *   [serializeTransactionOutputs](#serializetransactionoutputs)
         *   [Parameters](#parameters-7)
         *   [Examples](#examples-6)
-*   [createPaymentTransactionNew](#createpaymenttransactionnew-1)
+*   [BtcNew](#btcnew)
     *   [Parameters](#parameters-8)
-    *   [Examples](#examples-7)
-*   [BtcOld](#btcold)
-    *   [Parameters](#parameters-9)
-    *   [Examples](#examples-8)
+    *   [getWalletXpub](#getwalletxpub-1)
+        *   [Parameters](#parameters-9)
     *   [getWalletPublicKey](#getwalletpublickey-1)
         *   [Parameters](#parameters-10)
-        *   [Examples](#examples-9)
-    *   [signMessageNew](#signmessagenew-1)
+    *   [createPaymentTransactionNew](#createpaymenttransactionnew-1)
         *   [Parameters](#parameters-11)
-        *   [Examples](#examples-10)
+*   [outputScriptOf](#outputscriptof)
+    *   [Parameters](#parameters-12)
+*   [getTaprootOutputKey](#gettaprootoutputkey)
+    *   [Parameters](#parameters-13)
+*   [BtcOld](#btcold)
+    *   [Parameters](#parameters-14)
+    *   [Examples](#examples-7)
+    *   [getWalletPublicKey](#getwalletpublickey-2)
+        *   [Parameters](#parameters-15)
+        *   [Examples](#examples-8)
+    *   [signMessageNew](#signmessagenew-1)
+        *   [Parameters](#parameters-16)
+        *   [Examples](#examples-9)
     *   [createPaymentTransactionNew](#createpaymenttransactionnew-2)
-        *   [Parameters](#parameters-12)
-        *   [Examples](#examples-11)
+        *   [Parameters](#parameters-17)
+        *   [Examples](#examples-10)
     *   [signP2SHTransaction](#signp2shtransaction-1)
-        *   [Parameters](#parameters-13)
-        *   [Examples](#examples-12)
+        *   [Parameters](#parameters-18)
+        *   [Examples](#examples-11)
 *   [CreateTransactionArg](#createtransactionarg)
     *   [Properties](#properties)
 *   [AddressFormat](#addressformat)
-*   [constructor](#constructor)
-    *   [Parameters](#parameters-14)
-*   [constructor](#constructor-1)
-    *   [Parameters](#parameters-15)
+*   [AppClient](#appclient)
+    *   [Parameters](#parameters-19)
+*   [ClientCommandInterpreter](#clientcommandinterpreter)
+*   [MerkelizedPsbt](#merkelizedpsbt)
+    *   [Parameters](#parameters-20)
+*   [Merkle](#merkle)
+    *   [Parameters](#parameters-21)
+*   [MerkleMap](#merklemap)
+    *   [Parameters](#parameters-22)
+*   [WalletPolicy](#walletpolicy)
+    *   [Parameters](#parameters-23)
+*   [extract](#extract)
+    *   [Parameters](#parameters-24)
 *   [finalize](#finalize)
-    *   [Parameters](#parameters-16)
+    *   [Parameters](#parameters-25)
+*   [clearFinalizedInput](#clearfinalizedinput)
+    *   [Parameters](#parameters-26)
+*   [writePush](#writepush)
+    *   [Parameters](#parameters-27)
+*   [PsbtV2](#psbtv2)
 *   [serializeTransactionOutputs](#serializetransactionoutputs-1)
-    *   [Parameters](#parameters-17)
-    *   [Examples](#examples-13)
+    *   [Parameters](#parameters-28)
+    *   [Examples](#examples-12)
 *   [SignP2SHTransactionArg](#signp2shtransactionarg)
     *   [Properties](#properties-1)
 *   [TransactionInput](#transactioninput)
@@ -158,19 +181,19 @@ To sign a transaction involving standard (P2PKH) inputs, call createTransaction 
     *   sequence is the sequence number to use for this input (when using RBF), or non present
 *   `associatedKeysets`  is an array of BIP 32 paths pointing to the path to the private key used for each UTXO
 *   `changePath`  is an optional BIP 32 path pointing to the path to the public key used to compute the change address
-*   `outputScriptHex`  is the hexadecimal serialized outputs of the transaction to sign
+*   `outputScriptHex`  is the hexadecimal serialized outputs of the transaction to sign, including leading vararg voutCount
 *   `lockTime`  is the optional lockTime of the transaction to sign, or default (0)
 *   `sigHashType`  is the hash type of the transaction to sign, or default (all)
-*   `segwit`  is an optional boolean indicating wether to use segwit or not
+*   `segwit`  is an optional boolean indicating wether to use segwit or not. This includes wrapped segwit.
 *   `initialTimestamp`  is an optional timestamp of the function call to use for coins that necessitate timestamps only, (not the one that the tx will include)
 *   `additionals`  list of additionnal options*   "bech32" for spending native segwit outputs
-    *   "bech32m" for spending native segwit outputs
+    *   "bech32m" for spending segwit v1+ outputs
     *   "abc" for bch
     *   "gold" for btg
     *   "bipxxx" for using BIPxxx
     *   "sapling" to indicate a zec transaction is supporting sapling (to be set over block 419200)
 *   `expiryHeight`  is an optional Buffer for zec overwinter / sapling Txs
-*   `useTrustedInputForSegwit`  trust inputs for segwit transactions
+*   `useTrustedInputForSegwit`  trust inputs for segwit transactions. If app version >= 1.4.0 this should be true.
 
 ##### Examples
 
@@ -247,44 +270,121 @@ const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
 
 Returns **[Buffer](https://nodejs.org/api/buffer.html)** 
 
-### createPaymentTransactionNew
+### BtcNew
 
-To sign a transaction involving standard (P2PKH) inputs, call createTransaction with the following parameters
+This class implements the same interface as BtcOld (formerly
+named Btc), but interacts with Bitcoin hardware app version 2+
+which uses a totally new APDU protocol. This new
+protocol is documented at
+<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md>
+
+Since the interface must remain compatible with BtcOld, the methods
+of this class are quite clunky, because it needs to adapt legacy
+input data into the PSBT process. In the future, a new interface should
+be developed that exposes PSBT to the outer world, which would render
+a much cleaner implementation.
 
 #### Parameters
 
+*   ``  
+
+#### getWalletXpub
+
+This is a new method that allow users to get an xpub at a standard path.
+Standard paths are described at
+<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md#description>
+
+This boils down to paths (N=0 for Bitcoin, N=1 for Testnet):
+M/44'/N'/x'/\*\*
+M/48'/N'/x'/y'/\*\*
+M/49'/N'/x'/\*\*
+M/84'/N'/x'/\*\*
+M/86'/N'/x'/\*\*
+
+The method was added because of added security in the hardware app v2+. The
+new hardware app will allow export of any xpub up to and including the
+deepest hardened key of standard derivation paths, whereas the old app
+would allow export of any key.
+
+This caused an issue for callers of this class, who only had
+getWalletPublicKey() to call which means they have to constuct xpub
+themselves:
+
+Suppose a user of this class wants to create an account xpub on a standard
+path, M/44'/0'/Z'. The user must get the parent key fingerprint (see BIP32)
+by requesting the parent key M/44'/0'. The new app won't allow that, because
+it only allows exporting deepest level hardened path. So the options are to
+allow requesting M/44'/0' from the app, or to add a new function
+"getWalletXpub".
+
+We opted for adding a new function, which can greatly simplify client code.
+
+##### Parameters
+
+*   `$0` **{path: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), xpubVersion: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)}** 
+
+    *   `$0.path`  
+    *   `$0.xpubVersion`  
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** 
+
+#### getWalletPublicKey
+
+This method returns a public key, a bitcoin address, and and a chaincode
+for a specific derivation path.
+
+Limitation: If the path is not a leaf node of a standard path, the address
+will be the empty string "", see this.getWalletAddress() for details.
+
+##### Parameters
+
+*   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `opts` **{verify: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, format: [AddressFormat](#addressformat)?}?** 
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{publicKey: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), bitcoinAddress: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), chainCode: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** 
+
+#### createPaymentTransactionNew
+
+Build and sign a transaction. See Btc.createPaymentTransactionNew for
+details on how to use this method.
+
+This method will convert the legacy arguments, CreateTransactionArg, into
+a psbt which is finally signed and finalized, and the extracted fully signed
+transaction is returned.
+
+##### Parameters
+
 *   `arg` **[CreateTransactionArg](#createtransactionarg)** 
-*   `inputs`  is an array of \[ transaction, output_index, optional redeem script, optional sequence ] where*   transaction is the previously computed transaction object for this UTXO
-    *   output_index is the output in the transaction used as input for this UTXO (counting from 0)
-    *   redeem script is the optional redeem script to use when consuming a Segregated Witness input
-    *   sequence is the sequence number to use for this input (when using RBF), or non present
-*   `associatedKeysets`  is an array of BIP 32 paths pointing to the path to the private key used for each UTXO
-*   `changePath`  is an optional BIP 32 path pointing to the path to the public key used to compute the change address
-*   `outputScriptHex`  is the hexadecimal serialized outputs of the transaction to sign, including leading vararg voutCount
-*   `lockTime`  is the optional lockTime of the transaction to sign, or default (0)
-*   `sigHashType`  is the hash type of the transaction to sign, or default (all)
-*   `segwit`  is an optional boolean indicating wether to use segwit or not. This includes wrapped segwit.
-*   `initialTimestamp`  is an optional timestamp of the function call to use for coins that necessitate timestamps only, (not the one that the tx will include)
-*   `additionals`  list of additionnal options*   "bech32" for spending native segwit outputs
-    *   "bech32m" for spending segwit v1+ outptus
-    *   "abc" for bch
-    *   "gold" for btg
-    *   "bipxxx" for using BIPxxx
-    *   "sapling" to indicate a zec transaction is supporting sapling (to be set over block 419200)
-*   `expiryHeight`  is an optional Buffer for zec overwinter / sapling Txs
-*   `useTrustedInputForSegwit`  trust inputs for segwit transactions. If app version >= 1.4.0 this should be true.
 
-#### Examples
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** 
 
-```javascript
-btc.createTransaction({
-inputs: [ [tx1, 1] ],
-associatedKeysets: ["0'/0/0"],
-outputScriptHex: "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac"
-}).then(res => ...);
-```
+### outputScriptOf
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** the signed transaction ready to be broadcast
+Generates a single signature scriptPubKey (output script) from a public key.
+This is done differently depending on account type.
+
+If accountType is p2tr, the public key must be a 32 byte x-only taproot
+pubkey, otherwise it's expected to be a 33 byte ecdsa compressed pubkey.
+
+#### Parameters
+
+*   `pubkey` **[Buffer](https://nodejs.org/api/buffer.html)** 
+*   `accountType` **AccountType** 
+
+Returns **{script: [Buffer](https://nodejs.org/api/buffer.html), redeemScript: [Buffer](https://nodejs.org/api/buffer.html)?}** 
+
+### getTaprootOutputKey
+
+Calculates a taproot output key from an internal key. This output key will be
+used as witness program in a taproot output. The internal key is tweaked
+according to recommendation in BIP341:
+<https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki#cite_ref-22-0>
+
+#### Parameters
+
+*   `internalPubkey` **[Buffer](https://nodejs.org/api/buffer.html)** A 32 byte x-only taproot internal key
+
+Returns **[Buffer](https://nodejs.org/api/buffer.html)** The output key
 
 ### BtcOld
 
@@ -440,29 +540,164 @@ address format is one of legacy | p2sh | bech32 | cashaddr
 
 Type: (`"legacy"` | `"p2sh"` | `"bech32"` | `"bech32m"` | `"cashaddr"`)
 
-### constructor
+### AppClient
+
+This class encapsulates the APDU protocol documented at
+<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md>
+
+#### Parameters
+
+*   `transport` **Transport** 
+
+### ClientCommandInterpreter
+
+This class will dispatch a client command coming from the hardware device to
+the appropriate client command implementation. Those client commands
+typically requests data from a merkle tree or merkelized maps.
+
+A ClientCommandInterpreter is prepared by adding the merkle trees and
+merkelized maps it should be able to serve to the hardware device. This class
+doesn't know anything about the semantics of the data it holds, it just
+serves merkle data. It doesn't even know in what context it is being
+executed, ie SignPsbt, getWalletAddress, etc.
+
+If the command yelds results to the client, as signPsbt does, the yielded
+data will be accessible after the command completed by calling getYielded(),
+which will return the yields in the same order as they came in.
+
+### MerkelizedPsbt
+
+**Extends PsbtV2**
+
+This class merkelizes a PSBTv2, by merkelizing the different
+maps of the psbt. This is used during the transaction signing process,
+where the hardware app can request specific parts of the psbt from the
+client code and be sure that the response data actually belong to the psbt.
+The reason for this is the limited amount of memory available to the app,
+so it can't always store the full psbt in memory.
+
+The signing process is documented at
+<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md#sign_psbt>
+
+#### Parameters
+
+*   `psbt` **[PsbtV2](#psbtv2)** 
+
+### Merkle
+
+This class implements the merkle tree used by Ledger Bitcoin app v2+,
+which is documented at
+<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/merkle.md>
+
+#### Parameters
+
+*   `leaves` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[Buffer](https://nodejs.org/api/buffer.html)>** 
+*   `hasher` **function (buf: [Buffer](https://nodejs.org/api/buffer.html)): [Buffer](https://nodejs.org/api/buffer.html)**  (optional, default `crypto.sha256`)
+
+### MerkleMap
+
+This implements "Merkelized Maps", documented at
+<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/merkle.md#merkleized-maps>
+
+A merkelized map consist of two merkle trees, one for the keys of
+a map and one for the values of the same map, thus the two merkle
+trees have the same shape. The commitment is the number elements
+in the map followed by the keys' merkle root followed by the
+values' merkle root.
 
 #### Parameters
 
 *   `keys` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[Buffer](https://nodejs.org/api/buffer.html)>** Sorted list of (unhashed) keys
 *   `values` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[Buffer](https://nodejs.org/api/buffer.html)>** values, in corresponding order as the keys, and of equal length
 
-### constructor
+### WalletPolicy
 
-For now, we only support default descriptor templates.
+The Bitcon hardware app uses a descriptors-like thing to describe
+how to construct output scripts from keys. A "Wallet Policy" consists
+of a "Descriptor Template" and a list of "keys". A key is basically
+a serialized BIP32 extended public key with some added derivation path
+information. This is documented at
+<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/wallet.md>
 
 #### Parameters
 
 *   `descriptorTemplate` **DefaultDescriptorTemplate** 
 *   `key` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 
-### finalize
+### extract
+
+This implements the "Transaction Extractor" role of BIP370 (PSBTv2
+<https://github.com/bitcoin/bips/blob/master/bip-0370.mediawiki#transaction-extractor>). However
+the role is partially documented in BIP174 (PSBTv0
+<https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki#transaction-extractor>).
 
 #### Parameters
 
-*   `psbt` **PsbtV2** The psbt with all signatures added as partial sigs, either through PSBT_IN_PARTIAL_SIG or PSBT_IN_TAP_KEY_SIG
+*   `psbt` **[PsbtV2](#psbtv2)** 
+
+Returns **[Buffer](https://nodejs.org/api/buffer.html)** 
+
+### finalize
+
+This roughly implements the "input finalizer" role of BIP370 (PSBTv2
+<https://github.com/bitcoin/bips/blob/master/bip-0370.mediawiki>). However
+the role is documented in BIP174 (PSBTv0
+<https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki>).
+
+Verify that all inputs have a signature, and set inputFinalScriptwitness
+and/or inputFinalScriptSig depending on the type of the spent outputs. Clean
+fields that aren't useful anymore, partial signatures, redeem script and
+derivation paths.
+
+#### Parameters
+
+*   `psbt` **[PsbtV2](#psbtv2)** The psbt with all signatures added as partial sigs, either
+    through PSBT_IN_PARTIAL_SIG or PSBT_IN_TAP_KEY_SIG
 
 Returns **void** 
+
+### clearFinalizedInput
+
+Deletes fields that are no longer neccesary from the psbt.
+
+Note, the spec doesn't say anything about removing ouput fields
+like PSBT_OUT_BIP32\_DERIVATION_PATH and others, so we keep them
+without actually knowing why. I think we should remove them too.
+
+#### Parameters
+
+*   `psbt` **[PsbtV2](#psbtv2)** 
+*   `inputIndex` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+
+### writePush
+
+Writes a script push operation to buf, which looks different
+depending on the size of the data. See
+<https://en.bitcoin.it/wiki/Script#Constants>
+
+#### Parameters
+
+*   `buf` **BufferWriter** the BufferWriter to write to
+*   `data` **[Buffer](https://nodejs.org/api/buffer.html)** the Buffer to be pushed.
+
+### PsbtV2
+
+Implements Partially Signed Bitcoin Transaction version 2, BIP370, as
+documented at <https://github.com/bitcoin/bips/blob/master/bip-0370.mediawiki>
+and <https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki>
+
+A psbt is a data structure that can carry all relevant information about a
+transaction through all stages of the signing process. From constructing an
+unsigned transaction to extracting the final serialized transaction ready for
+broadcast.
+
+This implementation is limited to what's needed in ledgerjs to carry out its
+duties, which means that support for features like multisig or taproot script
+path spending are not implemented. Specifically, it supports p2pkh,
+p2wpkhWrappedInP2sh, p2wpkh and p2tr key path spending.
+
+This class is made purposefully dumb, so it's easy to add support for
+complemantary fields as needed in the future.
 
 ### serializeTransactionOutputs
 

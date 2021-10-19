@@ -1,5 +1,10 @@
 import { crypto } from "bitcoinjs-lib";
 
+/**
+ * This class implements the merkle tree used by Ledger Bitcoin app v2+,
+ * which is documented at
+ * https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/merkle.md
+ */
 export class Merkle {
   private leaves: Buffer[];
   private rootNode: Node;

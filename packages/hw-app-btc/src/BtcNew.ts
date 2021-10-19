@@ -38,9 +38,52 @@ export function canSupportApp(appAndVersion: AppAndVersion): boolean {
   );
 }
 
+/**
+ * This class implements the same interface as BtcOld (formerly
+ * named Btc), but interacts with Bitcoin hardware app version 2+
+ * which uses a totally new APDU protocol. This new
+ * protocol is documented at
+ * https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md
+ *
+ * Since the interface must remain compatible with BtcOld, the methods
+ * of this class are quite clunky, because it needs to adapt legacy
+ * input data into the PSBT process. In the future, a new interface should
+ * be developed that exposes PSBT to the outer world, which would render
+ * a much cleaner implementation.
+ */
 export default class BtcNew {
   constructor(private client: Client) {}
 
+  /**
+   * This is a new method that allow users to get an xpub at a standard path.
+   * Standard paths are described at
+   * https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md#description
+   *
+   * This boils down to paths (N=0 for Bitcoin, N=1 for Testnet):
+   * M/44'/N'/x'/**
+   * M/48'/N'/x'/y'/**
+   * M/49'/N'/x'/**
+   * M/84'/N'/x'/**
+   * M/86'/N'/x'/**
+   *
+   * The method was added because of added security in the hardware app v2+. The
+   * new hardware app will allow export of any xpub up to and including the
+   * deepest hardened key of standard derivation paths, whereas the old app
+   * would allow export of any key.
+   *
+   * This caused an issue for callers of this class, who only had
+   * getWalletPublicKey() to call which means they have to constuct xpub
+   * themselves:
+   *
+   * Suppose a user of this class wants to create an account xpub on a standard
+   * path, M/44'/0'/Z'. The user must get the parent key fingerprint (see BIP32)
+   * by requesting the parent key M/44'/0'. The new app won't allow that, because
+   * it only allows exporting deepest level hardened path. So the options are to
+   * allow requesting M/44'/0' from the app, or to add a new function
+   * "getWalletXpub".
+   *
+   * We opted for adding a new function, which can greatly simplify client code.
+   */
   async getWalletXpub({
     path,
     xpubVersion,
@@ -49,7 +92,7 @@ export default class BtcNew {
     xpubVersion: number;
   }): Promise<string> {
     const pathElements: number[] = pathStringToArray(path);
-    const xpub = await this.client.getPubkey(false, pathElements);
+    const xpub = await this.client.getExtendedPubkey(false, pathElements);
     const xpubComponents = getXpubComponents(xpub);
     if (xpubComponents.version != xpubVersion) {
       throw new Error(
@@ -59,6 +102,13 @@ export default class BtcNew {
     return xpub;
   }
 
+  /**
+   * This method returns a public key, a bitcoin address, and and a chaincode
+   * for a specific derivation path.
+   *
+   * Limitation: If the path is not a leaf node of a standard path, the address
+   * will be the empty string "", see this.getWalletAddress() for details.
+   */
   async getWalletPublicKey(
     path: string,
     opts?: {
@@ -71,7 +121,7 @@ export default class BtcNew {
     chainCode: string;
   }> {
     const pathElements: number[] = pathStringToArray(path);
-    const xpub = await this.client.getPubkey(false, pathElements);
+    const xpub = await this.client.getExtendedPubkey(false, pathElements);
 
     const display = opts?.verify ?? false;
 
@@ -100,7 +150,7 @@ export default class BtcNew {
    *
    * If display is false we *could* generate the address ourselves, but chose to
    * get it from the device to save development time. However, it shouldn't take
-   * more than a few hours to implement local address generation.
+   * too much time to implement local address generation.
    *
    * Moreover, if the path is not for a leaf, ie accountPath+/X/Y, there is no
    * way to get the address from the device. In this case we have to create it
@@ -115,7 +165,7 @@ export default class BtcNew {
     if (accountPath.length + 2 != pathElements.length) {
       return "";
     }
-    const accountXpub = await this.client.getPubkey(false, accountPath);
+    const accountXpub = await this.client.getExtendedPubkey(false, accountPath);
     const masterFingerprint = await this.client.getMasterFingerprint();
     const policy = new WalletPolicy(
       accountType,
@@ -132,37 +182,12 @@ export default class BtcNew {
   }
 
   /**
-   * To sign a transaction involving standard (P2PKH) inputs, call createTransaction with the following parameters
-   * @param inputs is an array of [ transaction, output_index, optional redeem script, optional sequence ] where
+   * Build and sign a transaction. See Btc.createPaymentTransactionNew for
+   * details on how to use this method.
    *
-   * * transaction is the previously computed transaction object for this UTXO
-   * * output_index is the output in the transaction used as input for this UTXO (counting from 0)
-   * * redeem script is the optional redeem script to use when consuming a Segregated Witness input
-   * * sequence is the sequence number to use for this input (when using RBF), or non present
-   * @param associatedKeysets is an array of BIP 32 paths pointing to the path to the private key used for each UTXO
-   * @param changePath is an optional BIP 32 path pointing to the path to the public key used to compute the change address
-   * @param outputScriptHex is the hexadecimal serialized outputs of the transaction to sign, including leading vararg voutCount
-   * @param lockTime is the optional lockTime of the transaction to sign, or default (0)
-   * @param sigHashType is the hash type of the transaction to sign, or default (all)
-   * @param segwit is an optional boolean indicating wether to use segwit or not. This includes wrapped segwit.
-   * @param initialTimestamp is an optional timestamp of the function call to use for coins that necessitate timestamps only, (not the one that the tx will include)
-   * @param additionals list of additionnal options
-   * 
-   * - "bech32" for spending native segwit outputs
-   * - "bech32m" for spending segwit v1+ outptus
-   * - "abc" for bch
-   * - "gold" for btg
-   * - "bipxxx" for using BIPxxx
-   * - "sapling" to indicate a zec transaction is supporting sapling (to be set over block 419200)
-   * @param expiryHeight is an optional Buffer for zec overwinter / sapling Txs
-   * @param useTrustedInputForSegwit trust inputs for segwit transactions. If app version >= 1.4.0 this should be true.
-   * @return the signed transaction ready to be broadcast
-   * @example
-  btc.createTransaction({
-   inputs: [ [tx1, 1] ],
-   associatedKeysets: ["0'/0/0"],
-   outputScriptHex: "01905f0100000000001976a91472a5d75c8d2d0565b656a5232703b167d50d5a2b88ac"
-  }).then(res => ...);
+   * This method will convert the legacy arguments, CreateTransactionArg, into
+   * a psbt which is finally signed and finalized, and the extracted fully signed
+   * transaction is returned.
    */
   async createPaymentTransactionNew(
     arg: CreateTransactionArg
@@ -174,14 +199,16 @@ export default class BtcNew {
 
     const accountType = accountTypeFromArg(arg);
 
-    psbt.setGlobalTxVersion(2);
     if (arg.lockTime) {
+      // The signer will assume locktime 0 if unset
       psbt.setGlobalFallbackLocktime(arg.lockTime);
     }
     psbt.setGlobalInputCount(arg.inputs.length);
     psbt.setGlobalPsbtVersion(2);
     psbt.setGlobalTxVersion(2);
 
+    // The master fingerprint is needed when adding BIP32 derivation paths on
+    // the psbt.
     const masterFp = await this.client.getMasterFingerprint();
     let accountXpub = "";
     let accountPath: number[] = [];
@@ -191,7 +218,7 @@ export default class BtcNew {
         // We assume all inputs belong to the same account so we set
         // the account xpub and path based on the first input.
         accountPath = pathElems.slice(0, -2);
-        accountXpub = await this.client.getPubkey(false, accountPath);
+        accountXpub = await this.client.getExtendedPubkey(false, accountPath);
       }
       await this.setInput(
         psbt,
@@ -206,22 +233,24 @@ export default class BtcNew {
     const outputsConcat = Buffer.from(arg.outputScriptHex, "hex");
     const outputsBufferReader = new BufferReader(outputsConcat);
     const outputCount = outputsBufferReader.readVarInt();
+    psbt.setGlobalOutputCount(outputCount);
     const changeData = await this.outputScriptAt(
       accountPath,
       accountType,
       arg.changePath
     );
-    psbt.setGlobalOutputCount(outputCount);
+    // If the caller supplied a changePath, we must make sure there actually is
+    // a change output. If no change output found, we'll throw an error.
     let changeFound = !changeData;
     for (let i = 0; i < outputCount; i++) {
       const amount = Number(outputsBufferReader.readUInt64());
       const outputScript = outputsBufferReader.readVarSlice();
+      psbt.setOutputAmount(i, amount);
+      psbt.setOutputScript(i, outputScript);
 
-      // We won't know if we're paying to ourselves, because
-      // there's no information in the input arg to support this.
-      // We only have the changePath.
-      // One exception is if there are multiple outputs to the
-      // change address.
+      // We won't know if we're paying to ourselves, because there's no
+      // information in arg to support multiple "change paths". One exception is
+      // if there are multiple outputs to the change address.
       const isChange = changeData && outputScript.equals(changeData?.script);
       if (isChange) {
         changeFound = true;
@@ -241,8 +270,6 @@ export default class BtcNew {
           psbt.setOutputTapBip32Derivation(i, pubkey, [], masterFp, changePath);
         }
       }
-      psbt.setOutputAmount(i, amount);
-      psbt.setOutputScript(i, outputScript);
     }
     if (!changeFound) {
       throw new Error(
@@ -253,9 +280,20 @@ export default class BtcNew {
 
     const key = createKey(masterFp, accountPath, accountXpub);
     const p = new WalletPolicy(accountType, key);
-    return await this.signPsbt(psbt, p);
+    await this.signPsbt(psbt, p);
+    finalize(psbt);
+    const serializedTx = extract(psbt);
+    return serializedTx.toString("hex");
   }
 
+  /**
+   * Calculates an output script along with public key and possible redeemScript
+   * from a path and accountType. The accountPath must be a prefix of path.
+   *
+   * @returns an object with output script (property "script"), redeemScript (if
+   * wrapped p2wpkh), and pubkey at provided path. The values of these three
+   * properties depend on the accountType used.
+   */
   private async outputScriptAt(
     accountPath: number[],
     accountType: AccountType,
@@ -274,7 +312,7 @@ export default class BtcNew {
         );
       }
     }
-    const xpub = await this.client.getPubkey(false, pathElems);
+    const xpub = await this.client.getExtendedPubkey(false, pathElems);
     let pubkey = pubkeyFromXpub(xpub);
     if (accountType == AccountType.p2tr) {
       pubkey = pubkey.slice(1);
@@ -283,6 +321,11 @@ export default class BtcNew {
     return { ...script, pubkey };
   }
 
+  /**
+   * Adds relevant data about an input to the psbt. This includes sequence,
+   * previous txid, output index, spent UTXO, redeem script for wrapped p2wpkh,
+   * public key and its derivation path.
+   */
   private async setInput(
     psbt: PsbtV2,
     i: number,
@@ -305,7 +348,7 @@ export default class BtcNew {
     }
     const inputTxBuffer = serializeTransaction(inputTx, true);
     const inputTxid = crypto.hash256(inputTxBuffer);
-    const xpubBase58 = await this.client.getPubkey(false, pathElements);
+    const xpubBase58 = await this.client.getExtendedPubkey(false, pathElements);
 
     const pubkey = pubkeyFromXpub(xpubBase58);
     if (!inputTx.outputs)
@@ -341,18 +384,27 @@ export default class BtcNew {
     psbt.setInputOutputIndex(i, spentOutputIndex);
   }
 
+  /**
+   * This implements the "Signer" role of the BIP370 transaction signing
+   * process.
+   *
+   * It ssks the hardware device to sign the a psbt using the specified wallet
+   * policy. This method assumes BIP32 derived keys are used for all inputs, see
+   * comment in-line. The signatures returned from the hardware device is added
+   * to the appropriate input fields of the PSBT.
+   */
   private async signPsbt(
     psbt: PsbtV2,
     walletPolicy: WalletPolicy
-  ): Promise<string> {
+  ): Promise<void> {
     const sigs: Map<number, Buffer> = await this.client.signPsbt(
       psbt,
       walletPolicy,
       Buffer.alloc(32, 0)
     );
     sigs.forEach((v, k) => {
-      // Note: Looking at BIP32 derivation does not work in the generic case.
-      // some inputs might not have a BIP32-derived pubkey.
+      // Note: Looking at BIP32 derivation does not work in the generic case,
+      // since some inputs might not have a BIP32-derived pubkey.
       const pubkeys = psbt.getInputKeyDatas(k, psbtIn.BIP32_DERIVATION);
       let pubkey;
       if (pubkeys.length != 1) {
@@ -367,9 +419,6 @@ export default class BtcNew {
         psbt.setInputPartialSig(k, pubkey, v);
       }
     });
-    finalize(psbt);
-    const serializedTx = extract(psbt);
-    return serializedTx.toString("hex");
   }
 }
 
@@ -385,6 +434,13 @@ function createRedeemScript(pubkey: Buffer): Buffer {
   return Buffer.concat([Buffer.from("0014", "hex"), pubkeyHash]);
 }
 
+/**
+ * Generates a single signature scriptPubKey (output script) from a public key.
+ * This is done differently depending on account type.
+ *
+ * If accountType is p2tr, the public key must be a 32 byte x-only taproot
+ * pubkey, otherwise it's expected to be a 33 byte ecdsa compressed pubkey.
+ */
 function outputScriptOf(
   pubkey: Buffer,
   accountType: AccountType
@@ -406,7 +462,6 @@ function outputScriptOf(
     buf.writeSlice(Buffer.of(0, HASH_SIZE));
     buf.writeSlice(pubkeyHash);
   } else if (accountType == AccountType.p2tr) {
-    console.log("Internal key: " + pubkey.toString("hex"));
     const outputKey = getTaprootOutputKey(pubkey);
     buf.writeSlice(Buffer.of(0x51, 32)); // push1, pubkeylen
     buf.writeSlice(outputKey);
@@ -430,7 +485,7 @@ function accountTypeFromArg(arg: CreateTransactionArg): AccountType {
 }
 
 /*
-The following two functions are copied from wallet-btc and adapte.
+The following two functions are copied from wallet-btc and adapted.
 They should be moved to a library to avoid code reuse. 
 */
 function hashTapTweak(x: Buffer): Buffer {
@@ -440,6 +495,15 @@ function hashTapTweak(x: Buffer): Buffer {
   return crypto.sha256(Buffer.concat([h, h, x]));
 }
 
+/**
+ * Calculates a taproot output key from an internal key. This output key will be
+ * used as witness program in a taproot output. The internal key is tweaked
+ * according to recommendation in BIP341:
+ * https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki#cite_ref-22-0
+ *
+ * @param internalPubkey A 32 byte x-only taproot internal key
+ * @returns The output key
+ */
 function getTaprootOutputKey(internalPubkey: Buffer): Buffer {
   if (internalPubkey.length != 32) {
     throw new Error("Expected 32 byte pubkey. Got " + internalPubkey.length);
