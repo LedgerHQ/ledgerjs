@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-transport-node-ble",
-  "version": "6.10.0",
+  "version": "6.11.0",
   "description": "Ledger Hardware Wallet Bluetooth BLE transport for Node.js (noble)",
   "keywords": [
     "Ledger",
@@ -29,9 +29,9 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@abandonware/noble": "1.9.2-14",
-    "@ledgerhq/devices": "^6.10.0",
+    "@ledgerhq/devices": "^6.11.0",
     "@ledgerhq/errors": "^6.10.0",
-    "@ledgerhq/hw-transport": "^6.10.0",
+    "@ledgerhq/hw-transport": "^6.11.0",
     "@ledgerhq/logs": "^6.10.0",
     "invariant": "^2.2.4",
     "rxjs": "6"
