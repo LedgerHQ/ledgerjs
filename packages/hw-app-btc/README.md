@@ -70,25 +70,26 @@ Ledger Hardware Wallet BTC JavaScript bindings. Also supports many altcoins.
 *   [AppClient](#appclient)
     *   [Parameters](#parameters-19)
 *   [ClientCommandInterpreter](#clientcommandinterpreter)
-*   [MerkelizedPsbt](#merkelizedpsbt)
     *   [Parameters](#parameters-20)
-*   [Merkle](#merkle)
+*   [MerkelizedPsbt](#merkelizedpsbt)
     *   [Parameters](#parameters-21)
-*   [MerkleMap](#merklemap)
+*   [Merkle](#merkle)
     *   [Parameters](#parameters-22)
-*   [WalletPolicy](#walletpolicy)
+*   [MerkleMap](#merklemap)
     *   [Parameters](#parameters-23)
-*   [extract](#extract)
+*   [WalletPolicy](#walletpolicy)
     *   [Parameters](#parameters-24)
-*   [finalize](#finalize)
+*   [extract](#extract)
     *   [Parameters](#parameters-25)
-*   [clearFinalizedInput](#clearfinalizedinput)
+*   [finalize](#finalize)
     *   [Parameters](#parameters-26)
-*   [writePush](#writepush)
+*   [clearFinalizedInput](#clearfinalizedinput)
     *   [Parameters](#parameters-27)
+*   [writePush](#writepush)
+    *   [Parameters](#parameters-28)
 *   [PsbtV2](#psbtv2)
 *   [serializeTransactionOutputs](#serializetransactionoutputs-1)
-    *   [Parameters](#parameters-28)
+    *   [Parameters](#parameters-29)
     *   [Examples](#examples-12)
 *   [SignP2SHTransactionArg](#signp2shtransactionarg)
     *   [Properties](#properties-1)
@@ -590,6 +591,10 @@ executed, ie SignPsbt, getWalletAddress, etc.
 If the command yelds results to the client, as signPsbt does, the yielded
 data will be accessible after the command completed by calling getYielded(),
 which will return the yields in the same order as they came in.
+
+#### Parameters
+
+*   `progressCallback` **function (): void** 
 
 ### MerkelizedPsbt
 

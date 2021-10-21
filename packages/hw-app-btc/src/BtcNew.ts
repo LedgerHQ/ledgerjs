@@ -192,7 +192,8 @@ export default class BtcNew {
   async createPaymentTransactionNew(
     arg: CreateTransactionArg
   ): Promise<string> {
-    if (arg.inputs.length == 0) {
+    const inputCount = arg.inputs.length;
+    if (inputCount == 0) {
       throw Error("No inputs");
     }
     const psbt = new PsbtV2();
@@ -203,16 +204,27 @@ export default class BtcNew {
       // The signer will assume locktime 0 if unset
       psbt.setGlobalFallbackLocktime(arg.lockTime);
     }
-    psbt.setGlobalInputCount(arg.inputs.length);
+    psbt.setGlobalInputCount(inputCount);
     psbt.setGlobalPsbtVersion(2);
     psbt.setGlobalTxVersion(2);
+
+    let notifyCount = 0;
+    const progress = () => {
+      if (!arg.onDeviceStreaming) return;
+      arg.onDeviceStreaming({
+        total: 2 * inputCount,
+        index: notifyCount,
+        progress: ++notifyCount / (2 * inputCount),
+      });
+    };
 
     // The master fingerprint is needed when adding BIP32 derivation paths on
     // the psbt.
     const masterFp = await this.client.getMasterFingerprint();
     let accountXpub = "";
     let accountPath: number[] = [];
-    for (let i = 0; i < arg.inputs.length; i++) {
+    for (let i = 0; i < inputCount; i++) {
+      progress();
       const pathElems: number[] = pathStringToArray(arg.associatedKeysets[i]);
       if (accountXpub == "") {
         // We assume all inputs belong to the same account so we set
@@ -280,7 +292,21 @@ export default class BtcNew {
 
     const key = createKey(masterFp, accountPath, accountXpub);
     const p = new WalletPolicy(accountType, key);
-    await this.signPsbt(psbt, p);
+    // This is cheating, because it's not actually requested on the
+    // device yet, but it will be, soonish.
+    if (arg.onDeviceSignatureRequested) arg.onDeviceSignatureRequested();
+
+    let firstSigned = false;
+    // This callback will be called once for each signature yielded.
+    const progressCallback = () => {
+      if (!firstSigned) {
+        firstSigned = true;
+        arg.onDeviceSignatureGranted && arg.onDeviceSignatureGranted();
+      }
+      progress();
+    };
+
+    await this.signPsbt(psbt, p, progressCallback);
     finalize(psbt);
     const serializedTx = extract(psbt);
     return serializedTx.toString("hex");
@@ -395,12 +421,14 @@ export default class BtcNew {
    */
   private async signPsbt(
     psbt: PsbtV2,
-    walletPolicy: WalletPolicy
+    walletPolicy: WalletPolicy,
+    progressCallback: () => void
   ): Promise<void> {
     const sigs: Map<number, Buffer> = await this.client.signPsbt(
       psbt,
       walletPolicy,
-      Buffer.alloc(32, 0)
+      Buffer.alloc(32, 0),
+      progressCallback
     );
     sigs.forEach((v, k) => {
       // Note: Looking at BIP32 derivation does not work in the generic case,

@@ -96,7 +96,7 @@ export class AppClient {
       throw new Error("Invalid HMAC length");
     }
 
-    const clientInterpreter = new ClientCommandInterpreter();
+    const clientInterpreter = new ClientCommandInterpreter(() => {});
     clientInterpreter.addKnownList(
       walletPolicy.keys.map((k) => Buffer.from(k, "ascii"))
     );
@@ -123,7 +123,8 @@ export class AppClient {
   async signPsbt(
     psbt: PsbtV2,
     walletPolicy: WalletPolicy,
-    walletHMAC: Buffer | null
+    walletHMAC: Buffer | null,
+    progressCallback: () => void
   ): Promise<Map<number, Buffer>> {
     const merkelizedPsbt = new MerkelizedPsbt(psbt);
 
@@ -131,7 +132,7 @@ export class AppClient {
       throw new Error("Invalid HMAC length");
     }
 
-    const clientInterpreter = new ClientCommandInterpreter();
+    const clientInterpreter = new ClientCommandInterpreter(progressCallback);
 
     // prepare ClientCommandInterpreter
     clientInterpreter.addKnownList(

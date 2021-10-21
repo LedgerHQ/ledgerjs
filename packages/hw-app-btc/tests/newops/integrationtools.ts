@@ -52,7 +52,10 @@ export async function runSignTransaction(
     outputWriter.writeVarSlice(Buffer.from(output.scriptPubKey.hex, "hex"));    
   });
   const outputScriptHex = outputWriter.buffer().toString("hex");  
-
+  let callbacks = "";
+  function logCallback(message: string) {
+    callbacks += new Date().toISOString() + " " + message + "\n";
+  }
   const arg: CreateTransactionArg = {    
     inputs,
     additionals,
@@ -60,11 +63,19 @@ export async function runSignTransaction(
     changePath: testPaths.out,
     outputScriptHex,
     lockTime: testTx.locktime,
-    segwit: accountType != AccountType.p2pkh,    
+    segwit: accountType != AccountType.p2pkh,
+    onDeviceSignatureGranted: () => logCallback("CALLBACK: signature granted"),
+    onDeviceSignatureRequested: () => logCallback("CALLBACK: signature requested"),
+    onDeviceStreaming: (arg) => logCallback("CALLBACK: " + JSON.stringify(arg))
   };
+  logCallback("Start createPaymentTransactionNew");
   const tx = await btcNew.createPaymentTransactionNew(arg);
+  logCallback("Done createPaymentTransactionNew");
+  // console.log(callbacks);
   return tx;
 };
+
+
 
 export function addressFormatFromDescriptorTemplate(descTemp: DefaultDescriptorTemplate): AddressFormat {
   if (descTemp == "tr(@0)") return "bech32m";
