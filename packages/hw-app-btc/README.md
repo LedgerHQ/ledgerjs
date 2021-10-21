@@ -36,11 +36,12 @@ Ledger Hardware Wallet BTC JavaScript bindings. Also supports many altcoins.
     *   [serializeTransactionOutputs](#serializetransactionoutputs)
         *   [Parameters](#parameters-7)
         *   [Examples](#examples-6)
+*   [getWalletPublicKey](#getwalletpublickey-1)
 *   [BtcNew](#btcnew)
     *   [Parameters](#parameters-8)
     *   [getWalletXpub](#getwalletxpub-1)
         *   [Parameters](#parameters-9)
-    *   [getWalletPublicKey](#getwalletpublickey-1)
+    *   [getWalletPublicKey](#getwalletpublickey-2)
         *   [Parameters](#parameters-10)
     *   [createPaymentTransactionNew](#createpaymenttransactionnew-1)
         *   [Parameters](#parameters-11)
@@ -51,7 +52,7 @@ Ledger Hardware Wallet BTC JavaScript bindings. Also supports many altcoins.
 *   [BtcOld](#btcold)
     *   [Parameters](#parameters-14)
     *   [Examples](#examples-7)
-    *   [getWalletPublicKey](#getwalletpublickey-2)
+    *   [getWalletPublicKey](#getwalletpublickey-3)
         *   [Parameters](#parameters-15)
         *   [Examples](#examples-8)
     *   [signMessageNew](#signmessagenew-1)
@@ -134,7 +135,7 @@ Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 
     *   p2sh format with 49' paths
 
-    *   bech32 format with 173' paths
+    *   bech32 format with 84' paths
 
     *   cashaddr in case of Bitcoin Cash
 
@@ -269,6 +270,31 @@ const outputScript = btc.serializeTransactionOutputs(tx1).toString('hex');
 ```
 
 Returns **[Buffer](https://nodejs.org/api/buffer.html)** 
+
+### getWalletPublicKey
+
+Definition: A "normal path" is a prefix of a standard path where all
+the hardened steps of the standard path are included. For example, the
+paths m/44'/1'/17' and m/44'/1'/17'/1 are normal paths, but m/44'/1'
+is not. m/'199/1'/17'/0/1 is not a normal path either.
+
+There's a compatiblity issue between old and new app: When exporting
+the key of a non-normal path with verify=false, the new app would
+return an error, whereas the old app would return the key.
+
+See
+<https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md#get_extended_pubkey>
+
+If format bech32m is used, we'll not use old, because it doesn't
+support it.
+
+When to use new (given the app supports it)
+
+*   format is bech32m or
+*   path is normal or
+*   verify is true
+
+Otherwise use old.
 
 ### BtcNew
 

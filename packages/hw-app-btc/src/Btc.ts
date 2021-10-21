@@ -1,4 +1,5 @@
 import type Transport from "@ledgerhq/hw-transport";
+import { pathStringToArray } from "./bip32";
 import BtcNew, { canSupportApp } from "./BtcNew";
 import BtcOld from "./BtcOld";
 import type { CreateTransactionArg } from "./createTransaction";
@@ -65,7 +66,7 @@ export default class Btc {
    *
    * - p2sh format with 49' paths
    *
-   * - bech32 format with 173' paths
+   * - bech32 format with 84' paths
    *
    * - cashaddr in case of Bitcoin Cash
    *
@@ -98,7 +99,39 @@ export default class Btc {
       options = opts || {};
     }
     return this.getCorrectImpl().then((impl) => {
-      return impl.getWalletPublicKey(path, options);
+      /**
+       * Definition: A "normal path" is a prefix of a standard path where all
+       * the hardened steps of the standard path are included. For example, the
+       * paths m/44'/1'/17' and m/44'/1'/17'/1 are normal paths, but m/44'/1'
+       * is not. m/'199/1'/17'/0/1 is not a normal path either.
+       *
+       * There's a compatiblity issue between old and new app: When exporting
+       * the key of a non-normal path with verify=false, the new app would
+       * return an error, whereas the old app would return the key.
+       *
+       * See
+       * https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md#get_extended_pubkey
+       *
+       * If format bech32m is used, we'll not use old, because it doesn't
+       * support it.
+       *
+       * When to use new (given the app supports it)
+       *   * format is bech32m or
+       *   * path is normal or
+       *   * verify is true
+       *
+       * Otherwise use old.
+       */
+      if (
+        impl instanceof BtcNew &&
+        options.format != "bech32m" &&
+        (!options.verify || options.verify == false) &&
+        !isPathNormal(path)
+      ) {
+        return this.old().getWalletPublicKey(path, options);
+      } else {
+        return impl.getWalletPublicKey(path, options);
+      }
     });
   }
 
@@ -259,13 +292,51 @@ export default class Btc {
     const appAndVersion = await getAppAndVersion(this.transport);
     const canUseNewImplementation = canSupportApp(appAndVersion);
     if (!canUseNewImplementation) {
-      return new BtcOld(this.transport);
+      return this.old();
     } else {
-      return new BtcNew(new AppClient(this.transport));
+      return this.new();
     }
   }
 
-  private old(): BtcOld {
+  protected old(): BtcOld {
     return new BtcOld(this.transport);
   }
+
+  protected new(): BtcNew {
+    return new BtcNew(new AppClient(this.transport));
+  }
+}
+
+function isPathNormal(path: string): boolean {
+  //path is not deepest hardened node of a standard path or deeper, use BtcOld
+  const h = 0x80000000;
+  const pathElems = pathStringToArray(path);
+
+  const hard = (n: number) => n > h;
+  const soft = (n: number | undefined) => !n || n < h;
+
+  if (
+    pathElems.length >= 3 &&
+    pathElems.length <= 5 &&
+    [44 + h, 49 + h, 84 + h, 86 + h].some((v) => v == pathElems[0]) &&
+    [0 + h, 1 + h].some((v) => v == pathElems[1]) &&
+    hard(pathElems[2]) &&
+    soft(pathElems[3]) &&
+    soft(pathElems[4])
+  ) {
+    return true;
+  }
+  if (
+    pathElems.length >= 4 &&
+    pathElems.length <= 6 &&
+    48 + h == pathElems[0] &&
+    [0 + h, 1 + h].some((v) => v == pathElems[1]) &&
+    hard(pathElems[2]) &&
+    hard(pathElems[3]) &&
+    soft(pathElems[4]) &&
+    soft(pathElems[5])
+  ) {
+    return true;
+  }
+  return false;
 }
