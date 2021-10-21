@@ -36,6 +36,24 @@ const PSBT_MAGIC_BYTES = Buffer.of(0x70, 0x73, 0x62, 0x74, 0xff);
 
 export class NoSuchEntry extends Error {}
 
+/**
+ * Implements Partially Signed Bitcoin Transaction version 2, BIP370, as
+ * documented at https://github.com/bitcoin/bips/blob/master/bip-0370.mediawiki
+ * and https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki
+ *
+ * A psbt is a data structure that can carry all relevant information about a
+ * transaction through all stages of the signing process. From constructing an
+ * unsigned transaction to extracting the final serialized transaction ready for
+ * broadcast.
+ *
+ * This implementation is limited to what's needed in ledgerjs to carry out its
+ * duties, which means that support for features like multisig or taproot script
+ * path spending are not implemented. Specifically, it supports p2pkh,
+ * p2wpkhWrappedInP2sh, p2wpkh and p2tr key path spending.
+ *
+ * This class is made purposefully dumb, so it's easy to add support for
+ * complemantary fields as needed in the future.
+ */
 export class PsbtV2 {
   protected globalMap: Map<string, Buffer> = new Map();
   protected inputMaps: Map<string, Buffer>[] = [];
@@ -361,15 +379,6 @@ export class PsbtV2 {
   ) {
     set(this.getMap(index, this.inputMaps), keyType, keyData, value);
   }
-  private getMap(
-    index: number,
-    maps: Map<string, Buffer>[]
-  ): Map<string, Buffer> {
-    if (maps[index]) {
-      return maps[index];
-    }
-    return (maps[index] = new Map());
-  }
   private getInput(index: number, keyType: KeyType, keyData: Buffer): Buffer {
     return get(this.inputMaps[index], keyType, keyData, false)!;
   }
@@ -391,12 +400,14 @@ export class PsbtV2 {
   private getOutput(index: number, keyType: KeyType, keyData: Buffer): Buffer {
     return get(this.outputMaps[index], keyType, keyData, false)!;
   }
-  private getOutputOptional(
+  private getMap(
     index: number,
-    keyType: KeyType,
-    keyData: Buffer
-  ): Buffer | undefined {
-    return get(this.outputMaps[index], keyType, keyData, true);
+    maps: Map<string, Buffer>[]
+  ): Map<string, Buffer> {
+    if (maps[index]) {
+      return maps[index];
+    }
+    return (maps[index] = new Map());
   }
   private encodeBip32Derivation(masterFingerprint: Buffer, path: number[]) {
     const buf = new BufferWriter();

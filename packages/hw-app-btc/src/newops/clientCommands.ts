@@ -247,6 +247,21 @@ export class GetMoreElementsCommand extends ClientCommand {
   }
 }
 
+/**
+ * This class will dispatch a client command coming from the hardware device to
+ * the appropriate client command implementation. Those client commands
+ * typically requests data from a merkle tree or merkelized maps.
+ *
+ * A ClientCommandInterpreter is prepared by adding the merkle trees and
+ * merkelized maps it should be able to serve to the hardware device. This class
+ * doesn't know anything about the semantics of the data it holds, it just
+ * serves merkle data. It doesn't even know in what context it is being
+ * executed, ie SignPsbt, getWalletAddress, etc.
+ *
+ * If the command yelds results to the client, as signPsbt does, the yielded
+ * data will be accessible after the command completed by calling getYielded(),
+ * which will return the yields in the same order as they came in.
+ */
 export class ClientCommandInterpreter {
   private roots: Map<string, Merkle> = new Map();
   private preimages: Map<string, Buffer> = new Map();

@@ -23,6 +23,10 @@ enum FrameworkIns {
   CONTINUE_INTERRUPTED = 0x01,
 }
 
+/**
+ * This class encapsulates the APDU protocol documented at
+ * https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md
+ */
 export class AppClient {
   transport: Transport;
 
@@ -59,7 +63,10 @@ export class AppClient {
     return response.slice(0, -2); // drop the status word (can only be 0x9000 at this point)
   }
 
-  async getPubkey(display: boolean, pathElements: number[]): Promise<string> {
+  async getExtendedPubkey(
+    display: boolean,
+    pathElements: number[]
+  ): Promise<string> {
     if (pathElements.length > 6) {
       throw new Error("Path too long. At most 6 levels allowed.");
     }

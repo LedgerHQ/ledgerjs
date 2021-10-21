@@ -167,7 +167,7 @@ class MockClient extends TestingClient {
   mockSignPsbt(yieldSigs: Map<number, Buffer>) {
     this.yieldSigs.push(yieldSigs);
   }
-  async getPubkey(display: boolean, pathElements: number[]): Promise<string> {
+  async getExtendedPubkey(display: boolean, pathElements: number[]): Promise<string> {
     const path = pathArrayToString(pathElements);
     const response = this.getPubkeyResponses.get(path);
     if (!response) {

@@ -1,8 +1,13 @@
+import Transport from "@ledgerhq/hw-transport";
 import {
   openTransportReplayer,
   RecordStore,
 } from "@ledgerhq/hw-transport-mocker";
 import Btc from "../src/Btc";
+import BtcNew from "../src/BtcNew";
+import BtcOld, { AddressFormat } from "../src/BtcOld";
+import { AppAndVersion, getAppAndVersion } from "../src/getAppAndVersion";
+import { TestingClient } from "./newops/integrationtools";
 
 test("btc.getWalletXpub", async () => {
   /*
@@ -421,3 +426,81 @@ test("signMessage", async () => {
     s: "385d83273c9d03c469596292fb354b07d193034f83c2633a4c1f057838e12a5b",
   });
 });
+
+function testBackend(s: string): any {
+  return async () => {
+    return { publicKey: s, bitcoinAddress: "", chainCode: "" };
+  }
+}
+
+class TestBtc extends Btc {
+  n: BtcNew;
+  o: BtcOld;
+  constructor(public tr: Transport) {
+    super(tr);
+    this.n = new BtcNew(new TestingClient(tr));
+    this.n.getWalletPublicKey = testBackend("new");
+    this.o = new BtcOld(tr);
+    this.o.getWalletPublicKey = testBackend("old");
+  }
+  protected new(): BtcNew {
+    return this.n;
+  }
+  protected old(): BtcOld {
+    return this.o;
+  }
+}
+
+// test.each`
+// a    | b    | expected
+// ${1} | ${1} | ${2}
+// ${1} | ${2} | ${3}
+// ${2} | ${1} | ${3}
+// `('returns $expected when $a is added $c', ({ a, c, expected }) => {
+//   expect(a + c).toBe(expected);
+// });
+
+test.each`
+app          | ver          | path             | format       | display | exp
+${"Bitcoin"} | ${"1.99.99"} | ${"m/44'/0'/1'"} | ${"bech32m"} | ${false} | ${""}
+${"Bitcoin"} | ${"1.99.99"} | ${"m/44'/0'"} | ${"bech32m"} | ${false} | ${""}
+${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'"} | ${"bech32m"} | ${false} | ${"new"}
+${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'"} | ${"bech32m"} | ${false} | ${"new"}
+${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'"} | ${"bech32"} | ${false} | ${"new"}
+${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'"} | ${"bech32"} | ${undefined} | ${"old"}   
+${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'"} | ${"bech32"} | ${true} | ${"new"}   
+`("dispatch $app $ver $path $format $display to $exp", async ({ app, ver, path, format, display, exp }) => {
+  const appName = Buffer.of(app.length)
+    .toString("hex")
+    .concat(Buffer.from(app, "ascii").toString("hex"));
+  const appVersion = Buffer.of(ver.length)
+    .toString("hex")
+    .concat(Buffer.from(ver, "ascii").toString("hex"));
+  const resp = `01${appName}${appVersion}01029000`;
+  const tr = await openTransportReplayer(RecordStore.fromString(`=> b001000000\n <= ${resp}`));
+  const btc = new TestBtc(tr);
+  try {
+    const key = await btc.getWalletPublicKey(path, { format: format, verify: display });
+    if (exp === "") {
+      expect(1).toEqual(0); // Allways fail. Don't know how to do that properly
+    }
+    expect(key.publicKey).toEqual(exp);
+  } catch (e: any) {
+    if (exp != "") {
+      throw e;
+    }
+    expect(exp).toEqual("");
+  }
+})
+
+// test("getWalletPublicKey compatibility for internal hardened keys", async () => {
+//   await testDispatch("Bitcoin", "1.99.99", "m/44'/0'/1'", "bech32m", "");
+//   await testDispatch("Bitcoin", "1.99.99", "m/44'/0'", "bech32m", "");
+//   await testDispatch("Bitcoin", "2.0.0-alpha1", "m/44'/0'/1'", "bech32m", "new");
+//   await testDispatch("Bitcoin", "2.0.0-alpha1", "m/44'/0'", "bech32m", "new");
+//   await testDispatch("Bitcoin", "2.0.0-alpha1", "m/44'/0'/1'", "bech32", "new");
+//   await testDispatch("Bitcoin", "2.0.0-alpha1", "m/44'/0'", "bech32", "old");
+// });
+
+async function testDispatch(name: string, version: string, path: string, addressFormat: AddressFormat | undefined, exp: string): Promise<void> {
+}

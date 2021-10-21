@@ -2,8 +2,18 @@ import { BufferWriter } from "../buffertools";
 import { psbtIn, PsbtV2 } from "./psbtv2";
 
 /**
+ * This roughly implements the "input finalizer" role of BIP370 (PSBTv2
+ * https://github.com/bitcoin/bips/blob/master/bip-0370.mediawiki). However
+ * the role is documented in BIP174 (PSBTv0
+ * https://github.com/bitcoin/bips/blob/master/bip-0174.mediawiki).
  *
- * @param psbt The psbt with all signatures added as partial sigs, either through PSBT_IN_PARTIAL_SIG or PSBT_IN_TAP_KEY_SIG
+ * Verify that all inputs have a signature, and set inputFinalScriptwitness
+ * and/or inputFinalScriptSig depending on the type of the spent outputs. Clean
+ * fields that aren't useful anymore, partial signatures, redeem script and
+ * derivation paths.
+ *
+ * @param psbt The psbt with all signatures added as partial sigs, either
+ * through PSBT_IN_PARTIAL_SIG or PSBT_IN_TAP_KEY_SIG
  */
 export function finalize(psbt: PsbtV2): void {
   // First check that each input has a signature
@@ -75,6 +85,13 @@ export function finalize(psbt: PsbtV2): void {
   }
 }
 
+/**
+ * Deletes fields that are no longer neccesary from the psbt.
+ *
+ * Note, the spec doesn't say anything about removing ouput fields
+ * like PSBT_OUT_BIP32_DERIVATION_PATH and others, so we keep them
+ * without actually knowing why. I think we should remove them too.
+ */
 function clearFinalizedInput(psbt: PsbtV2, inputIndex: number) {
   const keyTypes = [
     psbtIn.BIP32_DERIVATION,
@@ -93,6 +110,14 @@ function clearFinalizedInput(psbt: PsbtV2, inputIndex: number) {
   psbt.deleteInputEntries(inputIndex, keyTypes);
 }
 
+/**
+ * Writes a script push operation to buf, which looks different
+ * depending on the size of the data. See
+ * https://en.bitcoin.it/wiki/Script#Constants
+ *
+ * @param buf the BufferWriter to write to
+ * @param data the Buffer to be pushed.
+ */
 function writePush(buf: BufferWriter, data: Buffer) {
   if (data.length <= 75) {
     buf.writeUInt8(data.length);
