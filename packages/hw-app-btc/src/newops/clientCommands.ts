@@ -1,4 +1,5 @@
 import { crypto } from "bitcoinjs-lib";
+import { BufferReader } from "../buffertools";
 import { createVarint } from "../varint";
 import { hashLeaf, Merkle } from "./merkle";
 import { MerkleMap } from "./merkleMap";
@@ -105,19 +106,24 @@ export class GetMerkleLeafProofCommand extends ClientCommand {
   execute(request: Buffer): Buffer {
     const req = request.subarray(1);
 
-    if (req.length != 32 + 4 + 4) {
-      throw new Error("Invalid request, unexpected trailing data");
+    if (req.length < 32 + 1 + 1) {
+      throw new Error("Invalid request, expected at least 34 bytes");
     }
 
-    // read the hash
-    const hash = Buffer.alloc(32);
-    for (let i = 0; i < 32; i++) {
-      hash[i] = req.readUInt8(i);
-    }
+    const reqBuf = new BufferReader(req);
+    const hash = reqBuf.readSlice(32);
     const hash_hex = hash.toString("hex");
 
-    const tree_size = req.readUInt32BE(32);
-    const leaf_index = req.readUInt32BE(32 + 4);
+    let tree_size;
+    let leaf_index;
+    try {
+      tree_size = reqBuf.readVarInt();
+      leaf_index = reqBuf.readVarInt();
+    } catch (e: any) {
+      throw new Error(
+        "Invalid request, couldn't parse tree_size or leaf_index"
+      );
+    }
 
     const mt = this.known_trees.get(hash_hex);
     if (!mt) {
