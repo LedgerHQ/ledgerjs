@@ -1,6 +1,6 @@
 import { crypto } from "bitcoinjs-lib";
-import { pointCompress, pointAddScalar } from "tiny-secp256k1";
 import semver from "semver";
+import { pointAddScalar, pointCompress } from "tiny-secp256k1";
 import {
   getXpubComponents,
   hardenedPathOf,
@@ -9,7 +9,16 @@ import {
   pubkeyFromXpub,
 } from "./bip32";
 import { BufferReader, BufferWriter } from "./buffertools";
+import {
+  HASH_SIZE,
+  OP_CHECKSIG,
+  OP_DUP,
+  OP_EQUAL,
+  OP_EQUALVERIFY,
+  OP_HASH160,
+} from "./constants";
 import type { CreateTransactionArg } from "./createTransaction";
+import { AppAndVersion } from "./getAppAndVersion";
 import type { AddressFormat } from "./getWalletPublicKey";
 import { hashPublicKey } from "./hashPublicKey";
 import { AppClient as Client } from "./newops/appClient";
@@ -19,15 +28,6 @@ import { finalize } from "./newops/psbtFinalizer";
 import { psbtIn, PsbtV2 } from "./newops/psbtv2";
 import { serializeTransaction } from "./serializeTransaction";
 import type { Transaction } from "./types";
-import {
-  HASH_SIZE,
-  OP_CHECKSIG,
-  OP_DUP,
-  OP_EQUAL,
-  OP_EQUALVERIFY,
-  OP_HASH160,
-} from "./constants";
-import { AppAndVersion } from "./getAppAndVersion";
 
 const newSupportedApps = ["Bitcoin", "Bitcoin Test"];
 
@@ -238,7 +238,8 @@ export default class BtcNew {
         arg.inputs[i],
         pathElems,
         accountType,
-        masterFp
+        masterFp,
+        arg.sigHashType
       );
     }
 
@@ -363,7 +364,8 @@ export default class BtcNew {
     ],
     pathElements: number[],
     accountType: AccountType,
-    masterFP: Buffer
+    masterFP: Buffer,
+    sigHashType?: number
   ): Promise<void> {
     const inputTx = input[0];
     const spentOutputIndex = input[1];
@@ -373,6 +375,9 @@ export default class BtcNew {
     const sequence = input[3];
     if (sequence) {
       psbt.setInputSequence(i, sequence);
+    }
+    if (sigHashType) {
+      psbt.setInputSighashType(i, sigHashType);
     }
     const inputTxBuffer = serializeTransaction(inputTx, true);
     const inputTxid = crypto.hash256(inputTxBuffer);

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable prettier/prettier */
 import { openTransportReplayer, RecordStore } from "@ledgerhq/hw-transport-mocker";
 import { TransportReplayer } from "@ledgerhq/hw-transport-mocker/lib/openTransportReplayer";
 import ecc from "tiny-secp256k1";
@@ -11,7 +10,7 @@ import {
 } from "../../src/newops/policy";
 import { PsbtV2 } from "../../src/newops/psbtv2";
 import { AccountType, addressFormatFromDescriptorTemplate, creatDummyXpub, masterFingerprint, runSignTransaction, TestingClient } from "./integrationtools";
-import { CoreTx, p2pkh, p2tr, p2wpkh, wrappedP2wpkh, wrappedP2wpkhTwoInputs } from "./testtx";
+import { CoreInput, CoreTx, p2pkh, p2tr, p2wpkh, wrappedP2wpkh, wrappedP2wpkhTwoInputs } from "./testtx";
 
 test("getWalletPublicKey p2pkh", async () => {
   await testGetWalletPublicKey("m/44'/1'/0'", "pkh(@0)");
@@ -41,7 +40,7 @@ test("getWalletXpub normal path", async () => {
   await testGetWalletXpub("m/44'/0'/0'");
 });
 
-function testPaths(type: AccountType): {ins: string[], out?: string} {
+function testPaths(type: AccountType): { ins: string[], out?: string } {
   const basePath = `m/${type}/1'/0'/`;
   const ins = [
     basePath + "0/0",
@@ -51,7 +50,7 @@ function testPaths(type: AccountType): {ins: string[], out?: string} {
     basePath + "0/2",
     basePath + "1/2",
   ];
-  return {ins};
+  return { ins };
 }
 
 test("Sign p2pkh", async () => {
@@ -68,30 +67,47 @@ test("Sign p2wpkh", async () => {
   await runSignTransactionTest(p2wpkh, AccountType.p2wpkh);
 });
 test("Sign p2tr", async () => {
+  // This tx uses locktime, so this test verifies that locktime is propagated to/from
+  // the psbt correctly.
   await runSignTransactionTest(p2tr, AccountType.p2tr);
 });
 
+test("Sign p2tr with sigHashType", async () => {
+  const testTx = JSON.parse(JSON.stringify(p2tr));
+  testTx.vin.forEach((input: CoreInput, index: number) => {
+    // Test SIGHASH_SINGLE | SIGHASH_ANYONECANPAY, 0x83
+    const sig = input.txinwitness![0] + "83";
+    input.txinwitness = [sig];
+  })
+  const tx = await runSignTransactionNoVerification(testTx, AccountType.p2tr);
+  // The verification of the sighashtype is done in MockClient.signPsbt
+})
+
 async function runSignTransactionTest(testTx: CoreTx, accountType: AccountType, changePubkey?: string) {
+  const tx = await runSignTransactionNoVerification(testTx, accountType, changePubkey);
+  expect(tx).toEqual(testTx.hex);
+}
+
+async function runSignTransactionNoVerification(testTx: CoreTx, accountType: AccountType, changePubkey?: string): Promise<string> {
   const [client, transport] = await createClient();
   const accountXpub = "tpubDCwYjpDhUdPGP5rS3wgNg13mTrrjBuG8V9VpWbyptX6TRPbNoZVXsoVUSkCjmQ8jJycjuDKBb9eataSymXakTTaGifxR6kmVsfFehH1ZgJT";
   client.mockGetPubkeyResponse(`m/${accountType}/1'/0'`, accountXpub);
   const paths = testPaths(accountType);
   if (changePubkey) {
-    paths.out =  `m/${accountType}/1'/0'` + "/1/3";
+    paths.out = `m/${accountType}/1'/0'` + "/1/3";
     client.mockGetPubkeyResponse(paths.out, creatDummyXpub(Buffer.from(changePubkey, "hex")));
   }
   const tx = await runSignTransaction(testTx, paths, client, transport);
-  expect(tx).toEqual(testTx.hex);
   await transport.close();
+  return tx;
 }
-
 
 async function testGetWalletXpub(path: string, version = 0x043587cf) {
   const [client] = await createClient();
   const expectedXpub = "tpubDCwYjpDhUdPGP5rS3wgNg13mTrrjBuG8V9VpWbyptX6TRPbNoZVXsoVUSkCjmQ8jJycjuDKBb9eataSymXakTTaGifxR6kmVsfFehH1ZgJT";
   client.mockGetPubkeyResponse(path, expectedXpub);
   const btc = new BtcNew(client);
-  const result = await btc.getWalletXpub({path: path, xpubVersion: version});
+  const result = await btc.getWalletXpub({ path: path, xpubVersion: version });
   expect(result).toEqual(expectedXpub);
 }
 async function testGetWalletPublicKey(
@@ -118,7 +134,7 @@ async function testGetWalletPublicKey(
 
   const btcNew = new BtcNew(client);
   const addressFormat = addressFormatFromDescriptorTemplate(expectedDescriptorTemplate);
-  const result = await btcNew.getWalletPublicKey(path, {format: addressFormat});
+  const result = await btcNew.getWalletPublicKey(path, { format: addressFormat });
   verifyGetWalletPublicKeyResult(result, keyXpub, "testaddress");
 
   const resultAccount = await btcNew.getWalletPublicKey(accountPath);
@@ -194,11 +210,23 @@ class MockClient extends TestingClient {
     return masterFingerprint;
   }
   async signPsbt(
-    _psbt: PsbtV2,
+    psbt: PsbtV2,
     _walletPolicy: WalletPolicy,
-    _walletHMAC: Buffer | null
+    _walletHMAC: Buffer | null,
   ): Promise<Map<number, Buffer>> {
-    return this.yieldSigs.splice(0, 1)[0];
+    const sigs = this.yieldSigs.splice(0, 1)[0];
+    const sig0 = sigs.get(0)!;
+    if (sig0.length == 64) {
+      // Taproot may leave out sighash type, which defaults to 0x01 SIGHASH_ALL
+      return sigs;
+    }
+    const sigHashType = sig0.readUInt8(sig0.length - 1);
+    if (sigHashType != 0x01) {
+      for (let i = 0; i < psbt.getGlobalInputCount(); i++) {
+        expect(psbt.getInputSighashType(i)).toEqual(sigHashType);
+      }
+    }
+    return sigs;
   }
   private getWalletAddressKey(
     walletPolicy: WalletPolicy,

@@ -1,5 +1,4 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-/* eslint-disable prettier/prettier */
 import Transport from "@ledgerhq/hw-transport";
 import bs58check from "bs58check";
 import Btc from "../../src/Btc";
@@ -17,9 +16,9 @@ import { CoreInput, CoreTx, spentTxs } from "./testtx";
 
 
 export async function runSignTransaction(
-  testTx: CoreTx, 
-  testPaths: {ins: string[], out?: string},
-  client: TestingClient, 
+  testTx: CoreTx,
+  testPaths: { ins: string[], out?: string },
+  client: TestingClient,
   transport: Transport): Promise<string> {
   const btcNew = new BtcNew(client);
   // btc is needed to perform some functions like splitTransaction.
@@ -44,12 +43,17 @@ export async function runSignTransaction(
     yieldSigs.set(index, getSignature(input, accountType));
     return inputData;
   });
+  const sig0 = yieldSigs.get(0)!;
+  let sigHashType: number | undefined = sig0.readUInt8(sig0.length - 1)
+  if (sigHashType == 0x01) {
+    sigHashType = undefined;
+  }
   client.mockSignPsbt(yieldSigs);
   const outputWriter = new BufferWriter();
   outputWriter.writeVarInt(testTx.vout.length);
   testTx.vout.forEach(output => {
     outputWriter.writeUInt64(BigInt(Number.parseFloat((output.value * 100000000).toFixed(8))));
-    outputWriter.writeVarSlice(Buffer.from(output.scriptPubKey.hex, "hex"));    
+    outputWriter.writeVarSlice(Buffer.from(output.scriptPubKey.hex, "hex"));
   });
   const outputScriptHex = outputWriter.buffer().toString("hex");  
   let callbacks = "";
@@ -63,6 +67,7 @@ export async function runSignTransaction(
     changePath: testPaths.out,
     outputScriptHex,
     lockTime: testTx.locktime,
+    sigHashType,
     segwit: accountType != AccountType.p2pkh,
     onDeviceSignatureGranted: () => logCallback("CALLBACK: signature granted"),
     onDeviceSignatureRequested: () => logCallback("CALLBACK: signature requested"),
@@ -94,8 +99,8 @@ export enum AccountType {
 
 function getPubkey(inputIndex: number, accountType: AccountType, testTx: CoreTx, spentTx: Transaction, spentOutputIndex: number): Buffer {
   const scriptSig = Buffer.from(testTx.vin[inputIndex].scriptSig.hex, "hex");
-  if (accountType == AccountType.p2pkh) {    
-    return scriptSig.slice(scriptSig.length-33);
+  if (accountType == AccountType.p2pkh) {
+    return scriptSig.slice(scriptSig.length - 33);
   }
   if (accountType == AccountType.p2tr) {
     return spentTx.outputs![spentOutputIndex].script.slice(2, 34); // 32 bytes x-only pubkey
@@ -109,7 +114,7 @@ function getPubkey(inputIndex: number, accountType: AccountType, testTx: CoreTx,
 function getSignature(testTxInput: CoreInput, accountType: AccountType): Buffer {
   const scriptSig = Buffer.from(testTxInput.scriptSig.hex, "hex");
   if (accountType == AccountType.p2pkh) {
-    return scriptSig.slice(1, scriptSig.length-34);
+    return scriptSig.slice(1, scriptSig.length - 34);
   }
   if (accountType == AccountType.p2tr) {
     return Buffer.from(testTxInput.txinwitness![0], "hex");
@@ -143,7 +148,7 @@ function getAccountType(coreInput: CoreInput, btc: Btc): AccountType {
 export function creatDummyXpub(pubkey: Buffer): string {
   const xpubDecoded = bs58check.decode("tpubDHcN44A4UHqdHJZwBxgTbu8Cy87ZrZkN8tQnmJGhcijHqe4rztuvGcD4wo36XSviLmiqL5fUbDnekYaQ7LzAnaqauBb9RsyahsTTFHdeJGd");
   const pubkey33 = pubkey.length == 33 ? pubkey : Buffer.concat([Buffer.of(2), pubkey]);
-  xpubDecoded.fill(pubkey33, xpubDecoded.length-33);
+  xpubDecoded.fill(pubkey33, xpubDecoded.length - 33);
   return bs58check.encode(xpubDecoded);
 }
 
@@ -158,12 +163,12 @@ function createInput(coreInput: CoreInput, btc: Btc): [Transaction, number, stri
 
 export const masterFingerprint = Buffer.of(1, 2, 3, 4);
 export class TestingClient extends AppClient {
-  mockGetPubkeyResponse(_pathElements: string, _response: string): void {};
+  mockGetPubkeyResponse(_pathElements: string, _response: string): void { };
   mockGetWalletAddressResponse(
     _walletPolicy: WalletPolicy,
     _change: number,
     _addressIndex: number,
     _response: string
-  ): void {};
-  mockSignPsbt(_yieldSigs: Map<number, Buffer>): void {};
+  ): void { };
+  mockSignPsbt(_yieldSigs: Map<number, Buffer>): void { };
 }

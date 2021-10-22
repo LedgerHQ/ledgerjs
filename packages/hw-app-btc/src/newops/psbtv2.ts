@@ -14,6 +14,7 @@ export enum psbtIn {
   NON_WITNESS_UTXO = 0x00,
   WITNESS_UTXO = 0x01,
   PARTIAL_SIG = 0x02,
+  SIGHASH_TYPE = 0x03,
   REDEEM_SCRIPT = 0x04,
   BIP32_DERIVATION = 0x06,
   FINAL_SCRIPTSIG = 0x07,
@@ -127,6 +128,14 @@ export class PsbtV2 {
   }
   getInputPartialSig(inputIndex: number, pubkey: Buffer): Buffer | undefined {
     return this.getInputOptional(inputIndex, psbtIn.PARTIAL_SIG, pubkey);
+  }
+  setInputSighashType(inputIndex: number, sigHashtype: number) {
+    this.setInput(inputIndex, psbtIn.SIGHASH_TYPE, b(), uint32LE(sigHashtype));
+  }
+  getInputSighashType(inputIndex: number): number | undefined {
+    const result = this.getInputOptional(inputIndex, psbtIn.SIGHASH_TYPE, b());
+    if (!result) return undefined;
+    return result.readUInt32LE(0);
   }
   setInputRedeemScript(inputIndex: number, redeemScript: Buffer) {
     this.setInput(inputIndex, psbtIn.REDEEM_SCRIPT, b(), redeemScript);
