@@ -237,61 +237,6 @@ export const p2pkh: CoreTx = {
   "blocktime": 1633611385
 };
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const p2wpkhTwoInputs = {
-  "txid": "1913b7b5ffdcb5f32b9aca1f5eec2a189e7c66650f82b560eae211265fc995b7",
-  "hash": "c3439dcd3489373c586c7aed48c32f2b5d9c71aad24acd765a61684d98690a3f",
-  "version": 2,
-  "size": 388,
-  "vsize": 226,
-  "weight": 904,
-  "locktime": 0,
-  "vin": [
-    {
-      "txid": "5512d5788d4c26117f093de91223ef384c3fb22799810a92e3304bb6f0819224",
-      "vout": 1,
-      "scriptSig": {
-        "asm": "0014c1ac0d63d0258ea1b6fe90ef72d0c35d8d773dd3",
-        "hex": "160014c1ac0d63d0258ea1b6fe90ef72d0c35d8d773dd3"
-      },
-      "txinwitness": [
-        "30440220543617c5f4504dc29d34d2d06d0d7733dac4ec418b77c67feefb29f3f82ba3d80220690b784c52c3375f4ba9e64cc5c0aeb6a1b9fc6aadda0062905c06ce3bbba57501",
-        "02fb255ed920db5c2f507289202eb60a160e5a067ee7e30199a4ed81b74c22e441"
-      ],
-      "sequence": 4294967295
-    },
-    {
-      "txid": "28ad5054e029252d72da37f13fce66212d7f7763845b4a8c4aaf78e897b2bf9f",
-      "vout": 1,
-      "scriptSig": {
-        "asm": "0014c1ac0d63d0258ea1b6fe90ef72d0c35d8d773dd3",
-        "hex": "160014c1ac0d63d0258ea1b6fe90ef72d0c35d8d773dd3"
-      },
-      "txinwitness": [
-        "3044022049e7f3015a33ccdb015fe3891667564fd37111272df57e58447645c7bad8fed0022074d1e93ba946453896d0f0bc500df3a1e0d5bb5ad10cd9906736d5fbaebadd5801",
-        "02fb255ed920db5c2f507289202eb60a160e5a067ee7e30199a4ed81b74c22e441"
-      ],
-      "sequence": 4294967295
-    }
-  ],
-  "vout": [
-    {
-      "value": 0.01800000,
-      "n": 0,
-      "scriptPubKey": {
-        "asm": "OP_DUP OP_HASH160 f73384bcc3951ab6a75541ff79a9a51f82056ed8 OP_EQUALVERIFY OP_CHECKSIG",
-        "hex": "76a914f73384bcc3951ab6a75541ff79a9a51f82056ed888ac",
-        "address": "n442v1DrXQNim9gjjctKjyGVoe717hNdtG",
-        "type": "pubkeyhash"
-      }
-    }
-  ],
-  "hex": "02000000000102249281f0b64b30e3920a819927b23f4c38ef2312e93d097f11264c8d78d512550100000017160014c1ac0d63d0258ea1b6fe90ef72d0c35d8d773dd3ffffffff9fbfb297e878af4a8c4a5b8463777f2d2166ce3ff137da722d2529e05450ad280100000017160014c1ac0d63d0258ea1b6fe90ef72d0c35d8d773dd3ffffffff0140771b00000000001976a914f73384bcc3951ab6a75541ff79a9a51f82056ed888ac024730440220543617c5f4504dc29d34d2d06d0d7733dac4ec418b77c67feefb29f3f82ba3d80220690b784c52c3375f4ba9e64cc5c0aeb6a1b9fc6aadda0062905c06ce3bbba575012102fb255ed920db5c2f507289202eb60a160e5a067ee7e30199a4ed81b74c22e44102473044022049e7f3015a33ccdb015fe3891667564fd37111272df57e58447645c7bad8fed0022074d1e93ba946453896d0f0bc500df3a1e0d5bb5ad10cd9906736d5fbaebadd58012102fb255ed920db5c2f507289202eb60a160e5a067ee7e30199a4ed81b74c22e44100000000",
-  "blockhash": "00000000025a711e6cd4bce9138dc852232a4494afbf36d8bb80499a786da2a4",
-  "confirmations": 1,
-  "time": 1633944124,
-  "blocktime": 1633944124
-};
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const wrappedP2wpkhTwoInputs = {
   "txid": "c03119b538c78f56c8ce2e6cc5fc6998d447eeef42e34c12692764a3f1a3da7c",
   "hash": "6b3812304554a6964e43a6971ac533046f4be101e39609f72179856916e20268",
