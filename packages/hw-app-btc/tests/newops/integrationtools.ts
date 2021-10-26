@@ -25,10 +25,10 @@ export async function runSignTransaction(
   const btc = new Btc(transport);
   const accountType = getAccountType(testTx.vin[0], btc);
   const additionals: string[] = [];
-  if (accountType == AccountType.p2wpkh) {
+  if (accountType == StandardPurpose.p2wpkh) {
     additionals.push("bech32");
   }
-  if (accountType == AccountType.p2tr) {
+  if (accountType == StandardPurpose.p2tr) {
     additionals.push("bech32m");
   }
   const associatedKeysets: string[] = [];
@@ -68,7 +68,7 @@ export async function runSignTransaction(
     outputScriptHex,
     lockTime: testTx.locktime,
     sigHashType,
-    segwit: accountType != AccountType.p2pkh,
+    segwit: accountType != StandardPurpose.p2pkh,
     onDeviceSignatureGranted: () => logCallback("CALLBACK: signature granted"),
     onDeviceSignatureRequested: () => logCallback("CALLBACK: signature requested"),
     onDeviceStreaming: (arg) => logCallback("CALLBACK: " + JSON.stringify(arg))
@@ -90,42 +90,42 @@ export function addressFormatFromDescriptorTemplate(descTemp: DefaultDescriptorT
   throw new Error();
 }
 
-export enum AccountType {
+export enum StandardPurpose {
   p2tr = "86'",
   p2wpkh = "84'",
   p2wpkhInP2sh = "49'",
   p2pkh = "44'"
 }
 
-function getPubkey(inputIndex: number, accountType: AccountType, testTx: CoreTx, spentTx: Transaction, spentOutputIndex: number): Buffer {
+function getPubkey(inputIndex: number, accountType: StandardPurpose, testTx: CoreTx, spentTx: Transaction, spentOutputIndex: number): Buffer {
   const scriptSig = Buffer.from(testTx.vin[inputIndex].scriptSig.hex, "hex");
-  if (accountType == AccountType.p2pkh) {
+  if (accountType == StandardPurpose.p2pkh) {
     return scriptSig.slice(scriptSig.length - 33);
   }
-  if (accountType == AccountType.p2tr) {
+  if (accountType == StandardPurpose.p2tr) {
     return spentTx.outputs![spentOutputIndex].script.slice(2, 34); // 32 bytes x-only pubkey
   }
-  if (accountType == AccountType.p2wpkh || accountType == AccountType.p2wpkhInP2sh) {
+  if (accountType == StandardPurpose.p2wpkh || accountType == StandardPurpose.p2wpkhInP2sh) {
     return Buffer.from(testTx.vin[inputIndex].txinwitness![1], "hex");
   }
   throw new Error();
 }
 
-function getSignature(testTxInput: CoreInput, accountType: AccountType): Buffer {
+function getSignature(testTxInput: CoreInput, accountType: StandardPurpose): Buffer {
   const scriptSig = Buffer.from(testTxInput.scriptSig.hex, "hex");
-  if (accountType == AccountType.p2pkh) {
+  if (accountType == StandardPurpose.p2pkh) {
     return scriptSig.slice(1, scriptSig.length - 34);
   }
-  if (accountType == AccountType.p2tr) {
+  if (accountType == StandardPurpose.p2tr) {
     return Buffer.from(testTxInput.txinwitness![0], "hex");
   }
-  if (accountType == AccountType.p2wpkh || accountType == AccountType.p2wpkhInP2sh) {
+  if (accountType == StandardPurpose.p2wpkh || accountType == StandardPurpose.p2wpkhInP2sh) {
     return Buffer.from(testTxInput.txinwitness![0], "hex");
   }
   throw new Error();
 }
 
-function getAccountType(coreInput: CoreInput, btc: Btc): AccountType {
+function getAccountType(coreInput: CoreInput, btc: Btc): StandardPurpose {
   const spentTx = spentTxs[coreInput.txid];
   if (!spentTx) {
     throw new Error("Spent tx " + coreInput.txid + " unavailable.");
@@ -134,15 +134,15 @@ function getAccountType(coreInput: CoreInput, btc: Btc): AccountType {
   const spentOutput = splitSpentTx.outputs![coreInput.vout];
   const script = spentOutput.script;
   if (script.length == 34 && script[0] == 0x51) {
-    return AccountType.p2tr;
+    return StandardPurpose.p2tr;
   }
   if (script.length == 22 && script[0] == 0x00) {
-    return AccountType.p2wpkh;
+    return StandardPurpose.p2wpkh;
   }
   if (script.length == 23) {
-    return AccountType.p2wpkhInP2sh;
+    return StandardPurpose.p2wpkhInP2sh;
   }
-  return AccountType.p2pkh;
+  return StandardPurpose.p2pkh;
 }
 
 export function creatDummyXpub(pubkey: Buffer): string {
