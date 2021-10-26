@@ -469,6 +469,11 @@ ${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'"} | ${"bech32m"} | ${false} | ${"
 ${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'"} | ${"bech32"} | ${false} | ${"new"}
 ${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'"} | ${"bech32"} | ${undefined} | ${"old"}   
 ${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'"} | ${"bech32"} | ${true} | ${"new"}   
+${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'/0/0"} | ${"bech32"} | ${false} | ${"new"}   
+${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'/1/0"} | ${"bech32"} | ${false} | ${"new"}   
+${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'/1/0"} | ${"legacy"} | ${false} | ${"new"}   
+${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'/1/0"} | ${"p2sh"} | ${false} | ${"new"}   
+${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'/2/0"} | ${"bech32"} | ${false} | ${"old"}   
 `("dispatch $app $ver $path $format $display to $exp", async ({ app, ver, path, format, display, exp }) => {
   const appName = Buffer.of(app.length)
     .toString("hex")
