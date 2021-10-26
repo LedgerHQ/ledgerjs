@@ -21,13 +21,14 @@ export class YieldCommand extends ClientCommand {
 
   code = ClientCommandCode.YIELD;
 
-  constructor(results: Buffer[]) {
+  constructor(results: Buffer[], private progressCallback: () => void) {
     super();
     this.results = results;
   }
 
   execute(request: Buffer): Buffer {
     this.results.push(Buffer.from(request.subarray(1)));
+    this.progressCallback();
     return Buffer.from("");
   }
 }
@@ -272,9 +273,9 @@ export class ClientCommandInterpreter {
 
   private commands: Map<ClientCommandCode, ClientCommand> = new Map();
 
-  constructor() {
+  constructor(progressCallback: () => void) {
     const commands = [
-      new YieldCommand(this.yielded),
+      new YieldCommand(this.yielded, progressCallback),
       new GetPreimageCommand(this.preimages, this.queue),
       new GetMerkleLeafIndexCommand(this.roots),
       new GetMerkleLeafProofCommand(this.roots, this.queue),
