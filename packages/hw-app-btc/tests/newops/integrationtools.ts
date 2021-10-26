@@ -136,18 +136,13 @@ export function creatDummyXpub(pubkey: Buffer): string {
   return bs58check.encode(xpubDecoded);
 }
 
-function createInput(coreInput: CoreInput, btc: Btc): [Transaction, number, string, number] {
+function createInput(coreInput: CoreInput, btc: Btc): [Transaction, number, string | null, number] {
   const spentTx = spentTxs[coreInput.txid];
   if (!spentTx) {
     throw new Error("Spent tx " + coreInput.txid + " unavailable.");
   }
   const splitSpentTx = btc.splitTransaction(spentTx, true);
-  const scriptSig = coreInput.scriptSig;
-  let redeemScript;
-  if (scriptSig?.hex && scriptSig.hex.startsWith("160014")) {
-    redeemScript = scriptSig.hex.substring(2);
-  }
-  return [splitSpentTx, coreInput.vout, redeemScript, coreInput.sequence];
+  return [splitSpentTx, coreInput.vout, null, coreInput.sequence];
 }
 
 export const masterFingerprint = Buffer.of(1, 2, 3, 4);

@@ -11,7 +11,7 @@ import {
 } from "../../src/newops/policy";
 import { PsbtV2 } from "../../src/newops/psbtv2";
 import { AccountType, addressFormatFromDescriptorTemplate, creatDummyXpub, masterFingerprint, runSignTransaction, TestingClient } from "./integrationtools";
-import { CoreTx, p2pkh, p2tr, p2wpkh, p2wpkhTwoInputs, wrappedP2wpkh, wrappedP2wpkhTwoInputs } from "./testtx";
+import { CoreTx, p2pkh, p2tr, p2wpkh, wrappedP2wpkh, wrappedP2wpkhTwoInputs } from "./testtx";
 
 test("getWalletPublicKey p2pkh", async () => {
   await testGetWalletPublicKey("m/44'/1'/0'", "pkh(@0)");
@@ -66,7 +66,6 @@ test("Sign p2wpkh wrapped", async () => {
 });
 test("Sign p2wpkh", async () => {
   await runSignTransactionTest(p2wpkh, AccountType.p2wpkh);
-  await runSignTransactionTest(p2wpkhTwoInputs, AccountType.p2wpkh);
 });
 test("Sign p2tr", async () => {
   await runSignTransactionTest(p2tr, AccountType.p2tr);

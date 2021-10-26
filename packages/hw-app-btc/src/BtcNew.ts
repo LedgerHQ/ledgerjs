@@ -341,6 +341,8 @@ export default class BtcNew {
   ): Promise<void> {
     const inputTx = input[0];
     const spentOutputIndex = input[1];
+    // redeemScript will be null for wrapped p2wpkh, we need to create it
+    // ourselves. But if set, it should be used.
     const redeemScript = input[2];
     const sequence = input[3];
     if (sequence) {
@@ -365,14 +367,12 @@ export default class BtcNew {
     } else if (accountType == AccountType.p2wpkhWrapped) {
       psbt.setInputNonWitnessUtxo(i, inputTxBuffer);
       psbt.setInputBip32Derivation(i, pubkey, masterFP, pathElements);
-      if (!redeemScript) {
-        throw new Error("Missing redeemScript for p2wpkhWrapped input");
+      if (redeemScript) {
+        // At what point might a user set the redeemScript on its own?
+        psbt.setInputRedeemScript(i, Buffer.from(redeemScript, "hex"));
+      } else {
+        psbt.setInputRedeemScript(i, createRedeemScript(pubkey));
       }
-      const expectedRedeemScript = createRedeemScript(pubkey);
-      if (redeemScript != expectedRedeemScript.toString("hex")) {
-        throw new Error("Unexpected redeemScript");
-      }
-      psbt.setInputRedeemScript(i, expectedRedeemScript);
       psbt.setInputWitnessUtxo(i, spentOutput.amount, spentOutput.script);
     } else if (accountType == AccountType.p2tr) {
       const xonly = pubkey.slice(1);
