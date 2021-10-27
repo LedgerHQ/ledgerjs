@@ -45,51 +45,58 @@ Ledger Hardware Wallet BTC JavaScript bindings. Also supports many altcoins.
         *   [Parameters](#parameters-10)
     *   [createPaymentTransactionNew](#createpaymenttransactionnew-1)
         *   [Parameters](#parameters-11)
-*   [outputScriptOf](#outputscriptof)
-    *   [Parameters](#parameters-12)
-*   [getTaprootOutputKey](#gettaprootoutputkey)
-    *   [Parameters](#parameters-13)
 *   [BtcOld](#btcold)
-    *   [Parameters](#parameters-14)
+    *   [Parameters](#parameters-12)
     *   [Examples](#examples-7)
     *   [getWalletPublicKey](#getwalletpublickey-3)
-        *   [Parameters](#parameters-15)
+        *   [Parameters](#parameters-13)
         *   [Examples](#examples-8)
     *   [signMessageNew](#signmessagenew-1)
-        *   [Parameters](#parameters-16)
+        *   [Parameters](#parameters-14)
         *   [Examples](#examples-9)
     *   [createPaymentTransactionNew](#createpaymenttransactionnew-2)
-        *   [Parameters](#parameters-17)
+        *   [Parameters](#parameters-15)
         *   [Examples](#examples-10)
     *   [signP2SHTransaction](#signp2shtransaction-1)
-        *   [Parameters](#parameters-18)
+        *   [Parameters](#parameters-16)
         *   [Examples](#examples-11)
 *   [CreateTransactionArg](#createtransactionarg)
     *   [Properties](#properties)
 *   [AddressFormat](#addressformat)
-*   [AppClient](#appclient)
-    *   [Parameters](#parameters-19)
-*   [ClientCommandInterpreter](#clientcommandinterpreter)
+*   [AccountType](#accounttype)
+    *   [spendingCondition](#spendingcondition)
+        *   [Parameters](#parameters-17)
+    *   [setInput](#setinput)
+        *   [Parameters](#parameters-18)
+    *   [setOwnOutput](#setownoutput)
+        *   [Parameters](#parameters-19)
+    *   [getDescriptorTemplate](#getdescriptortemplate)
+*   [SingleKeyAccount](#singlekeyaccount)
+*   [getTaprootOutputKey](#gettaprootoutputkey)
     *   [Parameters](#parameters-20)
-*   [MerkelizedPsbt](#merkelizedpsbt)
+*   [AppClient](#appclient)
     *   [Parameters](#parameters-21)
-*   [Merkle](#merkle)
+*   [ClientCommandInterpreter](#clientcommandinterpreter)
     *   [Parameters](#parameters-22)
-*   [MerkleMap](#merklemap)
+*   [MerkelizedPsbt](#merkelizedpsbt)
     *   [Parameters](#parameters-23)
-*   [WalletPolicy](#walletpolicy)
+*   [Merkle](#merkle)
     *   [Parameters](#parameters-24)
-*   [extract](#extract)
+*   [MerkleMap](#merklemap)
     *   [Parameters](#parameters-25)
-*   [finalize](#finalize)
+*   [WalletPolicy](#walletpolicy)
     *   [Parameters](#parameters-26)
-*   [clearFinalizedInput](#clearfinalizedinput)
+*   [extract](#extract)
     *   [Parameters](#parameters-27)
-*   [writePush](#writepush)
+*   [finalize](#finalize)
     *   [Parameters](#parameters-28)
+*   [clearFinalizedInput](#clearfinalizedinput)
+    *   [Parameters](#parameters-29)
+*   [writePush](#writepush)
+    *   [Parameters](#parameters-30)
 *   [PsbtV2](#psbtv2)
 *   [serializeTransactionOutputs](#serializetransactionoutputs-1)
-    *   [Parameters](#parameters-29)
+    *   [Parameters](#parameters-31)
     *   [Examples](#examples-12)
 *   [SignP2SHTransactionArg](#signp2shtransactionarg)
     *   [Properties](#properties-1)
@@ -385,34 +392,6 @@ transaction is returned.
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** 
 
-### outputScriptOf
-
-Generates a single signature scriptPubKey (output script) from a public key.
-This is done differently depending on account type.
-
-If accountType is p2tr, the public key must be a 32 byte x-only taproot
-pubkey, otherwise it's expected to be a 33 byte ecdsa compressed pubkey.
-
-#### Parameters
-
-*   `pubkey` **[Buffer](https://nodejs.org/api/buffer.html)** 
-*   `accountType` **AccountType** 
-
-Returns **{script: [Buffer](https://nodejs.org/api/buffer.html), redeemScript: [Buffer](https://nodejs.org/api/buffer.html)?}** 
-
-### getTaprootOutputKey
-
-Calculates a taproot output key from an internal key. This output key will be
-used as witness program in a taproot output. The internal key is tweaked
-according to recommendation in BIP341:
-<https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki#cite_ref-22-0>
-
-#### Parameters
-
-*   `internalPubkey` **[Buffer](https://nodejs.org/api/buffer.html)** A 32 byte x-only taproot internal key
-
-Returns **[Buffer](https://nodejs.org/api/buffer.html)** The output key
-
 ### BtcOld
 
 Bitcoin API.
@@ -566,6 +545,85 @@ Type: {inputs: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Referen
 address format is one of legacy | p2sh | bech32 | cashaddr
 
 Type: (`"legacy"` | `"p2sh"` | `"bech32"` | `"bech32m"` | `"cashaddr"`)
+
+### AccountType
+
+Encapsulates differences between account types, for example p2wpkh,
+p2wpkhWrapped, p2tr.
+
+#### spendingCondition
+
+Generates a scriptPubKey (output script) from a list of public keys. If a
+p2sh redeemScript or a p2wsh witnessScript is needed it will also be set on
+the returned SpendingCondition.
+
+The pubkeys are expected to be 33 byte ecdsa compressed pubkeys.
+
+##### Parameters
+
+*   `pubkeys` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[Buffer](https://nodejs.org/api/buffer.html)>** 
+
+Returns **SpendingCondition** 
+
+#### setInput
+
+Populates the psbt with account type-specific data for an input.
+
+##### Parameters
+
+*   `i` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** The index of the input map to populate
+*   `inputTx` **([Buffer](https://nodejs.org/api/buffer.html) | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))** The full transaction containing the spent output. This may
+    be omitted for taproot.
+*   `spentOutput` **SpentOutput** The amount and spending condition of the spent output
+*   `pubkeys` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[Buffer](https://nodejs.org/api/buffer.html)>** The 33 byte ecdsa compressed public keys involved in the input
+*   `pathElems` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>>** The paths corresponding to the pubkeys, in same order.
+
+Returns **void** 
+
+#### setOwnOutput
+
+Populates the psbt with account type-specific data for an output. This is typically
+done for change outputs and other outputs that goes to the same account as
+being spent from.
+
+##### Parameters
+
+*   `i` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** The index of the output map to populate
+*   `cond` **SpendingCondition** The spending condition for this output
+*   `pubkeys` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[Buffer](https://nodejs.org/api/buffer.html)>** The 33 byte ecdsa compressed public keys involved in this output
+*   `paths` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>>** The paths corresponding to the pubkeys, in same order.
+
+Returns **void** 
+
+#### getDescriptorTemplate
+
+Returns the descriptor template for this account type. Currently only
+DefaultDescriptorTemplates are allowed, but that might be changed in the
+future. See class WalletPolicy for more information on descriptor
+templates.
+
+Returns **DefaultDescriptorTemplate** 
+
+### SingleKeyAccount
+
+**Extends BaseAccount**
+
+Superclass for single signature accounts. This will make sure that the pubkey
+arrays and path arrays in the method arguments contains exactly one element
+and calls an abstract method to do the actual work.
+
+### getTaprootOutputKey
+
+Calculates a taproot output key from an internal key. This output key will be
+used as witness program in a taproot output. The internal key is tweaked
+according to recommendation in BIP341:
+<https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki#cite_ref-22-0>
+
+#### Parameters
+
+*   `internalPubkey` **[Buffer](https://nodejs.org/api/buffer.html)** A 32 byte x-only taproot internal key
+
+Returns **[Buffer](https://nodejs.org/api/buffer.html)** The output key
 
 ### AppClient
 

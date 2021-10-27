@@ -2,7 +2,12 @@ import { crypto } from "bitcoinjs-lib";
 import { pointAddScalar } from "tiny-secp256k1";
 import { BufferWriter } from "../buffertools";
 import {
-  HASH_SIZE, OP_CHECKSIG, OP_DUP, OP_EQUAL, OP_EQUALVERIFY, OP_HASH160
+  HASH_SIZE,
+  OP_CHECKSIG,
+  OP_DUP,
+  OP_EQUAL,
+  OP_EQUALVERIFY,
+  OP_HASH160,
 } from "../constants";
 import { hashPublicKey } from "../hashPublicKey";
 import { DefaultDescriptorTemplate } from "./policy";
@@ -16,7 +21,7 @@ export type SpendingCondition = {
   // tapScript?: {tapPath: Buffer[], script: Buffer} // For taproot
 };
 
-export type SpentOutput = { cond: SpendingCondition, amount: Buffer }
+export type SpentOutput = { cond: SpendingCondition; amount: Buffer };
 
 /**
  * Encapsulates differences between account types, for example p2wpkh,
@@ -74,10 +79,10 @@ export interface AccountType {
   getDescriptorTemplate(): DefaultDescriptorTemplate;
 }
 
-interface BaseAccount extends AccountType { }
+interface BaseAccount extends AccountType {}
 
 abstract class BaseAccount implements AccountType {
-  constructor(protected psbt: PsbtV2, protected masterFp: Buffer) { }
+  constructor(protected psbt: PsbtV2, protected masterFp: Buffer) {}
 }
 
 /**
@@ -196,7 +201,11 @@ export class p2tr extends SingleKeyAccount {
   ) {
     const xonly = pubkey.slice(1);
     this.psbt.setInputTapBip32Derivation(i, xonly, [], this.masterFp, path);
-    this.psbt.setInputWitnessUtxo(i, spentOutput.amount, spentOutput.cond.scriptPubKey);
+    this.psbt.setInputWitnessUtxo(
+      i,
+      spentOutput.amount,
+      spentOutput.cond.scriptPubKey
+    );
   }
 
   setSingleKeyOutput(
@@ -276,17 +285,25 @@ export class p2wpkhWrapped extends SingleKeyAccount {
     }
     this.psbt.setInputNonWitnessUtxo(i, inputTx);
     this.psbt.setInputBip32Derivation(i, pubkey, this.masterFp, path);
-    
+
     const userSuppliedRedeemScript = spentOutput.cond.redeemScript;
-    const expectedRedeemScript = this.createRedeemScript(pubkey)
-    if (userSuppliedRedeemScript &&
-      !expectedRedeemScript.equals(userSuppliedRedeemScript)) {
+    const expectedRedeemScript = this.createRedeemScript(pubkey);
+    if (
+      userSuppliedRedeemScript &&
+      !expectedRedeemScript.equals(userSuppliedRedeemScript)
+    ) {
       // At what point might a user set the redeemScript on its own?
-      throw new Error(`User-supplied redeemScript ${userSuppliedRedeemScript.toString("hex")} doesn't
+      throw new Error(`User-supplied redeemScript ${userSuppliedRedeemScript.toString(
+        "hex"
+      )} doesn't
        match expected ${expectedRedeemScript.toString("hex")} for input ${i}`);
     }
     this.psbt.setInputRedeemScript(i, expectedRedeemScript);
-    this.psbt.setInputWitnessUtxo(i, spentOutput.amount, spentOutput.cond.scriptPubKey);
+    this.psbt.setInputWitnessUtxo(
+      i,
+      spentOutput.amount,
+      spentOutput.cond.scriptPubKey
+    );
   }
 
   setSingleKeyOutput(
@@ -330,7 +347,11 @@ export class p2wpkh extends SingleKeyAccount {
     }
     this.psbt.setInputNonWitnessUtxo(i, inputTx);
     this.psbt.setInputBip32Derivation(i, pubkey, this.masterFp, path);
-    this.psbt.setInputWitnessUtxo(i, spentOutput.amount, spentOutput.cond.scriptPubKey);
+    this.psbt.setInputWitnessUtxo(
+      i,
+      spentOutput.amount,
+      spentOutput.cond.scriptPubKey
+    );
   }
 
   setSingleKeyOutput(

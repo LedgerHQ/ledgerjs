@@ -378,9 +378,9 @@ export default class BtcNew {
     const spentTxOutput = inputTx.outputs[spentOutputIndex];
     const spendCondition: SpendingCondition = {
       scriptPubKey: spentTxOutput.script,
-      redeemScript: redeemScript
-    }
-    const spentOutput = {cond: spendCondition, amount: spentTxOutput.amount}
+      redeemScript: redeemScript,
+    };
+    const spentOutput = { cond: spendCondition, amount: spentTxOutput.amount };
     accountType.setInput(
       i,
       inputTxBuffer,
