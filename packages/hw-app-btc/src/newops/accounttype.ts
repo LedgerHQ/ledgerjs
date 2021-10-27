@@ -79,6 +79,7 @@ export interface AccountType {
   getDescriptorTemplate(): DefaultDescriptorTemplate;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
 interface BaseAccount extends AccountType {}
 
 abstract class BaseAccount implements AccountType {
