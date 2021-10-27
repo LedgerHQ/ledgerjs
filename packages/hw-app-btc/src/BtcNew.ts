@@ -6,15 +6,26 @@ import {
   hardenedPathOf,
   pathArrayToString,
   pathStringToArray,
-  pubkeyFromXpub
+  pubkeyFromXpub,
 } from "./bip32";
 import { BufferReader } from "./buffertools";
 import type { CreateTransactionArg } from "./createTransaction";
 import { AppAndVersion } from "./getAppAndVersion";
 import type { AddressFormat } from "./getWalletPublicKey";
-import { AccountType, p2pkh, p2tr, p2wpkh, p2wpkhWrapped, SpendingCondition } from "./newops/accounttype";
+import {
+  AccountType,
+  p2pkh,
+  p2tr,
+  p2wpkh,
+  p2wpkhWrapped,
+  SpendingCondition,
+} from "./newops/accounttype";
 import { AppClient as Client } from "./newops/appClient";
-import { createKey, DefaultDescriptorTemplate, WalletPolicy } from "./newops/policy";
+import {
+  createKey,
+  DefaultDescriptorTemplate,
+  WalletPolicy,
+} from "./newops/policy";
 import { extract } from "./newops/psbtExtractor";
 import { finalize } from "./newops/psbtFinalizer";
 import { psbtIn, PsbtV2 } from "./newops/psbtv2";
@@ -256,14 +267,15 @@ export default class BtcNew {
       // We won't know if we're paying to ourselves, because there's no
       // information in arg to support multiple "change paths". One exception is
       // if there are multiple outputs to the change address.
-      const isChange = changeData && outputScript.equals(changeData?.cond.scriptPubKey);
+      const isChange =
+        changeData && outputScript.equals(changeData?.cond.scriptPubKey);
       if (isChange) {
         changeFound = true;
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         const changePath = pathStringToArray(arg.changePath!);
         const pubkey = changeData.pubkey;
 
-        accountType.setOwnOutput(i, changeData.cond, [pubkey], [changePath])
+        accountType.setOwnOutput(i, changeData.cond, [pubkey], [changePath]);
       }
     }
     if (!changeFound) {
@@ -307,9 +319,7 @@ export default class BtcNew {
     accountPath: number[],
     accountType: AccountType,
     path: string | undefined
-  ): Promise<
-    { cond: SpendingCondition; pubkey: Buffer } | undefined
-  > {
+  ): Promise<{ cond: SpendingCondition; pubkey: Buffer } | undefined> {
     if (!path) return undefined;
     const pathElems = pathStringToArray(path);
     // Make sure path is in our account, otherwise something fishy is probably
@@ -322,7 +332,7 @@ export default class BtcNew {
       }
     }
     const xpub = await this.client.getExtendedPubkey(false, pathElems);
-    let pubkey = pubkeyFromXpub(xpub);
+    const pubkey = pubkeyFromXpub(xpub);
     const cond = accountType.spendingCondition([pubkey]);
     return { cond, pubkey };
   }
@@ -350,7 +360,7 @@ export default class BtcNew {
     const spentOutputIndex = input[1];
     // redeemScript will be null for wrapped p2wpkh, we need to create it
     // ourselves. But if set, it should be used.
-    const redeemScript = input[2];
+    const redeemScript = input[2] ? Buffer.from(input[2], "hex") : undefined;
     const sequence = input[3];
     if (sequence) {
       psbt.setInputSequence(i, sequence);
@@ -365,9 +375,19 @@ export default class BtcNew {
     const pubkey = pubkeyFromXpub(xpubBase58);
     if (!inputTx.outputs)
       throw Error("Missing outputs array in transaction to sign");
-    const spentOutput = inputTx.outputs[spentOutputIndex];
-
-    accountType.setInput(i, inputTxBuffer, spentOutput, [pubkey], [pathElements]);
+    const spentTxOutput = inputTx.outputs[spentOutputIndex];
+    const spendCondition: SpendingCondition = {
+      scriptPubKey: spentTxOutput.script,
+      redeemScript: redeemScript
+    }
+    const spentOutput = {cond: spendCondition, amount: spentTxOutput.amount}
+    accountType.setInput(
+      i,
+      inputTxBuffer,
+      spentOutput,
+      [pubkey],
+      [pathElements]
+    );
 
     psbt.setInputPreviousTxId(i, inputTxid);
     psbt.setInputOutputIndex(i, spentOutputIndex);
@@ -413,7 +433,9 @@ export default class BtcNew {
   }
 }
 
-function descrTemplFrom(addressFormat: AddressFormat): DefaultDescriptorTemplate {
+function descrTemplFrom(
+  addressFormat: AddressFormat
+): DefaultDescriptorTemplate {
   if (addressFormat == "legacy") return "pkh(@0)";
   if (addressFormat == "p2sh") return "sh(wpkh(@0))";
   if (addressFormat == "bech32") return "wpkh(@0)";
@@ -421,7 +443,11 @@ function descrTemplFrom(addressFormat: AddressFormat): DefaultDescriptorTemplate
   throw new Error("Unsupported address format " + addressFormat);
 }
 
-function accountTypeFromArg(arg: CreateTransactionArg, psbt: PsbtV2, masterFp: Buffer): AccountType {
+function accountTypeFromArg(
+  arg: CreateTransactionArg,
+  psbt: PsbtV2,
+  masterFp: Buffer
+): AccountType {
   if (arg.additionals.includes("bech32m")) return new p2tr(psbt, masterFp);
   if (arg.additionals.includes("bech32")) return new p2wpkh(psbt, masterFp);
   if (arg.segwit) return new p2wpkhWrapped(psbt, masterFp);

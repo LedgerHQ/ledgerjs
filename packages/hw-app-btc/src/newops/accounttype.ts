@@ -1,32 +1,32 @@
 import { crypto } from "bitcoinjs-lib";
+import { pointAddScalar } from "tiny-secp256k1";
 import { BufferWriter } from "../buffertools";
 import {
-  OP_DUP,
-  OP_HASH160,
-  HASH_SIZE,
-  OP_EQUALVERIFY,
-  OP_CHECKSIG,
-  OP_EQUAL,
+  HASH_SIZE, OP_CHECKSIG, OP_DUP, OP_EQUAL, OP_EQUALVERIFY, OP_HASH160
 } from "../constants";
 import { hashPublicKey } from "../hashPublicKey";
-import { TransactionOutput } from "../types";
 import { DefaultDescriptorTemplate } from "./policy";
 import { PsbtV2 } from "./psbtv2";
-import { pointAddScalar } from "tiny-secp256k1";
 
-type DescriptorTemplate = string;
-export type SpendingCondition = { scriptPubKey: Buffer; redeemScript?: Buffer; witnessScript?: Buffer };
+export type SpendingCondition = {
+  scriptPubKey: Buffer;
+  redeemScript?: Buffer;
+  // Possible future extension:
+  // witnessScript?: Buffer; // For p2wsh witnessScript
+  // tapScript?: {tapPath: Buffer[], script: Buffer} // For taproot
+};
+
+export type SpentOutput = { cond: SpendingCondition, amount: Buffer }
 
 /**
  * Encapsulates differences between account types, for example p2wpkh,
  * p2wpkhWrapped, p2tr.
  */
 export interface AccountType {
-
   /**
    * Generates a scriptPubKey (output script) from a list of public keys. If a
-   * p2sh redeemScript is needed it will also be set on the returned
-   * SpendingCondition.
+   * p2sh redeemScript or a p2wsh witnessScript is needed it will also be set on
+   * the returned SpendingCondition.
    *
    * The pubkeys are expected to be 33 byte ecdsa compressed pubkeys.
    */
@@ -37,29 +37,33 @@ export interface AccountType {
    * @param i The index of the input map to populate
    * @param inputTx The full transaction containing the spent output. This may
    * be omitted for taproot.
-   * @param spentOutput The amount and output script to spend
-   * @param pubkeys The public keys involved in the input
+   * @param spentOutput The amount and spending condition of the spent output
+   * @param pubkeys The 33 byte ecdsa compressed public keys involved in the input
    * @param pathElems The paths corresponding to the pubkeys, in same order.
    */
   setInput(
     i: number,
     inputTx: Buffer | undefined,
-    spentOutput: TransactionOutput,
+    spentOutput: SpentOutput,
     pubkeys: Buffer[],
     pathElems: number[][]
   ): void;
 
-  
   /**
    * Populates the psbt with account type-specific data for an output. This is typically
    * done for change outputs and other outputs that goes to the same account as
    * being spent from.
    * @param i The index of the output map to populate
    * @param cond The spending condition for this output
-   * @param pubkeys The public keys involved in this output
+   * @param pubkeys The 33 byte ecdsa compressed public keys involved in this output
    * @param paths The paths corresponding to the pubkeys, in same order.
    */
-  setOwnOutput(i: number, cond: SpendingCondition, pubkeys: Buffer[], paths: number[][]): void;
+  setOwnOutput(
+    i: number,
+    cond: SpendingCondition,
+    pubkeys: Buffer[],
+    paths: number[][]
+  ): void;
 
   /**
    * Returns the descriptor template for this account type. Currently only
@@ -82,9 +86,7 @@ abstract class BaseAccount implements AccountType {
  * and calls an abstract method to do the actual work.
  */
 abstract class SingleKeyAccount extends BaseAccount {
-  spendingCondition(
-    pubkeys: Buffer[]
-  ): SpendingCondition {
+  spendingCondition(pubkeys: Buffer[]): SpendingCondition {
     if (pubkeys.length != 1) {
       throw new Error("Expected single key, got " + pubkeys.length);
     }
@@ -95,7 +97,7 @@ abstract class SingleKeyAccount extends BaseAccount {
   setInput(
     i: number,
     inputTx: Buffer | undefined,
-    spentOutput: TransactionOutput,
+    spentOutput: SpentOutput,
     pubkeys: Buffer[],
     pathElems: number[][]
   ) {
@@ -105,20 +107,36 @@ abstract class SingleKeyAccount extends BaseAccount {
     if (pathElems.length != 1) {
       throw new Error("Expected single path, got " + pathElems.length);
     }
-    this.setSingleKeyInput(i, inputTx, spentOutput, pubkeys[0], pathElems[0])
+    this.setSingleKeyInput(i, inputTx, spentOutput, pubkeys[0], pathElems[0]);
   }
-  protected abstract setSingleKeyInput(i: number, inputTx: Buffer | undefined, spentOutput: TransactionOutput, pubkey: Buffer, path: number[]);
-  
-  setOwnOutput(i: number, cond: SpendingCondition, pubkeys: Buffer[], paths: number[][]) {
+  protected abstract setSingleKeyInput(
+    i: number,
+    inputTx: Buffer | undefined,
+    spentOutput: SpentOutput,
+    pubkey: Buffer,
+    path: number[]
+  );
+
+  setOwnOutput(
+    i: number,
+    cond: SpendingCondition,
+    pubkeys: Buffer[],
+    paths: number[][]
+  ) {
     if (pubkeys.length != 1) {
       throw new Error("Expected single key, got " + pubkeys.length);
     }
     if (paths.length != 1) {
       throw new Error("Expected single path, got " + paths.length);
     }
-    this.setSingleKeyOutput(i, cond, pubkeys[0], paths[0])
+    this.setSingleKeyOutput(i, cond, pubkeys[0], paths[0]);
   }
-  protected abstract setSingleKeyOutput(i: number, cond: SpendingCondition, pubkey: Buffer, path: number[])
+  protected abstract setSingleKeyOutput(
+    i: number,
+    cond: SpendingCondition,
+    pubkey: Buffer,
+    path: number[]
+  );
 }
 
 export class p2pkh extends SingleKeyAccount {
@@ -134,7 +152,7 @@ export class p2pkh extends SingleKeyAccount {
   setSingleKeyInput(
     i: number,
     inputTx: Buffer | undefined,
-    spentOutput: TransactionOutput,
+    _spentOutput: SpentOutput,
     pubkey: Buffer,
     path: number[]
   ) {
@@ -145,7 +163,12 @@ export class p2pkh extends SingleKeyAccount {
     this.psbt.setInputBip32Derivation(i, pubkey, this.masterFp, path);
   }
 
-  setSingleKeyOutput(i: number, cond: SpendingCondition, pubkey: Buffer, path: number[]) {
+  setSingleKeyOutput(
+    i: number,
+    cond: SpendingCondition,
+    pubkey: Buffer,
+    path: number[]
+  ) {
     this.psbt.setOutputBip32Derivation(i, pubkey, this.masterFp, path);
   }
 
@@ -167,16 +190,21 @@ export class p2tr extends SingleKeyAccount {
   setSingleKeyInput(
     i: number,
     _inputTx: Buffer | undefined,
-    spentOutput: TransactionOutput,
+    spentOutput: SpentOutput,
     pubkey: Buffer,
     path: number[]
   ) {
     const xonly = pubkey.slice(1);
     this.psbt.setInputTapBip32Derivation(i, xonly, [], this.masterFp, path);
-    this.psbt.setInputWitnessUtxo(i, spentOutput.amount, spentOutput.script);
+    this.psbt.setInputWitnessUtxo(i, spentOutput.amount, spentOutput.cond.scriptPubKey);
   }
 
-  setSingleKeyOutput(i: number, cond: SpendingCondition, pubkey: Buffer, path: number[]) {
+  setSingleKeyOutput(
+    i: number,
+    cond: SpendingCondition,
+    pubkey: Buffer,
+    path: number[]
+  ) {
     const xonly = pubkey.slice(1);
     this.psbt.setOutputTapBip32Derivation(i, xonly, [], this.masterFp, path);
   }
@@ -223,7 +251,6 @@ export class p2tr extends SingleKeyAccount {
     // Create address
     return outputSchnorrKey;
   }
-
 }
 
 export class p2wpkhWrapped extends SingleKeyAccount {
@@ -234,13 +261,13 @@ export class p2wpkhWrapped extends SingleKeyAccount {
     buf.writeSlice(Buffer.of(OP_HASH160, HASH_SIZE));
     buf.writeSlice(scriptHash);
     buf.writeUInt8(OP_EQUAL);
-    return { scriptPubKey: buf.buffer(), redeemScript: redeemScript};
+    return { scriptPubKey: buf.buffer(), redeemScript: redeemScript };
   }
 
   setSingleKeyInput(
     i: number,
     inputTx: Buffer | undefined,
-    spentOutput: TransactionOutput,
+    spentOutput: SpentOutput,
     pubkey: Buffer,
     path: number[]
   ) {
@@ -249,18 +276,25 @@ export class p2wpkhWrapped extends SingleKeyAccount {
     }
     this.psbt.setInputNonWitnessUtxo(i, inputTx);
     this.psbt.setInputBip32Derivation(i, pubkey, this.masterFp, path);
-    // if (!redeemScript) {
-    //   throw new Error("Missing redeemScript for p2wpkhWrapped input");
-    // }
-    const expectedRedeemScript = this.createRedeemScript(pubkey);
-    // if (redeemScript != expectedRedeemScript.toString("hex")) {
-    //   throw new Error("Unexpected redeemScript");
-    // }
+    
+    const userSuppliedRedeemScript = spentOutput.cond.redeemScript;
+    const expectedRedeemScript = this.createRedeemScript(pubkey)
+    if (userSuppliedRedeemScript &&
+      !expectedRedeemScript.equals(userSuppliedRedeemScript)) {
+      // At what point might a user set the redeemScript on its own?
+      throw new Error(`User-supplied redeemScript ${userSuppliedRedeemScript.toString("hex")} doesn't
+       match expected ${expectedRedeemScript.toString("hex")} for input ${i}`);
+    }
     this.psbt.setInputRedeemScript(i, expectedRedeemScript);
-    this.psbt.setInputWitnessUtxo(i, spentOutput.amount, spentOutput.script);
+    this.psbt.setInputWitnessUtxo(i, spentOutput.amount, spentOutput.cond.scriptPubKey);
   }
 
-  setSingleKeyOutput(i: number, cond: SpendingCondition, pubkey: Buffer, path: number[]) {
+  setSingleKeyOutput(
+    i: number,
+    cond: SpendingCondition,
+    pubkey: Buffer,
+    path: number[]
+  ) {
     this.psbt.setOutputRedeemScript(i, cond.redeemScript!);
     this.psbt.setOutputBip32Derivation(i, pubkey, this.masterFp, path);
   }
@@ -272,13 +306,13 @@ export class p2wpkhWrapped extends SingleKeyAccount {
   private createRedeemScript(pubkey: Buffer): Buffer {
     const pubkeyHash = hashPublicKey(pubkey);
     return Buffer.concat([Buffer.from("0014", "hex"), pubkeyHash]);
-  }  
+  }
 }
 
 export class p2wpkh extends SingleKeyAccount {
   singleKeyCondition(pubkey: Buffer): SpendingCondition {
     const buf = new BufferWriter();
-    const pubkeyHash = hashPublicKey(pubkey)
+    const pubkeyHash = hashPublicKey(pubkey);
     buf.writeSlice(Buffer.of(0, HASH_SIZE));
     buf.writeSlice(pubkeyHash);
     return { scriptPubKey: buf.buffer() };
@@ -287,7 +321,7 @@ export class p2wpkh extends SingleKeyAccount {
   setSingleKeyInput(
     i: number,
     inputTx: Buffer | undefined,
-    spentOutput: TransactionOutput,
+    spentOutput: SpentOutput,
     pubkey: Buffer,
     path: number[]
   ) {
@@ -296,10 +330,15 @@ export class p2wpkh extends SingleKeyAccount {
     }
     this.psbt.setInputNonWitnessUtxo(i, inputTx);
     this.psbt.setInputBip32Derivation(i, pubkey, this.masterFp, path);
-    this.psbt.setInputWitnessUtxo(i, spentOutput.amount, spentOutput.script);
+    this.psbt.setInputWitnessUtxo(i, spentOutput.amount, spentOutput.cond.scriptPubKey);
   }
 
-  setSingleKeyOutput(i: number, cond: SpendingCondition, pubkey: Buffer, path: number[]) {
+  setSingleKeyOutput(
+    i: number,
+    cond: SpendingCondition,
+    pubkey: Buffer,
+    path: number[]
+  ) {
     this.psbt.setOutputBip32Derivation(i, pubkey, this.masterFp, path);
   }
 
