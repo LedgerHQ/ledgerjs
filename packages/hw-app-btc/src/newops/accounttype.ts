@@ -15,19 +15,32 @@ import { PsbtV2 } from "./psbtv2";
 import { pointAddScalar } from "tiny-secp256k1";
 
 type DescriptorTemplate = string;
-export type SpendingCondition = { scriptPubKey: Buffer; redeemScript?: Buffer };
+export type SpendingCondition = { scriptPubKey: Buffer; redeemScript?: Buffer; witnessScript?: Buffer };
+
+/**
+ * Encapsulates differences between account types, for example p2wpkh,
+ * p2wpkhWrapped, p2tr.
+ */
 export interface AccountType {
 
   /**
-   * Generates a scriptPubKey (output script) from a list of public keys. If
-   * a redeemScript is needed it will be set on the returned SpendingCondition
-   * too.
+   * Generates a scriptPubKey (output script) from a list of public keys. If a
+   * p2sh redeemScript is needed it will also be set on the returned
+   * SpendingCondition.
    *
-   * If accountType is p2tr, the public key must be a 32 byte x-only taproot
-   * pubkey, otherwise it's expected to be a 33 byte ecdsa compressed pubkey.
+   * The pubkeys are expected to be 33 byte ecdsa compressed pubkeys.
    */
   spendingCondition(pubkeys: Buffer[]): SpendingCondition;
 
+  /**
+   * Populates the psbt with account type-specific data for an input.
+   * @param i The index of the input map to populate
+   * @param inputTx The full transaction containing the spent output. This may
+   * be omitted for taproot.
+   * @param spentOutput The amount and output script to spend
+   * @param pubkeys The public keys involved in the input
+   * @param pathElems The paths corresponding to the pubkeys, in same order.
+   */
   setInput(
     i: number,
     inputTx: Buffer | undefined,
@@ -36,8 +49,24 @@ export interface AccountType {
     pathElems: number[][]
   ): void;
 
-  setOwnOutput(i: number, cond: SpendingCondition, pubkeys: Buffer[], changePaths: number[][]): void;
+  
+  /**
+   * Populates the psbt with account type-specific data for an output. This is typically
+   * done for change outputs and other outputs that goes to the same account as
+   * being spent from.
+   * @param i The index of the output map to populate
+   * @param cond The spending condition for this output
+   * @param pubkeys The public keys involved in this output
+   * @param paths The paths corresponding to the pubkeys, in same order.
+   */
+  setOwnOutput(i: number, cond: SpendingCondition, pubkeys: Buffer[], paths: number[][]): void;
 
+  /**
+   * Returns the descriptor template for this account type. Currently only
+   * DefaultDescriptorTemplates are allowed, but that might be changed in the
+   * future. See class WalletPolicy for more information on descriptor
+   * templates.
+   */
   getDescriptorTemplate(): DefaultDescriptorTemplate;
 }
 
@@ -47,16 +76,12 @@ abstract class BaseAccount implements AccountType {
   constructor(protected psbt: PsbtV2, protected masterFp: Buffer) { }
 }
 
+/**
+ * Superclass for single signature accounts. This will make sure that the pubkey
+ * arrays and path arrays in the method arguments contains exactly one element
+ * and calls an abstract method to do the actual work.
+ */
 abstract class SingleKeyAccount extends BaseAccount {
-  /**
-   * Generates a single signature scriptPubKey (output script) from a public key.
-   * This is done differently depending on account type.
-   *
-   * It's expected to be a 33 byte ecdsa compressed pubkey.
-   * 
-   * If wrapped segwit, the returned SpendingCondition have its redeem script set
-   * accordingly.
-   */
   spendingCondition(
     pubkeys: Buffer[]
   ): SpendingCondition {
@@ -65,7 +90,7 @@ abstract class SingleKeyAccount extends BaseAccount {
     }
     return this.singleKeyCondition(pubkeys[0]);
   }
-  abstract singleKeyCondition(pubkey: Buffer): SpendingCondition;
+  protected abstract singleKeyCondition(pubkey: Buffer): SpendingCondition;
 
   setInput(
     i: number,
@@ -82,18 +107,18 @@ abstract class SingleKeyAccount extends BaseAccount {
     }
     this.setSingleKeyInput(i, inputTx, spentOutput, pubkeys[0], pathElems[0])
   }
-  abstract setSingleKeyInput(i: number, inputTx: Buffer | undefined, spentOutput: TransactionOutput, pubkey: Buffer, path: number[]);
+  protected abstract setSingleKeyInput(i: number, inputTx: Buffer | undefined, spentOutput: TransactionOutput, pubkey: Buffer, path: number[]);
   
-  setOwnOutput(i: number, cond: SpendingCondition, pubkeys: Buffer[], changePaths: number[][]) {
+  setOwnOutput(i: number, cond: SpendingCondition, pubkeys: Buffer[], paths: number[][]) {
     if (pubkeys.length != 1) {
       throw new Error("Expected single key, got " + pubkeys.length);
     }
-    if (changePaths.length != 1) {
-      throw new Error("Expected single path, got " + changePaths.length);
+    if (paths.length != 1) {
+      throw new Error("Expected single path, got " + paths.length);
     }
-    this.setSingleKeyOutput(i, cond, pubkeys[0], changePaths[0])
+    this.setSingleKeyOutput(i, cond, pubkeys[0], paths[0])
   }
-  abstract setSingleKeyOutput(i: number, cond: SpendingCondition, pubkey: Buffer, path: number[])
+  protected abstract setSingleKeyOutput(i: number, cond: SpendingCondition, pubkey: Buffer, path: number[])
 }
 
 export class p2pkh extends SingleKeyAccount {
@@ -152,7 +177,8 @@ export class p2tr extends SingleKeyAccount {
   }
 
   setSingleKeyOutput(i: number, cond: SpendingCondition, pubkey: Buffer, path: number[]) {
-    this.psbt.setOutputTapBip32Derivation(i, pubkey, [], this.masterFp, path);
+    const xonly = pubkey.slice(1);
+    this.psbt.setOutputTapBip32Derivation(i, xonly, [], this.masterFp, path);
   }
 
   getDescriptorTemplate(): DefaultDescriptorTemplate {
@@ -179,7 +205,7 @@ export class p2tr extends SingleKeyAccount {
    * @param internalPubkey A 32 byte x-only taproot internal key
    * @returns The output key
    */
-  private getTaprootOutputKey(internalPubkey: Buffer): Buffer {
+  getTaprootOutputKey(internalPubkey: Buffer): Buffer {
     if (internalPubkey.length != 32) {
       throw new Error("Expected 32 byte pubkey. Got " + internalPubkey.length);
     }

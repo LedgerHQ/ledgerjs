@@ -1,26 +1,18 @@
 import { crypto } from "bitcoinjs-lib";
 import semver from "semver";
-import { pointAddScalar, pointCompress } from "tiny-secp256k1";
+import { pointCompress } from "tiny-secp256k1";
 import {
   getXpubComponents,
   hardenedPathOf,
   pathArrayToString,
   pathStringToArray,
-  pubkeyFromXpub,
+  pubkeyFromXpub
 } from "./bip32";
-import { BufferReader, BufferWriter } from "./buffertools";
-import {
-  HASH_SIZE,
-  OP_CHECKSIG,
-  OP_DUP,
-  OP_EQUAL,
-  OP_EQUALVERIFY,
-  OP_HASH160,
-} from "./constants";
+import { BufferReader } from "./buffertools";
 import type { CreateTransactionArg } from "./createTransaction";
 import { AppAndVersion } from "./getAppAndVersion";
 import type { AddressFormat } from "./getWalletPublicKey";
-import { hashPublicKey } from "./hashPublicKey";
+import { AccountType, p2pkh, p2tr, p2wpkh, p2wpkhWrapped, SpendingCondition } from "./newops/accounttype";
 import { AppClient as Client } from "./newops/appClient";
 import { createKey, DefaultDescriptorTemplate, WalletPolicy } from "./newops/policy";
 import { extract } from "./newops/psbtExtractor";
@@ -28,7 +20,6 @@ import { finalize } from "./newops/psbtFinalizer";
 import { psbtIn, PsbtV2 } from "./newops/psbtv2";
 import { serializeTransaction } from "./serializeTransaction";
 import type { Transaction } from "./types";
-import { AccountType, p2pkh, p2tr, p2wpkh, p2wpkhWrapped, SpendingCondition } from "./newops/accounttype";
 
 const newSupportedApps = ["Bitcoin", "Bitcoin Test"];
 
@@ -128,7 +119,7 @@ export default class BtcNew {
 
     const address = await this.getWalletAddress(
       pathElements,
-      accountTypeFrom(opts?.format ?? "legacy"),
+      descrTemplFrom(opts?.format ?? "legacy"),
       display
     );
     const components = getXpubComponents(xpub);
@@ -159,7 +150,7 @@ export default class BtcNew {
    */
   private async getWalletAddress(
     pathElements: number[],
-    accountType: DefaultDescriptorTemplate,
+    descrTempl: DefaultDescriptorTemplate,
     display: boolean
   ): Promise<string> {
     const accountPath = hardenedPathOf(pathElements);
@@ -169,7 +160,7 @@ export default class BtcNew {
     const accountXpub = await this.client.getExtendedPubkey(false, accountPath);
     const masterFingerprint = await this.client.getMasterFingerprint();
     const policy = new WalletPolicy(
-      accountType,
+      descrTempl,
       createKey(masterFingerprint, accountPath, accountXpub)
     );
     const changeAndIndex = pathElements.slice(-2, pathElements.length);
@@ -422,23 +413,11 @@ export default class BtcNew {
   }
 }
 
-function createRedeemScript(pubkey: Buffer): Buffer {
-  const pubkeyHash = hashPublicKey(pubkey);
-  return Buffer.concat([Buffer.from("0014", "hex"), pubkeyHash]);
-}
-
-enum DescrTempl {
-  p2pkh = "pkh(@0)",
-  p2wpkh = "wpkh(@0)",
-  p2wpkhWrapped = "sh(wpkh(@0))",
-  p2tr = "tr(@0)",
-}
-
-function accountTypeFrom(addressFormat: AddressFormat): DescrTempl {
-  if (addressFormat == "legacy") return DescrTempl.p2pkh;
-  if (addressFormat == "p2sh") return DescrTempl.p2wpkhWrapped;
-  if (addressFormat == "bech32") return DescrTempl.p2wpkh;
-  if (addressFormat == "bech32m") return DescrTempl.p2tr;
+function descrTemplFrom(addressFormat: AddressFormat): DefaultDescriptorTemplate {
+  if (addressFormat == "legacy") return "pkh(@0)";
+  if (addressFormat == "p2sh") return "sh(wpkh(@0))";
+  if (addressFormat == "bech32") return "wpkh(@0)";
+  if (addressFormat == "bech32m") return "tr(@0)";
   throw new Error("Unsupported address format " + addressFormat);
 }
 
@@ -447,43 +426,4 @@ function accountTypeFromArg(arg: CreateTransactionArg, psbt: PsbtV2, masterFp: B
   if (arg.additionals.includes("bech32")) return new p2wpkh(psbt, masterFp);
   if (arg.segwit) return new p2wpkhWrapped(psbt, masterFp);
   return new p2pkh(psbt, masterFp);
-}
-
-/*
-The following two functions are copied from wallet-btc and adapted.
-They should be moved to a library to avoid code reuse. 
-*/
-function hashTapTweak(x: Buffer): Buffer {
-  // hash_tag(x) = SHA256(SHA256(tag) || SHA256(tag) || x), see BIP340
-  // See https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki#specification
-  const h = crypto.sha256(Buffer.from("TapTweak", "utf-8"));
-  return crypto.sha256(Buffer.concat([h, h, x]));
-}
-
-/**
- * Calculates a taproot output key from an internal key. This output key will be
- * used as witness program in a taproot output. The internal key is tweaked
- * according to recommendation in BIP341:
- * https://github.com/bitcoin/bips/blob/master/bip-0341.mediawiki#cite_ref-22-0
- *
- * @param internalPubkey A 32 byte x-only taproot internal key
- * @returns The output key
- */
-export function getTaprootOutputKey(internalPubkey: Buffer): Buffer {
-  if (internalPubkey.length != 32) {
-    throw new Error("Expected 32 byte pubkey. Got " + internalPubkey.length);
-  }
-  // A BIP32 derived key can be converted to a schnorr pubkey by dropping
-  // the first byte, which represent the oddness/evenness. In schnorr all
-  // pubkeys are even.
-  // https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki#public-key-conversion
-  const evenEcdsaPubkey = Buffer.concat([Buffer.of(0x02), internalPubkey]);
-  const tweak = hashTapTweak(internalPubkey);
-
-  // Q = P + int(hash_TapTweak(bytes(P)))G
-  const outputEcdsaKey = Buffer.from(pointAddScalar(evenEcdsaPubkey, tweak));
-  // Convert to schnorr.
-  const outputSchnorrKey = outputEcdsaKey.slice(1);
-  // Create address
-  return outputSchnorrKey;
 }
