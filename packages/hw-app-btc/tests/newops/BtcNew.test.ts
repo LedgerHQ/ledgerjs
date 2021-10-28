@@ -9,7 +9,7 @@ import {
   WalletPolicy
 } from "../../src/newops/policy";
 import { PsbtV2 } from "../../src/newops/psbtv2";
-import { AccountType, addressFormatFromDescriptorTemplate, creatDummyXpub, masterFingerprint, runSignTransaction, TestingClient } from "./integrationtools";
+import { StandardPurpose, addressFormatFromDescriptorTemplate, creatDummyXpub, masterFingerprint, runSignTransaction, TestingClient } from "./integrationtools";
 import { CoreInput, CoreTx, p2pkh, p2tr, p2wpkh, wrappedP2wpkh, wrappedP2wpkhTwoInputs } from "./testtx";
 
 test("getWalletPublicKey p2pkh", async () => {
@@ -40,7 +40,7 @@ test("getWalletXpub normal path", async () => {
   await testGetWalletXpub("m/44'/0'/0'");
 });
 
-function testPaths(type: AccountType): { ins: string[], out?: string } {
+function testPaths(type: StandardPurpose): { ins: string[], out?: string } {
   const basePath = `m/${type}/1'/0'/`;
   const ins = [
     basePath + "0/0",
@@ -55,21 +55,21 @@ function testPaths(type: AccountType): { ins: string[], out?: string } {
 
 test("Sign p2pkh", async () => {
   const changePubkey = "037ed58c914720772c59f7a1e7e76fba0ef95d7c5667119798586301519b9ad2cf";
-  await runSignTransactionTest(p2pkh, AccountType.p2pkh, changePubkey);
+  await runSignTransactionTest(p2pkh, StandardPurpose.p2pkh, changePubkey);
 });
 test("Sign p2wpkh wrapped", async () => {
   let changePubkey = "03efc6b990c1626d08bd176aab0e545a4f55c627c7ddee878d12bbbc46a126177a";
-  await runSignTransactionTest(wrappedP2wpkh, AccountType.p2wpkhInP2sh, changePubkey);
+  await runSignTransactionTest(wrappedP2wpkh, StandardPurpose.p2wpkhInP2sh, changePubkey);
   changePubkey = "031175a985c56e310ce3496a819229b427a2172920fd20b5972dda62758c6def09";
-  await runSignTransactionTest(wrappedP2wpkhTwoInputs, AccountType.p2wpkhInP2sh, changePubkey);
+  await runSignTransactionTest(wrappedP2wpkhTwoInputs, StandardPurpose.p2wpkhInP2sh, changePubkey);
 });
 test("Sign p2wpkh", async () => {
-  await runSignTransactionTest(p2wpkh, AccountType.p2wpkh);
+  await runSignTransactionTest(p2wpkh, StandardPurpose.p2wpkh);
 });
 test("Sign p2tr", async () => {
   // This tx uses locktime, so this test verifies that locktime is propagated to/from
   // the psbt correctly.
-  await runSignTransactionTest(p2tr, AccountType.p2tr);
+  await runSignTransactionTest(p2tr, StandardPurpose.p2tr);
 });
 
 test("Sign p2tr with sigHashType", async () => {
@@ -79,16 +79,16 @@ test("Sign p2tr with sigHashType", async () => {
     const sig = input.txinwitness![0] + "83";
     input.txinwitness = [sig];
   })
-  const tx = await runSignTransactionNoVerification(testTx, AccountType.p2tr);
+  const tx = await runSignTransactionNoVerification(testTx, StandardPurpose.p2tr);
   // The verification of the sighashtype is done in MockClient.signPsbt
 })
 
-async function runSignTransactionTest(testTx: CoreTx, accountType: AccountType, changePubkey?: string) {
+async function runSignTransactionTest(testTx: CoreTx, accountType: StandardPurpose, changePubkey?: string) {
   const tx = await runSignTransactionNoVerification(testTx, accountType, changePubkey);
   expect(tx).toEqual(testTx.hex);
 }
 
-async function runSignTransactionNoVerification(testTx: CoreTx, accountType: AccountType, changePubkey?: string): Promise<string> {
+async function runSignTransactionNoVerification(testTx: CoreTx, accountType: StandardPurpose, changePubkey?: string): Promise<string> {
   const [client, transport] = await createClient();
   const accountXpub = "tpubDCwYjpDhUdPGP5rS3wgNg13mTrrjBuG8V9VpWbyptX6TRPbNoZVXsoVUSkCjmQ8jJycjuDKBb9eataSymXakTTaGifxR6kmVsfFehH1ZgJT";
   client.mockGetPubkeyResponse(`m/${accountType}/1'/0'`, accountXpub);
