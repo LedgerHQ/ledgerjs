@@ -216,7 +216,7 @@ test("signTransactionLargeChainID", async () => {
   expect(result).toEqual({
     r: "3694583045a85ada8d15d5e01b373b00e86a405c9c52f7835691dcc522b7353b",
     s: "30392e638a591c65ed307809825ca48346980f52d004ab7a5f93657f7e62a400",
-    v: "01541b",
+    v: "01542b",
   });
 });
 

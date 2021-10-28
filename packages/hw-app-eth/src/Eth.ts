@@ -374,7 +374,7 @@ export default class Eth {
         if (chainId.times(2).plus(35).plus(1).isGreaterThan(255)) {
           const oneByteChainId = (chainIdTruncated * 2 + 35) % 256;
 
-          const ecc_parity = response_byte - oneByteChainId;
+          const ecc_parity = Math.abs(response_byte - oneByteChainId);
 
           if (txType != null) {
             // For EIP2930 and EIP1559 tx, v is simply the parity.
