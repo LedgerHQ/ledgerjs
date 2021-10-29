@@ -1877,7 +1877,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     managerAppName: "Polygon",
     ticker: "MATIC",
     scheme: "polygon",
-    color: "#F0B90A",
+    color: "#6d29de",
     family: "ethereum",
     ethereumLikeInfo: {
       baseChain: "mainnet",
