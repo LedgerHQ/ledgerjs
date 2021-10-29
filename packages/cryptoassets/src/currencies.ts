@@ -1869,6 +1869,36 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
+  polygon: {
+    type: "CryptoCurrency",
+    id: "polygon",
+    coinType: 60,
+    name: "Polygon",
+    managerAppName: "Polygon",
+    ticker: "MATIC",
+    scheme: "polygon",
+    color: "#F0B90A",
+    family: "ethereum",
+    ethereumLikeInfo: {
+      baseChain: "mainnet",
+      chainId: 137,
+      networkId: 137,
+    },
+    units: [
+      {
+        name: "MATIC",
+        code: "MATIC",
+        magnitude: 18,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://polygonscan.com/tx/$hash",
+        address: "https://polygonscan.com/address/$address",
+        token: "https://polygonscan.com/token/$contractAddress?a=$address",
+      },
+    ],
+  },
   poswallet: {
     type: "CryptoCurrency",
     id: "poswallet",
