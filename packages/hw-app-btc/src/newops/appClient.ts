@@ -1,11 +1,11 @@
-import Transport from "@ledgerhq/hw-transport";
-import { pathElementsToBuffer } from "../bip32";
-import { PsbtV2 } from "./psbtv2";
-import { MerkelizedPsbt } from "./merkelizedPsbt";
-import { ClientCommandInterpreter } from "./clientCommands";
-import { WalletPolicy } from "./policy";
-import { createVarint } from "../varint";
-import { hashLeaf, Merkle } from "./merkle";
+import Transport from '@ledgerhq/hw-transport';
+import { pathElementsToBuffer } from '../bip32';
+import { PsbtV2 } from './psbtv2';
+import { MerkelizedPsbt } from './merkelizedPsbt';
+import { ClientCommandInterpreter } from './clientCommands';
+import { WalletPolicy } from './policy';
+import { createVarint } from '../varint';
+import { hashLeaf, Merkle } from './merkle';
 
 const CLA_BTC = 0xe1;
 const CLA_FRAMEWORK = 0xf8;
@@ -45,7 +45,7 @@ export class AppClient {
     ]);
     while (response.readUInt16BE(response.length - 2) === 0xe000) {
       if (!cci) {
-        throw new Error("Unexpected SW_INTERRUPTED_EXECUTION");
+        throw new Error('Unexpected SW_INTERRUPTED_EXECUTION');
       }
 
       const hwRequest = response.slice(0, -2);
@@ -68,16 +68,16 @@ export class AppClient {
     pathElements: number[]
   ): Promise<string> {
     if (pathElements.length > 6) {
-      throw new Error("Path too long. At most 6 levels allowed.");
+      throw new Error('Path too long. At most 6 levels allowed.');
     }
     const response = await this.makeRequest(
       BitcoinIns.GET_PUBKEY,
       Buffer.concat([
-        Buffer.of(display ? 1 : 0),
+        Buffer.from(display ? [1] : [0]),
         pathElementsToBuffer(pathElements),
       ])
     );
-    return response.toString("ascii");
+    return response.toString('ascii');
   }
 
   async getWalletAddress(
@@ -88,17 +88,17 @@ export class AppClient {
     display: boolean
   ): Promise<string> {
     if (change !== 0 && change !== 1)
-      throw new Error("Change can only be 0 or 1");
+      throw new Error('Change can only be 0 or 1');
     if (addressIndex < 0 || !Number.isInteger(addressIndex))
-      throw new Error("Invalid address index");
+      throw new Error('Invalid address index');
 
     if (walletHMAC != null && walletHMAC.length != 32) {
-      throw new Error("Invalid HMAC length");
+      throw new Error('Invalid HMAC length');
     }
 
     const clientInterpreter = new ClientCommandInterpreter(() => {});
     clientInterpreter.addKnownList(
-      walletPolicy.keys.map((k) => Buffer.from(k, "ascii"))
+      walletPolicy.keys.map((k) => Buffer.from(k, 'ascii'))
     );
     clientInterpreter.addKnownPreimage(walletPolicy.serialize());
 
@@ -108,16 +108,16 @@ export class AppClient {
     const response = await this.makeRequest(
       BitcoinIns.GET_WALLET_ADDRESS,
       Buffer.concat([
-        Buffer.of(display ? 1 : 0),
+        Buffer.from(display ? [1] : [0]),
         walletPolicy.getWalletId(),
         walletHMAC || Buffer.alloc(32, 0),
-        Buffer.of(change),
+        Buffer.from([change]),
         addressIndexBuffer,
       ]),
       clientInterpreter
     );
 
-    return response.toString("ascii");
+    return response.toString('ascii');
   }
 
   async signPsbt(
@@ -129,14 +129,14 @@ export class AppClient {
     const merkelizedPsbt = new MerkelizedPsbt(psbt);
 
     if (walletHMAC != null && walletHMAC.length != 32) {
-      throw new Error("Invalid HMAC length");
+      throw new Error('Invalid HMAC length');
     }
 
     const clientInterpreter = new ClientCommandInterpreter(progressCallback);
 
     // prepare ClientCommandInterpreter
     clientInterpreter.addKnownList(
-      walletPolicy.keys.map((k) => Buffer.from(k, "ascii"))
+      walletPolicy.keys.map((k) => Buffer.from(k, 'ascii'))
     );
     clientInterpreter.addKnownPreimage(walletPolicy.serialize());
 
@@ -181,6 +181,6 @@ export class AppClient {
   }
 
   async getMasterFingerprint(): Promise<Buffer> {
-    return this.makeRequest(BitcoinIns.GET_MASTER_FINGERPRINT, Buffer.of());
+    return this.makeRequest(BitcoinIns.GET_MASTER_FINGERPRINT, Buffer.from([]));
   }
 }

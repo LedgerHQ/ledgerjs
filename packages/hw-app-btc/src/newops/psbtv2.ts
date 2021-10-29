@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { BufferReader, BufferWriter } from "../buffertools";
+import { BufferReader, BufferWriter } from '../buffertools';
 
 export enum psbtGlobal {
   TX_VERSION = 0x02,
@@ -33,7 +33,7 @@ export enum psbtOut {
   TAP_BIP32_DERIVATION = 0x07,
 }
 
-const PSBT_MAGIC_BYTES = Buffer.of(0x70, 0x73, 0x62, 0x74, 0xff);
+const PSBT_MAGIC_BYTES = Buffer.from([0x70, 0x73, 0x62, 0x74, 0xff]);
 
 export class NoSuchEntry extends Error {}
 
@@ -150,7 +150,7 @@ export class PsbtV2 {
     path: number[]
   ) {
     if (pubkey.length != 33)
-      throw new Error("Invalid pubkey length: " + pubkey.length);
+      throw new Error('Invalid pubkey length: ' + pubkey.length);
     this.setInput(
       inputIndex,
       psbtIn.BIP32_DERIVATION,
@@ -218,7 +218,7 @@ export class PsbtV2 {
     path: number[]
   ) {
     if (pubkey.length != 32)
-      throw new Error("Invalid pubkey length: " + pubkey.length);
+      throw new Error('Invalid pubkey length: ' + pubkey.length);
     const buf = this.encodeTapBip32Derivation(hashes, masterFingerprint, path);
     this.setInput(inputIndex, psbtIn.TAP_BIP32_DERIVATION, pubkey, buf);
   }
@@ -321,7 +321,7 @@ export class PsbtV2 {
   }
   serialize(): Buffer {
     const buf = new BufferWriter();
-    buf.writeSlice(Buffer.of(0x70, 0x73, 0x62, 0x74, 0xff));
+    buf.writeSlice(Buffer.from([0x70, 0x73, 0x62, 0x74, 0xff]));
     serializeMap(buf, this.globalMap);
     this.inputMaps.forEach((map) => {
       serializeMap(buf, map);
@@ -334,7 +334,7 @@ export class PsbtV2 {
   deserialize(psbt: Buffer) {
     const buf = new BufferReader(psbt);
     if (!buf.readSlice(5).equals(PSBT_MAGIC_BYTES)) {
-      throw new Error("Invalid magic bytes");
+      throw new Error('Invalid magic bytes');
     }
     while (this.readKeyPair(this.globalMap, buf));
     for (let i = 0; i < this.getGlobalInputCount(); i++) {
@@ -361,17 +361,17 @@ export class PsbtV2 {
     const result: Buffer[] = [];
     map.forEach((_v, k) => {
       if (this.isKeyType(k, [keyType])) {
-        result.push(Buffer.from(k.substring(2), "hex"));
+        result.push(Buffer.from(k.substring(2), 'hex'));
       }
     });
     return result;
   }
   private isKeyType(hexKey: string, keyTypes: KeyType[]): boolean {
-    const keyType = Buffer.from(hexKey.substring(0, 2), "hex").readUInt8(0);
+    const keyType = Buffer.from(hexKey.substring(0, 2), 'hex').readUInt8(0);
     return keyTypes.some((k) => k == keyType);
   }
   private setGlobal(keyType: KeyType, value: Buffer) {
-    const key = new Key(keyType, Buffer.of());
+    const key = new Key(keyType, Buffer.from([]));
     this.globalMap.set(key.toString(), value);
   }
   private getGlobal(keyType: KeyType): Buffer {
@@ -481,7 +481,7 @@ function get(
   keyData: Buffer,
   acceptUndefined: boolean
 ): Buffer | undefined {
-  if (!map) throw Error("No such map");
+  if (!map) throw Error('No such map');
   const key = new Key(keyType, keyData);
   const value = map.get(key.toString());
   if (!value) {
@@ -505,7 +505,7 @@ class Key {
   toString(): string {
     const buf = new BufferWriter();
     this.toBuffer(buf);
-    return buf.buffer().toString("hex");
+    return buf.buffer().toString('hex');
   }
   serialize(buf: BufferWriter) {
     buf.writeVarInt(1 + this.keyData.length);
@@ -534,14 +534,14 @@ function createKey(buf: Buffer): Key {
 function serializeMap(buf: BufferWriter, map: Map<string, Buffer>) {
   for (const k in map.keys) {
     const value = map.get(k)!;
-    const keyPair = new KeyPair(createKey(Buffer.from(k, "hex")), value);
+    const keyPair = new KeyPair(createKey(Buffer.from(k, 'hex')), value);
     keyPair.serialize(buf);
   }
   buf.writeUInt8(0);
 }
 
 function b(): Buffer {
-  return Buffer.of();
+  return Buffer.from([]);
 }
 function set(
   map: Map<string, Buffer>,
