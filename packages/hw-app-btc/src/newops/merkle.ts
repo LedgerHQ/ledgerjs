@@ -1,4 +1,4 @@
-import { crypto } from 'bitcoinjs-lib';
+import { crypto } from "bitcoinjs-lib";
 
 /**
  * This class implements the merkle tree used by Ledger Bitcoin app v2+,
@@ -33,7 +33,7 @@ export class Merkle {
     return this.leafNodes[index].hash;
   }
   getProof(index: number): Buffer[] {
-    if (index >= this.leaves.length) throw Error('Index out of bounds');
+    if (index >= this.leaves.length) throw Error("Index out of bounds");
     return proveNode(this.leafNodes[index]);
   }
 
@@ -102,12 +102,12 @@ function proveNode(node: Node): Buffer[] {
   }
   if (node.parent.leftChild == node) {
     if (!node.parent.rightChild) {
-      throw new Error('Expected right child to exist');
+      throw new Error("Expected right child to exist");
     }
     return [node.parent.rightChild.hash, ...proveNode(node.parent)];
   } else {
     if (!node.parent.leftChild) {
-      throw new Error('Expected left child to exist');
+      throw new Error("Expected left child to exist");
     }
     return [node.parent.leftChild.hash, ...proveNode(node.parent)];
   }
@@ -115,7 +115,7 @@ function proveNode(node: Node): Buffer[] {
 
 function highestPowerOf2LessThan(n: number) {
   if (n < 2) {
-    throw Error('Expected n >= 2');
+    throw Error("Expected n >= 2");
   }
   if (isPowerOf2(n)) {
     return n / 2;

@@ -1,6 +1,6 @@
-import { crypto } from 'bitcoinjs-lib';
-import { pointAddScalar } from 'tiny-secp256k1';
-import { BufferWriter } from '../buffertools';
+import { crypto } from "bitcoinjs-lib";
+import { pointAddScalar } from "tiny-secp256k1";
+import { BufferWriter } from "../buffertools";
 import {
   HASH_SIZE,
   OP_CHECKSIG,
@@ -8,10 +8,10 @@ import {
   OP_EQUAL,
   OP_EQUALVERIFY,
   OP_HASH160,
-} from '../constants';
-import { hashPublicKey } from '../hashPublicKey';
-import { DefaultDescriptorTemplate } from './policy';
-import { PsbtV2 } from './psbtv2';
+} from "../constants";
+import { hashPublicKey } from "../hashPublicKey";
+import { DefaultDescriptorTemplate } from "./policy";
+import { PsbtV2 } from "./psbtv2";
 
 export type SpendingCondition = {
   scriptPubKey: Buffer;
@@ -94,7 +94,7 @@ abstract class BaseAccount implements AccountType {
 abstract class SingleKeyAccount extends BaseAccount {
   spendingCondition(pubkeys: Buffer[]): SpendingCondition {
     if (pubkeys.length != 1) {
-      throw new Error('Expected single key, got ' + pubkeys.length);
+      throw new Error("Expected single key, got " + pubkeys.length);
     }
     return this.singleKeyCondition(pubkeys[0]);
   }
@@ -108,10 +108,10 @@ abstract class SingleKeyAccount extends BaseAccount {
     pathElems: number[][]
   ) {
     if (pubkeys.length != 1) {
-      throw new Error('Expected single key, got ' + pubkeys.length);
+      throw new Error("Expected single key, got " + pubkeys.length);
     }
     if (pathElems.length != 1) {
-      throw new Error('Expected single path, got ' + pathElems.length);
+      throw new Error("Expected single path, got " + pathElems.length);
     }
     this.setSingleKeyInput(i, inputTx, spentOutput, pubkeys[0], pathElems[0]);
   }
@@ -130,10 +130,10 @@ abstract class SingleKeyAccount extends BaseAccount {
     paths: number[][]
   ) {
     if (pubkeys.length != 1) {
-      throw new Error('Expected single key, got ' + pubkeys.length);
+      throw new Error("Expected single key, got " + pubkeys.length);
     }
     if (paths.length != 1) {
-      throw new Error('Expected single path, got ' + paths.length);
+      throw new Error("Expected single path, got " + paths.length);
     }
     this.setSingleKeyOutput(i, cond, pubkeys[0], paths[0]);
   }
@@ -163,7 +163,7 @@ export class p2pkh extends SingleKeyAccount {
     path: number[]
   ) {
     if (!inputTx) {
-      throw new Error('Full input base transaction required');
+      throw new Error("Full input base transaction required");
     }
     this.psbt.setInputNonWitnessUtxo(i, inputTx);
     this.psbt.setInputBip32Derivation(i, pubkey, this.masterFp, path);
@@ -179,7 +179,7 @@ export class p2pkh extends SingleKeyAccount {
   }
 
   getDescriptorTemplate(): DefaultDescriptorTemplate {
-    return 'pkh(@0)';
+    return "pkh(@0)";
   }
 }
 
@@ -220,7 +220,7 @@ export class p2tr extends SingleKeyAccount {
   }
 
   getDescriptorTemplate(): DefaultDescriptorTemplate {
-    return 'tr(@0)';
+    return "tr(@0)";
   }
 
   /*
@@ -230,7 +230,7 @@ export class p2tr extends SingleKeyAccount {
   private hashTapTweak(x: Buffer): Buffer {
     // hash_tag(x) = SHA256(SHA256(tag) || SHA256(tag) || x), see BIP340
     // See https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki#specification
-    const h = crypto.sha256(Buffer.from('TapTweak', 'utf-8'));
+    const h = crypto.sha256(Buffer.from("TapTweak", "utf-8"));
     return crypto.sha256(Buffer.concat([h, h, x]));
   }
 
@@ -245,7 +245,7 @@ export class p2tr extends SingleKeyAccount {
    */
   getTaprootOutputKey(internalPubkey: Buffer): Buffer {
     if (internalPubkey.length != 32) {
-      throw new Error('Expected 32 byte pubkey. Got ' + internalPubkey.length);
+      throw new Error("Expected 32 byte pubkey. Got " + internalPubkey.length);
     }
     // A BIP32 derived key can be converted to a schnorr pubkey by dropping
     // the first byte, which represent the oddness/evenness. In schnorr all
@@ -285,7 +285,7 @@ export class p2wpkhWrapped extends SingleKeyAccount {
     path: number[]
   ) {
     if (!inputTx) {
-      throw new Error('Full input base transaction required');
+      throw new Error("Full input base transaction required");
     }
     this.psbt.setInputNonWitnessUtxo(i, inputTx);
     this.psbt.setInputBip32Derivation(i, pubkey, this.masterFp, path);
@@ -298,9 +298,9 @@ export class p2wpkhWrapped extends SingleKeyAccount {
     ) {
       // At what point might a user set the redeemScript on its own?
       throw new Error(`User-supplied redeemScript ${userSuppliedRedeemScript.toString(
-        'hex'
+        "hex"
       )} doesn't
-       match expected ${expectedRedeemScript.toString('hex')} for input ${i}`);
+       match expected ${expectedRedeemScript.toString("hex")} for input ${i}`);
     }
     this.psbt.setInputRedeemScript(i, expectedRedeemScript);
     this.psbt.setInputWitnessUtxo(
@@ -321,12 +321,12 @@ export class p2wpkhWrapped extends SingleKeyAccount {
   }
 
   getDescriptorTemplate(): DefaultDescriptorTemplate {
-    return 'sh(wpkh(@0))';
+    return "sh(wpkh(@0))";
   }
 
   private createRedeemScript(pubkey: Buffer): Buffer {
     const pubkeyHash = hashPublicKey(pubkey);
-    return Buffer.concat([Buffer.from('0014', 'hex'), pubkeyHash]);
+    return Buffer.concat([Buffer.from("0014", "hex"), pubkeyHash]);
   }
 }
 
@@ -347,7 +347,7 @@ export class p2wpkh extends SingleKeyAccount {
     path: number[]
   ) {
     if (!inputTx) {
-      throw new Error('Full input base transaction required');
+      throw new Error("Full input base transaction required");
     }
     this.psbt.setInputNonWitnessUtxo(i, inputTx);
     this.psbt.setInputBip32Derivation(i, pubkey, this.masterFp, path);
@@ -368,6 +368,6 @@ export class p2wpkh extends SingleKeyAccount {
   }
 
   getDescriptorTemplate(): DefaultDescriptorTemplate {
-    return 'wpkh(@0)';
+    return "wpkh(@0)";
   }
 }
