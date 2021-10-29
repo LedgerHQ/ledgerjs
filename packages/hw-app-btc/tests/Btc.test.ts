@@ -106,14 +106,24 @@ ascii(1NjiCsVBuKDT62LmaUd7WZZZBK2gPAkisb)
 8bd937d416de7020952cc8e2c99ce9ac7e01265e31ceb8e47bf9c37f46f8abbd
 */
   /*eslint-disable */
-  const pubkeyParent = "045d4a72237572a91e13818fa38cedabe6174569cc9a319012f75150d5c0a0639d54eafd13a68d079b7a67764800c6a981825ef52384f08c3925109188ab21bc09";
-  const addrParent = Buffer.from("1NjiCsVBuKDT62LmaUd7WZZZBK2gPAkisb", "ascii").toString("hex");
-  const ccParent = "8bd937d416de7020952cc8e2c99ce9ac7e01265e31ceb8e47bf9c37f46f8abbd";
+  const pubkeyParent =
+    "045d4a72237572a91e13818fa38cedabe6174569cc9a319012f75150d5c0a0639d54eafd13a68d079b7a67764800c6a981825ef52384f08c3925109188ab21bc09";
+  const addrParent = Buffer.from(
+    "1NjiCsVBuKDT62LmaUd7WZZZBK2gPAkisb",
+    "ascii"
+  ).toString("hex");
+  const ccParent =
+    "8bd937d416de7020952cc8e2c99ce9ac7e01265e31ceb8e47bf9c37f46f8abbd";
   const responseParent = `41${pubkeyParent}22${addrParent}${ccParent}`;
 
-  const pubkeyAcc = "04250dfdfb84c1efd160ed0e10ebac845d0e4b04277174630ba56de96bbd3afb21fc6c04ce0d5a0cbd784fdabc99d16269c27cf3842fe8440f1f21b8af900f0eaa";
-  const addrAcc = Buffer.from("16Y97ByhyboePhTYMMmFj1tq5Cy1bDq8jT", "ascii").toString("hex");
-  const ccAcc = "c071c6f2d05cbc9ea9a04951b238086ce1608cf00020c3cab85b36aac5fdd591";
+  const pubkeyAcc =
+    "04250dfdfb84c1efd160ed0e10ebac845d0e4b04277174630ba56de96bbd3afb21fc6c04ce0d5a0cbd784fdabc99d16269c27cf3842fe8440f1f21b8af900f0eaa";
+  const addrAcc = Buffer.from(
+    "16Y97ByhyboePhTYMMmFj1tq5Cy1bDq8jT",
+    "ascii"
+  ).toString("hex");
+  const ccAcc =
+    "c071c6f2d05cbc9ea9a04951b238086ce1608cf00020c3cab85b36aac5fdd591";
   /*eslint-enable */
   const responseAcc = `41${pubkeyAcc}22${addrAcc}${ccAcc}`;
   const transport = await openTransportReplayer(
@@ -123,7 +133,7 @@ ascii(1NjiCsVBuKDT62LmaUd7WZZZBK2gPAkisb)
     => e040000009028000002c80000000
     <= ${responseParent}9000
     => e04000000d038000002c8000000080000011
-    <= ${responseAcc}9000  
+    <= ${responseAcc}9000
     `)
   );
   const btc = new Btc(transport);
@@ -430,7 +440,7 @@ test("signMessage", async () => {
 function testBackend(s: string): any {
   return async () => {
     return { publicKey: s, bitcoinAddress: "", chainCode: "" };
-  }
+  };
 }
 
 class TestBtc extends Btc {
@@ -461,43 +471,51 @@ class TestBtc extends Btc {
 // });
 
 test.each`
-app          | ver          | path             | format       | display | exp
-${"Bitcoin"} | ${"1.99.99"} | ${"m/44'/0'/1'"} | ${"bech32m"} | ${false} | ${""}
-${"Bitcoin"} | ${"1.99.99"} | ${"m/44'/0'"} | ${"bech32m"} | ${false} | ${""}
-${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'"} | ${"bech32m"} | ${false} | ${"new"}
-${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'"} | ${"bech32m"} | ${false} | ${"new"}
-${"Bitcoin"} | ${"2.0.0-beta"} | ${"m/84'/1'/0'"} | ${"bech32"} | ${false} | ${"new"}
-${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'"} | ${"bech32"} | ${false} | ${"new"}
-${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'"} | ${"bech32"} | ${undefined} | ${"old"}   
-${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'"} | ${"bech32"} | ${true} | ${"new"}   
-${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'/0/0"} | ${"bech32"} | ${false} | ${"new"}   
-${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'/1/0"} | ${"bech32"} | ${false} | ${"new"}   
-${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'/1/0"} | ${"legacy"} | ${false} | ${"new"}   
-${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'/1/0"} | ${"p2sh"} | ${false} | ${"new"}   
-${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'/2/0"} | ${"bech32"} | ${false} | ${"old"}
-`("dispatch $app $ver $path $format $display to $exp", async ({ app, ver, path, format, display, exp }) => {
-  const appName = Buffer.of(app.length)
-    .toString("hex")
-    .concat(Buffer.from(app, "ascii").toString("hex"));
-  const appVersion = Buffer.of(ver.length)
-    .toString("hex")
-    .concat(Buffer.from(ver, "ascii").toString("hex"));
-  const resp = `01${appName}${appVersion}01029000`;
-  const tr = await openTransportReplayer(RecordStore.fromString(`=> b001000000\n <= ${resp}`));
-  const btc = new TestBtc(tr);
-  try {
-    const key = await btc.getWalletPublicKey(path, { format: format, verify: display });
-    if (exp === "") {
-      expect(1).toEqual(0); // Allways fail. Don't know how to do that properly
+  app          | ver               | path                 | format       | display      | exp
+  ${"Bitcoin"} | ${"1.99.99"}      | ${"m/44'/0'/1'"}     | ${"bech32m"} | ${false}     | ${""}
+  ${"Bitcoin"} | ${"1.99.99"}      | ${"m/44'/0'"}        | ${"bech32m"} | ${false}     | ${""}
+  ${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'"}     | ${"bech32m"} | ${false}     | ${"new"}
+  ${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'"}        | ${"bech32m"} | ${false}     | ${"new"}
+  ${"Bitcoin"} | ${"2.0.0-beta"}   | ${"m/84'/1'/0'"}     | ${"bech32"}  | ${false}     | ${"new"}
+  ${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'"}     | ${"bech32"}  | ${false}     | ${"new"}
+  ${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'"}        | ${"bech32"}  | ${undefined} | ${"old"}
+  ${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'"}        | ${"bech32"}  | ${true}      | ${"new"}
+  ${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'/0/0"} | ${"bech32"}  | ${false}     | ${"new"}
+  ${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'/1/0"} | ${"bech32"}  | ${false}     | ${"new"}
+  ${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'/1/0"} | ${"legacy"}  | ${false}     | ${"new"}
+  ${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'/1/0"} | ${"p2sh"}    | ${false}     | ${"new"}
+  ${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'/2/0"} | ${"bech32"}  | ${false}     | ${"old"}
+`(
+  "dispatch $app $ver $path $format $display to $exp",
+  async ({ app, ver, path, format, display, exp }) => {
+    const appName = Buffer.from([app.length])
+      .toString("hex")
+      .concat(Buffer.from(app, "ascii").toString("hex"));
+    const appVersion = Buffer.from([ver.length])
+      .toString("hex")
+      .concat(Buffer.from(ver, "ascii").toString("hex"));
+    const resp = `01${appName}${appVersion}01029000`;
+    const tr = await openTransportReplayer(
+      RecordStore.fromString(`=> b001000000\n <= ${resp}`)
+    );
+    const btc = new TestBtc(tr);
+    try {
+      const key = await btc.getWalletPublicKey(path, {
+        format: format,
+        verify: display,
+      });
+      if (exp === "") {
+        expect(1).toEqual(0); // Allways fail. Don't know how to do that properly
+      }
+      expect(key.publicKey).toEqual(exp);
+    } catch (e: any) {
+      if (exp != "") {
+        throw e;
+      }
+      expect(exp).toEqual("");
     }
-    expect(key.publicKey).toEqual(exp);
-  } catch (e: any) {
-    if (exp != "") {
-      throw e;
-    }
-    expect(exp).toEqual("");
   }
-})
+);
 
 // test("getWalletPublicKey compatibility for internal hardened keys", async () => {
 //   await testDispatch("Bitcoin", "1.99.99", "m/44'/0'/1'", "bech32m", "");
@@ -508,5 +526,10 @@ ${"Bitcoin"} | ${"2.0.0-alpha1"} | ${"m/44'/0'/1'/2/0"} | ${"bech32"} | ${false}
 //   await testDispatch("Bitcoin", "2.0.0-alpha1", "m/44'/0'", "bech32", "old");
 // });
 
-async function testDispatch(name: string, version: string, path: string, addressFormat: AddressFormat | undefined, exp: string): Promise<void> {
-}
+async function testDispatch(
+  name: string,
+  version: string,
+  path: string,
+  addressFormat: AddressFormat | undefined,
+  exp: string
+): Promise<void> {}

@@ -149,9 +149,9 @@ export class p2pkh extends SingleKeyAccount {
   singleKeyCondition(pubkey: Buffer): SpendingCondition {
     const buf = new BufferWriter();
     const pubkeyHash = hashPublicKey(pubkey);
-    buf.writeSlice(Buffer.of(OP_DUP, OP_HASH160, HASH_SIZE));
+    buf.writeSlice(Buffer.from([OP_DUP, OP_HASH160, HASH_SIZE]));
     buf.writeSlice(pubkeyHash);
-    buf.writeSlice(Buffer.of(OP_EQUALVERIFY, OP_CHECKSIG));
+    buf.writeSlice(Buffer.from([OP_EQUALVERIFY, OP_CHECKSIG]));
     return { scriptPubKey: buf.buffer() };
   }
 
@@ -188,7 +188,7 @@ export class p2tr extends SingleKeyAccount {
     const xonlyPubkey = pubkey.slice(1); // x-only pubkey
     const buf = new BufferWriter();
     const outputKey = this.getTaprootOutputKey(xonlyPubkey);
-    buf.writeSlice(Buffer.of(0x51, 32)); // push1, pubkeylen
+    buf.writeSlice(Buffer.from([0x51, 32])); // push1, pubkeylen
     buf.writeSlice(outputKey);
     return { scriptPubKey: buf.buffer() };
   }
@@ -251,7 +251,10 @@ export class p2tr extends SingleKeyAccount {
     // the first byte, which represent the oddness/evenness. In schnorr all
     // pubkeys are even.
     // https://github.com/bitcoin/bips/blob/master/bip-0340.mediawiki#public-key-conversion
-    const evenEcdsaPubkey = Buffer.concat([Buffer.of(0x02), internalPubkey]);
+    const evenEcdsaPubkey = Buffer.concat([
+      Buffer.from([0x02]),
+      internalPubkey,
+    ]);
     const tweak = this.hashTapTweak(internalPubkey);
 
     // Q = P + int(hash_TapTweak(bytes(P)))G
@@ -268,7 +271,7 @@ export class p2wpkhWrapped extends SingleKeyAccount {
     const buf = new BufferWriter();
     const redeemScript = this.createRedeemScript(pubkey);
     const scriptHash = hashPublicKey(redeemScript);
-    buf.writeSlice(Buffer.of(OP_HASH160, HASH_SIZE));
+    buf.writeSlice(Buffer.from([OP_HASH160, HASH_SIZE]));
     buf.writeSlice(scriptHash);
     buf.writeUInt8(OP_EQUAL);
     return { scriptPubKey: buf.buffer(), redeemScript: redeemScript };
@@ -331,7 +334,7 @@ export class p2wpkh extends SingleKeyAccount {
   singleKeyCondition(pubkey: Buffer): SpendingCondition {
     const buf = new BufferWriter();
     const pubkeyHash = hashPublicKey(pubkey);
-    buf.writeSlice(Buffer.of(0, HASH_SIZE));
+    buf.writeSlice(Buffer.from([0, HASH_SIZE]));
     buf.writeSlice(pubkeyHash);
     return { scriptPubKey: buf.buffer() };
   }

@@ -3,7 +3,7 @@ function testHasher(buf: Buffer): Buffer {
   return Buffer.from(buf);
 }
 function leaf(n: number) {
-  return Buffer.of(0, n);
+  return Buffer.from([0, n]);
 }
 function merkleOf(count: number): Merkle {
   const leaves: Buffer[] = [];

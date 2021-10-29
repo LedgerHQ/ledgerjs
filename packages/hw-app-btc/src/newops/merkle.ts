@@ -62,7 +62,7 @@ export class Merkle {
   }
 
   hashNode(left: Buffer, right: Buffer): Buffer {
-    return this.h(Buffer.concat([Buffer.of(1), left, right]));
+    return this.h(Buffer.concat([Buffer.from([1]), left, right]));
   }
 }
 
@@ -70,7 +70,7 @@ export function hashLeaf(
   buf: Buffer,
   hashFunction: (buf: Buffer) => Buffer = crypto.sha256
 ): Buffer {
-  return hashConcat(Buffer.of(0), buf, hashFunction);
+  return hashConcat(Buffer.from([0]), buf, hashFunction);
 }
 
 function hashConcat(

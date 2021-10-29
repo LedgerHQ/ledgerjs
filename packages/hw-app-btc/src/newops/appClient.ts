@@ -73,7 +73,7 @@ export class AppClient {
     const response = await this.makeRequest(
       BitcoinIns.GET_PUBKEY,
       Buffer.concat([
-        Buffer.of(display ? 1 : 0),
+        Buffer.from(display ? [1] : [0]),
         pathElementsToBuffer(pathElements),
       ])
     );
@@ -108,10 +108,10 @@ export class AppClient {
     const response = await this.makeRequest(
       BitcoinIns.GET_WALLET_ADDRESS,
       Buffer.concat([
-        Buffer.of(display ? 1 : 0),
+        Buffer.from(display ? [1] : [0]),
         walletPolicy.getWalletId(),
         walletHMAC || Buffer.alloc(32, 0),
-        Buffer.of(change),
+        Buffer.from([change]),
         addressIndexBuffer,
       ]),
       clientInterpreter
@@ -181,6 +181,6 @@ export class AppClient {
   }
 
   async getMasterFingerprint(): Promise<Buffer> {
-    return this.makeRequest(BitcoinIns.GET_MASTER_FINGERPRINT, Buffer.of());
+    return this.makeRequest(BitcoinIns.GET_MASTER_FINGERPRINT, Buffer.from([]));
   }
 }

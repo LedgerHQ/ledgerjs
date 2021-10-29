@@ -13,7 +13,7 @@ export function extract(psbt: PsbtV2): Buffer {
 
   const isSegwit = !!psbt.getInputWitnessUtxo(0);
   if (isSegwit) {
-    tx.writeSlice(Buffer.of(0, 1));
+    tx.writeSlice(Buffer.from([0, 1]));
   }
   const inputCount = psbt.getGlobalInputCount();
   tx.writeVarInt(inputCount);
@@ -21,7 +21,7 @@ export function extract(psbt: PsbtV2): Buffer {
   for (let i = 0; i < inputCount; i++) {
     tx.writeSlice(psbt.getInputPreviousTxid(i));
     tx.writeUInt32(psbt.getInputOutputIndex(i));
-    tx.writeVarSlice(psbt.getInputFinalScriptsig(i) ?? Buffer.of());
+    tx.writeVarSlice(psbt.getInputFinalScriptsig(i) ?? Buffer.from([]));
     tx.writeUInt32(psbt.getInputSequence(i));
     if (isSegwit) {
       witnessWriter.writeSlice(psbt.getInputFinalScriptwitness(i));

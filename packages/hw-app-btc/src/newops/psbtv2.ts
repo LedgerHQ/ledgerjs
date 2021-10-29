@@ -33,7 +33,7 @@ export enum psbtOut {
   TAP_BIP32_DERIVATION = 0x07,
 }
 
-const PSBT_MAGIC_BYTES = Buffer.of(0x70, 0x73, 0x62, 0x74, 0xff);
+const PSBT_MAGIC_BYTES = Buffer.from([0x70, 0x73, 0x62, 0x74, 0xff]);
 
 export class NoSuchEntry extends Error {}
 
@@ -321,7 +321,7 @@ export class PsbtV2 {
   }
   serialize(): Buffer {
     const buf = new BufferWriter();
-    buf.writeSlice(Buffer.of(0x70, 0x73, 0x62, 0x74, 0xff));
+    buf.writeSlice(Buffer.from([0x70, 0x73, 0x62, 0x74, 0xff]));
     serializeMap(buf, this.globalMap);
     this.inputMaps.forEach((map) => {
       serializeMap(buf, map);
@@ -371,7 +371,7 @@ export class PsbtV2 {
     return keyTypes.some((k) => k == keyType);
   }
   private setGlobal(keyType: KeyType, value: Buffer) {
-    const key = new Key(keyType, Buffer.of());
+    const key = new Key(keyType, Buffer.from([]));
     this.globalMap.set(key.toString(), value);
   }
   private getGlobal(keyType: KeyType): Buffer {
@@ -541,7 +541,7 @@ function serializeMap(buf: BufferWriter, map: Map<string, Buffer>) {
 }
 
 function b(): Buffer {
-  return Buffer.of();
+  return Buffer.from([]);
 }
 function set(
   map: Map<string, Buffer>,
