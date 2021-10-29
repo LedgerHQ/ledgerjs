@@ -19,6 +19,7 @@ module.exports = {
     "tokens/ethereum/erc20",
     "tokens/ethereum_ropsten/erc20",
     "tokens/bsc/bep20",
+    "tokens/polygon/erc20",
   ],
   id: "erc20",
   output: "data/erc20-signatures.js",
