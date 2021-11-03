@@ -19,7 +19,7 @@ export const getNFTInfo = async (
   }
 
   const url = BACKEND_URL + chain + "/contracts/" + contractAddress;
-  const data = await axios
+  const data: NftInfo = await axios
     .get(url)
     .then((r) => r.data)
     .catch((e) => {
