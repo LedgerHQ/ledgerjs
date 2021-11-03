@@ -7,7 +7,7 @@
 
 Allows to communicate with Ledger Hardware Wallets.
 
-**[Node]**/Electron **(HID)** – uses `node-hid` and `usb`.
+**\[Node]**/Electron **(HID)** – uses `node-hid` and `usb`.
 
 ## API
 
@@ -15,19 +15,19 @@ Allows to communicate with Ledger Hardware Wallets.
 
 #### Table of Contents
 
--   [TransportNodeHid](#transportnodehid)
-    -   [Examples](#examples)
-    -   [isSupported](#issupported)
-    -   [list](#list)
-    -   [setListenDevicesDebounce](#setlistendevicesdebounce)
-        -   [Parameters](#parameters)
-    -   [setListenDevicesPollingSkip](#setlistendevicespollingskip)
-        -   [Parameters](#parameters-1)
-    -   [setListenDevicesDebug](#setlistendevicesdebug)
-    -   [listen](#listen)
-        -   [Parameters](#parameters-2)
-    -   [open](#open)
-        -   [Parameters](#parameters-3)
+*   [TransportNodeHid](#transportnodehid)
+    *   [Examples](#examples)
+    *   [isSupported](#issupported)
+    *   [list](#list)
+    *   [setListenDevicesDebounce](#setlistendevicesdebounce)
+        *   [Parameters](#parameters)
+    *   [setListenDevicesPollingSkip](#setlistendevicespollingskip)
+        *   [Parameters](#parameters-1)
+    *   [setListenDevicesDebug](#setlistendevicesdebug)
+    *   [listen](#listen)
+        *   [Parameters](#parameters-2)
+    *   [open](#open)
+        *   [Parameters](#parameters-3)
 
 ### TransportNodeHid
 
@@ -51,13 +51,13 @@ TransportNodeHid.create().then(transport => ...)
 
 ##### Parameters
 
--   `delay` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+*   `delay` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 
 #### setListenDevicesPollingSkip
 
 ##### Parameters
 
--   `conditionToSkip` **function (): [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** 
+*   `conditionToSkip` **function (): [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** 
 
 #### setListenDevicesDebug
 
@@ -65,7 +65,7 @@ TransportNodeHid.create().then(transport => ...)
 
 ##### Parameters
 
--   `observer` **Observer&lt;DescriptorEvent&lt;([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))>>** 
+*   `observer` **Observer\<DescriptorEvent<([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))>>** 
 
 Returns **Subscription** 
 
@@ -75,4 +75,4 @@ if path="" is not provided, the library will take the first device
 
 ##### Parameters
 
--   `path` **([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))** 
+*   `path` **([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | null | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))** 

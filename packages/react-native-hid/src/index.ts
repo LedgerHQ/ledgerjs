@@ -108,7 +108,7 @@ export default class HIDTransport extends Transport {
     try {
       const nativeObj = await NativeModules.HID.openDevice(deviceObj);
       return new HIDTransport(nativeObj.id, deviceObj.productId);
-    } catch (error) {
+    } catch (error: any) {
       if (disconnectedErrors.includes(error.message)) {
         throw new DisconnectedDevice(error.message);
       }
@@ -130,7 +130,7 @@ export default class HIDTransport extends Transport {
         const res = Buffer.from(resultHex, "hex");
         log("apdu", "<= " + resultHex);
         return res;
-      } catch (error) {
+      } catch (error: any) {
         if (disconnectedErrors.includes(error.message)) {
           this.emit("disconnect", error);
           throw new DisconnectedDeviceDuringOperation(error.message);

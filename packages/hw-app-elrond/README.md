@@ -13,16 +13,16 @@ Ledger Hardware Wallet Elrond JavaScript bindings.
 
 #### Table of Contents
 
--   [getAppConfiguration](#getappconfiguration)
-    -   [Examples](#examples)
--   [getAddress](#getaddress)
-    -   [Parameters](#parameters)
-    -   [Examples](#examples-1)
--   [setAddress](#setaddress)
-    -   [Parameters](#parameters-1)
-    -   [Examples](#examples-2)
--   [signTransaction](#signtransaction)
-    -   [Parameters](#parameters-2)
+*   [getAppConfiguration](#getappconfiguration)
+    *   [Examples](#examples)
+*   [getAddress](#getaddress)
+    *   [Parameters](#parameters)
+    *   [Examples](#examples-1)
+*   [setAddress](#setaddress)
+    *   [Parameters](#parameters-1)
+    *   [Examples](#examples-2)
+*   [signTransaction](#signtransaction)
+    *   [Parameters](#parameters-2)
 
 ### getAppConfiguration
 
@@ -35,7 +35,7 @@ const result = await elrond.getAppConfiguration();
 const { contractData, accountIndex, addressIndex, version } = result;
 ```
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{contractData: ([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) \| [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)), accountIndex: ([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) \| [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)), addressIndex: ([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) \| [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)), version: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** an object with a contractData, accountIndex, addressIndex, version
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{contractData: ([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)), accountIndex: ([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)), addressIndex: ([string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String) | [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)), version: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** an object with a contractData, accountIndex, addressIndex, version
 
 ### getAddress
 
@@ -43,8 +43,8 @@ Get Elrond address for a given BIP 32 path.
 
 #### Parameters
 
--   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
--   `display` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** optionally enable or not the display
+*   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
+*   `display` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** optionally enable or not the display
 
 #### Examples
 
@@ -53,7 +53,7 @@ const result = await elrond.getAddress("44'/508'/0'/0'/0'");
 const { address, returnCode } = result;
 ```
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;{address: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** an object with a address
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{address: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** an object with a address
 
 ### setAddress
 
@@ -61,8 +61,8 @@ Set Elrond address for a given BIP 32 path.
 
 #### Parameters
 
--   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
--   `display` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** optionally enable or not the display
+*   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
+*   `display` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** optionally enable or not the display
 
 #### Examples
 
@@ -79,11 +79,11 @@ Sign Elrond transaction for a given BIP 32 path.
 
 #### Parameters
 
--   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
--   `message` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** string with an unsigned transaction
--   `usingHash` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** boolean wich indicate if transaction is hash or raw
+*   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format
+*   `message` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** string with an unsigned transaction
+*   `usingHash` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)** boolean wich indicate if transaction is hash or raw
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** a signature for transaction
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)>** a signature for transaction
 
 ## getAppConfiguration
 
@@ -96,7 +96,7 @@ const result = await elrond.getAppConfiguration();
 const { contractData, accountIndex, addressIndex, version } = result;
 ```
 
-Returns **[Promise][11]&lt;{version: [string][12]}>** an object with a contractData, accountIndex, addressIndex, version
+Returns **[Promise][11]<{version: [string][12]}>** an object with a contractData, accountIndex, addressIndex, version
 
 [1]: #getappconfiguration
 

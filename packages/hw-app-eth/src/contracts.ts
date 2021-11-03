@@ -133,7 +133,7 @@ export const loadInfosForContractMethod = async (
       ? {}
       : await axios
           .get(`${baseURL}/plugins/ethereum.json`)
-          .then((r) => r.data)
+          .then((r) => r.data as any)
           .catch((e) => {
             if (
               e.response &&

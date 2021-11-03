@@ -8,6 +8,7 @@ const importers = [
   require("./importers/erc20full"),
   require("./importers/erc20exchange"),
   require("./importers/bep20full"),
+  require("./importers/polygontokensfull"),
   require("./importers/currenciesExchange"),
 ];
 
@@ -29,20 +30,23 @@ axios
         imp.output ? imp.output : imp.path + ".js"
       );
       Promise.all(
-        imp.paths.flatMap((p) => {
+        imp.paths.map((p) => {
           const folder = path.join(inputFolder, "assets", p);
           const signatureFolder = path.join(inputFolder, "signatures/prod/", p);
           const items = fs.readdirSync(folder);
-          return items
-            .sort()
-            .filter((a) => !a.endsWith(".json"))
-            .map((id) =>
-              imp.loader({ signatureFolder, folder, id }).catch((e) => {
-                console.log("FAILED " + id + " " + e);
-              })
-            );
+          return promiseAllBatched(
+            50,
+            items.sort().filter((a) => !a.endsWith(".json")),
+            (id) =>
+              Promise.resolve()
+                .then(() => imp.loader({ signatureFolder, folder, id }))
+                .catch((e) => {
+                  console.log("FAILED " + id + " " + e);
+                })
+          );
         })
       )
+        .then((all) => all.flat())
         .then((all) => all.filter(Boolean))
         .then((all) =>
           imp.validate ? imp.validate(all, countervaluesTickers) : all
@@ -53,3 +57,27 @@ axios
         });
     });
   });
+
+async function promiseAllBatched(batch, items, fn) {
+  const data = Array(items.length);
+  const queue = items.map((item, index) => ({
+    item,
+    index,
+  }));
+  async function step() {
+    if (queue.length === 0) return;
+    const first = queue.shift();
+    if (first) {
+      const { item, index } = first;
+      data[index] = await fn(item, index);
+    }
+    await step(); // each time an item redeem, we schedule another one
+  }
+  // initially, we schedule <batch> items in parallel
+  await Promise.all(
+    Array(Math.min(batch, items.length))
+      .fill(() => undefined)
+      .map(step)
+  );
+  return data;
+}

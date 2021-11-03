@@ -1,16 +1,17 @@
 import type Transport from "@ledgerhq/hw-transport";
-import { signMessage } from "./signMessage";
-import { getWalletPublicKey } from "./getWalletPublicKey";
-import type { AddressFormat } from "./getWalletPublicKey";
-import { splitTransaction } from "./splitTransaction";
+import { pathStringToArray } from "./bip32";
+import BtcNew, { canSupportApp } from "./BtcNew";
+import BtcOld from "./BtcOld";
+import type { CreateTransactionArg } from "./createTransaction";
+import { getAppAndVersion } from "./getAppAndVersion";
 import { getTrustedInput } from "./getTrustedInput";
 import { getTrustedInputBIP143 } from "./getTrustedInputBIP143";
-import type { Transaction } from "./types";
-import { createTransaction } from "./createTransaction";
-import type { CreateTransactionArg } from "./createTransaction";
-import { signP2SHTransaction } from "./signP2SHTransaction";
-import type { SignP2SHTransactionArg } from "./signP2SHTransaction";
+import type { AddressFormat } from "./getWalletPublicKey";
+import { AppClient } from "./newops/appClient";
 import { serializeTransactionOutputs } from "./serializeTransaction";
+import type { SignP2SHTransactionArg } from "./signP2SHTransaction";
+import { splitTransaction } from "./splitTransaction";
+import type { Transaction } from "./types";
 export type { AddressFormat };
 /**
  * Bitcoin API.
@@ -28,6 +29,7 @@ export default class Btc {
     transport.decorateAppAPIMethods(
       this,
       [
+        "getWalletXpub",
         "getWalletPublicKey",
         "signP2SHTransaction",
         "signMessageNew",
@@ -40,12 +42,23 @@ export default class Btc {
   }
 
   /**
+   * Get an XPUB with a ledger device
+   * @param arg derivation parameter
+   * - path: a BIP 32 path of the account level. e.g. `84'/0'/0'`
+   * - xpubVersion: the XPUBVersion of the coin used. (use @ledgerhq/currencies if needed)
+   * @returns XPUB of the account
+   */
+  getWalletXpub(arg: { path: string; xpubVersion: number }): Promise<string> {
+    return this.getCorrectImpl().then((impl) => impl.getWalletXpub(arg));
+  }
+
+  /**
    * @param path a BIP 32 path
    * @param options an object with optional these fields:
    *
    * - verify (boolean) will ask user to confirm the address on the device
    *
-   * - format ("legacy" | "p2sh" | "bech32" | "cashaddr") to use different bitcoin address formatter.
+   * - format ("legacy" | "p2sh" | "bech32" | "bech32m" | "cashaddr") to use different bitcoin address formatter.
    *
    * NB The normal usage is to use:
    *
@@ -53,7 +66,7 @@ export default class Btc {
    *
    * - p2sh format with 49' paths
    *
-   * - bech32 format with 173' paths
+   * - bech32 format with 84' paths
    *
    * - cashaddr in case of Bitcoin Cash
    *
@@ -85,8 +98,71 @@ export default class Btc {
     } else {
       options = opts || {};
     }
+    return this.getCorrectImpl().then((impl) => {
+      /**
+       * Definition: A "normal path" is a prefix of a standard path where all
+       * the hardened steps of the standard path are included. For example, the
+       * paths m/44'/1'/17' and m/44'/1'/17'/1 are normal paths, but m/44'/1'
+       * is not. m/'199/1'/17'/0/1 is not a normal path either.
+       *
+       * There's a compatiblity issue between old and new app: When exporting
+       * the key of a non-normal path with verify=false, the new app would
+       * return an error, whereas the old app would return the key.
+       *
+       * See
+       * https://github.com/LedgerHQ/app-bitcoin-new/blob/master/doc/bitcoin.md#get_extended_pubkey
+       *
+       * If format bech32m is used, we'll not use old, because it doesn't
+       * support it.
+       *
+       * When to use new (given the app supports it)
+       *   * format is bech32m or
+       *   * path is normal or
+       *   * verify is true
+       *
+       * Otherwise use old.
+       */
+      if (
+        impl instanceof BtcNew &&
+        options.format != "bech32m" &&
+        (!options.verify || options.verify == false) &&
+        !isPathNormal(path)
+      ) {
+        console.warn(`WARNING: Using deprecated device protocol to get the public key because
+        
+        * a non-standard path is requested, and
+        * verify flag is false
+        
+        The new protocol only allows export of non-standard paths if the 
+        verify flag is true. Standard paths are (currently):
 
-    return getWalletPublicKey(this.transport, { ...options, path });
+        M/44'/(1|0)'/X'
+        M/49'/(1|0)'/X'
+        M/84'/(1|0)'/X'
+        M/86'/(1|0)'/X'
+        M/48'/(1|0)'/X'/Y'
+
+        followed by "", "(0|1)", or "(0|1)/b", where a and b are 
+        non-hardened. For example, the following paths are standard
+        
+        M/48'/1'/99'/7'
+        M/86'/1'/99'/0
+        M/48'/0'/99'/7'/1/17
+
+        The following paths are non-standard
+
+        M/48'/0'/99'           // Not deepest hardened path
+        M/48'/0'/99'/7'/1/17/2 // Too many non-hardened derivation steps
+        M/199'/0'/1'/0/88      // Not a known purpose 199
+        M/86'/1'/99'/2         // Change path item must be 0 or 1
+
+        This compatibility safeguard will be removed in the future.
+        Please consider calling Btc.getWalletXpub() instead.`);
+        return this.old().getWalletPublicKey(path, options);
+      } else {
+        return impl.getWalletPublicKey(path, options);
+      }
+    });
   }
 
   /**
@@ -106,10 +182,7 @@ export default class Btc {
     r: string;
     s: string;
   }> {
-    return signMessage(this.transport, {
-      path,
-      messageHex,
-    });
+    return this.old().signMessageNew(path, messageHex);
   }
 
   /**
@@ -122,20 +195,21 @@ export default class Btc {
    * * sequence is the sequence number to use for this input (when using RBF), or non present
    * @param associatedKeysets is an array of BIP 32 paths pointing to the path to the private key used for each UTXO
    * @param changePath is an optional BIP 32 path pointing to the path to the public key used to compute the change address
-   * @param outputScriptHex is the hexadecimal serialized outputs of the transaction to sign
+   * @param outputScriptHex is the hexadecimal serialized outputs of the transaction to sign, including leading vararg voutCount
    * @param lockTime is the optional lockTime of the transaction to sign, or default (0)
    * @param sigHashType is the hash type of the transaction to sign, or default (all)
-   * @param segwit is an optional boolean indicating wether to use segwit or not
+   * @param segwit is an optional boolean indicating wether to use segwit or not. This includes wrapped segwit.
    * @param initialTimestamp is an optional timestamp of the function call to use for coins that necessitate timestamps only, (not the one that the tx will include)
    * @param additionals list of additionnal options
    *
    * - "bech32" for spending native segwit outputs
+   * - "bech32m" for spending segwit v1+ outputs
    * - "abc" for bch
    * - "gold" for btg
    * - "bipxxx" for using BIPxxx
    * - "sapling" to indicate a zec transaction is supporting sapling (to be set over block 419200)
    * @param expiryHeight is an optional Buffer for zec overwinter / sapling Txs
-   * @param useTrustedInputForSegwit trust inputs for segwit transactions
+   * @param useTrustedInputForSegwit trust inputs for segwit transactions. If app version >= 1.4.0 this should be true.
    * @return the signed transaction ready to be broadcast
    * @example
   btc.createTransaction({
@@ -150,8 +224,9 @@ export default class Btc {
         "@ledgerhq/hw-app-btc: createPaymentTransactionNew multi argument signature is deprecated. please switch to named parameters."
       );
     }
-
-    return createTransaction(this.transport, arg);
+    return this.getCorrectImpl().then((impl) => {
+      return impl.createPaymentTransactionNew(arg);
+    });
   }
 
   /**
@@ -174,13 +249,7 @@ export default class Btc {
   }).then(result => ...);
    */
   signP2SHTransaction(arg: SignP2SHTransactionArg): Promise<string[]> {
-    if (arguments.length > 1) {
-      console.warn(
-        "@ledgerhq/hw-app-btc: signP2SHTransaction multi argument signature is deprecated. please switch to named parameters."
-      );
-    }
-
-    return signP2SHTransaction(this.transport, arg);
+    return this.old().signP2SHTransaction(arg);
   }
 
   /**
@@ -238,4 +307,67 @@ export default class Btc {
       additionals
     );
   }
+
+  // cache the underlying implementation (only once)
+  private _lazyImpl: BtcOld | BtcNew | null = null;
+  private async getCorrectImpl(): Promise<BtcOld | BtcNew> {
+    const { _lazyImpl } = this;
+    if (_lazyImpl) return _lazyImpl;
+    const impl = await this.inferCorrectImpl();
+    this._lazyImpl = impl;
+    return impl;
+  }
+
+  private async inferCorrectImpl(): Promise<BtcOld | BtcNew> {
+    const appAndVersion = await getAppAndVersion(this.transport);
+    const canUseNewImplementation = canSupportApp(appAndVersion);
+    if (!canUseNewImplementation) {
+      return this.old();
+    } else {
+      return this.new();
+    }
+  }
+
+  protected old(): BtcOld {
+    return new BtcOld(this.transport);
+  }
+
+  protected new(): BtcNew {
+    return new BtcNew(new AppClient(this.transport));
+  }
+}
+
+function isPathNormal(path: string): boolean {
+  //path is not deepest hardened node of a standard path or deeper, use BtcOld
+  const h = 0x80000000;
+  const pathElems = pathStringToArray(path);
+
+  const hard = (n: number) => n >= h;
+  const soft = (n: number | undefined) => !n || n < h;
+  const change = (n: number | undefined) => !n || n == 0 || n == 1;
+
+  if (
+    pathElems.length >= 3 &&
+    pathElems.length <= 5 &&
+    [44 + h, 49 + h, 84 + h, 86 + h].some((v) => v == pathElems[0]) &&
+    [0 + h, 1 + h].some((v) => v == pathElems[1]) &&
+    hard(pathElems[2]) &&
+    change(pathElems[3]) &&
+    soft(pathElems[4])
+  ) {
+    return true;
+  }
+  if (
+    pathElems.length >= 4 &&
+    pathElems.length <= 6 &&
+    48 + h == pathElems[0] &&
+    [0 + h, 1 + h].some((v) => v == pathElems[1]) &&
+    hard(pathElems[2]) &&
+    hard(pathElems[3]) &&
+    change(pathElems[4]) &&
+    soft(pathElems[5])
+  ) {
+    return true;
+  }
+  return false;
 }

@@ -232,6 +232,35 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [],
   },
+  avalanche: {
+    type: "CryptoCurrency",
+    id: "avalanche",
+    coinType: 9000,
+    name: "Avalanche",
+    managerAppName: "Avalanche",
+    ticker: "AVAX",
+    scheme: "avalanche",
+    color: "#E84142",
+    family: "ethereum",
+    units: [
+      {
+        name: "AVAX",
+        code: "AVAX",
+        magnitude: 18,
+      },
+    ],
+    ethereumLikeInfo: {
+      chainId: 43114,
+    },
+    explorerViews: [
+      {
+        tx: "https://cchain.explorer.avax.network/tx/$hash",
+        address: "https://cchain.explorer.avax.network/address/$address",
+        token:
+          "https://cchain.explorer.avax.network/token/$contractAddress?a=$address",
+      },
+    ],
+  },
   banano: {
     type: "CryptoCurrency",
     id: "banano",
@@ -1840,6 +1869,36 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
+  polygon: {
+    type: "CryptoCurrency",
+    id: "polygon",
+    coinType: 60,
+    name: "Polygon",
+    managerAppName: "Polygon",
+    ticker: "MATIC",
+    scheme: "polygon",
+    color: "#6d29de",
+    family: "ethereum",
+    ethereumLikeInfo: {
+      baseChain: "mainnet",
+      chainId: 137,
+      networkId: 137,
+    },
+    units: [
+      {
+        name: "MATIC",
+        code: "MATIC",
+        magnitude: 18,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://polygonscan.com/tx/$hash",
+        address: "https://polygonscan.com/address/$address",
+        token: "https://polygonscan.com/token/$contractAddress?a=$address",
+      },
+    ],
+  },
   poswallet: {
     type: "CryptoCurrency",
     id: "poswallet",
@@ -2114,10 +2173,22 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       {
         name: "SOL",
         code: "SOL",
-        magnitude: 8,
+        magnitude: 9,
+      },
+      {
+        name: "lamports",
+        code: "lamports",
+        magnitude: 0,
       },
     ],
-    explorerViews: [],
+    explorerViews: [
+      {
+        address: "https://explorer.solana.com/",
+      },
+      {
+        address: "https://solanabeach.io/",
+      },
+    ],
   },
   stakenet: {
     type: "CryptoCurrency",
@@ -2156,6 +2227,9 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
   },
   stratis: {
+    terminated: {
+      link: "https://support.ledger.com/",
+    },
     type: "CryptoCurrency",
     id: "stratis",
     coinType: 105,
@@ -2192,6 +2266,9 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
   },
   stealthcoin: {
+    terminated: {
+      link: "https://support.ledger.com/",
+    },
     type: "CryptoCurrency",
     id: "stealthcoin",
     coinType: 125,

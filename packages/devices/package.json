@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/devices",
-  "version": "6.7.0",
+  "version": "6.11.2",
   "description": "Ledger devices",
   "keywords": [
     "Ledger"
@@ -21,11 +21,11 @@
   "types": "lib/index.d.ts",
   "license": "Apache-2.0",
   "devDependencies": {
-    "@types/semver": "^7.3.8"
+    "@types/semver": "^7.3.9"
   },
   "dependencies": {
-    "@ledgerhq/errors": "^6.2.0",
-    "@ledgerhq/logs": "^6.2.0",
+    "@ledgerhq/errors": "^6.10.0",
+    "@ledgerhq/logs": "^6.10.0",
     "rxjs": "6",
     "semver": "^7.3.5"
   },

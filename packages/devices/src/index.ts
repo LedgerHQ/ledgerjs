@@ -60,7 +60,7 @@ const devices: { [key in DeviceModelId]: DeviceModel } = {
     usbOnly: true,
     memorySize: 1533 * 1024,
     masks: [0x33100000],
-    getBlockSize: (_firmwareVersion: string): number => 512,
+    getBlockSize: (_firmwareVersion: string): number => 32,
   },
   [DeviceModelId.nanoX]: {
     id: DeviceModelId.nanoX,

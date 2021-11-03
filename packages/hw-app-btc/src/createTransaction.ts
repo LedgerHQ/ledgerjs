@@ -62,7 +62,7 @@ export type CreateTransactionArg = {
 export async function createTransaction(
   transport: Transport,
   arg: CreateTransactionArg
-) {
+): Promise<string> {
   const signTx = { ...defaultsSignTransaction, ...arg };
   const {
     inputs,
