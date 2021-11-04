@@ -29,11 +29,9 @@ export const getNFTInfo = async (
     .catch(() => null);
   if (!response || response instanceof Error) return;
 
-  let j = 2;
   const payload = response["payload"];
-  const collectionNameLength = Number(payload.slice(j, j + 1));
-  j += 1;
-  const collectionName = payload.slice(j, j + collectionNameLength).toString();
+  const collectionNameLength = Number(payload.slice(2, 3));
+  const collectionName = payload.slice(3, 3 + collectionNameLength).toString();
   return {
     contractAddress: contractAddress,
     collectionName: collectionName,
