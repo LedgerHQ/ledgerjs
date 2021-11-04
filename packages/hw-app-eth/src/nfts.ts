@@ -19,7 +19,7 @@ export const getNFTInfo = async (
   }
 
   const url = BACKEND_URL + chain + "/contracts/" + contractAddress;
-  const data = await axios
+  const response = await axios
     .get(url)
     .then((r) => r.data)
     .catch((e) => {
@@ -28,9 +28,10 @@ export const getNFTInfo = async (
       }
       throw e;
     });
-  if (!data || data instanceof Error) return;
+  if (!response || response instanceof Error) return;
 
   let j = 2;
+  const data = response as any;
   const payload = data["payload"];
   const collectionNameLength = payload.slice(j, j + 1);
   j += 1;
