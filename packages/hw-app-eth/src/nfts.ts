@@ -26,12 +26,7 @@ export const getNFTInfo = async (
   const response: BackendResponse | Error | null = await axios
     .get(url)
     .then((r) => r.data as BackendResponse)
-    .catch((e) => {
-      if (e.response && 400 <= e.response.status && e.response.status <= 504) {
-        return null; // not found cases can be ignored to allow fall back to blind signing.
-      }
-      throw e;
-    });
+    .catch(() => null);
   if (!response || response instanceof Error) return;
 
   let j = 2;
