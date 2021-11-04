@@ -134,16 +134,7 @@ export const loadInfosForContractMethod = async (
       : await axios
           .get(`${baseURL}/plugins/ethereum.json`)
           .then((r) => r.data as any)
-          .catch((e) => {
-            if (
-              e.response &&
-              400 <= e.response.status &&
-              e.response.status < 500
-            ) {
-              return null; // not found cases can be ignored to allow future changes in endpoint without failing a signature to be done.
-            }
-            throw e;
-          });
+          .catch(() => null);
 
     if (extraPlugins) {
       data = { ...data, ...extraPlugins };
