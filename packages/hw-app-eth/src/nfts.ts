@@ -6,6 +6,10 @@ type NftInfo = {
   data: Buffer;
 };
 
+type BackendResponse = {
+  payload: string;
+};
+
 const BACKEND_URL = "https://nft.staging.aws.ledger.fr/v1/chains/";
 const ETHEREUM_MAINNET = 1;
 
@@ -19,9 +23,9 @@ export const getNFTInfo = async (
   }
 
   const url = BACKEND_URL + chain + "/contracts/" + contractAddress;
-  const response = await axios
+  const response: BackendResponse | Error | null = await axios
     .get(url)
-    .then((r) => r.data)
+    .then((r) => r.data as BackendResponse)
     .catch((e) => {
       if (e.response && 400 <= e.response.status && e.response.status <= 504) {
         return null; // not found cases can be ignored to allow fall back to blind signing.
@@ -31,9 +35,8 @@ export const getNFTInfo = async (
   if (!response || response instanceof Error) return;
 
   let j = 2;
-  const data = response as any;
-  const payload = data["payload"];
-  const collectionNameLength = payload.slice(j, j + 1);
+  const payload = response["payload"];
+  const collectionNameLength = Number(payload.slice(j, j + 1));
   j += 1;
   const collectionName = payload.slice(j, j + collectionNameLength).toString();
   return {
