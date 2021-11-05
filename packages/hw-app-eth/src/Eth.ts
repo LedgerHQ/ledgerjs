@@ -24,7 +24,7 @@ import { ethers } from "ethers";
 import { byContractAddressAndChainId } from "./erc20";
 import { loadInfosForContractMethod } from "./contracts";
 import type { PluginsLoadConfig } from "./contracts";
-import { getNFTInfo } from "./nfts";
+import { getNFTInfo, loadNftPlugin } from "./nfts";
 
 export type StarkQuantizationType =
   | "eth"
@@ -103,6 +103,7 @@ export default class Eth {
         "eth2GetPublicKey",
         "eth2SetWithdrawalIndex",
         "setExternalPlugin",
+        "setPlugin",
       ],
       scrambleKey
     );
@@ -341,39 +342,49 @@ export default class Eth {
 
     if (decodedTx.data.length >= 10) {
       const selector = decodedTx.data.substring(0, 10);
-      const infos = await loadInfosForContractMethod(
+      const nftPluginPayload = await loadNftPlugin(
         decodedTx.to,
         selector,
-        chainIdTruncated,
-        this.pluginsLoadConfig
+        chainIdTruncated
       );
+      console.log("going to set");
 
-      if (infos) {
-        const { plugin, payload, signature, erc20OfInterest, abi } = infos;
-
-        if (plugin) {
-          log("ethereum", "loading plugin for " + selector);
-          await setExternalPlugin(this.transport, payload, signature);
-        }
-
-        if (erc20OfInterest && erc20OfInterest.length && abi) {
-          const contract = new ethers.utils.Interface(abi);
-          const args = contract.parseTransaction(decodedTx).args;
-
-          for (path of erc20OfInterest) {
-            const address = path.split(".").reduce((value, seg) => {
-              if (seg === "-1" && Array.isArray(value)) {
-                return value[value.length - 1];
-              }
-              return value[seg];
-            }, args);
-            await provideForContract(address);
-          }
-        }
+      if (nftPluginPayload) {
+        setPlugin(this.transport, nftPluginPayload);
       } else {
-        log("ethereum", "no infos for selector " + selector);
-      }
+        const infos = await loadInfosForContractMethod(
+          decodedTx.to,
+          selector,
+          chainIdTruncated,
+          this.pluginsLoadConfig
+        );
 
+        if (infos) {
+          const { plugin, payload, signature, erc20OfInterest, abi } = infos;
+
+          if (plugin) {
+            log("ethereum", "loading plugin for " + selector);
+            await setExternalPlugin(this.transport, payload, signature);
+          }
+
+          if (erc20OfInterest && erc20OfInterest.length && abi) {
+            const contract = new ethers.utils.Interface(abi);
+            const args = contract.parseTransaction(decodedTx).args;
+
+            for (path of erc20OfInterest) {
+              const address = path.split(".").reduce((value, seg) => {
+                if (seg === "-1" && Array.isArray(value)) {
+                  return value[value.length - 1];
+                }
+                return value[seg];
+              }, args);
+              await provideForContract(address);
+            }
+          }
+        } else {
+          log("ethereum", "no infos for selector " + selector);
+        }
+      }
       await provideForContract(decodedTx.to);
     }
 
@@ -1242,7 +1253,7 @@ export default class Eth {
   }
 
   /**
-   * Set the name of the plugin that should be used to parse the next transaction
+   * Set the name of the external plugin that should be used to parse the next transaction
    *
    * @param pluginName string containing the name of the plugin, must have length between 1 and 30 bytes
    * @return True if the method was executed successfully
@@ -1253,6 +1264,16 @@ export default class Eth {
     selector: string
   ): Promise<boolean> {
     return setExternalPlugin(this.transport, pluginName, selector);
+  }
+
+  /**
+   * Set the plugin (internal or external) that should be used to parse the next transaction
+   *
+   * @param data string containing the payload and signature that will be parsed and verified by the device.
+   * @return True if the method was executed successfully
+   */
+  setPlugin(data: string): Promise<boolean> {
+    return setPlugin(this.transport, data);
   }
 }
 
@@ -1296,6 +1317,27 @@ function setExternalPlugin(
   const signatureBuffer = Buffer.from(signature, "hex");
   const buffer = Buffer.concat([payloadBuffer, signatureBuffer]);
   return transport.send(0xe0, 0x12, 0x00, 0x00, buffer).then(
+    () => true,
+    (e) => {
+      if (e && e.statusCode === 0x6a80) {
+        // this case happen when the plugin name is too short or too long
+        return false;
+      } else if (e && e.statusCode === 0x6984) {
+        // this case happen when the plugin requested is not installed on the device
+        return false;
+      } else if (e && e.statusCode === 0x6d00) {
+        // this case happen for older version of ETH app
+        return false;
+      }
+      throw e;
+    }
+  );
+}
+
+function setPlugin(transport: Transport, data: string): Promise<boolean> {
+  const buffer = Buffer.from(data, "hex");
+  console.log(data);
+  return transport.send(0xe0, 0x16, 0x00, 0x00, buffer).then(
     () => true,
     (e) => {
       if (e && e.statusCode === 0x6a80) {

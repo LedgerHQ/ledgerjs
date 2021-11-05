@@ -1,5 +1,4 @@
 import axios from "axios";
-import { getNFTInfo } from "./nfts";
 
 type ContractMethod = {
   payload: string;
@@ -38,125 +37,33 @@ export const loadInfosForContractMethod = async (
     ...userPluginsLoadConfig,
   };
 
-  const nftInfo = await getNFTInfo(contractAddress, chainId);
-  if (nftInfo) {
-    const contractBuffer = Buffer.from(contractAddress.slice(2), "hex");
-    const selectorBuffer = Buffer.from(selector.slice(2), "hex");
+  let data = !baseURL
+    ? {}
+    : await axios
+        .get(`${baseURL}/plugins/ethereum.json`)
+        .then((r) => r.data as any)
+        .catch(() => null);
 
-    // Placeholder
-    const erc721 = Buffer.from([0x06, 0x45, 0x52, 0x43, 0x37, 0x32, 0x31]); // "ERC721"
-    // Placeholder
-    const sig = Buffer.from([
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-      42,
-    ]);
+  if (extraPlugins) {
+    data = { ...data, ...extraPlugins };
+  }
 
-    const payload = Buffer.concat([
-      erc721,
-      contractBuffer,
-      selectorBuffer,
-      sig,
-    ]).toString("hex");
+  if (!data) return;
 
-    return {
-      payload: payload,
-      signature: "",
-      plugin: "ERC721", // placeholder
-      erc20OfInterest: [],
-      abi: null,
-    };
-  } else {
-    let data = !baseURL
-      ? {}
-      : await axios
-          .get(`${baseURL}/plugins/ethereum.json`)
-          .then((r) => r.data as any)
-          .catch(() => null);
+  const lcSelector = selector.toLowerCase();
+  const lcContractAddress = contractAddress.toLowerCase();
 
-    if (extraPlugins) {
-      data = { ...data, ...extraPlugins };
-    }
+  if (lcContractAddress in data) {
+    const contractSelectors = data[lcContractAddress];
 
-    if (!data) return;
-
-    const lcSelector = selector.toLowerCase();
-    const lcContractAddress = contractAddress.toLowerCase();
-
-    if (lcContractAddress in data) {
-      const contractSelectors = data[lcContractAddress];
-
-      if (lcSelector in contractSelectors) {
-        return {
-          payload: contractSelectors[lcSelector]["serialized_data"],
-          signature: contractSelectors[lcSelector]["signature"],
-          plugin: contractSelectors[lcSelector]["plugin"],
-          erc20OfInterest: contractSelectors[lcSelector]["erc20OfInterest"],
-          abi: contractSelectors["abi"],
-        };
-      }
+    if (lcSelector in contractSelectors) {
+      return {
+        payload: contractSelectors[lcSelector]["serialized_data"],
+        signature: contractSelectors[lcSelector]["signature"],
+        plugin: contractSelectors[lcSelector]["plugin"],
+        erc20OfInterest: contractSelectors[lcSelector]["erc20OfInterest"],
+        abi: contractSelectors["abi"],
+      };
     }
   }
 };

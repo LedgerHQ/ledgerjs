@@ -58,8 +58,10 @@ Ledger Hardware Wallet ETH JavaScript bindings.
         *   [Examples](#examples-6)
     *   [eth2SetWithdrawalIndex](#eth2setwithdrawalindex)
         *   [Parameters](#parameters-17)
-    *   [setExternalPlugin](#setexternalplugin)
+    *   [setExternalPlugin](#setExternalplugin)
         *   [Parameters](#parameters-18)
+    *   [setPlugin](#setPlugin)
+        *   [Parameters](#parameters-19)
 
 ### loadInfosForContractMethod
 

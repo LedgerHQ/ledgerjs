@@ -10,19 +10,13 @@ type BackendResponse = {
   payload: string;
 };
 
-const BACKEND_URL = "https://nft.staging.aws.ledger.fr/v1/chains/";
-const ETHEREUM_MAINNET = 1;
+const BACKEND_URL = "https://nft.staging.aws.ledger.fr/v1/ethereum";
 
 export const getNFTInfo = async (
   contractAddress: string,
   chainId: number
 ): Promise<NftInfo | undefined> => {
-  let chain = "";
-  if (chainId == ETHEREUM_MAINNET) {
-    chain = "eth";
-  }
-
-  const url = BACKEND_URL + chain + "/contracts/" + contractAddress;
+  const url = `${BACKEND_URL}/${chainId}/contracts/${contractAddress}`;
   const response = await axios
     .get<BackendResponse>(url)
     .then((r) => r.data)
@@ -37,4 +31,22 @@ export const getNFTInfo = async (
     collectionName: collectionName,
     data: Buffer.from(payload, "hex"),
   };
+};
+
+export const loadNftPlugin = async (
+  contractAddress: string,
+  selector: string,
+  chainId: number
+): Promise<string | undefined> => {
+  const url = `${BACKEND_URL}/${chainId}/contracts/${contractAddress}/plugin/selector?selector=${selector}`;
+
+  const response = await axios
+    .get<BackendResponse>(url)
+    .then((r) => r.data)
+    .catch(() => null);
+  if (!response) return;
+
+  const payload = response["payload"];
+  console.log(payload);
+  return payload;
 };
