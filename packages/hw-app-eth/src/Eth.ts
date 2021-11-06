@@ -347,7 +347,6 @@ export default class Eth {
         selector,
         chainIdTruncated
       );
-      console.log("going to set");
 
       if (nftPluginPayload) {
         setPlugin(this.transport, nftPluginPayload);
@@ -1336,7 +1335,6 @@ function setExternalPlugin(
 
 function setPlugin(transport: Transport, data: string): Promise<boolean> {
   const buffer = Buffer.from(data, "hex");
-  console.log(data);
   return transport.send(0xe0, 0x16, 0x00, 0x00, buffer).then(
     () => true,
     (e) => {

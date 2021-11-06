@@ -47,6 +47,5 @@ export const loadNftPlugin = async (
   if (!response) return;
 
   const payload = response["payload"];
-  console.log(payload);
   return payload;
 };
