@@ -23,7 +23,7 @@ import { BigNumber } from "bignumber.js";
 import { ethers } from "ethers";
 import { byContractAddressAndChainId } from "./erc20";
 import { loadInfosForContractMethod } from "./contracts";
-import type { PluginsLoadConfig } from "./contracts";
+import type { LoadConfig } from "./loadConfig";
 import { getNFTInfo, loadNftPlugin } from "./nfts";
 
 export type StarkQuantizationType =
@@ -70,19 +70,19 @@ const remapTransactionRelatedErrors = (e) => {
 
 export default class Eth {
   transport: Transport;
-  pluginsLoadConfig: PluginsLoadConfig;
+  loadConfig: LoadConfig;
 
-  setPluginsLoadConfig(pluginsLoadConfig: PluginsLoadConfig): void {
-    this.pluginsLoadConfig = pluginsLoadConfig;
+  setLoadConfig(loadConfig: LoadConfig): void {
+    this.loadConfig = loadConfig;
   }
 
   constructor(
     transport: Transport,
     scrambleKey = "w0w",
-    pluginsLoadConfig: PluginsLoadConfig = {}
+    loadConfig: LoadConfig = {}
   ) {
     this.transport = transport;
-    this.pluginsLoadConfig = pluginsLoadConfig;
+    this.loadConfig = loadConfig;
     transport.decorateAppAPIMethods(
       this,
       [
@@ -310,7 +310,11 @@ export default class Eth {
     }
 
     const provideForContract = async (address) => {
-      const nftInfo = await getNFTInfo(address, chainIdTruncated);
+      const nftInfo = await getNFTInfo(
+        address,
+        chainIdTruncated,
+        this.loadConfig
+      );
       if (nftInfo) {
         log(
           "ethereum",
@@ -345,7 +349,8 @@ export default class Eth {
       const nftPluginPayload = await loadNftPlugin(
         decodedTx.to,
         selector,
-        chainIdTruncated
+        chainIdTruncated,
+        this.loadConfig
       );
 
       if (nftPluginPayload) {
@@ -355,7 +360,7 @@ export default class Eth {
           decodedTx.to,
           selector,
           chainIdTruncated,
-          this.pluginsLoadConfig
+          this.loadConfig
         );
 
         if (infos) {

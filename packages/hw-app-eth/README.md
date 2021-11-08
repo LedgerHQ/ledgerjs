@@ -58,9 +58,9 @@ Ledger Hardware Wallet ETH JavaScript bindings.
         *   [Examples](#examples-6)
     *   [eth2SetWithdrawalIndex](#eth2setwithdrawalindex)
         *   [Parameters](#parameters-17)
-    *   [setExternalPlugin](#setExternalplugin)
+    *   [setExternalPlugin](#setexternalplugin)
         *   [Parameters](#parameters-18)
-    *   [setPlugin](#setPlugin)
+    *   [setPlugin](#setplugin)
         *   [Parameters](#parameters-19)
 
 ### loadInfosForContractMethod
@@ -72,7 +72,7 @@ Retrieve the metadatas a given contract address and a method selector
 *   `contractAddress` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 *   `selector` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 *   `chainId` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
-*   `userPluginsLoadConfig` **PluginsLoadConfig** 
+*   `userLoadConfig` **LoadConfig** 
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<(ContractMethod | [undefined](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/undefined))>** 
 
@@ -101,7 +101,7 @@ Ethereum API
 
 *   `transport` **Transport** 
 *   `scrambleKey`   (optional, default `"w0w"`)
-*   `pluginsLoadConfig` **PluginsLoadConfig**  (optional, default `{}`)
+*   `loadConfig` **LoadConfig**  (optional, default `{}`)
 
 #### Examples
 
@@ -389,12 +389,22 @@ Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/
 
 #### setExternalPlugin
 
-Set the name of the plugin that should be used to parse the next transaction
+Set the name of the external plugin that should be used to parse the next transaction
 
 ##### Parameters
 
 *   `pluginName` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** string containing the name of the plugin, must have length between 1 and 30 bytes
 *   `contractAddress` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
 *   `selector` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** True if the method was executed successfully
+
+#### setPlugin
+
+Set the plugin (internal or external) that should be used to parse the next transaction
+
+##### Parameters
+
+*   `data` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** string containing the payload and signature that will be parsed and verified by the device.
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** True if the method was executed successfully

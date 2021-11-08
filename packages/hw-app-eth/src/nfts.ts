@@ -1,4 +1,7 @@
 import axios from "axios";
+import { getLoadConfig } from "./loadConfig";
+import type { LoadConfig } from "./loadConfig";
+import { log } from "@ledgerhq/logs";
 
 type NftInfo = {
   contractAddress: string;
@@ -10,17 +13,21 @@ type BackendResponse = {
   payload: string;
 };
 
-const BACKEND_URL = "https://nft.staging.aws.ledger.fr/v1/ethereum";
-
 export const getNFTInfo = async (
   contractAddress: string,
-  chainId: number
+  chainId: number,
+  userLoadConfig: LoadConfig
 ): Promise<NftInfo | undefined> => {
-  const url = `${BACKEND_URL}/${chainId}/contracts/${contractAddress}`;
+  const { nftExplorerBaseURL } = getLoadConfig(userLoadConfig);
+  if (!nftExplorerBaseURL) return;
+  const url = `${nftExplorerBaseURL}/${chainId}/contracts/${contractAddress}`;
   const response = await axios
     .get<BackendResponse>(url)
     .then((r) => r.data)
-    .catch(() => null);
+    .catch((e) => {
+      log("error", "could not fetch from " + url + ": " + String(e));
+      return null;
+    });
   if (!response) return;
 
   const payload = response["payload"];
@@ -36,14 +43,20 @@ export const getNFTInfo = async (
 export const loadNftPlugin = async (
   contractAddress: string,
   selector: string,
-  chainId: number
+  chainId: number,
+  userLoadConfig: LoadConfig
 ): Promise<string | undefined> => {
-  const url = `${BACKEND_URL}/${chainId}/contracts/${contractAddress}/plugin/selector?selector=${selector}`;
+  const { nftExplorerBaseURL } = getLoadConfig(userLoadConfig);
+  if (!nftExplorerBaseURL) return;
+  const url = `${nftExplorerBaseURL}/${chainId}/contracts/${contractAddress}/plugin/selector?selector=${selector}`;
 
   const response = await axios
     .get<BackendResponse>(url)
     .then((r) => r.data)
-    .catch(() => null);
+    .catch((e) => {
+      log("error", "could not fetch from " + url + ": " + String(e));
+      return null;
+    });
   if (!response) return;
 
   const payload = response["payload"];

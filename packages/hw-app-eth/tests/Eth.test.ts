@@ -166,8 +166,8 @@ test("paraswap without plugins", async () => {
     RecordStore.fromString(paraswapAPDUs.split("\n").slice(4).join("\n"))
   );
   const eth = new Eth(transport);
-  eth.setPluginsLoadConfig({
-    baseURL: null,
+  eth.setLoadConfig({
+    pluginBaseURL: null,
   });
   const result = await eth.signTransaction(
     "44'/60'/0'/0/0",
@@ -186,8 +186,8 @@ test("paraswap without plugins CDN but with explicit plugin", async () => {
     RecordStore.fromString(paraswapAPDUs)
   );
   const eth = new Eth(transport);
-  eth.setPluginsLoadConfig({
-    baseURL: null,
+  eth.setLoadConfig({
+    pluginBaseURL: null,
     extraPlugins: paraswapJSON,
   });
   const result = await eth.signTransaction(
