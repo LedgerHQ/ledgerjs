@@ -206,7 +206,7 @@ export default class BtcNew {
 
     const accountType = accountTypeFromArg(arg, psbt, masterFp);
 
-    if (arg.lockTime) {
+    if (arg.lockTime != undefined) {
       // The signer will assume locktime 0 if unset
       psbt.setGlobalFallbackLocktime(arg.lockTime);
     }
@@ -362,10 +362,10 @@ export default class BtcNew {
     // ourselves. But if set, it should be used.
     const redeemScript = input[2] ? Buffer.from(input[2], "hex") : undefined;
     const sequence = input[3];
-    if (sequence) {
+    if (sequence != undefined) {
       psbt.setInputSequence(i, sequence);
     }
-    if (sigHashType) {
+    if (sigHashType != undefined) {
       psbt.setInputSighashType(i, sigHashType);
     }
     const inputTxBuffer = serializeTransaction(inputTx, true);

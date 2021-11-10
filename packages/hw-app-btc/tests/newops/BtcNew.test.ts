@@ -9,6 +9,7 @@ import {
   WalletPolicy
 } from "../../src/newops/policy";
 import { PsbtV2 } from "../../src/newops/psbtv2";
+import { splitTransaction } from "../../src/splitTransaction";
 import { StandardPurpose, addressFormatFromDescriptorTemplate, creatDummyXpub, masterFingerprint, runSignTransaction, TestingClient } from "./integrationtools";
 import { CoreInput, CoreTx, p2pkh, p2tr, p2wpkh, wrappedP2wpkh, wrappedP2wpkhTwoInputs } from "./testtx";
 
@@ -81,6 +82,18 @@ test("Sign p2tr with sigHashType", async () => {
   })
   const tx = await runSignTransactionNoVerification(testTx, StandardPurpose.p2tr);
   // The verification of the sighashtype is done in MockClient.signPsbt
+})
+
+test("Sign p2tr sequence 0", async() => {
+  const testTx = JSON.parse(JSON.stringify(p2tr));
+  testTx.vin.forEach((input: CoreInput, index: number) => {
+    input.sequence = 0;
+  })
+  const tx = await runSignTransactionNoVerification(testTx, StandardPurpose.p2tr);
+  const txObj = splitTransaction(tx, true);
+  txObj.inputs.forEach((input, index) => {
+    expect(input.sequence.toString("hex")).toEqual("00000000");
+  })
 })
 
 async function runSignTransactionTest(testTx: CoreTx, accountType: StandardPurpose, changePubkey?: string) {
