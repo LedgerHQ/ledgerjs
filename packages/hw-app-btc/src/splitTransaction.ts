@@ -18,11 +18,16 @@ export function splitTransaction(
   let nVersionGroupId = Buffer.alloc(0);
   let extraData = Buffer.alloc(0);
   const isDecred = additionals.includes("decred");
+  const isPeercoin = additionals.includes("peercoin");
   const transaction = Buffer.from(transactionHex, "hex");
   const version = transaction.slice(offset, offset + 4);
   const overwinter =
     version.equals(Buffer.from([0x03, 0x00, 0x00, 0x80])) ||
     version.equals(Buffer.from([0x04, 0x00, 0x00, 0x80]));
+  const oldpeercoin =
+    version.equals(Buffer.from([0x01, 0x00, 0x00, 0x00])) ||
+    version.equals(Buffer.from([0x02, 0x00, 0x00, 0x00]));
+
   offset += 4;
 
   if (
@@ -36,8 +41,13 @@ export function splitTransaction(
   }
 
   if (hasTimestamp) {
-    timestamp = transaction.slice(offset, 4 + offset);
-    offset += 4;
+    if (
+      !isPeercoin ||
+      (isPeercoin && oldpeercoin)
+    ) {
+      timestamp = transaction.slice(offset, 4 + offset);
+      offset += 4;
+    }
   }
 
   if (overwinter) {
