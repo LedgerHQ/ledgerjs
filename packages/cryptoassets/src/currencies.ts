@@ -2568,8 +2568,8 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        tx: "https://explorer.viacoin.org/tx/$hash",
-        address: "https://explorer.viacoin.org/address/$address",
+        tx: "https://blockbook.viacoin.org/tx/$hash",
+        address: "https://blockbook.viacoin.org/address/$address",
       },
     ],
   },
