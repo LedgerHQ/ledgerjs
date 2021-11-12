@@ -30,7 +30,7 @@
     "@ledgerhq/hw-transport": "^6.11.2",
     "@ledgerhq/logs": "^6.10.0",
     "invariant": "^2.2.4",
-    "react-native-ble-plx": "1.0.1",
+    "react-native-ble-plx": "2.0.3",
     "rxjs": "6",
     "uuid": "^3.4.0"
   },
