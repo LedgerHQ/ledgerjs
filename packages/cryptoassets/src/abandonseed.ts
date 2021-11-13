@@ -19,6 +19,7 @@ const abandonSeedAddresses: Record<string, string> = {
   digibyte: "DG1KhhBKpsyWXTakHNezaDQ34focsXjN1i",
   dogecoin: "DBus3bamQjgJULBJtYXpEzDWQRwF5iwxgC",
   game_credits: "GJgbzWpGhrZmSvc2V5Npqf57Kg9xfB79tj",
+  garlicoin: "M9uvAM1jYk1H5ypaE6pzgLTJpRWu1txi3S",
   komodo: "RW8gfgpCUdgZbkPAs1uJQF2S9681JVkGRi",
   litecoin: "LUWPbpM43E2p7ZSh8cyTBEkvpHmr3cB8Ez",
   nix: "GRpn2DPiQxAczMrQFt2sK1CS8EYdnvSHxo",

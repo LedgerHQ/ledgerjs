@@ -1113,6 +1113,41 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     },
     explorerViews: [],
   },
+  garlicoin: {
+    type: "CryptoCurrency",
+    id: "garlicoin",
+    coinType: 69420,
+    name: "Garlicoin",
+    managerAppName: "Garlicoin",
+    ticker: "GRLC",
+    scheme: "garlicoin",
+    color: "#f2c94c",
+    family: "bitcoin",
+    blockAvgTime: 40,
+    bitcoinLikeInfo: {
+      P2PKH: 38,
+      P2SH: 50,
+      XPUBVersion: 0x0488b21e,
+    },
+    units: [
+      {
+        name: "GRLC",
+        code: "GRLC",
+        magnitude: 8,
+      },
+      {
+        name: "mGRLC",
+        code: "mGRLC",
+        magnitude: 5,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://garli.co.in/tx/$hash",
+        address: "https://garli.co.in/address/$address",
+      },
+    ],
+  },
   gochain: {
     type: "CryptoCurrency",
     id: "gochain",
