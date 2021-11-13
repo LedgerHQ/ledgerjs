@@ -1122,6 +1122,8 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ticker: "GRLC",
     scheme: "garlicoin",
     color: "#f2c94c",
+    supportsSegwit: true,
+    supportsNativeSegwit: true,
     family: "bitcoin",
     blockAvgTime: 40,
     bitcoinLikeInfo: {
