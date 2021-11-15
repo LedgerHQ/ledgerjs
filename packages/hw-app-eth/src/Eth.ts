@@ -23,6 +23,8 @@ import { BigNumber } from "bignumber.js";
 import { ethers } from "ethers";
 import { byContractAddressAndChainId } from "./erc20";
 import { loadInfosForContractMethod } from "./contracts";
+import type { LoadConfig } from "./loadConfig";
+import { getNFTInfo, loadNftPlugin } from "./nfts";
 
 export type StarkQuantizationType =
   | "eth"
@@ -52,7 +54,7 @@ function maybeHexBuffer(
 const remapTransactionRelatedErrors = (e) => {
   if (e && e.statusCode === 0x6a80) {
     return new EthAppPleaseEnableContractData(
-      "Please enable Contract data on the Ethereum app Settings"
+      "Please enable Blind signing or Contract data in the Ethereum app Settings"
     );
   }
 
@@ -68,9 +70,19 @@ const remapTransactionRelatedErrors = (e) => {
 
 export default class Eth {
   transport: Transport;
+  loadConfig: LoadConfig;
 
-  constructor(transport: Transport, scrambleKey = "w0w") {
+  setLoadConfig(loadConfig: LoadConfig): void {
+    this.loadConfig = loadConfig;
+  }
+
+  constructor(
+    transport: Transport,
+    scrambleKey = "w0w",
+    loadConfig: LoadConfig = {}
+  ) {
     this.transport = transport;
+    this.loadConfig = loadConfig;
     transport.decorateAppAPIMethods(
       this,
       [
@@ -91,6 +103,7 @@ export default class Eth {
         "eth2GetPublicKey",
         "eth2SetWithdrawalIndex",
         "setExternalPlugin",
+        "setPlugin",
       ],
       scrambleKey
     );
@@ -197,13 +210,40 @@ export default class Eth {
     const toSend: Buffer[] = [];
     let response;
     // Check if the TX is encoded following EIP 155
-    let rlpTx = ethers.utils.RLP.decode(rlpData).map((hex) =>
+    const rlpTx = ethers.utils.RLP.decode(rlpData).map((hex) =>
       Buffer.from(hex.slice(2), "hex")
     );
 
     let vrsOffset = 0;
     let chainId = new BigNumber(0);
     let chainIdTruncated = 0;
+
+    const rlpDecoded = ethers.utils.RLP.decode(rlpData);
+
+    let decodedTx;
+    if (txType === 2) {
+      // EIP1559
+      decodedTx = {
+        data: rlpDecoded[7],
+        to: rlpDecoded[5],
+        chainId: rlpTx[0],
+      };
+    } else if (txType === 1) {
+      // EIP2930
+      decodedTx = {
+        data: rlpDecoded[6],
+        to: rlpDecoded[4],
+        chainId: rlpTx[0],
+      };
+    } else {
+      // Legacy tx
+      decodedTx = {
+        data: rlpDecoded[5],
+        to: rlpDecoded[3],
+        // Default to 1 for non EIP 155 txs
+        chainId: rlpTx.length > 6 ? rlpTx[6] : Buffer.from("0x01", "hex"),
+      };
+    }
 
     if (txType === null && rlpTx.length > 6) {
       const rlpVrs = Buffer.from(
@@ -224,10 +264,12 @@ export default class Eth {
         // Increase rlpOffset by the size of the list length.
         vrsOffset += sizeOfListLen - 1;
       }
+    }
 
+    const chainIdSrc = decodedTx.chainId;
+    if (chainIdSrc) {
       // Using BigNumber because chainID could be any uint256.
-      chainId = new BigNumber(rlpTx[6].toString("hex"), 16);
-      const chainIdSrc = rlpTx[6];
+      chainId = new BigNumber(chainIdSrc.toString("hex"), 16);
       const chainIdTruncatedBuf = Buffer.alloc(4);
       if (chainIdSrc.length > 4) {
         chainIdSrc.copy(chainIdTruncatedBuf);
@@ -267,73 +309,86 @@ export default class Eth {
       offset += chunkSize;
     }
 
-    rlpTx = ethers.utils.RLP.decode(rlpData);
-
-    let decodedTx;
-    if (txType === 2) {
-      // EIP1559
-      decodedTx = {
-        data: rlpTx[7],
-        to: rlpTx[5],
-      };
-    } else if (txType === 1) {
-      // EIP2930
-      decodedTx = {
-        data: rlpTx[6],
-        to: rlpTx[4],
-      };
-    } else {
-      // Legacy tx
-      decodedTx = {
-        data: rlpTx[5],
-        to: rlpTx[3],
-      };
-    }
     const provideForContract = async (address) => {
-      const erc20Info = byContractAddressAndChainId(address, chainIdTruncated);
-      if (erc20Info) {
+      const nftInfo = await getNFTInfo(
+        address,
+        chainIdTruncated,
+        this.loadConfig
+      );
+      if (nftInfo) {
         log(
           "ethereum",
-          "loading erc20token info for " +
-            erc20Info.contractAddress +
+          "loading nft info for " +
+            nftInfo.contractAddress +
             " (" +
-            erc20Info.ticker +
+            nftInfo.collectionName +
             ")"
         );
-        await provideERC20TokenInformation(this.transport, erc20Info.data);
+        await provideNFTInformation(this.transport, nftInfo.data);
+      } else {
+        const erc20Info = byContractAddressAndChainId(
+          address,
+          chainIdTruncated
+        );
+        if (erc20Info) {
+          log(
+            "ethereum",
+            "loading erc20token info for " +
+              erc20Info.contractAddress +
+              " (" +
+              erc20Info.ticker +
+              ")"
+          );
+          await provideERC20TokenInformation(this.transport, erc20Info.data);
+        }
       }
     };
 
     if (decodedTx.data.length >= 10) {
       const selector = decodedTx.data.substring(0, 10);
-      const infos = await loadInfosForContractMethod(decodedTx.to, selector);
+      const nftPluginPayload = await loadNftPlugin(
+        decodedTx.to,
+        selector,
+        chainIdTruncated,
+        this.loadConfig
+      );
 
-      if (infos) {
-        const { plugin, payload, signature, erc20OfInterest, abi } = infos;
-
-        if (plugin) {
-          log("ethereum", "loading plugin for " + selector);
-          await setExternalPlugin(this.transport, payload, signature);
-        }
-
-        if (erc20OfInterest && erc20OfInterest.length && abi) {
-          const contract = new ethers.utils.Interface(abi);
-          const args = contract.parseTransaction(decodedTx).args;
-
-          for (path of erc20OfInterest) {
-            const address = path.split(".").reduce((value, seg) => {
-              if (seg === "-1" && Array.isArray(value)) {
-                return value[value.length - 1];
-              }
-              return value[seg];
-            }, args);
-            await provideForContract(address);
-          }
-        }
+      if (nftPluginPayload) {
+        setPlugin(this.transport, nftPluginPayload);
       } else {
-        log("ethereum", "no infos for selector " + selector);
-      }
+        const infos = await loadInfosForContractMethod(
+          decodedTx.to,
+          selector,
+          chainIdTruncated,
+          this.loadConfig
+        );
 
+        if (infos) {
+          const { plugin, payload, signature, erc20OfInterest, abi } = infos;
+
+          if (plugin) {
+            log("ethereum", "loading plugin for " + selector);
+            await setExternalPlugin(this.transport, payload, signature);
+          }
+
+          if (erc20OfInterest && erc20OfInterest.length && abi) {
+            const contract = new ethers.utils.Interface(abi);
+            const args = contract.parseTransaction(decodedTx).args;
+
+            for (path of erc20OfInterest) {
+              const address = path.split(".").reduce((value, seg) => {
+                if (seg === "-1" && Array.isArray(value)) {
+                  return value[value.length - 1];
+                }
+                return value[seg];
+              }, args);
+              await provideForContract(address);
+            }
+          }
+        } else {
+          log("ethereum", "no infos for selector " + selector);
+        }
+      }
       await provideForContract(decodedTx.to);
     }
 
@@ -351,7 +406,7 @@ export default class Eth {
         if (chainId.times(2).plus(35).plus(1).isGreaterThan(255)) {
           const oneByteChainId = (chainIdTruncated * 2 + 35) % 256;
 
-          const ecc_parity = response_byte - oneByteChainId;
+          const ecc_parity = Math.abs(response_byte - oneByteChainId);
 
           if (txType != null) {
             // For EIP2930 and EIP1559 tx, v is simply the parity.
@@ -1202,7 +1257,7 @@ export default class Eth {
   }
 
   /**
-   * Set the name of the plugin that should be used to parse the next transaction
+   * Set the name of the external plugin that should be used to parse the next transaction
    *
    * @param pluginName string containing the name of the plugin, must have length between 1 and 30 bytes
    * @return True if the method was executed successfully
@@ -1213,6 +1268,16 @@ export default class Eth {
     selector: string
   ): Promise<boolean> {
     return setExternalPlugin(this.transport, pluginName, selector);
+  }
+
+  /**
+   * Set the plugin (internal or external) that should be used to parse the next transaction
+   *
+   * @param data string containing the payload and signature that will be parsed and verified by the device.
+   * @return True if the method was executed successfully
+   */
+  setPlugin(data: string): Promise<boolean> {
+    return setPlugin(this.transport, data);
   }
 }
 
@@ -1235,6 +1300,18 @@ function provideERC20TokenInformation(
   );
 }
 
+function provideNFTInformation(
+  transport: Transport,
+  data: Buffer
+): Promise<boolean> {
+  return transport.send(0xe0, 0x14, 0x00, 0x00, data).then(
+    () => true,
+    (e) => {
+      throw e;
+    }
+  );
+}
+
 function setExternalPlugin(
   transport: Transport,
   payload: string,
@@ -1244,6 +1321,26 @@ function setExternalPlugin(
   const signatureBuffer = Buffer.from(signature, "hex");
   const buffer = Buffer.concat([payloadBuffer, signatureBuffer]);
   return transport.send(0xe0, 0x12, 0x00, 0x00, buffer).then(
+    () => true,
+    (e) => {
+      if (e && e.statusCode === 0x6a80) {
+        // this case happen when the plugin name is too short or too long
+        return false;
+      } else if (e && e.statusCode === 0x6984) {
+        // this case happen when the plugin requested is not installed on the device
+        return false;
+      } else if (e && e.statusCode === 0x6d00) {
+        // this case happen for older version of ETH app
+        return false;
+      }
+      throw e;
+    }
+  );
+}
+
+function setPlugin(transport: Transport, data: string): Promise<boolean> {
+  const buffer = Buffer.from(data, "hex");
+  return transport.send(0xe0, 0x16, 0x00, 0x00, buffer).then(
     () => true,
     (e) => {
       if (e && e.statusCode === 0x6a80) {

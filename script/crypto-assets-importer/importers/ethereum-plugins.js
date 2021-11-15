@@ -4,7 +4,7 @@ const { readFileJSON } = require("../utils");
 const mapObject = (obj, fn) => Object.fromEntries(Object.entries(obj).map(fn));
 
 module.exports = {
-  paths: ["dapps/ethereum"],
+  paths: ["dapps/ethereum", "dapps/bsc"],
   output: "ethereum.json", // to be put in crypto assets list
   outputTemplate: (data) =>
     JSON.stringify(
@@ -19,9 +19,9 @@ module.exports = {
       2
     ),
 
-  loader: async ({ folder, id }) => {
+  loader: async ({ signatureFolder, folder, id }) => {
     const [signatures, bare] = await Promise.all([
-      readFileJSON(path.join(folder, id, "b2c_signatures.json")),
+      readFileJSON(path.join(signatureFolder, id, "b2c_signatures.json")),
       readFileJSON(path.join(folder, id, "b2c.json")),
     ]);
 
@@ -29,9 +29,13 @@ module.exports = {
 
     const abisList = await Promise.all(
       addresses.map((address) =>
-        readFileJSON(
-          path.join(folder, id, "abis", `${address}.abi.json`)
-        ).catch(() => {})
+        readFileJSON(path.join(folder, id, "abis", `${address}.abi.json`))
+          .catch(() =>
+            readFileJSON(path.join(folder, id, "abis", `${address}.json`))
+          )
+          .catch((e) => {
+            console.warn(`${id} ${address} failed to load`, e);
+          })
       )
     );
 

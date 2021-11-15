@@ -17,6 +17,7 @@
 import type Transport from "@ledgerhq/hw-transport";
 import BIPPath from "bip32-path";
 import { UserRefusedOnDevice } from "@ledgerhq/errors";
+import { encodeAddress } from "./utils";
 const CHUNK_SIZE = 250;
 // const P1_FIRST = 0x00;
 const P1_MORE = 0x80;
@@ -59,7 +60,7 @@ export default class Algorand {
     boolDisplay?: boolean
   ): Promise<{
     publicKey: string;
-    address?: string;
+    address: string;
   }> {
     const bipPath = BIPPath.fromString(path).toPathArray();
     const buf = Buffer.alloc(4);
@@ -74,9 +75,12 @@ export default class Algorand {
         [SW_OK]
       )
       .then((response) => {
-        const publicKey = Buffer.from(response.slice(0, 32)).toString("hex");
+        const buffer = Buffer.from(response.slice(0, 32));
+        const publicKey = buffer.toString("hex");
+        const address = encodeAddress(buffer);
         return {
           publicKey,
+          address,
         };
       });
   }

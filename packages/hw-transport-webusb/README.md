@@ -7,7 +7,7 @@
 
 Allows to communicate with Ledger Hardware Wallets.
 
-**[Web]** **(WebUSB)** – WebUSB [check browser support](https://caniuse.com/webusb).
+**\[Web]** **(WebUSB)** – WebUSB [check browser support](https://caniuse.com/webusb).
 
 ### FAQ: "DOM Exception" is triggered when creating the transport
 
@@ -29,10 +29,10 @@ in (2) case, you will need to have a Connect button that appear when you don’t
 
 WebUSB is currently only supported on Google Chrome / Chromium.
 
--   In Linux, user need to install the [specific udev rules](https://raw.githubusercontent.com/LedgerHQ/udev-rules/master/add_udev_rules.sh)
--   In Mac, it should work.
--   In Windows, [WebUSB does not work out of the box](https://github.com/WICG/webusb/issues/143) but you can fix it with [Zadig](https://zadig.akeo.ie/).
--   In Android Chrome it works.
+*   In Linux, user need to install the [specific udev rules](https://raw.githubusercontent.com/LedgerHQ/udev-rules/master/add_udev_rules.sh)
+*   In Mac, it should work.
+*   In Windows, [WebUSB does not work out of the box](https://github.com/WICG/webusb/issues/143) but you can fix it with [Zadig](https://zadig.akeo.ie/).
+*   In Android Chrome it works.
 
 ## API
 
@@ -40,20 +40,20 @@ WebUSB is currently only supported on Google Chrome / Chromium.
 
 #### Table of Contents
 
--   [TransportWebUSB](#transportwebusb)
-    -   [Parameters](#parameters)
-    -   [Examples](#examples)
-    -   [close](#close)
-    -   [exchange](#exchange)
-        -   [Parameters](#parameters-1)
-    -   [isSupported](#issupported)
-    -   [list](#list)
-    -   [listen](#listen)
-        -   [Parameters](#parameters-2)
-    -   [request](#request)
-    -   [openConnected](#openconnected)
-    -   [open](#open)
-        -   [Parameters](#parameters-3)
+*   [TransportWebUSB](#transportwebusb)
+    *   [Parameters](#parameters)
+    *   [Examples](#examples)
+    *   [close](#close)
+    *   [exchange](#exchange)
+        *   [Parameters](#parameters-1)
+    *   [isSupported](#issupported)
+    *   [list](#list)
+    *   [listen](#listen)
+        *   [Parameters](#parameters-2)
+    *   [request](#request)
+    *   [openConnected](#openconnected)
+    *   [open](#open)
+        *   [Parameters](#parameters-3)
 
 ### TransportWebUSB
 
@@ -63,8 +63,8 @@ WebUSB Transport implementation
 
 #### Parameters
 
--   `device` **USBDevice** 
--   `interfaceNumber` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+*   `device` **USBDevice** 
+*   `interfaceNumber` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 
 #### Examples
 
@@ -78,7 +78,7 @@ TransportWebUSB.create().then(transport => ...)
 
 Release the transport device
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;void>** 
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<void>** 
 
 #### exchange
 
@@ -86,9 +86,9 @@ Exchange with the device using APDU protocol.
 
 ##### Parameters
 
--   `apdu` **[Buffer](https://nodejs.org/api/buffer.html)** 
+*   `apdu` **[Buffer](https://nodejs.org/api/buffer.html)** 
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Buffer](https://nodejs.org/api/buffer.html)>** a promise of apdu response
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[Buffer](https://nodejs.org/api/buffer.html)>** a promise of apdu response
 
 #### isSupported
 
@@ -107,7 +107,7 @@ Important: it must be called in the context of a UI click!
 
 ##### Parameters
 
--   `observer` **Observer&lt;DescriptorEvent&lt;USBDevice>>** 
+*   `observer` **Observer\<DescriptorEvent\<USBDevice>>** 
 
 Returns **Subscription** 
 
@@ -117,7 +117,7 @@ Similar to create() except it will always display the device permission (even if
 
 #### openConnected
 
-Similar to create() except it will never display the device permission (it returns a Promise&lt;?Transport>, null if it fails to find a device).
+Similar to create() except it will never display the device permission (it returns a Promise\<?Transport>, null if it fails to find a device).
 
 #### open
 
@@ -125,4 +125,4 @@ Create a Ledger transport with a USBDevice
 
 ##### Parameters
 
--   `device` **USBDevice** 
+*   `device` **USBDevice** 

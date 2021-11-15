@@ -4,13 +4,12 @@ const { readFileJSON } = require("../utils");
 const {
   findFiatCurrencyByTicker,
 } = require("../../../packages/cryptoassets/lib/fiats");
+const {
+  getCryptoCurrencyById,
+} = require("../../../packages/cryptoassets/lib/currencies");
 
 const inferParentCurrency = (common) =>
-  common.blockchain_name === "foundation"
-    ? "ethereum"
-    : common.blockchain_name === "ropsten"
-    ? "ethereum_ropsten"
-    : null;
+  getCryptoCurrencyById(common.blockchain_name).id;
 
 const withoutExtraComma = (str) => {
   const m = str.match(/,+$/);
@@ -23,7 +22,10 @@ const WARN_IF_COUNTERVALUES = true;
 const lenseTicker = (a) => a[9] || a[2];
 
 module.exports = {
-  paths: ["tokens/ethereum/erc20", "tokens/ethereum_ropsten/erc20"],
+  paths: [
+    "tokens/ethereum/erc20",
+    "tokens/ethereum_ropsten/erc20",
+  ],
   output: "data/erc20.js",
 
   validate: (everything, countervaluesTickers) =>
@@ -101,10 +103,10 @@ ${data
   .join(",\n")}
 ];`,
 
-  loader: ({ folder, id }) =>
+  loader: ({ signatureFolder, folder, id }) =>
     Promise.all([
       readFileJSON(path.join(folder, id, "common.json")),
-      readFileJSON(path.join(folder, id, "ledger_signature.json")),
+      readFileJSON(path.join(signatureFolder, id, "ledger_signature.json")),
     ]).then(([common, ledgerSignature]) => {
       const name = common.name;
       const ticker = common.ticker.toUpperCase();

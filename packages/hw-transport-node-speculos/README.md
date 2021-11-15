@@ -9,8 +9,8 @@ A transport for <https://github.com/LedgerHQ/speculos> Nano simulator.
 
 ### Getting started
 
--   Install <https://github.com/LedgerHQ/speculos>
--   Make sure to have a speculos running with a APDU port and (optionally) a buttons port available.
+*   Install <https://github.com/LedgerHQ/speculos>
+*   Make sure to have a speculos running with a APDU port and (optionally) a buttons port available.
 
 ```js
 import SpeculosTransport from "@ledgerhq/hw-transport-node-speculos";
@@ -59,15 +59,15 @@ $ ./speculos.py -m nanos ./apps/btc.elf --sdk 1.6 --seed "abandon abandon abando
 
 #### Table of Contents
 
--   [SpeculosTransportOpts](#speculostransportopts)
-    -   [Properties](#properties)
--   [SpeculosTransport](#speculostransport)
-    -   [Parameters](#parameters)
-    -   [Examples](#examples)
-    -   [button](#button)
-        -   [Parameters](#parameters-1)
-    -   [open](#open)
-        -   [Parameters](#parameters-2)
+*   [SpeculosTransportOpts](#speculostransportopts)
+    *   [Properties](#properties)
+*   [SpeculosTransport](#speculostransport)
+    *   [Parameters](#parameters)
+    *   [Examples](#examples)
+    *   [button](#button)
+        *   [Parameters](#parameters-1)
+    *   [open](#open)
+        *   [Parameters](#parameters-2)
 
 ### SpeculosTransportOpts
 
@@ -75,10 +75,10 @@ Type: {apduPort: [number](https://developer.mozilla.org/docs/Web/JavaScript/Refe
 
 #### Properties
 
--   `apduPort` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
--   `buttonPort` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
--   `automationPort` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
--   `host` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** 
+*   `apduPort` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+*   `buttonPort` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
+*   `automationPort` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
+*   `host` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** 
 
 ### SpeculosTransport
 
@@ -88,8 +88,8 @@ Speculos TCP transport implementation
 
 #### Parameters
 
--   `apduSocket` **net.Socket** 
--   `opts` **[SpeculosTransportOpts](#speculostransportopts)** 
+*   `apduSocket` **net.Socket** 
+*   `opts` **[SpeculosTransportOpts](#speculostransportopts)** 
 
 #### Examples
 
@@ -107,14 +107,14 @@ typically "Rr" would press and release the right button
 
 ##### Parameters
 
--   `command` **any** 
+*   `command` **any** 
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;void>** 
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<void>** 
 
 #### open
 
 ##### Parameters
 
--   `opts` **[SpeculosTransportOpts](#speculostransportopts)** 
+*   `opts` **[SpeculosTransportOpts](#speculostransportopts)** 
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[SpeculosTransport](#speculostransport)>** 
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[SpeculosTransport](#speculostransport)>** 
