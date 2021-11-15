@@ -10,11 +10,11 @@ Utility library that is used by all Ledger libraries to dispatch logs so we can 
 
 #### Table of Contents
 
--   [Log](#log)
--   [log](#log-1)
-    -   [Parameters](#parameters)
--   [listen](#listen)
-    -   [Parameters](#parameters-1)
+*   [Log](#log)
+*   [log](#log-1)
+    *   [Parameters](#parameters)
+*   [listen](#listen)
+    *   [Parameters](#parameters-1)
 
 ### Log
 
@@ -26,9 +26,9 @@ log something
 
 #### Parameters
 
--   `type` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a namespaced identifier of the log (it is not a level like "debug", "error" but more like "apdu-in", "apdu-out", etc...)
--   `message` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** a clear message of the log associated to the type
--   `data` **any?** 
+*   `type` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a namespaced identifier of the log (it is not a level like "debug", "error" but more like "apdu-in", "apdu-out", etc...)
+*   `message` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)?** a clear message of the log associated to the type
+*   `data` **any?** 
 
 ### listen
 
@@ -36,6 +36,6 @@ listen to logs.
 
 #### Parameters
 
--   `cb` **Subscriber** that is called for each future log() with the Log object
+*   `cb` **Subscriber** that is called for each future log() with the Log object
 
 Returns **Unsubscribe** a function that can be called to unsubscribe the listener

@@ -24,6 +24,7 @@ export const IIWebUSB = 0x10;
 export enum DeviceModelId {
   blue = "blue",
   nanoS = "nanoS",
+  nanoSP = "nanoSP",
   nanoX = "nanoX",
 }
 
@@ -50,6 +51,16 @@ const devices: { [key in DeviceModelId]: DeviceModel } = {
       semver.lt(semver.coerce(firmwareVersion) ?? "", "2.0.0")
         ? 4 * 1024
         : 2 * 1024,
+  },
+  [DeviceModelId.nanoSP]: {
+    id: DeviceModelId.nanoSP,
+    productName: "Ledger Nano SP",
+    productIdMM: 0x50,
+    legacyUsbProductId: 0x0005,
+    usbOnly: true,
+    memorySize: 1533 * 1024,
+    masks: [0x33100000],
+    getBlockSize: (_firmwareVersion: string): number => 32,
   },
   [DeviceModelId.nanoX]: {
     id: DeviceModelId.nanoX,
@@ -128,7 +139,10 @@ export const identifyUSBProductId = (
 export const identifyProductName = (
   productName: string
 ): DeviceModel | null | undefined => {
-  const productId = productMap[productName];
+  let productId = productMap[productName];
+  if (!productId && productName.startsWith("Nano S")) {
+    productId = DeviceModelId.nanoSP;
+  }
   const deviceModel = devicesList.find((d) => d.id === productId);
   return deviceModel;
 };

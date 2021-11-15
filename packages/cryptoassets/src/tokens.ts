@@ -4,9 +4,10 @@ import erc20tokens from "../data/erc20";
 import trc10tokens from "../data/trc10";
 import trc20tokens from "../data/trc20";
 import bep20tokens from "../data/bep20";
+import polygonTokens from "../data/polygon-erc20";
 import asatokens from "../data/asa";
 import esdttokens from "../data/esdt";
-
+import spltokens from "../data/spl";
 const emptyArray = [];
 const tokensArray: TokenCurrency[] = [];
 const tokensArrayWithDelisted: TokenCurrency[] = [];
@@ -17,12 +18,13 @@ const tokensByTicker: Record<string, TokenCurrency> = {};
 const tokensByAddress: Record<string, TokenCurrency> = {};
 const tokensByCurrencyAddress: Record<string, TokenCurrency> = {};
 addTokens(erc20tokens.map(convertERC20));
+addTokens(polygonTokens.map(convertERC20));
 addTokens(trc10tokens.map(convertTRONTokens("trc10")));
 addTokens(trc20tokens.map(convertTRONTokens("trc20")));
 addTokens(bep20tokens.map(convertBEP20));
 addTokens(asatokens.map(convertAlgorandASATokens));
 addTokens(esdttokens.map(convertElrondESDTTokens));
-
+addTokens(spltokens.map(convertSplTokens));
 type TokensListOptions = {
   withDelisted: boolean;
 };
@@ -312,8 +314,8 @@ function convertElrondESDTTokens([
   identifier,
   decimals,
   signature,
+  name
 ]): TokenCurrency {
-  const name = "TEST";
   const ELROND_ESDT_CONTRACT = 'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u';
 
   return {
@@ -329,6 +331,32 @@ function convertElrondESDTTokens([
       {
         name,
         code: ticker,
+        magnitude: decimals,
+      },
+    ],
+  };
+}
+
+function convertSplTokens([
+  name,
+  symbol,
+  address,
+  decimals,
+  enableCountervalues,
+]): TokenCurrency {
+  return {
+    contractAddress: address,
+    parentCurrency: getCryptoCurrencyById("solana"),
+    id: `solana/spl/${address}`,
+    name,
+    tokenType: "spl",
+    ticker: symbol,
+    type: "TokenCurrency",
+    disableCountervalue: !enableCountervalues,
+    units: [
+      {
+        name,
+        code: symbol,
         magnitude: decimals,
       },
     ],

@@ -13,12 +13,12 @@ Ledger Hardware Wallet Tezos JavaScript bindings.
 
 #### Table of Contents
 
--   [Tezos](#tezos)
-    -   [Parameters](#parameters)
-    -   [Examples](#examples)
-    -   [getAddress](#getaddress)
-        -   [Parameters](#parameters-1)
-        -   [Examples](#examples-1)
+*   [Tezos](#tezos)
+    *   [Parameters](#parameters)
+    *   [Examples](#examples)
+    *   [getAddress](#getaddress)
+        *   [Parameters](#parameters-1)
+        *   [Examples](#examples-1)
 
 ### Tezos
 
@@ -26,7 +26,7 @@ Tezos API
 
 #### Parameters
 
--   `transport` **Transport** 
+*   `transport` **Transport** 
 
 #### Examples
 
@@ -41,8 +41,8 @@ get Tezos address for a given BIP 32 path.
 
 ##### Parameters
 
--   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format, must begin with 44'/1729'
--   `options` **{verify: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, curve: Curve?, ins: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?}**  (optional, default `{}`)
+*   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in BIP 32 format, must begin with 44'/1729'
+*   `options` **{verify: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, curve: Curve?, ins: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?}**  (optional, default `{}`)
 
 ##### Examples
 
@@ -51,4 +51,4 @@ tez.getAddress("44'/1729'/0'/0'").then(o => o.address)
 tez.getAddress("44'/1729'/0'/0'", { verify: true })
 ```
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;GetAddressResult>** an object with address, publicKey
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<GetAddressResult>** an object with address, publicKey

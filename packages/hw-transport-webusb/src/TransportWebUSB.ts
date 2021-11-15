@@ -142,7 +142,7 @@ export default class TransportWebUSB extends Transport {
 
     try {
       await device.claimInterface(interfaceNumber);
-    } catch (e) {
+    } catch (e: any) {
       await device.close();
       throw new TransportInterfaceNotAvailable(e.message);
     }

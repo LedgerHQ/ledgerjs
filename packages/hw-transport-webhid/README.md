@@ -7,7 +7,7 @@
 
 Allows to communicate with Ledger Hardware Wallets.
 
-**[Web]** **(WebHID)** – WebHID [check browser support](https://caniuse.com/webhid).
+**\[Web]** **(WebHID)** – WebHID [check browser support](https://caniuse.com/webhid).
 
 ### FAQ: "DOM Exception" is triggered when creating the transport
 
@@ -27,20 +27,20 @@ WebUSB is currently only supported on Google Chrome / Chromium DEV version and b
 
 #### Table of Contents
 
--   [TransportWebHID](#transportwebhid)
-    -   [Parameters](#parameters)
-    -   [Examples](#examples)
-    -   [close](#close)
-    -   [exchange](#exchange)
-        -   [Parameters](#parameters-1)
-    -   [isSupported](#issupported)
-    -   [list](#list)
-    -   [listen](#listen)
-        -   [Parameters](#parameters-2)
-    -   [request](#request)
-    -   [openConnected](#openconnected)
-    -   [open](#open)
-        -   [Parameters](#parameters-3)
+*   [TransportWebHID](#transportwebhid)
+    *   [Parameters](#parameters)
+    *   [Examples](#examples)
+    *   [close](#close)
+    *   [exchange](#exchange)
+        *   [Parameters](#parameters-1)
+    *   [isSupported](#issupported)
+    *   [list](#list)
+    *   [listen](#listen)
+        *   [Parameters](#parameters-2)
+    *   [request](#request)
+    *   [openConnected](#openconnected)
+    *   [open](#open)
+        *   [Parameters](#parameters-3)
 
 ### TransportWebHID
 
@@ -50,7 +50,7 @@ WebHID Transport implementation
 
 #### Parameters
 
--   `device` **HIDDevice** 
+*   `device` **HIDDevice** 
 
 #### Examples
 
@@ -64,7 +64,7 @@ TransportWebHID.create().then(transport => ...)
 
 Release the transport device
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;void>** 
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<void>** 
 
 #### exchange
 
@@ -72,9 +72,9 @@ Exchange with the device using APDU protocol.
 
 ##### Parameters
 
--   `apdu` **[Buffer](https://nodejs.org/api/buffer.html)** 
+*   `apdu` **[Buffer](https://nodejs.org/api/buffer.html)** 
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Buffer](https://nodejs.org/api/buffer.html)>** a promise of apdu response
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[Buffer](https://nodejs.org/api/buffer.html)>** a promise of apdu response
 
 #### isSupported
 
@@ -93,7 +93,7 @@ Important: it must be called in the context of a UI click!
 
 ##### Parameters
 
--   `observer` **Observer&lt;DescriptorEvent&lt;HIDDevice>>** 
+*   `observer` **Observer\<DescriptorEvent\<HIDDevice>>** 
 
 Returns **Subscription** 
 
@@ -103,7 +103,7 @@ Similar to create() except it will always display the device permission (even if
 
 #### openConnected
 
-Similar to create() except it will never display the device permission (it returns a Promise&lt;?Transport>, null if it fails to find a device).
+Similar to create() except it will never display the device permission (it returns a Promise\<?Transport>, null if it fails to find a device).
 
 #### open
 
@@ -111,4 +111,4 @@ Create a Ledger transport with a HIDDevice
 
 ##### Parameters
 
--   `device` **HIDDevice** 
+*   `device` **HIDDevice** 

@@ -99,6 +99,10 @@ export default class Tezos {
     });
     const payload = await this.transport.send(cla, ins, p1, p2, buffer);
     const publicKeyLength = payload[0];
+    if (!publicKeyLength) {
+      // it seems to be a bug that apps returns empty answer
+      throw new Error("invalid public key");
+    }
     const publicKey = payload.slice(1, 1 + publicKeyLength);
     const res: GetAddressResult = {
       publicKey: publicKey.toString("hex"),

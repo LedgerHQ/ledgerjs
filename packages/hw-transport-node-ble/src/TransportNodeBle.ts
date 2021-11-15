@@ -271,7 +271,7 @@ export default class BluetoothTransport extends Transport {
 
     try {
       await write(this.writeCharacteristic, buffer);
-    } catch (e) {
+    } catch (e: any) {
       throw new DisconnectedDeviceDuringOperation(e.message);
     }
   };

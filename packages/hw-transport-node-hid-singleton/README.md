@@ -7,7 +7,7 @@
 
 Allows to communicate with Ledger Hardware Wallets.
 
-**[Node]**/Electron **(HID)** – uses `node-hid` and `usb-detection`. Keep transport opened and re-use it as a singleton, one device at a time on a computer but more robust implementation.
+**\[Node]**/Electron **(HID)** – uses `node-hid` and `usb-detection`. Keep transport opened and re-use it as a singleton, one device at a time on a computer but more robust implementation.
 
 ## API
 
@@ -15,14 +15,14 @@ Allows to communicate with Ledger Hardware Wallets.
 
 #### Table of Contents
 
--   [TransportNodeHidSingleton](#transportnodehidsingleton)
-    -   [Examples](#examples)
-    -   [isSupported](#issupported)
-    -   [list](#list)
-    -   [listen](#listen)
-        -   [Parameters](#parameters)
-    -   [disconnect](#disconnect)
-    -   [open](#open)
+*   [TransportNodeHidSingleton](#transportnodehidsingleton)
+    *   [Examples](#examples)
+    *   [isSupported](#issupported)
+    *   [list](#list)
+    *   [listen](#listen)
+        *   [Parameters](#parameters)
+    *   [disconnect](#disconnect)
+    *   [open](#open)
 
 ### TransportNodeHidSingleton
 
@@ -46,7 +46,7 @@ TransportNodeHid.create().then(transport => ...)
 
 ##### Parameters
 
--   `observer` **Observer&lt;DescriptorEvent&lt;any>>** 
+*   `observer` **Observer\<DescriptorEvent\<any>>** 
 
 Returns **Subscription** 
 
@@ -58,4 +58,4 @@ globally disconnect the transport singleton
 
 if path="" is not provided, the library will take the first device
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[TransportNodeHidSingleton](#transportnodehidsingleton)>** 
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[TransportNodeHidSingleton](#transportnodehidsingleton)>** 

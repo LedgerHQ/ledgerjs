@@ -7,7 +7,7 @@
 
 Allows to communicate with Ledger Hardware Wallets.
 
-**[React Native]** **(HID)** _Android_ – Ledger's native implementation.
+**\[React Native]** **(HID)** *Android* – Ledger's native implementation.
 
 ## API
 
@@ -15,18 +15,18 @@ Allows to communicate with Ledger Hardware Wallets.
 
 #### Table of Contents
 
--   [HIDTransport](#hidtransport)
-    -   [Parameters](#parameters)
-    -   [Examples](#examples)
-    -   [exchange](#exchange)
-        -   [Parameters](#parameters-1)
-    -   [close](#close)
-    -   [isSupported](#issupported)
-    -   [list](#list)
-    -   [listen](#listen)
-        -   [Parameters](#parameters-2)
-    -   [open](#open)
-        -   [Parameters](#parameters-3)
+*   [HIDTransport](#hidtransport)
+    *   [Parameters](#parameters)
+    *   [Examples](#examples)
+    *   [exchange](#exchange)
+        *   [Parameters](#parameters-1)
+    *   [close](#close)
+    *   [isSupported](#issupported)
+    *   [list](#list)
+    *   [listen](#listen)
+        *   [Parameters](#parameters-2)
+    *   [open](#open)
+        *   [Parameters](#parameters-3)
 
 ### HIDTransport
 
@@ -36,8 +36,8 @@ Ledger's React Native HID Transport implementation
 
 #### Parameters
 
--   `nativeId` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
--   `productId` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+*   `nativeId` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+*   `productId` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 
 #### Examples
 
@@ -51,9 +51,9 @@ TransportHID.create().then(transport => ...)
 
 ##### Parameters
 
--   `apdu` **any** input value
+*   `apdu` **any** input value
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;any>** Promise of apdu response
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<any>** Promise of apdu response
 
 #### close
 
@@ -65,13 +65,13 @@ Returns **any** Promise
 
 Check if the transport is supported (basically true on Android)
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** 
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>** 
 
 #### list
 
 List currently connected devices.
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;any>>** Promise of devices
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)\<any>>** Promise of devices
 
 #### listen
 
@@ -79,7 +79,7 @@ Listen to ledger devices events
 
 ##### Parameters
 
--   `observer` **any** 
+*   `observer` **any** 
 
 Returns **any** 
 
@@ -89,4 +89,4 @@ Open a the transport with a Ledger device
 
 ##### Parameters
 
--   `deviceObj` **DeviceObj** 
+*   `deviceObj` **DeviceObj** 

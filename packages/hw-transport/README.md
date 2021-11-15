@@ -13,40 +13,40 @@
 
 #### Table of Contents
 
--   [Subscription](#subscription)
-    -   [Properties](#properties)
--   [Device](#device)
--   [DescriptorEvent](#descriptorevent)
--   [Observer](#observer)
--   [Transport](#transport)
-    -   [exchange](#exchange)
-        -   [Parameters](#parameters)
-    -   [setScrambleKey](#setscramblekey)
-        -   [Parameters](#parameters-1)
-    -   [close](#close)
-    -   [on](#on)
-        -   [Parameters](#parameters-2)
-    -   [off](#off)
-        -   [Parameters](#parameters-3)
-    -   [setDebugMode](#setdebugmode)
-    -   [setExchangeTimeout](#setexchangetimeout)
-        -   [Parameters](#parameters-4)
-    -   [setExchangeUnresponsiveTimeout](#setexchangeunresponsivetimeout)
-        -   [Parameters](#parameters-5)
-    -   [send](#send)
-        -   [Parameters](#parameters-6)
-    -   [isSupported](#issupported)
-    -   [list](#list)
-        -   [Examples](#examples)
-    -   [listen](#listen)
-        -   [Parameters](#parameters-7)
-        -   [Examples](#examples-1)
-    -   [open](#open)
-        -   [Parameters](#parameters-8)
-        -   [Examples](#examples-2)
-    -   [create](#create)
-        -   [Parameters](#parameters-9)
-        -   [Examples](#examples-3)
+*   [Subscription](#subscription)
+    *   [Properties](#properties)
+*   [Device](#device)
+*   [DescriptorEvent](#descriptorevent)
+*   [Observer](#observer)
+*   [Transport](#transport)
+    *   [exchange](#exchange)
+        *   [Parameters](#parameters)
+    *   [setScrambleKey](#setscramblekey)
+        *   [Parameters](#parameters-1)
+    *   [close](#close)
+    *   [on](#on)
+        *   [Parameters](#parameters-2)
+    *   [off](#off)
+        *   [Parameters](#parameters-3)
+    *   [setDebugMode](#setdebugmode)
+    *   [setExchangeTimeout](#setexchangetimeout)
+        *   [Parameters](#parameters-4)
+    *   [setExchangeUnresponsiveTimeout](#setexchangeunresponsivetimeout)
+        *   [Parameters](#parameters-5)
+    *   [send](#send)
+        *   [Parameters](#parameters-6)
+    *   [isSupported](#issupported)
+    *   [list](#list)
+        *   [Examples](#examples)
+    *   [listen](#listen)
+        *   [Parameters](#parameters-7)
+        *   [Examples](#examples-1)
+    *   [open](#open)
+        *   [Parameters](#parameters-8)
+        *   [Examples](#examples-2)
+    *   [create](#create)
+        *   [Parameters](#parameters-9)
+        *   [Examples](#examples-3)
 
 ### Subscription
 
@@ -54,7 +54,7 @@ Type: {unsubscribe: function (): void}
 
 #### Properties
 
--   `unsubscribe` **function (): void** 
+*   `unsubscribe` **function (): void** 
 
 ### Device
 
@@ -69,7 +69,7 @@ device: transport specific device info
 
 ### Observer
 
-Type: Readonly&lt;{next: function (event: Ev): any, error: function (e: any): any, complete: function (): any}>
+Type: Readonly<{next: function (event: Ev): any, error: function (e: any): any, complete: function (): any}>
 
 ### Transport
 
@@ -85,10 +85,10 @@ Instead, the recommanded way is to use send() method
 
 ##### Parameters
 
--   `_apdu` **[Buffer](https://nodejs.org/api/buffer.html)** 
--   `apdu`  the data to send
+*   `_apdu` **[Buffer](https://nodejs.org/api/buffer.html)** 
+*   `apdu`  the data to send
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Buffer](https://nodejs.org/api/buffer.html)>** a Promise of response data
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[Buffer](https://nodejs.org/api/buffer.html)>** a Promise of response data
 
 #### setScrambleKey
 
@@ -97,26 +97,26 @@ Each App can have a different scramble key and they internally will set it at in
 
 ##### Parameters
 
--   `_key` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
--   `key`  the scramble key
+*   `_key` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `key`  the scramble key
 
 #### close
 
 close the exchange with the device.
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;void>** a Promise that ends when the transport is closed.
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)\<void>** a Promise that ends when the transport is closed.
 
 #### on
 
 Listen to an event on an instance of transport.
 Transport implementation can have specific events. Here is the common events:
 
--   `"disconnect"` : triggered if Transport is disconnected
+*   `"disconnect"` : triggered if Transport is disconnected
 
 ##### Parameters
 
--   `eventName` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
--   `cb` **function (...args: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;any>): any** 
+*   `eventName` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `cb` **function (...args: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)\<any>): any** 
 
 Returns **void** 
 
@@ -126,8 +126,8 @@ Stop listening to an event on an instance of transport.
 
 ##### Parameters
 
--   `eventName` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
--   `cb` **function (...args: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;any>): any** 
+*   `eventName` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
+*   `cb` **function (...args: [Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)\<any>): any** 
 
 Returns **void** 
 
@@ -141,7 +141,7 @@ Set a timeout (in milliseconds) for the exchange call. Only some transport might
 
 ##### Parameters
 
--   `exchangeTimeout` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+*   `exchangeTimeout` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 
 Returns **void** 
 
@@ -151,7 +151,7 @@ Define the delay before emitting "unresponsive" on an exchange that does not res
 
 ##### Parameters
 
--   `unresponsiveTimeout` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+*   `unresponsiveTimeout` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
 
 Returns **void** 
 
@@ -161,26 +161,26 @@ wrapper on top of exchange to simplify work of the implementation.
 
 ##### Parameters
 
--   `cla` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
--   `ins` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
--   `p1` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
--   `p2` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
--   `data` **[Buffer](https://nodejs.org/api/buffer.html)**  (optional, default `Buffer.alloc(0)`)
--   `statusList` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** is a list of accepted status code (shorts). [0x9000] by default (optional, default `[StatusCodes.OK]`)
+*   `cla` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+*   `ins` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+*   `p1` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+*   `p2` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)** 
+*   `data` **[Buffer](https://nodejs.org/api/buffer.html)**  (optional, default `Buffer.alloc(0)`)
+*   `statusList` **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)<[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)>** is a list of accepted status code (shorts). \[0x9000] by default (optional, default `[StatusCodes.OK]`)
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Buffer](https://nodejs.org/api/buffer.html)>** a Promise of response buffer
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[Buffer](https://nodejs.org/api/buffer.html)>** a Promise of response buffer
 
 #### isSupported
 
 Statically check if a transport is supported on the user's platform/browser.
 
-Type: function (): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>
+Type: function (): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)>
 
 #### list
 
 List once all available descriptors. For a better granularity, checkout `listen()`.
 
-Type: function (): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)&lt;any>>
+Type: function (): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)\<any>>
 
 ##### Examples
 
@@ -197,11 +197,11 @@ a DescriptorEvent is a `{ descriptor, type }` object. type can be `"add"` or `"r
 each listen() call will first emit all potential device already connected and then will emit events can come over times,
 for instance if you plug a USB device after listen() or a bluetooth device become discoverable.
 
-Type: function (observer: [Observer](#observer)&lt;[DescriptorEvent](#descriptorevent)&lt;any>>): [Subscription](#subscription)
+Type: function (observer: [Observer](#observer)<[DescriptorEvent](#descriptorevent)\<any>>): [Subscription](#subscription)
 
 ##### Parameters
 
--   `observer`  is an object with a next, error and complete function (compatible with observer pattern)
+*   `observer`  is an object with a next, error and complete function (compatible with observer pattern)
 
 ##### Examples
 
@@ -225,12 +225,12 @@ Returns **any** a Subscription object on which you can `.unsubscribe()` to stop 
 
 attempt to create a Transport instance with potentially a descriptor.
 
-Type: function (descriptor: any, timeout: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Transport](#transport)>
+Type: function (descriptor: any, timeout: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)): [Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[Transport](#transport)>
 
 ##### Parameters
 
--   `descriptor`  : the descriptor to open the transport with.
--   `timeout`  : an optional timeout
+*   `descriptor`  : the descriptor to open the transport with.
+*   `timeout`  : an optional timeout
 
 ##### Examples
 
@@ -248,8 +248,8 @@ This is a light helper, alternative to using listen() and open() (that you may n
 
 ##### Parameters
 
--   `openTimeout`   (optional, default `3000`)
--   `listenTimeout` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
+*   `openTimeout`   (optional, default `3000`)
+*   `listenTimeout` **[number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number)?** 
 
 ##### Examples
 
@@ -257,4 +257,4 @@ This is a light helper, alternative to using listen() and open() (that you may n
 TransportFoo.create().then(transport => ...)
 ```
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)&lt;[Transport](#transport)>** 
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<[Transport](#transport)>** 
