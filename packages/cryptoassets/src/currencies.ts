@@ -1280,6 +1280,25 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [],
   },
+  icp: {
+    type: "CryptoCurrency",
+    id: "icp",
+    coinType: 223,
+    family: "icp",
+    ticker: "ICP",
+    scheme: "icp",
+    color: "#000",
+    managerAppName: "InternetComputer",
+    name: "Internet Computer (ICP)",
+    units: [
+      {
+        name: "ICP",
+        code: "ICP",
+        magnitude: 8,
+      },
+    ],
+    explorerViews: [],
+  },
   iota: {
     type: "CryptoCurrency",
     id: "iota",
