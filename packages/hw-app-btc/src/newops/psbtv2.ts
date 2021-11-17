@@ -1,3 +1,4 @@
+import { BigNumber } from "bignumber.js";
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
 import { BufferReader, BufferWriter } from "../buffertools";
@@ -559,7 +560,7 @@ function uint32LE(n: number): Buffer {
 }
 function uint64LE(n: number): Buffer {
   const b = Buffer.alloc(8);
-  b.writeBigUInt64LE(BigInt(n), 0);
+  b.writeBigUInt64LE(new BigNumber(n), 0);
   return b;
 }
 function varint(n: number): Buffer {

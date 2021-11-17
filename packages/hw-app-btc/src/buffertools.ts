@@ -1,3 +1,4 @@
+import { BigNumber } from "bignumber.js";
 import varuint from "varuint-bitcoin";
 
 export class BufferWriter {
@@ -21,7 +22,8 @@ export class BufferWriter {
     this.write(4, (b) => b.writeUInt32LE(i, 0));
   }
 
-  writeUInt64(i: bigint): void {
+  writeUInt64(i: BigNumber): void {
+    // FIXME Conversion BigNumber => bigint
     this.write(8, (b) => b.writeBigUInt64LE(i, 0));
   }
 
@@ -68,9 +70,10 @@ export class BufferReader {
     return result;
   }
 
-  readUInt64(): bigint {
+  readUInt64(): BigNumber {
     const result = this.buffer.readBigUInt64LE(this.offset);
     this.offset += 8;
+    // FIXME Conversion bigint => BigNumber
     return result;
   }
 

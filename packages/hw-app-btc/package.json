@@ -29,6 +29,7 @@
   "dependencies": {
     "@ledgerhq/hw-transport": "^6.11.2",
     "@ledgerhq/logs": "^6.10.0",
+    "bignumber.js": "^9.0.1",
     "bip32-path": "^0.4.2",
     "bitcoinjs-lib": "^5.2.0",
     "bs58": "^4.0.1",

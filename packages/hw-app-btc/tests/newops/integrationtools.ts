@@ -1,6 +1,7 @@
+import { BigNumber } from "bignumber.js";
+import bs58check from "bs58check";
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import Transport from "@ledgerhq/hw-transport";
-import bs58check from "bs58check";
 import Btc from "../../src/Btc";
 import BtcNew from "../../src/BtcNew";
 import { BufferWriter } from "../../src/buffertools";
@@ -59,7 +60,7 @@ export async function runSignTransaction(
   outputWriter.writeVarInt(testTx.vout.length);
   testTx.vout.forEach((output) => {
     outputWriter.writeUInt64(
-      BigInt(Number.parseFloat((output.value * 100000000).toFixed(8)))
+      new BigNumber(Number.parseFloat((output.value * 100000000).toFixed(8)))
     );
     outputWriter.writeVarSlice(Buffer.from(output.scriptPubKey.hex, "hex"));
   });
