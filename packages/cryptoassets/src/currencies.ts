@@ -1297,7 +1297,12 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
         magnitude: 8,
       },
     ],
-    explorerViews: [],
+    explorerViews: [
+      {
+        address: "https://dashboard.internetcomputer.org/account/$address",
+        tx: "https://dashboard.internetcomputer.org/transaction/$hash",
+      },
+    ],
   },
   iota: {
     type: "CryptoCurrency",
