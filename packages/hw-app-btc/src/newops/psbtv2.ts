@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { BufferReader, BufferWriter, to64bitLE } from "../buffertools";
+import { BufferReader, BufferWriter, unsafeTo64bitLE } from "../buffertools";
 
 export enum psbtGlobal {
   TX_VERSION = 0x02,
@@ -558,7 +558,7 @@ function uint32LE(n: number): Buffer {
   return b;
 }
 function uint64LE(n: number): Buffer {
-  return to64bitLE(n);
+  return unsafeTo64bitLE(n);
 }
 function varint(n: number): Buffer {
   const b = new BufferWriter();

@@ -16,3 +16,10 @@ test("Test 64 bit numbers", () => {
   run(0x010203040506, "0605040302010000");
   run(Number.MAX_SAFE_INTEGER, "FFFFFFFFFFFF1F00");
 })
+
+test("Too big 64 bit number", () => {
+  const w = new BufferWriter();
+  expect(() => w.writeUInt64(Number.MAX_SAFE_INTEGER+1)).toThrow();
+  const r = new BufferReader(Buffer.from("FFFFFFFFFFFF2000", "hex"))
+  expect(() => r.readUInt64()).toThrow();
+})

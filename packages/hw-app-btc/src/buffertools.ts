@@ -1,7 +1,10 @@
 import varuint from "varuint-bitcoin";
 
-export function to64bitLE(n: number): Buffer {
+export function unsafeTo64bitLE(n: number): Buffer {
   // we want to represent the input as a 8-bytes array
+  if (n > Number.MAX_SAFE_INTEGER) {
+    throw new Error("Can't convert numbers > MAX_SAFE_INT");
+  }
   const byteArray = Buffer.alloc(8, 0);
   for (let index = 0; index < byteArray.length; index++) {
     const byte = n & 0xff;
@@ -11,8 +14,17 @@ export function to64bitLE(n: number): Buffer {
   return byteArray;
 }
 
-export function from64bitLE(byteArray: Buffer): number {
+export function unsafeFrom64bitLE(byteArray: Buffer): number {
   let value = 0;
+  if (byteArray.length != 8) {
+    throw new Error("Expected Bufffer of lenght 8");
+  }
+  if (byteArray[7] != 0) {
+    throw new Error("Can't encode numbers > MAX_SAFE_INT");
+  }
+  if (byteArray[6] > 0x1f) {
+    throw new Error("Can't encode numbers > MAX_SAFE_INT");
+  }
   for (let i = byteArray.length - 1; i >= 0; i--) {
     value = value * 256 + byteArray[i];
   }
@@ -41,7 +53,7 @@ export class BufferWriter {
   }
 
   writeUInt64(i: number): void {
-    const bytes = to64bitLE(i);
+    const bytes = unsafeTo64bitLE(i);
     this.writeSlice(bytes);
   }
 
@@ -90,7 +102,7 @@ export class BufferReader {
 
   readUInt64(): number {
     const buf = this.readSlice(8);
-    const n = from64bitLE(buf);
+    const n = unsafeFrom64bitLE(buf);
     return n;
   }
 
