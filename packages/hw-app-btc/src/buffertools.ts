@@ -1,5 +1,24 @@
 import varuint from "varuint-bitcoin";
 
+export function to64bitLE(n: number): Buffer {
+  // we want to represent the input as a 8-bytes array
+  const byteArray = Buffer.alloc(8, 0);
+  for (let index = 0; index < byteArray.length; index++) {
+    const byte = n & 0xff;
+    byteArray[index] = byte;
+    n = (n - byte) / 256;
+  }
+  return byteArray;
+}
+
+export function from64bitLE(byteArray: Buffer): number {
+  let value = 0;
+  for (let i = byteArray.length - 1; i >= 0; i--) {
+    value = value * 256 + byteArray[i];
+  }
+  return value;
+}
+
 export class BufferWriter {
   private bufs: Buffer[] = [];
 
@@ -21,8 +40,9 @@ export class BufferWriter {
     this.write(4, (b) => b.writeUInt32LE(i, 0));
   }
 
-  writeUInt64(i: bigint): void {
-    this.write(8, (b) => b.writeBigUInt64LE(i, 0));
+  writeUInt64(i: number): void {
+    const bytes = to64bitLE(i);
+    this.writeSlice(bytes);
   }
 
   writeVarInt(i: number): void {
@@ -68,10 +88,10 @@ export class BufferReader {
     return result;
   }
 
-  readUInt64(): bigint {
-    const result = this.buffer.readBigUInt64LE(this.offset);
-    this.offset += 8;
-    return result;
+  readUInt64(): number {
+    const buf = this.readSlice(8);
+    const n = from64bitLE(buf);
+    return n;
   }
 
   readVarInt(): number {
