@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 /* eslint-disable @typescript-eslint/explicit-module-boundary-types */
-import { BufferReader, BufferWriter, unsafeTo64bitLE } from "../buffertools";
+import {
+  BufferReader,
+  BufferWriter,
+  unsafeFrom64bitLE,
+  unsafeTo64bitLE,
+} from "../buffertools";
 
 export enum psbtGlobal {
   TX_VERSION = 0x02,
@@ -263,9 +268,8 @@ export class PsbtV2 {
     this.setOutput(outputIndex, psbtOut.AMOUNT, b(), uint64LE(amount));
   }
   getOutputAmount(outputIndex: number): number {
-    return Number(
-      this.getOutput(outputIndex, psbtOut.AMOUNT, b()).readBigUInt64LE(0)
-    );
+    const buf = this.getOutput(outputIndex, psbtOut.AMOUNT, b());
+    return unsafeFrom64bitLE(buf);
   }
   setOutputScript(outputIndex: number, scriptPubKey: Buffer) {
     this.setOutput(outputIndex, psbtOut.SCRIPT, b(), scriptPubKey);
