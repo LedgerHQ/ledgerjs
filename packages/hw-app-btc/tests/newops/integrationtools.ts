@@ -59,7 +59,7 @@ export async function runSignTransaction(
   outputWriter.writeVarInt(testTx.vout.length);
   testTx.vout.forEach((output) => {
     outputWriter.writeUInt64(
-      BigInt(Number.parseFloat((output.value * 100000000).toFixed(8)))
+      Number.parseFloat((output.value * 100000000).toFixed(8))
     );
     outputWriter.writeVarSlice(Buffer.from(output.scriptPubKey.hex, "hex"));
   });
