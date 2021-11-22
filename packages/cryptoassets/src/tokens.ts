@@ -308,15 +308,22 @@ function convertTRONTokens(type: "trc10" | "trc20") {
 }
 
 function convertSplTokens([
+  chainId,
   name,
   symbol,
   address,
   decimals,
   enableCountervalues,
 ]): TokenCurrency {
+  const chainIdToCurrencyId = {
+    101: "solana",
+    102: "solana_testnet",
+    103: "solana_devnet",
+  };
+  const currencyId = chainIdToCurrencyId[chainId];
   return {
     contractAddress: address,
-    parentCurrency: getCryptoCurrencyById("solana"),
+    parentCurrency: getCryptoCurrencyById(currencyId),
     id: `solana/spl/${address}`,
     name,
     tokenType: "spl",
