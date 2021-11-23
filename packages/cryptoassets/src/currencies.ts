@@ -2184,9 +2184,11 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     explorerViews: [
       {
         address: "https://explorer.solana.com/",
+        tx: "https://explorer.solana.com/tx/$hash",
       },
       {
         address: "https://solanabeach.io/",
+        tx: "https://solanabeach.io/transaction/$hash",
       },
     ],
   },
@@ -2902,6 +2904,74 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       {
         tx: "https://crypto.org/explorer/croeseid/tx/$hash",
         address: "https://crypto.org/explorer/croeseid/account/$address",
+      },
+    ],
+  },
+  solana_testnet: {
+    type: "CryptoCurrency",
+    id: "solana_testnet",
+    coinType: 501,
+    name: "Solana testnet",
+    managerAppName: "Solana",
+    ticker: "SOL",
+    scheme: "solana_testnet",
+    color: "#000",
+    family: "solana",
+    isTestnetFor: "solana",
+    units: [
+      {
+        name: "SOL",
+        code: "SOL",
+        magnitude: 9,
+      },
+      {
+        name: "lamports",
+        code: "lamports",
+        magnitude: 0,
+      },
+    ].map(makeTestnetUnit),
+    explorerViews: [
+      {
+        address: "https://explorer.solana.com/?cluster=testnet",
+        tx: "https://explorer.solana.com/tx/$hash?cluster=testnet",
+      },
+      {
+        address: "https://solanabeach.io/?cluster=testnet",
+        tx: "https://solanabeach.io/transaction/$hash?cluster=testnet",
+      },
+    ],
+  },
+  solana_devnet: {
+    type: "CryptoCurrency",
+    id: "solana_devnet",
+    coinType: 501,
+    name: "Solana devnet",
+    managerAppName: "Solana",
+    ticker: "SOL",
+    scheme: "solana_devnet",
+    color: "#000",
+    family: "solana",
+    isTestnetFor: "solana",
+    units: [
+      {
+        name: "SOL",
+        code: "SOL",
+        magnitude: 9,
+      },
+      {
+        name: "lamports",
+        code: "lamports",
+        magnitude: 0,
+      },
+    ].map(makeTestnetUnit),
+    explorerViews: [
+      {
+        address: "https://explorer.solana.com/?cluster=devnet",
+        tx: "https://explorer.solana.com/tx/$hash?cluster=devnet",
+      },
+      {
+        address: "https://solanabeach.io/?cluster=devnet",
+        tx: "https://solanabeach.io/transaction/$hash?cluster=devnet",
       },
     ],
   },
