@@ -354,7 +354,7 @@ export default class Eth {
       );
 
       if (nftPluginPayload) {
-        setPlugin(this.transport, nftPluginPayload);
+        await setPlugin(this.transport, nftPluginPayload);
       } else {
         const infos = await loadInfosForContractMethod(
           decodedTx.to,
