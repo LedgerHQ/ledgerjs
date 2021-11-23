@@ -1307,6 +1307,10 @@ function provideNFTInformation(
   return transport.send(0xe0, 0x14, 0x00, 0x00, data).then(
     () => true,
     (e) => {
+      if (e && e.statusCode === 0x6a80) {
+        // some issue with providing the data
+        return false;
+      }
       if (e && e.statusCode === 0x6d00) {
         // ignore older version of ETH app
         return false;
