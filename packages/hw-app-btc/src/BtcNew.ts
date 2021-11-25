@@ -21,6 +21,7 @@ import {
   SpendingCondition,
 } from "./newops/accounttype";
 import { AppClient as Client } from "./newops/appClient";
+import { ClientCommandCode } from "./newops/clientCommands";
 import {
   createKey,
   DefaultDescriptorTemplate,
@@ -287,24 +288,60 @@ export default class BtcNew {
 
     const key = createKey(masterFp, accountPath, accountXpub);
     const p = new WalletPolicy(accountType.getDescriptorTemplate(), key);
-    // This is cheating, because it's not actually requested on the
-    // device yet, but it will be, soonish.
-    if (arg.onDeviceSignatureRequested) arg.onDeviceSignatureRequested();
 
-    let firstSigned = false;
-    // This callback will be called once for each signature yielded.
-    const progressCallback = () => {
-      if (!firstSigned) {
-        firstSigned = true;
-        arg.onDeviceSignatureGranted && arg.onDeviceSignatureGranted();
-      }
-      progress();
-    };
-
-    await this.signPsbt(psbt, p, progressCallback);
+    const callback = this.clientCommandCallbackHandler(
+      progress,
+      arg.onDeviceSignatureRequested,
+      arg.onDeviceSignatureGranted
+    );
+    await this.signPsbt(psbt, p, callback);
     finalize(psbt);
     const serializedTx = extract(psbt);
     return serializedTx.toString("hex");
+  }
+
+  private clientCommandCallbackHandler(
+    progress: () => void,
+    sigRequested?: () => void,
+    sigGranted?: () => void
+  ): (code: ClientCommandCode, data: Buffer) => void {
+    let triggered = false;
+    const req = () => {
+      !triggered && sigRequested && sigRequested();
+      triggered = true;
+    };
+    // We have no way of knowing exactly when the device requests the user
+    // to verify the transaction on the device. Therefore we wait until we have
+    // a pause in the stream of client commands. A pause is an indicator that
+    // the device is waiting for user interaction.
+    let timeout = setTimeout(req, 500);
+    const reset = () => {
+      if (triggered) return;
+      clearTimeout(timeout);
+      timeout = setTimeout(req, 500);
+    };
+    const trigger = () => {
+      if (triggered) return;
+      clearTimeout(timeout);
+      req();
+    };
+
+    let firstSigned = false;
+    return (code: ClientCommandCode, _data: Buffer) => {
+      reset();
+      if (code == ClientCommandCode.YIELD) {
+        if (!firstSigned) {
+          // If user (or automation) approves tx before the timeout, we should
+          // call sigRequested() before sigGranted(), because the client might (?)
+          // expect that particular order of callbacks. Leaving out sigRequested()
+          // or calling it after sigGranted, migh
+          trigger();
+          firstSigned = true;
+          sigGranted && sigGranted();
+        }
+        progress();
+      }
+    };
   }
 
   /**
@@ -405,7 +442,7 @@ export default class BtcNew {
   private async signPsbt(
     psbt: PsbtV2,
     walletPolicy: WalletPolicy,
-    progressCallback: () => void
+    progressCallback: (code: ClientCommandCode, data: Buffer) => void
   ): Promise<void> {
     const sigs: Map<number, Buffer> = await this.client.signPsbt(
       psbt,

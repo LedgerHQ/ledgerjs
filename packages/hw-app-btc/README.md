@@ -652,7 +652,7 @@ which will return the yields in the same order as they came in.
 
 #### Parameters
 
-*   `progressCallback` **function (): void** 
+*   ``  
 
 ### MerkelizedPsbt
 

@@ -4,7 +4,7 @@ import { createVarint } from "../varint";
 import { hashLeaf, Merkle } from "./merkle";
 import { MerkleMap } from "./merkleMap";
 
-enum ClientCommandCode {
+export enum ClientCommandCode {
   YIELD = 0x10,
   GET_PREIMAGE = 0x40,
   GET_MERKLE_LEAF_PROOF = 0x41,
@@ -17,24 +17,23 @@ abstract class ClientCommand {
   abstract execute(request: Buffer): Buffer;
 }
 
-export class YieldCommand extends ClientCommand {
+class YieldCommand extends ClientCommand {
   private results: Buffer[];
 
   code = ClientCommandCode.YIELD;
 
-  constructor(results: Buffer[], private progressCallback: () => void) {
+  constructor(results: Buffer[]) {
     super();
     this.results = results;
   }
 
   execute(request: Buffer): Buffer {
     this.results.push(Buffer.from(request.subarray(1)));
-    this.progressCallback();
     return Buffer.from("");
   }
 }
 
-export class GetPreimageCommand extends ClientCommand {
+class GetPreimageCommand extends ClientCommand {
   private known_preimages: Map<string, Buffer>;
   private queue: Buffer[];
 
@@ -92,7 +91,7 @@ export class GetPreimageCommand extends ClientCommand {
   }
 }
 
-export class GetMerkleLeafProofCommand extends ClientCommand {
+class GetMerkleLeafProofCommand extends ClientCommand {
   private known_trees: Map<string, Merkle>;
   private queue: Buffer[];
 
@@ -163,7 +162,7 @@ export class GetMerkleLeafProofCommand extends ClientCommand {
   }
 }
 
-export class GetMerkleLeafIndexCommand extends ClientCommand {
+class GetMerkleLeafIndexCommand extends ClientCommand {
   private known_trees: Map<string, Merkle>;
 
   code = ClientCommandCode.GET_MERKLE_LEAF_INDEX;
@@ -214,7 +213,7 @@ export class GetMerkleLeafIndexCommand extends ClientCommand {
   }
 }
 
-export class GetMoreElementsCommand extends ClientCommand {
+class GetMoreElementsCommand extends ClientCommand {
   queue: Buffer[];
 
   code = ClientCommandCode.GET_MORE_ELEMENTS;
@@ -279,9 +278,14 @@ export class ClientCommandInterpreter {
 
   private commands: Map<ClientCommandCode, ClientCommand> = new Map();
 
-  constructor(progressCallback: () => void) {
+  constructor(
+    private clientCommandCallback: (
+      code: ClientCommandCode,
+      data: Buffer
+    ) => void
+  ) {
     const commands = [
-      new YieldCommand(this.yielded, progressCallback),
+      new YieldCommand(this.yielded),
       new GetPreimageCommand(this.preimages, this.queue),
       new GetMerkleLeafIndexCommand(this.roots),
       new GetMerkleLeafProofCommand(this.roots, this.queue),
@@ -328,7 +332,7 @@ export class ClientCommandInterpreter {
     if (!cmd) {
       throw new Error(`Unexpected command code ${cmdCode}`);
     }
-
+    this.clientCommandCallback(cmdCode, request);
     return cmd.execute(request);
   }
 }
