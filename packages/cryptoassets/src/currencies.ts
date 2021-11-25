@@ -241,7 +241,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ticker: "AVAX",
     scheme: "avalanche",
     color: "#E84142",
-    family: "ethereum",
+    family: "avalanche",
     units: [
       {
         name: "AVAX",
