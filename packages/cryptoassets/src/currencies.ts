@@ -1524,6 +1524,35 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
+  moonriver: {
+    type: "CryptoCurrency",
+    id: "moonriver",
+    coinType: 60,
+    name: "Moonriver",
+    managerAppName: "Moonriver",
+    ticker: "MOVR",
+    scheme: "moonriver",
+    color: "#F2A007",
+    family: "ethereum",
+    units: [
+      {
+        name: "MOVR",
+        code: "MOVR",
+        magnitude: 18,
+      },
+    ],
+    ethereumLikeInfo: {
+      chainId: 1285,
+    },
+    explorerViews: [
+      {
+        tx: "https://moonriver.moonscan.io/tx/$hash",
+        address: "https://moonriver.moonscan.io/address/$address",
+        token:
+          "https://moonriver.moonscan.io/token/$contractAddress?a=$address",
+      },
+    ],
+  },
   musicoin: {
     type: "CryptoCurrency",
     id: "musicoin",
