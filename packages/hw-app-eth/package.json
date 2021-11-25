@@ -1,6 +1,6 @@
 {
   "name": "@ledgerhq/hw-app-eth",
-  "version": "6.16.2",
+  "version": "6.17.0",
   "description": "Ledger Hardware Wallet Ethereum Application API",
   "keywords": [
     "Ledger",
@@ -27,7 +27,7 @@
   "types": "lib/Eth.d.ts",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/cryptoassets": "^6.16.0",
+    "@ledgerhq/cryptoassets": "^6.17.0",
     "@ledgerhq/errors": "^6.10.0",
     "@ledgerhq/hw-transport": "^6.11.2",
     "@ledgerhq/logs": "^6.10.0",
