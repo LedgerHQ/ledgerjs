@@ -525,6 +525,35 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
+  celo: {
+    type: "CryptoCurrency",
+    id: "celo",
+    coinType: 52752,
+    name: "Celo",
+    managerAppName: "Celo",
+    blockAvgTime: 5,
+    ticker: "CELO",
+    scheme: "celo",
+    color: "#35D07F",
+    family: "celo",
+    units: [
+      {
+        name: "CELO",
+        code: "CELO",
+        magnitude: 18,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "http://hubble.figment.io/celo/chains/celo/transactions/$hash",
+        address: "https://hubble.figment.io/celo/chains/celo/accounts/$address",
+      },
+      {
+        tx: "https://explorer.celo.org/tx/$hash",
+        address: "https://explorer.celo.org/address/$address",
+      },
+    ],
+  },
   clubcoin: {
     terminated: {
       link: "https://support.ledger.com/",
