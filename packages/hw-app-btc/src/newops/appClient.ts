@@ -2,7 +2,7 @@ import Transport from "@ledgerhq/hw-transport";
 import { pathElementsToBuffer } from "../bip32";
 import { PsbtV2 } from "./psbtv2";
 import { MerkelizedPsbt } from "./merkelizedPsbt";
-import { ClientCommandCode, ClientCommandInterpreter } from "./clientCommands";
+import { ClientCommandInterpreter } from "./clientCommands";
 import { WalletPolicy } from "./policy";
 import { createVarint } from "../varint";
 import { hashLeaf, Merkle } from "./merkle";
@@ -124,7 +124,7 @@ export class AppClient {
     psbt: PsbtV2,
     walletPolicy: WalletPolicy,
     walletHMAC: Buffer | null,
-    progressCallback: (code: ClientCommandCode, data: Buffer) => void
+    progressCallback: () => void
   ): Promise<Map<number, Buffer>> {
     const merkelizedPsbt = new MerkelizedPsbt(psbt);
 
