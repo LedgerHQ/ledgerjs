@@ -241,7 +241,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ticker: "AVAX",
     scheme: "avalanche",
     color: "#E84142",
-    family: "ethereum",
+    family: "avalanche",
     units: [
       {
         name: "AVAX",
@@ -522,6 +522,35 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       {
         tx: "https://cardanoexplorer.com/tx/$hash",
         address: "https://cardanoexplorer.com/address/$address",
+      },
+    ],
+  },
+  celo: {
+    type: "CryptoCurrency",
+    id: "celo",
+    coinType: 52752,
+    name: "Celo",
+    managerAppName: "Celo",
+    blockAvgTime: 5,
+    ticker: "CELO",
+    scheme: "celo",
+    color: "#35D07F",
+    family: "celo",
+    units: [
+      {
+        name: "CELO",
+        code: "CELO",
+        magnitude: 18,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "http://hubble.figment.io/celo/chains/celo/transactions/$hash",
+        address: "https://hubble.figment.io/celo/chains/celo/accounts/$address",
+      },
+      {
+        tx: "https://explorer.celo.org/tx/$hash",
+        address: "https://explorer.celo.org/address/$address",
       },
     ],
   },
@@ -1521,6 +1550,35 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     explorerViews: [
       {
         tx: "https://moneroblocks.info/tx/$hash",
+      },
+    ],
+  },
+  moonriver: {
+    type: "CryptoCurrency",
+    id: "moonriver",
+    coinType: 60,
+    name: "Moonriver",
+    managerAppName: "Moonriver",
+    ticker: "MOVR",
+    scheme: "moonriver",
+    color: "#F2A007",
+    family: "ethereum",
+    units: [
+      {
+        name: "MOVR",
+        code: "MOVR",
+        magnitude: 18,
+      },
+    ],
+    ethereumLikeInfo: {
+      chainId: 1285,
+    },
+    explorerViews: [
+      {
+        tx: "https://moonriver.moonscan.io/tx/$hash",
+        address: "https://moonriver.moonscan.io/address/$address",
+        token:
+          "https://moonriver.moonscan.io/token/$contractAddress?a=$address",
       },
     ],
   },

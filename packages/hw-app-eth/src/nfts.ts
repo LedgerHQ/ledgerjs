@@ -48,7 +48,7 @@ export const loadNftPlugin = async (
 ): Promise<string | undefined> => {
   const { nftExplorerBaseURL } = getLoadConfig(userLoadConfig);
   if (!nftExplorerBaseURL) return;
-  const url = `${nftExplorerBaseURL}/${chainId}/contracts/${contractAddress}/plugin/selector?selector=${selector}`;
+  const url = `${nftExplorerBaseURL}/${chainId}/contracts/${contractAddress}/plugin-selector/${selector}`;
 
   const response = await axios
     .get<BackendResponse>(url)

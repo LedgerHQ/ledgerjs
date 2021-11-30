@@ -1,1 +1,4 @@
-*             @ledgerhq/ledger-live-maintainer
+*                           @ledgerhq/live-blockchain-support
+packages/devices            @ledgerhq/live-devices
+packages/hw-transport-*     @ledgerhq/live-devices
+packages/react-native-*     @ledgerhq/live-devices
