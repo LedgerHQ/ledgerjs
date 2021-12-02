@@ -15,14 +15,13 @@ module.exports = {
     d.forEach((obj) => {
       for (const contractAddress in obj) {
         const existing = all[contractAddress];
-        if (existing) {
-          if (!isEqual(existing.abi, obj.abi)) {
-            // eslint-disable-next-line no-undef
-            console.warn(
-              "found two different abi for same contract!",
-              contractAddress
-            );
-          }
+        if (existing && !isEqual(existing.abi, obj[contractAddress].abi)) {
+          // eslint-disable-next-line no-undef
+          console.warn(
+            "plugin contract " +
+              contractAddress +
+              "seem to have two different abi for same contract address!"
+          );
         }
         all[contractAddress] = {
           ...existing,
@@ -65,17 +64,22 @@ module.exports = {
 
     return bare.contracts.reduce((acc, contract) => {
       const key = contract.address.toLowerCase();
+      const abi = abis[key];
+      if (!abi) {
+        console.warn("not abi found for " + key + " on " + id);
+      }
+
       return {
         ...acc,
         [key]: {
           ...mapObject(contract.selectors, ([selector, data]) => [
             selector,
             {
-              ...(signatures[contract.address.toLowerCase()][selector] || {}),
+              ...(signatures[key][selector] || {}),
               erc20OfInterest: data.erc20OfInterest,
             },
           ]),
-          abi: abis[contract.address.toLowerCase()],
+          abi,
         },
       };
     }, {});
