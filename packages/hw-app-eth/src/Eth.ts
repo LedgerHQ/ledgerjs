@@ -16,6 +16,7 @@
  ********************************************************************************/
 // FIXME drop:
 import { splitPath, foreach } from "./utils";
+import { Buffer } from "buffer/";
 import { log } from "@ledgerhq/logs";
 import { EthAppPleaseEnableContractData } from "@ledgerhq/errors";
 import type Transport from "@ledgerhq/hw-transport";

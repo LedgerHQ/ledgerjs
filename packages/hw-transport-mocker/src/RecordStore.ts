@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 /**
  * thrown by the RecordStore.fromString parser.
  */

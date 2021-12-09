@@ -30,6 +30,7 @@
     "@ledgerhq/errors": "^6.10.0",
     "@ledgerhq/hw-transport": "^6.11.2",
     "bip32-path": "^0.4.2",
+    "buffer": "^6.0.3",
     "hi-base32": "^0.5.1",
     "js-sha512": "^0.8.0",
     "tweetnacl": "^1.0.3"

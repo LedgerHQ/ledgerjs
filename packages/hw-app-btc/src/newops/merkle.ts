@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import { crypto } from "bitcoinjs-lib";
 
 /**

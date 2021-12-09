@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import type { Transaction } from "./types";
 import { createVarint } from "./varint";
 

@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import { log } from "@ledgerhq/logs";
 import type { Transaction, TransactionInput, TransactionOutput } from "./types";
 import { getVarint } from "./varint";

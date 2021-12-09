@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import varuint from "varuint-bitcoin";
 
 export function unsafeTo64bitLE(n: number): Buffer {

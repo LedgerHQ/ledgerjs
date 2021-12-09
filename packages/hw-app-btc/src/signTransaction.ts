@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import type Transport from "@ledgerhq/hw-transport";
 import { bip32asBuffer } from "./bip32";
 export function signTransaction(

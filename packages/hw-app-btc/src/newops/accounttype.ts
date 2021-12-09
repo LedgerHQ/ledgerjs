@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import { crypto } from "bitcoinjs-lib";
 import { pointAddScalar } from "tiny-secp256k1";
 import { BufferWriter } from "../buffertools";

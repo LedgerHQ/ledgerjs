@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import type Transport from "@ledgerhq/hw-transport";
 import bippath from "bip32-path";
 import { MAX_SCRIPT_BLOCK } from "./constants";

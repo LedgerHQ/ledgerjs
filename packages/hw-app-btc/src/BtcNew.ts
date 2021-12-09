@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import { crypto } from "bitcoinjs-lib";
 import semver from "semver";
 import { pointCompress } from "tiny-secp256k1";

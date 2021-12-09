@@ -27,6 +27,7 @@
   "dependencies": {
     "@ledgerhq/devices": "^6.11.2",
     "@ledgerhq/errors": "^6.10.0",
+    "buffer": "^6.0.3",
     "events": "^3.3.0"
   },
   "scripts": {

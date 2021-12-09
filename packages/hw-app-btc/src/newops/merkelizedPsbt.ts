@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import { MerkleMap } from "./merkleMap";
 import { PsbtV2 } from "./psbtv2";
 

@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import invariant from "invariant";
 import type Transport from "@ledgerhq/hw-transport";
 import type { Transaction } from "./types";

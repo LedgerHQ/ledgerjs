@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import bippath from "bip32-path";
 import bs58check from "bs58check";
 

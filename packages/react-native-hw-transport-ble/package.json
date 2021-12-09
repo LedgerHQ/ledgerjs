@@ -29,6 +29,7 @@
     "@ledgerhq/errors": "^6.10.0",
     "@ledgerhq/hw-transport": "^6.11.2",
     "@ledgerhq/logs": "^6.10.0",
+    "buffer": "^6.0.3",
     "invariant": "^2.2.4",
     "react-native-ble-plx": "2.0.3",
     "rxjs": "6",

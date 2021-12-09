@@ -28,7 +28,8 @@
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/hw-transport": "^6.11.2",
-    "bip32-path": "0.4.2"
+    "bip32-path": "0.4.2",
+    "buffer": "^6.0.3"
   },
   "scripts": {
     "clean": "bash ../../script/clean.sh",

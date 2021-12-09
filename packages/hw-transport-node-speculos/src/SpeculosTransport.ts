@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import { Subject } from "rxjs";
 import net from "net";
 import Transport from "@ledgerhq/hw-transport";

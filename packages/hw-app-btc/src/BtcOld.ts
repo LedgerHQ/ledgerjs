@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import bs58 from "bs58";
 import RIPEMD160 from "ripemd160";
 import sha from "sha.js";

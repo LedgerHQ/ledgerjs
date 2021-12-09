@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import noble, { Characteristic, Service } from "@abandonware/noble";
 import { Observable } from "rxjs";
 import { log } from "@ledgerhq/logs";

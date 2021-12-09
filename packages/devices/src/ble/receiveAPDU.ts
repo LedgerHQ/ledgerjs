@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import { TransportError, DisconnectedDevice } from "@ledgerhq/errors";
 import { Observable } from "rxjs";
 import { log } from "@ledgerhq/logs";

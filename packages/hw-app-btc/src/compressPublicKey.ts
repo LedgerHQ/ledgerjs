@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 export function compressPublicKey(publicKey: Buffer): Buffer {
   const prefix = (publicKey[64] & 1) !== 0 ? 0x03 : 0x02;
   const prefixBuffer = Buffer.alloc(1);

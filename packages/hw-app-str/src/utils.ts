@@ -14,6 +14,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
+import { Buffer } from "buffer/";
 import base32 from "base32.js";
 import nacl from "tweetnacl";
 import { sha256 } from "sha.js";

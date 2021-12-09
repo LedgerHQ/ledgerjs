@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import Transport from "@ledgerhq/hw-transport";
 import { TransportError } from "@ledgerhq/errors";
 import { log } from "@ledgerhq/logs";

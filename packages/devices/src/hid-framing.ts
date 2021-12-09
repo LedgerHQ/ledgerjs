@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import { TransportError } from "@ledgerhq/errors";
 export type ResponseAcc =
   | {

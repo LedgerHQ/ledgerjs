@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import axios from "axios";
 import { getLoadConfig } from "./loadConfig";
 import type { LoadConfig } from "./loadConfig";

@@ -14,6 +14,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
+import { Buffer } from "buffer/";
 import invariant from "invariant";
 import bs58check from "bs58check";
 import blake2b from "blake2b";

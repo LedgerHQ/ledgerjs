@@ -33,6 +33,7 @@
     "@ledgerhq/logs": "^6.10.0",
     "axios": "^0.24.0",
     "bignumber.js": "^9.0.1",
+    "buffer": "^6.0.3",
     "ethers": "^5.5.1"
   },
   "scripts": {

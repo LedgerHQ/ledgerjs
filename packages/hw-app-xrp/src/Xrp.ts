@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import type Transport from "@ledgerhq/hw-transport";
 import BIPPath from "bip32-path";
 /**

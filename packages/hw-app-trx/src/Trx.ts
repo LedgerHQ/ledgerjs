@@ -18,6 +18,7 @@
 import { splitPath, foreach, decodeVarint } from "./utils";
 //import { StatusCodes, TransportStatusError } from "@ledgerhq/errors";
 import type Transport from "@ledgerhq/hw-transport";
+import { Buffer } from "buffer/";
 
 const remapTransactionRelatedErrors = (e) => {
   if (e && e.statusCode === 0x6a80) {

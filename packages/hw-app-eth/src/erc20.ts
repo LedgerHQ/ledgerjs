@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import blob from "@ledgerhq/cryptoassets/data/erc20-signatures";
 
 /**

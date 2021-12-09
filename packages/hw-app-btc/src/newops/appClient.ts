@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import Transport from "@ledgerhq/hw-transport";
 import { pathElementsToBuffer } from "../bip32";
 import { PsbtV2 } from "./psbtv2";

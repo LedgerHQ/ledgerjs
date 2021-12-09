@@ -15,6 +15,7 @@
  *  limitations under the License.
  ********************************************************************************/
 import type Transport from "@ledgerhq/hw-transport";
+import { Buffer } from "buffer/";
 import BIPPath from "bip32-path";
 import {
   UserRefusedOnDevice,

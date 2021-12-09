@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import { crypto } from "bitcoinjs-lib";
 import { pathArrayToString } from "../bip32";
 import { BufferWriter } from "../buffertools";

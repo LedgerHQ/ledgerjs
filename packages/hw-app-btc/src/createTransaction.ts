@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import { log } from "@ledgerhq/logs";
 import type Transport from "@ledgerhq/hw-transport";
 import { hashPublicKey } from "./hashPublicKey";

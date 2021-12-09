@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import Transport from "@ledgerhq/hw-transport";
 import type { DeviceModel } from "@ledgerhq/devices";
 import { sendAPDU } from "@ledgerhq/devices/lib/ble/sendAPDU";

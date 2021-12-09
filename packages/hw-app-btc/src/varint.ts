@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 export function getVarint(data: Buffer, offset: number): [number, number] {
   if (data[offset] < 0xfd) {
     return [data[offset], 1];

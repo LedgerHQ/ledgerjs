@@ -29,7 +29,8 @@
   "dependencies": {
     "@ledgerhq/errors": "^6.10.0",
     "@ledgerhq/hw-transport": "^6.11.2",
-    "bip32-path": "^0.4.2"
+    "bip32-path": "^0.4.2",
+    "buffer": "^6.0.3"
   },
   "scripts": {
     "clean": "bash ../../script/clean.sh",

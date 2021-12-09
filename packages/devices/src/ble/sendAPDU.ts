@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import { Observable } from "rxjs";
 import { log } from "@ledgerhq/logs";
 const TagId = 0x05;

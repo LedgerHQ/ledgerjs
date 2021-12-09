@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import HID, { Device } from "node-hid";
 import { log } from "@ledgerhq/logs";
 import Transport, {

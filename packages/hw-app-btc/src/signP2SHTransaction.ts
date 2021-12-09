@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import type Transport from "@ledgerhq/hw-transport";
 import { getTrustedInput } from "./getTrustedInput";
 import { startUntrustedHashTransactionInput } from "./startUntrustedHashTransactionInput";

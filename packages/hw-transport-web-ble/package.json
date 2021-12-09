@@ -31,6 +31,7 @@
     "@ledgerhq/errors": "^6.10.0",
     "@ledgerhq/hw-transport": "^6.11.2",
     "@ledgerhq/logs": "^6.10.0",
+    "buffer": "^6.0.3",
     "rxjs": "6"
   },
   "devDependencies": {

@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import { Observable } from "rxjs";
 import { TransportError } from "@ledgerhq/errors";
 import type { Characteristic } from "./types";

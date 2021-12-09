@@ -1,3 +1,4 @@
+import { Buffer } from "buffer/";
 import { createVarint } from "../varint";
 import { hashLeaf, Merkle } from "./merkle";
 
