@@ -5,7 +5,6 @@ Array [
   "algorand/asa/312769",
   "ethereum/erc20/usd_tether__erc20_",
   "polygon/erc20/(pos)_tether_usd",
-  "solana/spl/Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB",
   "tron/trc20/TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
 ]
 `;
