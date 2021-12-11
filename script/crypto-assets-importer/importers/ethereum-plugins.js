@@ -1,4 +1,5 @@
 const path = require("path");
+const isEqual = require("lodash/isEqual");
 const { readFileJSON } = require("../utils");
 
 const mapObject = (obj, fn) => Object.fromEntries(Object.entries(obj).map(fn));
@@ -6,18 +7,32 @@ const mapObject = (obj, fn) => Object.fromEntries(Object.entries(obj).map(fn));
 module.exports = {
   paths: ["dapps/ethereum", "dapps/bsc", "dapps/polygon"],
   output: "ethereum.json", // to be put in crypto assets list
-  outputTemplate: (data) =>
-    JSON.stringify(
-      data.reduce(
-        (acc, obj) => ({
-          ...acc,
-          ...obj,
-        }),
-        {}
-      ),
-      null,
-      2
-    ),
+
+  join: (d) => {
+    // merge together all methods with the same contract id
+    // for instance if paraswapv4 is on eth, it will merge all other cross chain data that would happen to have same contract address
+    const all = {};
+    d.forEach((obj) => {
+      for (const contractAddress in obj) {
+        const existing = all[contractAddress];
+        if (existing && !isEqual(existing.abi, obj[contractAddress].abi)) {
+          // eslint-disable-next-line no-undef
+          console.warn(
+            "plugin contract " +
+              contractAddress +
+              "seem to have two different abi for same contract address!"
+          );
+        }
+        all[contractAddress] = {
+          ...existing,
+          ...obj[contractAddress],
+        };
+      }
+    });
+    return all;
+  },
+
+  outputTemplate: (data) => JSON.stringify(data, null, 2),
 
   loader: async ({ signatureFolder, folder, id }) => {
     const [signatures, bare] = await Promise.all([
@@ -47,21 +62,26 @@ module.exports = {
       {}
     );
 
-    return bare.contracts.reduce(
-      (acc, contract) => ({
+    return bare.contracts.reduce((acc, contract) => {
+      const key = contract.address.toLowerCase();
+      const abi = abis[key];
+      if (!abi) {
+        console.warn("not abi found for " + key + " on " + id);
+      }
+
+      return {
         ...acc,
-        [contract.address.toLowerCase()]: {
+        [key]: {
           ...mapObject(contract.selectors, ([selector, data]) => [
             selector,
             {
-              ...(signatures[contract.address.toLowerCase()][selector] || {}),
+              ...(signatures[key][selector] || {}),
               erc20OfInterest: data.erc20OfInterest,
             },
           ]),
-          abi: abis[contract.address.toLowerCase()],
+          abi,
         },
-      }),
-      {}
-    );
+      };
+    }, {});
   },
 };

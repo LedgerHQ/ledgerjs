@@ -6,7 +6,7 @@ import trc20tokens from "../data/trc20";
 import bep20tokens from "../data/bep20";
 import polygonTokens from "../data/polygon-erc20";
 import asatokens from "../data/asa";
-import spltokens from "../data/spl";
+//import spltokens from "../data/spl";
 const emptyArray = [];
 const tokensArray: TokenCurrency[] = [];
 const tokensArrayWithDelisted: TokenCurrency[] = [];
@@ -22,7 +22,7 @@ addTokens(trc10tokens.map(convertTRONTokens("trc10")));
 addTokens(trc20tokens.map(convertTRONTokens("trc20")));
 addTokens(bep20tokens.map(convertBEP20));
 addTokens(asatokens.map(convertAlgorandASATokens));
-addTokens(spltokens.map(convertSplTokens));
+//addTokens(spltokens.map(convertSplTokens));
 type TokensListOptions = {
   withDelisted: boolean;
 };
@@ -307,6 +307,7 @@ function convertTRONTokens(type: "trc10" | "trc20") {
   });
 }
 
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 function convertSplTokens([
   chainId,
   name,
