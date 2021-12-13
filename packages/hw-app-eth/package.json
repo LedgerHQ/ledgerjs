@@ -32,8 +32,8 @@
     "@ledgerhq/hw-transport": "^6.11.2",
     "@ledgerhq/logs": "^6.10.0",
     "axios": "^0.24.0",
-    "bignumber.js": "^9.0.1",
-    "ethers": "^5.5.1"
+    "bignumber.js": "^9.0.2",
+    "ethers": "^5.5.2"
   },
   "scripts": {
     "clean": "bash ../../script/clean.sh",
