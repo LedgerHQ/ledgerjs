@@ -77,11 +77,13 @@ const devices: { [key in DeviceModelId]: DeviceModel } = {
         serviceUuid: "d973f2e0-b19e-11e2-9e96-0800200c9a66",
         notifyUuid: "d973f2e1-b19e-11e2-9e96-0800200c9a66",
         writeUuid: "d973f2e2-b19e-11e2-9e96-0800200c9a66",
+        writeCmdUuid: "d973f2e3-b19e-11e2-9e96-0800200c9a66",
       },
       {
         serviceUuid: "13d63400-2c97-0004-0000-4c6564676572",
         notifyUuid: "13d63400-2c97-0004-0001-4c6564676572",
         writeUuid: "13d63400-2c97-0004-0002-4c6564676572",
+        writeCmdUuid: "13d63400-2c97-0004-0003-4c6564676572",
       },
     ],
   },
@@ -196,6 +198,7 @@ export interface DeviceModel {
   bluetoothSpec?: {
     serviceUuid: string;
     writeUuid: string;
+    writeCmdUuid: string;
     notifyUuid: string;
   }[];
 }
@@ -207,5 +210,6 @@ export interface BluetoothInfos {
   deviceModel: DeviceModel;
   serviceUuid: string;
   writeUuid: string;
+  writeCmdUuid: string;
   notifyUuid: string;
 }

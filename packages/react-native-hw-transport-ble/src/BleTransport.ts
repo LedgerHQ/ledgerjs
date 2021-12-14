@@ -26,6 +26,7 @@ import { awaitsBleOn } from "./awaitsBleOn";
 import { decoratePromiseErrors, remapError } from "./remapErrors";
 let connectOptions: Record<string, unknown> = {
   requestMTU: 156,
+  connectionPriority: 1,
 };
 const transportsCache = {};
 const bleManager = new BleManager();
@@ -147,7 +148,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
     throw new TransportError("service not found", "BLEServiceNotFound");
   }
 
-  const { deviceModel, serviceUuid, writeUuid, notifyUuid } = res;
+  const { deviceModel, serviceUuid, writeUuid, writeCmdUuid, notifyUuid } = res;
 
   if (!characteristics) {
     characteristics = await device.characteristicsForService(serviceUuid);
@@ -158,11 +159,14 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
   }
 
   let writeC;
+  let writeCmdC;
   let notifyC;
 
   for (const c of characteristics) {
     if (c.uuid === writeUuid) {
       writeC = c;
+    } else if (c.uuid === writeCmdUuid) {
+      writeCmdC = c;
     } else if (c.uuid === notifyUuid) {
       notifyC = c;
     }
@@ -196,6 +200,15 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
     );
   }
 
+  if (writeCmdC) {
+    if (!writeCmdC.isWritableWithoutResponse) {
+      throw new TransportError(
+        "write cmd characteristic not writableWithoutResponse",
+        "BLEChracteristicInvalid"
+      );
+    }
+  }
+
   log("ble-verbose", `device.mtu=${device.mtu}`);
   const notifyObservable = monitorCharacteristic(notifyC).pipe(
     tap((value) => {
@@ -207,6 +220,7 @@ async function open(deviceOrId: Device | string, needsReconnect: boolean) {
   const transport = new BluetoothTransport(
     device,
     writeC,
+    writeCmdC,
     notifyObservable,
     deviceModel
   );
@@ -373,6 +387,7 @@ export default class BluetoothTransport extends Transport {
   device: Device;
   mtuSize = 20;
   writeCharacteristic: Characteristic;
+  writeCmdCharacteristic: Characteristic;
   notifyObservable: Observable<Buffer>;
   deviceModel: DeviceModel;
   notYetDisconnected = true;
@@ -380,6 +395,7 @@ export default class BluetoothTransport extends Transport {
   constructor(
     device: Device,
     writeCharacteristic: Characteristic,
+    writeCmdCharacteristic: Characteristic,
     notifyObservable: Observable<Buffer>,
     deviceModel: DeviceModel
   ) {
@@ -387,6 +403,7 @@ export default class BluetoothTransport extends Transport {
     this.id = device.id;
     this.device = device;
     this.writeCharacteristic = writeCharacteristic;
+    this.writeCmdCharacteristic = writeCmdCharacteristic;
     this.notifyObservable = notifyObservable;
     this.deviceModel = deviceModel;
     log("ble-verbose", `BleTransport(${String(this.id)}) new instance`);
@@ -470,13 +487,24 @@ export default class BluetoothTransport extends Transport {
   write = async (buffer: Buffer, txid?: string | null | undefined) => {
     log("ble-frame", "=> " + buffer.toString("hex"));
 
-    try {
-      await this.writeCharacteristic.writeWithResponse(
-        buffer.toString("base64"),
-        txid
-      );
-    } catch (e: any) {
-      throw new DisconnectedDeviceDuringOperation(e.message);
+    if (!this.writeCmdCharacteristic) {
+      try {
+        await this.writeCharacteristic.writeWithResponse(
+          buffer.toString("base64"),
+          txid
+        );
+      } catch (e: any) {
+        throw new DisconnectedDeviceDuringOperation(e.message);
+      }
+    } else {
+      try {
+        await this.writeCmdCharacteristic.writeWithoutResponse(
+          buffer.toString("base64"),
+          txid
+        );
+      } catch (e: any) {
+        throw new DisconnectedDeviceDuringOperation(e.message);
+      }
     }
   };
 
