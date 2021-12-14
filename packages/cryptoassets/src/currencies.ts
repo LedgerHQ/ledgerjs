@@ -241,7 +241,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ticker: "AVAX",
     scheme: "avalanche",
     color: "#E84142",
-    family: "ethereum",
+    family: "avalanche",
     units: [
       {
         name: "AVAX",
@@ -522,6 +522,35 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       {
         tx: "https://cardanoexplorer.com/tx/$hash",
         address: "https://cardanoexplorer.com/address/$address",
+      },
+    ],
+  },
+  celo: {
+    type: "CryptoCurrency",
+    id: "celo",
+    coinType: 52752,
+    name: "Celo",
+    managerAppName: "Celo",
+    blockAvgTime: 5,
+    ticker: "CELO",
+    scheme: "celo",
+    color: "#35D07F",
+    family: "celo",
+    units: [
+      {
+        name: "CELO",
+        code: "CELO",
+        magnitude: 18,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "http://hubble.figment.io/celo/chains/celo/transactions/$hash",
+        address: "https://hubble.figment.io/celo/chains/celo/accounts/$address",
+      },
+      {
+        tx: "https://explorer.celo.org/tx/$hash",
+        address: "https://explorer.celo.org/address/$address",
       },
     ],
   },
@@ -1280,6 +1309,30 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [],
   },
+  icp: {
+    type: "CryptoCurrency",
+    id: "icp",
+    coinType: 223,
+    family: "icp",
+    ticker: "ICP",
+    scheme: "icp",
+    color: "#000",
+    managerAppName: "InternetComputer",
+    name: "Internet Computer (ICP)",
+    units: [
+      {
+        name: "ICP",
+        code: "ICP",
+        magnitude: 8,
+      },
+    ],
+    explorerViews: [
+      {
+        address: "https://dashboard.internetcomputer.org/account/$address",
+        tx: "https://dashboard.internetcomputer.org/transaction/$hash",
+      },
+    ],
+  },
   iota: {
     type: "CryptoCurrency",
     id: "iota",
@@ -1521,6 +1574,35 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     explorerViews: [
       {
         tx: "https://moneroblocks.info/tx/$hash",
+      },
+    ],
+  },
+  moonriver: {
+    type: "CryptoCurrency",
+    id: "moonriver",
+    coinType: 60,
+    name: "Moonriver",
+    managerAppName: "Moonriver",
+    ticker: "MOVR",
+    scheme: "moonriver",
+    color: "#F2A007",
+    family: "ethereum",
+    units: [
+      {
+        name: "MOVR",
+        code: "MOVR",
+        magnitude: 18,
+      },
+    ],
+    ethereumLikeInfo: {
+      chainId: 1285,
+    },
+    explorerViews: [
+      {
+        tx: "https://moonriver.moonscan.io/tx/$hash",
+        address: "https://moonriver.moonscan.io/address/$address",
+        token:
+          "https://moonriver.moonscan.io/token/$contractAddress?a=$address",
       },
     ],
   },
@@ -2184,9 +2266,11 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     explorerViews: [
       {
         address: "https://explorer.solana.com/",
+        tx: "https://explorer.solana.com/tx/$hash",
       },
       {
         address: "https://solanabeach.io/",
+        tx: "https://solanabeach.io/transaction/$hash",
       },
     ],
   },
@@ -2765,7 +2849,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     type: "CryptoCurrency",
     id: "crypto_org",
     coinType: 394,
-    name: "Crypto.org Coin",
+    name: "Crypto.org",
     managerAppName: "Crypto.org Chain",
     ticker: "CRO",
     scheme: "crypto_org",
@@ -2879,7 +2963,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     type: "CryptoCurrency",
     id: "crypto_org_croeseid",
     coinType: 394,
-    name: "Crypto.org Croeseid Coin",
+    name: "Crypto.org Croeseid",
     managerAppName: "Crypto.org Chain",
     ticker: "CRO",
     scheme: "crypto_org_croeseid",
@@ -2902,6 +2986,74 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       {
         tx: "https://crypto.org/explorer/croeseid/tx/$hash",
         address: "https://crypto.org/explorer/croeseid/account/$address",
+      },
+    ],
+  },
+  solana_testnet: {
+    type: "CryptoCurrency",
+    id: "solana_testnet",
+    coinType: 501,
+    name: "Solana testnet",
+    managerAppName: "Solana",
+    ticker: "SOL",
+    scheme: "solana_testnet",
+    color: "#000",
+    family: "solana",
+    isTestnetFor: "solana",
+    units: [
+      {
+        name: "SOL",
+        code: "SOL",
+        magnitude: 9,
+      },
+      {
+        name: "lamports",
+        code: "lamports",
+        magnitude: 0,
+      },
+    ].map(makeTestnetUnit),
+    explorerViews: [
+      {
+        address: "https://explorer.solana.com/?cluster=testnet",
+        tx: "https://explorer.solana.com/tx/$hash?cluster=testnet",
+      },
+      {
+        address: "https://solanabeach.io/?cluster=testnet",
+        tx: "https://solanabeach.io/transaction/$hash?cluster=testnet",
+      },
+    ],
+  },
+  solana_devnet: {
+    type: "CryptoCurrency",
+    id: "solana_devnet",
+    coinType: 501,
+    name: "Solana devnet",
+    managerAppName: "Solana",
+    ticker: "SOL",
+    scheme: "solana_devnet",
+    color: "#000",
+    family: "solana",
+    isTestnetFor: "solana",
+    units: [
+      {
+        name: "SOL",
+        code: "SOL",
+        magnitude: 9,
+      },
+      {
+        name: "lamports",
+        code: "lamports",
+        magnitude: 0,
+      },
+    ].map(makeTestnetUnit),
+    explorerViews: [
+      {
+        address: "https://explorer.solana.com/?cluster=devnet",
+        tx: "https://explorer.solana.com/tx/$hash?cluster=devnet",
+      },
+      {
+        address: "https://solanabeach.io/?cluster=devnet",
+        tx: "https://solanabeach.io/transaction/$hash?cluster=devnet",
       },
     ],
   },

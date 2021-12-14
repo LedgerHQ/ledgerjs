@@ -30,7 +30,7 @@ export function extract(psbt: PsbtV2): Buffer {
   const outputCount = psbt.getGlobalOutputCount();
   tx.writeVarInt(outputCount);
   for (let i = 0; i < outputCount; i++) {
-    tx.writeUInt64(BigInt(psbt.getOutputAmount(i)));
+    tx.writeUInt64(psbt.getOutputAmount(i));
     tx.writeVarSlice(psbt.getOutputScript(i));
   }
   tx.writeSlice(witnessWriter.buffer());

@@ -7,7 +7,7 @@ import bep20tokens from "../data/bep20";
 import polygonTokens from "../data/polygon-erc20";
 import asatokens from "../data/asa";
 import esdttokens from "../data/esdt";
-import spltokens from "../data/spl";
+//import spltokens from "../data/spl";
 const emptyArray = [];
 const tokensArray: TokenCurrency[] = [];
 const tokensArrayWithDelisted: TokenCurrency[] = [];
@@ -24,7 +24,7 @@ addTokens(trc20tokens.map(convertTRONTokens("trc20")));
 addTokens(bep20tokens.map(convertBEP20));
 addTokens(asatokens.map(convertAlgorandASATokens));
 addTokens(esdttokens.map(convertElrondESDTTokens));
-addTokens(spltokens.map(convertSplTokens));
+//addTokens(spltokens.map(convertSplTokens));
 type TokensListOptions = {
   withDelisted: boolean;
 };
@@ -337,16 +337,24 @@ function convertElrondESDTTokens([
   };
 }
 
+/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 function convertSplTokens([
+  chainId,
   name,
   symbol,
   address,
   decimals,
   enableCountervalues,
 ]): TokenCurrency {
+  const chainIdToCurrencyId = {
+    101: "solana",
+    102: "solana_testnet",
+    103: "solana_devnet",
+  };
+  const currencyId = chainIdToCurrencyId[chainId];
   return {
     contractAddress: address,
-    parentCurrency: getCryptoCurrencyById("solana"),
+    parentCurrency: getCryptoCurrencyById(currencyId),
     id: `solana/spl/${address}`,
     name,
     tokenType: "spl",
