@@ -47,7 +47,7 @@ export class GetPreimageCommand extends ClientCommand {
   }
 
   execute(request: Buffer): Buffer {
-    const req = request.subarray(1);
+    const req = Buffer.from(request.subarray(1));
 
     // we expect no more data to read
     if (req.length != 1 + 32) {
@@ -84,7 +84,7 @@ export class GetPreimageCommand extends ClientCommand {
       return Buffer.concat([
         preimage_len_varint,
         Buffer.from([payload_size]),
-        known_preimage.subarray(0, payload_size),
+        Buffer.from(known_preimage.subarray(0, payload_size)),
       ]);
     }
 
@@ -105,7 +105,7 @@ export class GetMerkleLeafProofCommand extends ClientCommand {
   }
 
   execute(request: Buffer): Buffer {
-    const req = request.subarray(1);
+    const req = Buffer.from(request.subarray(1));
 
     if (req.length < 32 + 1 + 1) {
       throw new Error("Invalid request, expected at least 34 bytes");
@@ -174,7 +174,7 @@ export class GetMerkleLeafIndexCommand extends ClientCommand {
   }
 
   execute(request: Buffer): Buffer {
-    const req = request.subarray(1);
+    const req = Buffer.from(request.subarray(1));
 
     if (req.length != 32 + 32) {
       throw new Error("Invalid request, unexpected trailing data");
