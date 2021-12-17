@@ -5,5 +5,5 @@ module.exports = [
   ["TMwFHYXLJaRUPeW6421aqXL4ZEzPRFGkGT","USDJ","JUST Stablecoin","TMwFHYXLJaRUPeW6421aqXL4ZEzPRFGkGT",18],
   ["TVj7RNVHy6thbM7BWdSe9G6gXwKhjhdNZS","KLV","Klever","TVj7RNVHy6thbM7BWdSe9G6gXwKhjhdNZS",6],
   ["TBwoSTyywvLrgjSgaatxrBhxt3DGpVuENh","SEED","SEED","TBwoSTyywvLrgjSgaatxrBhxt3DGpVuENh",6],
-  ["TZJmk51TP3YEETw7phRP581A7H3VzLDFsa","TEUR”,”EUR AlteWay Token","TZJmk51TP3YEETw7phRP581A7H3VzLDFsa",4]
+  ["TZJmk51TP3YEETw7phRP581A7H3VzLDFsa","TEUR","EUR AlteWay Token","TZJmk51TP3YEETw7phRP581A7H3VzLDFsa",4]
 ];
