@@ -1240,7 +1240,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       {
         tx: "https://v2.explorer.kabuto.sh/transaction/$hash",
         address: "https://v2.explorer.kabuto.sh/id/$address",
-      }
+      },
     ],
   },
   hpb: {
