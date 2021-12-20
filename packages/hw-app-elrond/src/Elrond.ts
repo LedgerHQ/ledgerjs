@@ -36,7 +36,7 @@ export default class Elrond {
         "signTransaction",
         "signMessage",
         "getAppConfiguration",
-        "provideESDTInfo"
+        "provideESDTInfo",
       ],
       "eGLD"
     );
@@ -197,7 +197,7 @@ export default class Elrond {
 
     return signature;
   }
-  
+
   serializeESDTInfo(
     ticker: string,
     id: string,
@@ -213,7 +213,7 @@ export default class Elrond {
     const chainIdLengthBuffer = Buffer.from([chainId.length]);
     const chainIdBuffer = Buffer.from(chainId);
     const signatureBuffer = Buffer.from(signature, "hex");
-    let infoBuffer = [
+    const infoBuffer = [
       tickerLengthBuffer,
       tickerBuffer,
       idLengthBuffer,

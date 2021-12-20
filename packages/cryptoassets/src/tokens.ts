@@ -314,9 +314,10 @@ function convertElrondESDTTokens([
   identifier,
   decimals,
   signature,
-  name
+  name,
 ]): TokenCurrency {
-  const ELROND_ESDT_CONTRACT = 'erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u';
+  const ELROND_ESDT_CONTRACT =
+    "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u";
 
   return {
     type: "TokenCurrency",
