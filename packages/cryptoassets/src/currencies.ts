@@ -1236,7 +1236,12 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
         magnitude: 8,
       },
     ],
-    explorerViews: [],
+    explorerViews: [
+      {
+        tx: "https://v2.explorer.kabuto.sh/transaction/$hash",
+        address: "https://v2.explorer.kabuto.sh/id/$address",
+      }
+    ],
   },
   hpb: {
     type: "CryptoCurrency",
