@@ -30,12 +30,12 @@
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.4.0",
     "eslint-plugin-react": "^7.27.1",
-    "jest": "^27.4.4",
+    "jest": "^27.4.5",
     "lerna": "3.22.1",
     "prettier": "^2.2.1",
-    "ts-jest": "^27.1.1",
+    "ts-jest": "^27.1.2",
     "ts-node": "^10.4.0",
-    "typescript": "^4.5.3",
+    "typescript": "^4.5.4",
     "uglify-js": "^3.14.5"
   },
   "dependencies": {
