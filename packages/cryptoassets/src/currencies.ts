@@ -2441,8 +2441,8 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        tx: "https://tzstats.com/operation/$hash",
-        address: "https://tzstats.com/account/$address",
+        tx: "https://tzkt.io/$hash",
+        address: "https://tzkt.io/$address",
       },
     ],
   },
