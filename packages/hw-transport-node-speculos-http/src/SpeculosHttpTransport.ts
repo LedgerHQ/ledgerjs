@@ -13,7 +13,7 @@ export type SpeculosHttpTransportOpts = {
  * Speculos TCP transport implementation
  *
  * @example
- * import SpeculosHttpTransport from "...";
+ * import SpeculosHttpTransport from "@ledgerhq/hw-transport-node-speculos-http";
  * const transport = await SpeculosHttpTransport.open();
  * const res = await transport.send(0xE0, 0x01, 0, 0);
  */
