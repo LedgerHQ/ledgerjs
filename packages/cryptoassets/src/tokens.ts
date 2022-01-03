@@ -6,6 +6,7 @@ import trc20tokens from "../data/trc20";
 import bep20tokens from "../data/bep20";
 import polygonTokens from "../data/polygon-erc20";
 import asatokens from "../data/asa";
+import esdttokens from "../data/esdt";
 //import spltokens from "../data/spl";
 const emptyArray = [];
 const tokensArray: TokenCurrency[] = [];
@@ -22,6 +23,7 @@ addTokens(trc10tokens.map(convertTRONTokens("trc10")));
 addTokens(trc20tokens.map(convertTRONTokens("trc20")));
 addTokens(bep20tokens.map(convertBEP20));
 addTokens(asatokens.map(convertAlgorandASATokens));
+addTokens(esdttokens.map(convertElrondESDTTokens));
 //addTokens(spltokens.map(convertSplTokens));
 type TokensListOptions = {
   withDelisted: boolean;
@@ -305,6 +307,35 @@ function convertTRONTokens(type: "trc10" | "trc20") {
       },
     ],
   });
+}
+
+function convertElrondESDTTokens([
+  ticker,
+  identifier,
+  decimals,
+  signature,
+  name,
+]): TokenCurrency {
+  const ELROND_ESDT_CONTRACT =
+    "erd1qqqqqqqqqqqqqqqpqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqzllls8a5w6u";
+
+  return {
+    type: "TokenCurrency",
+    id: `elrond/esdt/${identifier}`,
+    contractAddress: ELROND_ESDT_CONTRACT,
+    ledgerSignature: signature,
+    parentCurrency: getCryptoCurrencyById("elrond"),
+    tokenType: "esdt",
+    name,
+    ticker,
+    units: [
+      {
+        name,
+        code: ticker,
+        magnitude: decimals,
+      },
+    ],
+  };
 }
 
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
