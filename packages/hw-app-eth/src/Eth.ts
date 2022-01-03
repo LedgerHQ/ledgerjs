@@ -15,16 +15,13 @@
  *  limitations under the License.
  ********************************************************************************/
 // FIXME drop:
-import { splitPath, foreach } from "./utils";
-import { log } from "@ledgerhq/logs";
 import { EthAppPleaseEnableContractData } from "@ledgerhq/errors";
 import type Transport from "@ledgerhq/hw-transport";
 import { BigNumber } from "bignumber.js";
-import { ethers } from "ethers";
-import { byContractAddressAndChainId } from "./erc20";
-import { loadInfosForContractMethod } from "./contracts";
-import type { LoadConfig } from "./loadConfig";
-import { getNFTInfo, loadNftPlugin } from "./nfts";
+import { decodeTxInfo } from "./utils";
+// NB: these are temporary import for the deprecated fallback mechanism
+import { LedgerEthTransactionResolution, LoadConfig } from "./services/types";
+import ledgerService from "./services/ledger";
 
 export type StarkQuantizationType =
   | "eth"
@@ -39,6 +36,22 @@ const starkQuantizationTypeMap = {
   erc20mintable: 4,
   erc721mintable: 5,
 };
+
+function splitPath(path: string): number[] {
+  const result: number[] = [];
+  const components = path.split("/");
+  components.forEach((element) => {
+    let number = parseInt(element, 10);
+    if (isNaN(number)) {
+      return; // FIXME shouldn't it throws instead?
+    }
+    if (element.length > 1 && element[element.length - 1] === "'") {
+      number += 0x80000000;
+    }
+    result.push(number);
+  });
+  return result;
+}
 
 function hexBuffer(str: string): Buffer {
   return Buffer.from(str.startsWith("0x") ? str.slice(2) : str, "hex");
@@ -168,119 +181,72 @@ export default class Eth {
   }
 
   /**
-   * This commands provides a trusted description of an ERC 20 token
-   * to associate a contract address with a ticker and number of decimals.
-   *
-   * It shall be run immediately before performing a transaction involving a contract
-   * calling this contract address to display the proper token information to the user if necessary.
-   *
-   * @param {*} info: a blob from "erc20.js" utilities that contains all token information.
-   *
+   * You can sign a transaction and retrieve v, r, s given the raw transaction and the BIP 32 path of the account to sign.
+   * 
+   * @param path: the BIP32 path to sign the transaction on
+   * @param rawTxHex: the raw ethereum transaction in hexadecimal to sign
+   * @param resolution: resolution is an object with all "resolved" metadata necessary to allow the device to clear sign information. This includes: ERC20 token information, plugins, contracts, NFT signatures,... You must explicitly provide something to avoid having a warning. By default, you can use Ledger's service or your own resolution service. See services/types.js for the contract. Setting the value to "null" will fallback everything to blind signing but will still allow the device to sign the transaction.
    * @example
-   * import { byContractAddressAndChainId } from "@ledgerhq/hw-app-eth/erc20"
-   * const zrxInfo = byContractAddressAndChainId("0xe41d2489571d322189246dafa5ebde1f4699f498", chainId)
-   * if (zrxInfo) await appEth.provideERC20TokenInformation(zrxInfo)
-   * const signed = await appEth.signTransaction(path, rawTxHex)
-   */
-  provideERC20TokenInformation({ data }: { data: Buffer }): Promise<boolean> {
-    return provideERC20TokenInformation(this.transport, data);
-  }
-
-  /**
-   * You can sign a transaction and retrieve v, r, s given the raw transaction and the BIP 32 path of the account to sign
-   * @example
-   eth.signTransaction("44'/60'/0'/0/0", "e8018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a2487400080").then(result => ...)
+   import ledgerService from "@ledgerhq/hw-app-eth/lib/services/ledger"
+   const tx = "e8018504e3b292008252089428ee52a8f3d6e5d15f8b131996950d7f296c7952872bd72a2487400080"; // raw tx to sign
+   const resolution = await ledgerService.resolveTransaction(tx);
+   const result = eth.signTransaction("44'/60'/0'/0/0", tx, resolution);
+   console.log(result);
    */
   async signTransaction(
     path: string,
-    rawTxHex: string
+    rawTxHex: string,
+    resolution?: LedgerEthTransactionResolution | null
   ): Promise<{
     s: string;
     v: string;
     r: string;
   }> {
-    const paths = splitPath(path);
-    let offset = 0;
+    if (resolution === undefined) {
+      console.warn(
+        "hw-app-eth: signTransaction(path, rawTxHex, resolution): " +
+          "please provide the 'resolution' parameter. " +
+          "See https://github.com/LedgerHQ/ledgerjs/blob/master/packages/hw-app-eth/README.md " +
+          "– the previous signature is deprecated and providing the 3rd 'resolution' parameter explicitly will become mandatory so you have the control on the resolution and the fallback mecanism (e.g. fallback to blind signing or not)." +
+          "// Possible solution:\n" +
+          " + import ledgerService from '@ledgerhq/hw-app-eth/lib/services/ledger';\n" +
+          " + const resolution = await ledgerService.resolveTransaction(rawTxHex);"
+      );
+      resolution = await ledgerService
+        .resolveTransaction(rawTxHex, this.loadConfig)
+        .catch(() => null);
+    }
+
+    // provide to the device resolved information to make it clear sign the signature
+    if (resolution) {
+      for (const plugin of resolution.plugin) {
+        await setPlugin(this.transport, plugin);
+      }
+      for (const { payload, signature } of resolution.externalPlugin) {
+        await setExternalPlugin(this.transport, payload, signature);
+      }
+      for (const nft of resolution.nfts) {
+        await provideNFTInformation(this.transport, Buffer.from(nft, "hex"));
+      }
+      for (const data of resolution.erc20Tokens) {
+        await provideERC20TokenInformation(
+          this.transport,
+          Buffer.from(data, "hex")
+        );
+      }
+    }
 
     const rawTx = Buffer.from(rawTxHex, "hex");
-    const VALID_TYPES = [1, 2];
-    const txType = VALID_TYPES.includes(rawTx[0]) ? rawTx[0] : null;
-    const rlpData = txType === null ? rawTx : rawTx.slice(1, rawTxHex.length);
-
-    const toSend: Buffer[] = [];
-    let response;
-    // Check if the TX is encoded following EIP 155
-    const rlpTx = ethers.utils.RLP.decode(rlpData).map((hex) =>
-      Buffer.from(hex.slice(2), "hex")
+    const { vrsOffset, txType, chainId, chainIdTruncated } = decodeTxInfo(
+      rawTx
     );
 
-    let vrsOffset = 0;
-    let chainId = new BigNumber(0);
-    let chainIdTruncated = 0;
-
-    const rlpDecoded = ethers.utils.RLP.decode(rlpData);
-
-    let decodedTx;
-    if (txType === 2) {
-      // EIP1559
-      decodedTx = {
-        data: rlpDecoded[7],
-        to: rlpDecoded[5],
-        chainId: rlpTx[0],
-      };
-    } else if (txType === 1) {
-      // EIP2930
-      decodedTx = {
-        data: rlpDecoded[6],
-        to: rlpDecoded[4],
-        chainId: rlpTx[0],
-      };
-    } else {
-      // Legacy tx
-      decodedTx = {
-        data: rlpDecoded[5],
-        to: rlpDecoded[3],
-        // Default to 1 for non EIP 155 txs
-        chainId: rlpTx.length > 6 ? rlpTx[6] : Buffer.from("0x01", "hex"),
-      };
-    }
-
-    if (txType === null && rlpTx.length > 6) {
-      const rlpVrs = Buffer.from(
-        ethers.utils.RLP.encode(rlpTx.slice(-3)).slice(2),
-        "hex"
-      );
-
-      vrsOffset = rawTx.length - (rlpVrs.length - 1);
-
-      // First byte > 0xf7 means the length of the list length doesn't fit in a single byte.
-      if (rlpVrs[0] > 0xf7) {
-        // Increment vrsOffset to account for that extra byte.
-        vrsOffset++;
-
-        // Compute size of the list length.
-        const sizeOfListLen = rlpVrs[0] - 0xf7;
-
-        // Increase rlpOffset by the size of the list length.
-        vrsOffset += sizeOfListLen - 1;
-      }
-    }
-
-    const chainIdSrc = decodedTx.chainId;
-    if (chainIdSrc) {
-      // Using BigNumber because chainID could be any uint256.
-      chainId = new BigNumber(chainIdSrc.toString("hex"), 16);
-      const chainIdTruncatedBuf = Buffer.alloc(4);
-      if (chainIdSrc.length > 4) {
-        chainIdSrc.copy(chainIdTruncatedBuf);
-      } else {
-        chainIdSrc.copy(chainIdTruncatedBuf, 4 - chainIdSrc.length);
-      }
-      chainIdTruncated = chainIdTruncatedBuf.readUInt32BE(0);
-    }
-
+    const paths = splitPath(path);
+    let response;
+    let offset = 0;
     while (offset !== rawTx.length) {
-      const maxChunkSize = offset === 0 ? 150 - 1 - paths.length * 4 : 150;
+      const first = offset === 0;
+      const maxChunkSize = first ? 150 - 1 - paths.length * 4 : 150;
       let chunkSize =
         offset + maxChunkSize > rawTx.length
           ? rawTx.length - offset
@@ -292,10 +258,10 @@ export default class Eth {
       }
 
       const buffer = Buffer.alloc(
-        offset === 0 ? 1 + paths.length * 4 + chunkSize : chunkSize
+        first ? 1 + paths.length * 4 + chunkSize : chunkSize
       );
 
-      if (offset === 0) {
+      if (first) {
         buffer[0] = paths.length;
         paths.forEach((element, index) => {
           buffer.writeUInt32BE(element, 1 + 4 * index);
@@ -305,137 +271,42 @@ export default class Eth {
         rawTx.copy(buffer, 0, offset, offset + chunkSize);
       }
 
-      toSend.push(buffer);
+      response = await this.transport
+        .send(0xe0, 0x04, first ? 0x00 : 0x80, 0x00, buffer)
+        .catch((e) => {
+          throw remapTransactionRelatedErrors(e);
+        });
+
       offset += chunkSize;
     }
 
-    const provideForContract = async (address) => {
-      const nftInfo = await getNFTInfo(
-        address,
-        chainIdTruncated,
-        this.loadConfig
-      );
-      if (nftInfo) {
-        log(
-          "ethereum",
-          "loading nft info for " +
-            nftInfo.contractAddress +
-            " (" +
-            nftInfo.collectionName +
-            ")"
-        );
-        await provideNFTInformation(this.transport, nftInfo.data);
+    const response_byte: number = response[0];
+    let v = "";
+
+    if (chainId.times(2).plus(35).plus(1).isGreaterThan(255)) {
+      const oneByteChainId = (chainIdTruncated * 2 + 35) % 256;
+
+      const ecc_parity = Math.abs(response_byte - oneByteChainId);
+
+      if (txType != null) {
+        // For EIP2930 and EIP1559 tx, v is simply the parity.
+        v = ecc_parity % 2 == 1 ? "00" : "01";
       } else {
-        const erc20Info = byContractAddressAndChainId(
-          address,
-          chainIdTruncated
-        );
-        if (erc20Info) {
-          log(
-            "ethereum",
-            "loading erc20token info for " +
-              erc20Info.contractAddress +
-              " (" +
-              erc20Info.ticker +
-              ")"
-          );
-          await provideERC20TokenInformation(this.transport, erc20Info.data);
-        }
+        // Legacy type transaction with a big chain ID
+        v = chainId.times(2).plus(35).plus(ecc_parity).toString(16);
       }
-    };
-
-    if (decodedTx.data.length >= 10) {
-      const selector = decodedTx.data.substring(0, 10);
-      const nftPluginPayload = await loadNftPlugin(
-        decodedTx.to,
-        selector,
-        chainIdTruncated,
-        this.loadConfig
-      );
-
-      if (nftPluginPayload) {
-        await setPlugin(this.transport, nftPluginPayload);
-      } else {
-        const infos = await loadInfosForContractMethod(
-          decodedTx.to,
-          selector,
-          chainIdTruncated,
-          this.loadConfig
-        );
-
-        if (infos) {
-          const { plugin, payload, signature, erc20OfInterest, abi } = infos;
-
-          if (plugin) {
-            log("ethereum", "loading plugin for " + selector);
-            await setExternalPlugin(this.transport, payload, signature);
-          }
-
-          if (erc20OfInterest && erc20OfInterest.length && abi) {
-            const contract = new ethers.utils.Interface(abi);
-            const args = contract.parseTransaction(decodedTx).args;
-
-            for (path of erc20OfInterest) {
-              const address = path.split(".").reduce((value, seg) => {
-                if (seg === "-1" && Array.isArray(value)) {
-                  return value[value.length - 1];
-                }
-                return value[seg];
-              }, args);
-              await provideForContract(address);
-            }
-          }
-        } else {
-          log("ethereum", "no infos for selector " + selector);
-        }
-      }
-      await provideForContract(decodedTx.to);
+    } else {
+      v = response_byte.toString(16);
     }
 
-    return foreach(toSend, (data, i) =>
-      this.transport
-        .send(0xe0, 0x04, i === 0 ? 0x00 : 0x80, 0x00, data)
-        .then((apduResponse) => {
-          response = apduResponse;
-        })
-    ).then(
-      () => {
-        const response_byte: number = response.slice(0, 1)[0];
-        let v = "";
+    // Make sure v has is prefixed with a 0 if its length is odd ("1" -> "01").
+    if (v.length % 2 == 1) {
+      v = "0" + v;
+    }
 
-        if (chainId.times(2).plus(35).plus(1).isGreaterThan(255)) {
-          const oneByteChainId = (chainIdTruncated * 2 + 35) % 256;
-
-          const ecc_parity = Math.abs(response_byte - oneByteChainId);
-
-          if (txType != null) {
-            // For EIP2930 and EIP1559 tx, v is simply the parity.
-            v = ecc_parity % 2 == 1 ? "00" : "01";
-          } else {
-            // Legacy type transaction with a big chain ID
-            v = chainId.times(2).plus(35).plus(ecc_parity).toString(16);
-          }
-        } else {
-          v = response_byte.toString(16);
-        }
-
-        // Make sure v has is prefixed with a 0 if its length is odd ("1" -> "01").
-        if (v.length % 2 == 1) {
-          v = "0" + v;
-        }
-
-        const r = response.slice(1, 1 + 32).toString("hex");
-        const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
-        return {
-          v,
-          r,
-          s,
-        };
-      },
-      (e) => {
-        throw remapTransactionRelatedErrors(e);
-      }
-    );
+    const r = response.slice(1, 1 + 32).toString("hex");
+    const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
+    return { v, r, s };
   }
 
   /**
@@ -470,7 +341,7 @@ export default class Eth {
   console.log("Signature 0x" + result['r'] + result['s'] + v);
   })
    */
-  signPersonalMessage(
+  async signPersonalMessage(
     path: string,
     messageHex: string
   ): Promise<{
@@ -481,7 +352,6 @@ export default class Eth {
     const paths = splitPath(path);
     let offset = 0;
     const message = Buffer.from(messageHex, "hex");
-    const toSend: Buffer[] = [];
     let response;
 
     while (offset !== message.length) {
@@ -510,26 +380,21 @@ export default class Eth {
         message.copy(buffer, 0, offset, offset + chunkSize);
       }
 
-      toSend.push(buffer);
+      response = await this.transport.send(
+        0xe0,
+        0x08,
+        offset === 0 ? 0x00 : 0x80,
+        0x00,
+        buffer
+      );
+
       offset += chunkSize;
     }
 
-    return foreach(toSend, (data, i) =>
-      this.transport
-        .send(0xe0, 0x08, i === 0 ? 0x00 : 0x80, 0x00, data)
-        .then((apduResponse) => {
-          response = apduResponse;
-        })
-    ).then(() => {
-      const v = response[0];
-      const r = response.slice(1, 1 + 32).toString("hex");
-      const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
-      return {
-        v,
-        r,
-        s,
-      };
-    });
+    const v = response[0];
+    const r = response.slice(1, 1 + 32).toString("hex");
+    const s = response.slice(1 + 32, 1 + 32 + 32).toString("hex");
+    return { v, r, s };
   }
 
   /**
@@ -1256,27 +1121,28 @@ export default class Eth {
     );
   }
 
-  /**
-   * Set the name of the external plugin that should be used to parse the next transaction
-   *
-   * @param pluginName string containing the name of the plugin, must have length between 1 and 30 bytes
-   * @return True if the method was executed successfully
-   */
+  provideERC20TokenInformation({ data }: { data: Buffer }): Promise<boolean> {
+    console.warn(
+      "hw-app-eth: eth.provideERC20TokenInformation is deprecated. signTransaction solves this for you when providing it in `resolution`."
+    );
+    return provideERC20TokenInformation(this.transport, data);
+  }
+
   setExternalPlugin(
     pluginName: string,
     contractAddress: string,
     selector: string
   ): Promise<boolean> {
+    console.warn(
+      "hw-app-eth: eth.setExternalPlugin is deprecated. signTransaction solves this for you when providing it in `resolution`."
+    );
     return setExternalPlugin(this.transport, pluginName, selector);
   }
 
-  /**
-   * Set the plugin (internal or external) that should be used to parse the next transaction
-   *
-   * @param data string containing the payload and signature that will be parsed and verified by the device.
-   * @return True if the method was executed successfully
-   */
   setPlugin(data: string): Promise<boolean> {
+    console.warn(
+      "hw-app-eth: eth.setPlugin is deprecated. signTransaction solves this for you when providing it in `resolution`."
+    );
     return setPlugin(this.transport, data);
   }
 }
