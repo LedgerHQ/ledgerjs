@@ -32,7 +32,6 @@
         "@ledgerhq/errors": "^6.10.0",
         "@ledgerhq/hw-transport": "^6.11.2",
         "@ledgerhq/logs": "^6.10.0",
-        "big-integer": "^1.6.51",
         "bignumber.js": "^9.0.1",
         "bip32-path": "^0.4.2"
     },
