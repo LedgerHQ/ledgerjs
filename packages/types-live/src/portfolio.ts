@@ -5,22 +5,43 @@ import type {
   TokenCurrency,
 } from "@ledgerhq/types-cryptoassets";
 
+/**
+ *
+ */
 export type BalanceHistoryData = {
   date: Date;
   value: BigNumber;
 };
+/**
+ *
+ */
 export type BalanceHistory = BalanceHistoryData[];
+/**
+ *
+ */
 export type BalanceHistoryRaw = Array<[string, string]>;
+
+/**
+ *
+ */
 export type BalanceHistoryWithCountervalue = Array<{
   date: Date;
   value: BigNumber;
   countervalue: BigNumber;
 }>;
+
+/**
+ *
+ */
 export type ValueChange = {
   percentage: BigNumber | null | undefined;
   // value from 0 to 1. not defined if not meaningful
   value: BigNumber; // delta of change
 };
+
+/**
+ *
+ */
 export type AccountPortfolio = {
   history: BalanceHistoryWithCountervalue;
   countervalueAvailable: boolean;
@@ -30,6 +51,10 @@ export type AccountPortfolio = {
   // how much the account changes. value is in the account currency
   countervalueChange: ValueChange; // calculates the ROI. value in the countervalue unit.
 };
+
+/**
+ *
+ */
 export type CurrencyPortfolio = {
   history: BalanceHistoryWithCountervalue;
   countervalueAvailable: boolean;
@@ -39,6 +64,10 @@ export type CurrencyPortfolio = {
   // how much the account changes. value is in the account currency
   countervalueChange: ValueChange; // calculates the ROI. value in the countervalue unit.
 };
+
+/**
+ *
+ */
 export type Portfolio = {
   balanceHistory: BalanceHistory;
   balanceAvailable: boolean;
@@ -51,14 +80,26 @@ export type Portfolio = {
   countervalueSendSum: BigNumber;
   countervalueChange: ValueChange; // calculates the ROI. value in the countervalue unit.
 };
+
+/**
+ *
+ */
 export type PortfolioRangeConfig = {
   count: number;
   granularityId: "HOUR" | "DAY" | "WEEK";
   // only supported here atm
   startOf: (arg0: Date) => Date;
-  increment: number; // FIXME it should be a Date=>Date
+  increment: number;
 };
+
+/**
+ *
+ */
 export type PortfolioRange = "year" | "month" | "week" | "day";
+
+/**
+ *
+ */
 export type AssetsDistribution = {
   // false if no distribution can be done (sum is zero)
   isAvailable: boolean;

@@ -16,35 +16,61 @@ import type { Operation } from "./operation";
 import type { DerivationMode } from "./derivation";
 import type { SyncConfig } from "./pagination";
 
+/**
+ *
+ */
 export type ScanAccountEvent = {
   type: "discovered";
   account: Account;
 };
-// more events will come in the future
+/**
+ * more events will come in the future
+ */
 export type ScanAccountEventRaw = {
   type: "discovered";
   account: AccountRaw;
 };
-// unique identifier of a device. it will depends on the underlying implementation.
+
+/**
+ * unique identifier of a device. it will depends on the underlying implementation.
+ */
 export type DeviceId = string;
+
+/**
+ *
+ */
 export type PreloadStrategy = Partial<{
   preloadMaxAge: number;
 }>;
 
+/**
+ *
+ */
 export type BroadcastArg0 = {
   account: Account;
   signedOperation: SignedOperation;
 };
+
+/**
+ *
+ */
 export type SignOperationArg0<T> = {
   account: Account;
   transaction: T;
   deviceId: DeviceId;
 };
+
+/**
+ *
+ */
 export type SignOperationFnSignature<T> = (
   arg0: SignOperationArg0<T>
 ) => Observable<SignOperationEvent>;
 export type BroadcastFnSignature = (arg0: BroadcastArg0) => Promise<Operation>;
-// Abstraction related to a currency
+
+/**
+ *
+ */
 export interface CurrencyBridge {
   // Preload data required for the bridges to work. (e.g. tokens, delegators,...)
   // Assume to call it at every load time but as lazy as possible (if user have such account already AND/OR if user is about to scanAccounts)

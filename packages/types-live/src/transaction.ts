@@ -2,18 +2,29 @@ import type { BigNumber } from "bignumber.js";
 import type { Operation, OperationRaw } from "./operation";
 import type { Unit } from "@ledgerhq/types-cryptoassets";
 
+/**
+ *
+ */
 export type BitcoinInput = {
   address: string | null | undefined;
   value: BigNumber | null | undefined;
   previousTxHash: string | null | undefined;
   previousOutputIndex: number;
 };
+
+/**
+ *
+ */
 export type BitcoinInputRaw = [
   string | null | undefined,
   string | null | undefined,
   string | null | undefined,
   number
 ];
+
+/**
+ *
+ */
 export type BitcoinOutput = {
   hash: string;
   outputIndex: number;
@@ -24,6 +35,10 @@ export type BitcoinOutput = {
   rbf: boolean;
   isChange: boolean;
 };
+
+/**
+ *
+ */
 export type BitcoinOutputRaw = [
   string,
   number,
@@ -35,6 +50,9 @@ export type BitcoinOutputRaw = [
   number
 ];
 
+/**
+ *
+ */
 export type SignedOperation = {
   // prepared version of Operation before it's even broadcasted
   // .id/.hash is potentially not settled yet
@@ -46,12 +64,20 @@ export type SignedOperation = {
   // date calculated as expiring
   expirationDate: Date | null | undefined;
 };
+
+/**
+ *
+ */
 export type SignedOperationRaw = {
   operation: OperationRaw;
   signature: string;
   signatureRaw?: Record<string, any>;
   expirationDate: string | null | undefined;
 };
+
+/**
+ *
+ */
 export type SignOperationEvent = // Used when lot of exchange is needed with the device to visually express a progress
   // It can be used before and/or after the signature
   // only used if it can takes >1s to show a visual progress to user (typically UTXO streaming)
@@ -72,6 +98,10 @@ export type SignOperationEvent = // Used when lot of exchange is needed with the
       type: "signed";
       signedOperation: SignedOperation;
     };
+
+/**
+ *
+ */
 export type SignOperationEventRaw =
   | {
       type: "device-streaming";
@@ -89,8 +119,10 @@ export type SignOperationEventRaw =
       type: "signed";
       signedOperation: SignedOperationRaw;
     };
-// Transaction is a generic object that holds all state for all transactions
-// there are generic fields and coin specific fields. That's why almost all fields are optionals
+/**
+ * Transaction is a generic object that holds all state for all transactions
+ * there are generic fields and coin specific fields. That's why almost all fields are optionals
+ */
 export type TransactionCommon = {
   amount: BigNumber;
   recipient: string;
@@ -98,6 +130,10 @@ export type TransactionCommon = {
   subAccountId?: string | null | undefined;
   feesStrategy?: "slow" | "medium" | "fast" | "custom" | null;
 };
+
+/**
+ *
+ */
 export type TransactionCommonRaw = {
   amount: string;
   recipient: string;
@@ -105,16 +141,21 @@ export type TransactionCommonRaw = {
   subAccountId?: string | null | undefined;
   feesStrategy?: "slow" | "medium" | "fast" | "custom" | null;
 };
-// User can have 3 differents choice for their fee
-// Most of the time mid is low * 1.25 and high is low * 1.5
-// They are some exception as eth that got his own meter
+
+/**
+ * User can have 3 differents choice for their fee
+ * Most of the time mid is low * 1.25 and high is low * 1.5
+ * They are some exception as eth that got his own meter
+ */
 export type FeeStrategy = {
   amount: BigNumber;
   displayedAmount?: BigNumber;
   label: string;
   unit?: Unit;
 };
-// TransactionStatus is a view of Transaction with general info to be used on the UI and status info.
+/**
+ * TransactionStatus is a view of Transaction with general info to be used on the UI and status info.
+ */
 export type TransactionStatus = {
   // potential error for each (user) field of the transaction
   errors: Record<string, Error>;
@@ -131,6 +172,9 @@ export type TransactionStatus = {
   txInputs?: BitcoinInput[];
   txOutputs?: BitcoinOutput[];
 };
+/**
+ *
+ */
 export type TransactionStatusRaw = {
   errors: Record<string, string>;
   warnings: Record<string, string>;

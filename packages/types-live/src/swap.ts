@@ -1,5 +1,8 @@
 import { BigNumber } from "bignumber.js";
 
+/**
+ *
+ */
 export type SwapOperation = {
   provider: string;
   swapId: string;
@@ -11,6 +14,9 @@ export type SwapOperation = {
   toAmount: BigNumber;
 };
 
+/**
+ *
+ */
 export type SwapOperationRaw = {
   provider: string;
   swapId: string;

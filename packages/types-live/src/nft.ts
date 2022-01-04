@@ -1,7 +1,13 @@
 import type BigNumber from "bignumber.js";
 
+/**
+ *
+ */
 export type NFTStandards = "ERC721" | "ERC1155";
 
+/**
+ *
+ */
 export type NFT = {
   // id crafted by live
   id: string;
@@ -17,12 +23,21 @@ export type NFT = {
   };
 };
 
+/**
+ *
+ */
 export type NFTRaw = Omit<NFT, "amount"> & {
   amount: string;
 };
 
+/**
+ *
+ */
 export type NFTMetadataLinksProviders = "opensea" | "rarible" | "etherscan";
 
+/**
+ *
+ */
 export type NFTMetadataResponse = {
   status: 200 | 404 | 500;
   result?: {

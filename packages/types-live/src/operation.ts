@@ -1,6 +1,9 @@
 import type { BigNumber } from "bignumber.js";
 import { NFTStandards } from "./nft";
 
+/**
+ *
+ */
 export type OperationType =
   | "IN"
   | "OUT"
@@ -36,6 +39,10 @@ export type OperationType =
   // NFT
   | "NFT_IN"
   | "NFT_OUT";
+
+/**
+ *
+ */
 export type Operation = {
   // unique identifier (usually hash)
   id: string;
@@ -88,6 +95,10 @@ export type Operation = {
   // Operations related to ERC721 | ERC1155 tokens
   nftOperations?: Operation[];
 };
+
+/**
+ *
+ */
 export type OperationRaw = {
   id: string;
   hash: string;
