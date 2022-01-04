@@ -1,12 +1,11 @@
 import axios from "axios";
 import { getLoadConfig } from "./loadConfig";
-import type { LoadConfig } from "./loadConfig";
-import { log } from "@ledgerhq/logs";
+import type { LoadConfig } from "../types";
 
 type NftInfo = {
   contractAddress: string;
   collectionName: string;
-  data: Buffer;
+  data: string;
 };
 
 type BackendResponse = {
@@ -21,13 +20,7 @@ export const getNFTInfo = async (
   const { nftExplorerBaseURL } = getLoadConfig(userLoadConfig);
   if (!nftExplorerBaseURL) return;
   const url = `${nftExplorerBaseURL}/${chainId}/contracts/${contractAddress}`;
-  const response = await axios
-    .get<BackendResponse>(url)
-    .then((r) => r.data)
-    .catch((e) => {
-      log("error", "could not fetch from " + url + ": " + String(e));
-      return null;
-    });
+  const response = await axios.get<BackendResponse>(url).then((r) => r.data);
   if (!response) return;
 
   const payload = response["payload"];
@@ -36,7 +29,7 @@ export const getNFTInfo = async (
   return {
     contractAddress: contractAddress,
     collectionName: collectionName,
-    data: Buffer.from(payload, "hex"),
+    data: payload,
   };
 };
 
@@ -50,13 +43,7 @@ export const loadNftPlugin = async (
   if (!nftExplorerBaseURL) return;
   const url = `${nftExplorerBaseURL}/${chainId}/contracts/${contractAddress}/plugin-selector/${selector}`;
 
-  const response = await axios
-    .get<BackendResponse>(url)
-    .then((r) => r.data)
-    .catch((e) => {
-      log("error", "could not fetch from " + url + ": " + String(e));
-      return null;
-    });
+  const response = await axios.get<BackendResponse>(url).then((r) => r.data);
   if (!response) return;
 
   const payload = response["payload"];

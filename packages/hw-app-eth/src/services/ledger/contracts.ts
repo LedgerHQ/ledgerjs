@@ -1,6 +1,6 @@
 import axios from "axios";
 import { getLoadConfig } from "./loadConfig";
-import type { LoadConfig } from "./loadConfig";
+import type { LoadConfig } from "../types";
 import { log } from "@ledgerhq/logs";
 
 type ContractMethod = {

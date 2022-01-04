@@ -3,9 +3,9 @@ import {
   RecordStore,
 } from "@ledgerhq/hw-transport-mocker";
 import Eth from "../src/Eth";
-import { TokenInfo } from "../src/erc20";
+import { TokenInfo } from "../src/services/ledger/erc20";
 import { BigNumber } from "bignumber.js";
-import { byContractAddressAndChainId } from "../src/erc20";
+import { byContractAddressAndChainId } from "../src/services/ledger/erc20";
 import paraswapJSON from "./paraswap.json";
 
 test("getAppConfiguration", async () => {
