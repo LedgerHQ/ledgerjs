@@ -618,8 +618,8 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        tx: "https://www.mintscan.io/txs/$hash",
-        address: "https://www.mintscan.io/validators/$address",
+        tx: "https://www.mintscan.io/cosmos/txs/$hash",
+        address: "https://www.mintscan.io/cosmos/validators/$address",
       },
     ],
   },
