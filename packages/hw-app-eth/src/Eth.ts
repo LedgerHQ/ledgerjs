@@ -213,7 +213,10 @@ export default class Eth {
           " + const resolution = await ledgerService.resolveTransaction(rawTxHex);"
       );
       resolution = await ledgerService
-        .resolveTransaction(rawTxHex, this.loadConfig)
+        .resolveTransaction(rawTxHex, this.loadConfig, {
+          externalPlugins: true,
+          erc20: true,
+        })
         .catch((e) => {
           console.warn(
             "an error occurred in resolveTransaction => fallback to blind signing: " +

@@ -55,6 +55,8 @@ Ledger Hardware Wallet ETH JavaScript bindings.
 *   [byContractAddressAndChainId](#bycontractaddressandchainid)
     *   [Parameters](#parameters-16)
 *   [list](#list)
+*   [ResolutionConfig](#resolutionconfig)
+    *   [Properties](#properties)
 
 ### Eth
 
@@ -359,3 +361,16 @@ Returns **(TokenInfo | null | [undefined](https://developer.mozilla.org/docs/Web
 list all the ERC20 tokens informations
 
 Returns **[Array](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Array)\<TokenInfo>** 
+
+### ResolutionConfig
+
+Allows to configure precisely what the service need to resolve.
+for instance you can set nft:true if you need clear signing on NFTs. If you set it and it is not a NFT transaction, it should still work but will do a useless service resolution.
+
+Type: {nft: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, externalPlugins: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?, erc20: [boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?}
+
+#### Properties
+
+*   `nft` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** 
+*   `externalPlugins` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** 
+*   `erc20` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** 
