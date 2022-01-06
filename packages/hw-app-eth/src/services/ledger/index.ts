@@ -12,7 +12,7 @@ import { getNFTInfo, loadNftPlugin } from "./nfts";
 import { decodeTxInfo } from "../../utils";
 
 const ledgerService: LedgerEthTransactionService = {
-  resolveTransaction: async (rawTxHex, loadConfig) => {
+  resolveTransaction: async (rawTxHex, loadConfig, resolutionConfig) => {
     const resolution: LedgerEthTransactionResolution = {
       erc20Tokens: [],
       nfts: [],
@@ -36,7 +36,9 @@ const ledgerService: LedgerEthTransactionService = {
     const rawTx = Buffer.from(rawTxHex, "hex");
     const { decodedTx, chainIdTruncated } = decodeTxInfo(rawTx);
     const provideForContract = async (address) => {
-      const nftInfo = await getNFTInfo(address, chainIdTruncated, loadConfig);
+      const nftInfo = resolutionConfig.nft
+        ? await getNFTInfo(address, chainIdTruncated, loadConfig)
+        : null;
       if (nftInfo) {
         log(
           "ethereum",
@@ -68,22 +70,26 @@ const ledgerService: LedgerEthTransactionService = {
 
     if (decodedTx.data.length >= 10) {
       const selector = decodedTx.data.substring(0, 10);
-      const nftPluginPayload = await loadNftPlugin(
-        decodedTx.to,
-        selector,
-        chainIdTruncated,
-        loadConfig
-      );
+      const nftPluginPayload = resolutionConfig.nft
+        ? await loadNftPlugin(
+            decodedTx.to,
+            selector,
+            chainIdTruncated,
+            loadConfig
+          )
+        : null;
 
       if (nftPluginPayload) {
         setPlugin(nftPluginPayload);
       } else {
-        const infos = await loadInfosForContractMethod(
-          decodedTx.to,
-          selector,
-          chainIdTruncated,
-          loadConfig
-        );
+        const infos = resolutionConfig.externalPlugins
+          ? await loadInfosForContractMethod(
+              decodedTx.to,
+              selector,
+              chainIdTruncated,
+              loadConfig
+            )
+          : null;
 
         if (infos) {
           const { plugin, payload, signature, erc20OfInterest, abi } = infos;
