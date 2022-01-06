@@ -46,7 +46,15 @@ export default class Helium {
     this.transport = transport;
     this.transport.decorateAppAPIMethods(
       this,
-      ["getAddress", "signPaymentV1"],
+      [
+        "getVersion",
+        "getAddress",
+        "signPaymentV1",
+        "signTokenBurnV1",
+        "signStakeValidatorV1",
+        "signUnstakeValidatorV1",
+        "signTransferValidatorStakeV1",
+      ],
       scrambleKey
     );
   }
