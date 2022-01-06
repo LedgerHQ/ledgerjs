@@ -12,6 +12,12 @@ type BackendResponse = {
   payload: string;
 };
 
+function axiosErrorHandling(e) {
+  if (!e || !e.status) throw e;
+  if (e.status === 404) return null;
+  throw e;
+}
+
 export const getNFTInfo = async (
   contractAddress: string,
   chainId: number,
@@ -20,7 +26,10 @@ export const getNFTInfo = async (
   const { nftExplorerBaseURL } = getLoadConfig(userLoadConfig);
   if (!nftExplorerBaseURL) return;
   const url = `${nftExplorerBaseURL}/${chainId}/contracts/${contractAddress}`;
-  const response = await axios.get<BackendResponse>(url).then((r) => r.data);
+  const response = await axios
+    .get<BackendResponse>(url)
+    .then((r) => r.data)
+    .catch(axiosErrorHandling);
   if (!response) return;
 
   const payload = response["payload"];
@@ -43,7 +52,10 @@ export const loadNftPlugin = async (
   if (!nftExplorerBaseURL) return;
   const url = `${nftExplorerBaseURL}/${chainId}/contracts/${contractAddress}/plugin-selector/${selector}`;
 
-  const response = await axios.get<BackendResponse>(url).then((r) => r.data);
+  const response = await axios
+    .get<BackendResponse>(url)
+    .then((r) => r.data)
+    .catch(axiosErrorHandling);
   if (!response) return;
 
   const payload = response["payload"];

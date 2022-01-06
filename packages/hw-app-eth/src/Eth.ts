@@ -214,7 +214,13 @@ export default class Eth {
       );
       resolution = await ledgerService
         .resolveTransaction(rawTxHex, this.loadConfig)
-        .catch(() => null);
+        .catch((e) => {
+          console.warn(
+            "an error occurred in resolveTransaction => fallback to blind signing: " +
+              String(e)
+          );
+          return null;
+        });
     }
 
     // provide to the device resolved information to make it clear sign the signature
