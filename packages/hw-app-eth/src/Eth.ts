@@ -15,13 +15,16 @@
  *  limitations under the License.
  ********************************************************************************/
 // FIXME drop:
-import { EthAppPleaseEnableContractData } from "@ledgerhq/errors";
 import type Transport from "@ledgerhq/hw-transport";
 import { BigNumber } from "bignumber.js";
 import { decodeTxInfo } from "./utils";
 // NB: these are temporary import for the deprecated fallback mechanism
 import { LedgerEthTransactionResolution, LoadConfig } from "./services/types";
 import ledgerService from "./services/ledger";
+import {
+  EthAppNftNotSupported,
+  EthAppPleaseEnableContractData,
+} from "./errors";
 
 export type StarkQuantizationType =
   | "eth"
@@ -1187,8 +1190,8 @@ function provideNFTInformation(
         return false;
       }
       if (e && e.statusCode === 0x6d00) {
-        // ignore older version of ETH app
-        return false;
+        // older version of ETH app => error because we don't allow blind sign when NFT is explicitly requested to be resolved.
+        throw new EthAppNftNotSupported();
       }
       throw e;
     }
