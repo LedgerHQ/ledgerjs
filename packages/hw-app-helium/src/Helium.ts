@@ -1,9 +1,22 @@
 import Transport from "@ledgerhq/hw-transport";
 import { StatusCodes } from "@ledgerhq/errors";
 import { Address } from "@helium/crypto";
-import { PaymentV1 } from "@helium/transactions";
+import {
+  PaymentV1,
+  StakeValidatorV1,
+  TokenBurnV1,
+  TransferValidatorStakeV1,
+  UnstakeValidatorV1,
+} from "@helium/transactions";
 import proto from "@helium/proto";
-import { pathToBuffer, serializePaymentV1 } from "./serialization";
+import {
+  pathToBuffer,
+  serializePaymentV1,
+  serializeStakeValidatorV1,
+  serializeTokenBurnV1,
+  serializeTransferValidatorStakeV1,
+  serializeUnstakeValidatorV1,
+} from "./serialization";
 
 const P1_NON_CONFIRM = 0x00;
 const P1_CONFIRM = 0x01;
@@ -20,7 +33,7 @@ const INS = {
   SIGN_VALIDATOR_STAKE: 0x09,
   SIGN_VALIDATOR_TXFER: 0x0a,
   SIGN_VALIDATOR_UNSTAKE: 0x0b,
-  SIGN_VALIDATOR_BURN: 0x0c,
+  SIGN_TOKEN_BURN: 0x0c,
 };
 
 export default class Helium {
@@ -36,6 +49,19 @@ export default class Helium {
       ["getAddress", "signPaymentV1"],
       scrambleKey
     );
+  }
+
+  async getVersion(): Promise<{ version: string }> {
+    const [major, minor, patch] = await this.sendToDevice(
+      INS.GET_VERSION,
+      P1_NON_CONFIRM,
+      0,
+      Buffer.from([])
+    );
+
+    return {
+      version: `${major}.${minor}.${patch}`,
+    };
   }
 
   async getAddress(
@@ -65,7 +91,6 @@ export default class Helium {
     txn: PaymentV1,
     accountIndex = 0
   ): Promise<{ signature: Buffer; txn: PaymentV1 }> {
-    console.log("hw txn", txn);
     const payload = serializePaymentV1(txn);
 
     const response = await this.sendToDevice(
@@ -81,6 +106,123 @@ export default class Helium {
     const signature = decoded.signature as Buffer;
 
     txn.signature = signature;
+
+    return {
+      signature,
+      txn,
+    };
+  }
+
+  async signTokenBurnV1(
+    txn: TokenBurnV1,
+    accountIndex = 0
+  ): Promise<{ signature: Buffer; txn: TokenBurnV1 }> {
+    const payload = serializeTokenBurnV1(txn);
+
+    const response = await this.sendToDevice(
+      INS.SIGN_TOKEN_BURN,
+      accountIndex,
+      CLA_OFFSET,
+      payload
+    );
+
+    if (response.length === 1) throw "User has declined.";
+
+    const decoded = proto.helium.blockchain_txn_token_burn_v1.decode(response);
+    const signature = decoded.signature as Buffer;
+
+    txn.signature = signature;
+
+    return {
+      signature,
+      txn,
+    };
+  }
+
+  async signStakeValidatorV1(
+    txn: StakeValidatorV1,
+    accountIndex = 0
+  ): Promise<{ signature: Buffer; txn: StakeValidatorV1 }> {
+    const payload = serializeStakeValidatorV1(txn);
+
+    const response = await this.sendToDevice(
+      INS.SIGN_VALIDATOR_STAKE,
+      accountIndex,
+      CLA_OFFSET,
+      payload
+    );
+
+    if (response.length === 1) throw "User has declined.";
+
+    const decoded = proto.helium.blockchain_txn_stake_validator_v1.decode(
+      response
+    );
+    const signature = decoded.ownerSignature as Buffer;
+
+    txn.ownerSignature = signature;
+
+    return {
+      signature,
+      txn,
+    };
+  }
+
+  async signUnstakeValidatorV1(
+    txn: UnstakeValidatorV1,
+    accountIndex = 0
+  ): Promise<{ signature: Buffer; txn: UnstakeValidatorV1 }> {
+    const payload = serializeUnstakeValidatorV1(txn);
+
+    const response = await this.sendToDevice(
+      INS.SIGN_VALIDATOR_UNSTAKE,
+      accountIndex,
+      CLA_OFFSET,
+      payload
+    );
+
+    if (response.length === 1) throw "User has declined.";
+
+    const decoded = proto.helium.blockchain_txn_unstake_validator_v1.decode(
+      response
+    );
+    const signature = decoded.ownerSignature as Buffer;
+
+    txn.ownerSignature = signature;
+
+    return {
+      signature,
+      txn,
+    };
+  }
+
+  async signTransferValidatorStakeV1(
+    txn: TransferValidatorStakeV1,
+    ownerType: "old" | "new",
+    accountIndex = 0
+  ): Promise<{ signature: Buffer; txn: TransferValidatorStakeV1 }> {
+    const payload = serializeTransferValidatorStakeV1(txn);
+
+    const response = await this.sendToDevice(
+      INS.SIGN_VALIDATOR_TXFER,
+      accountIndex,
+      CLA_OFFSET,
+      payload
+    );
+
+    if (response.length === 1) throw "User has declined.";
+
+    const decoded = proto.helium.blockchain_txn_transfer_validator_stake_v1.decode(
+      response
+    );
+    const signature = decoded.oldOwnerSignature as Buffer;
+
+    if (ownerType === "old") {
+      txn.oldOwnerSignature = signature;
+    }
+
+    if (ownerType === "new") {
+      txn.newOwnerSignature = signature;
+    }
 
     return {
       signature,
