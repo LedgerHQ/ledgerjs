@@ -20,9 +20,16 @@ export type LoadConfig = {
   extraPlugins?: any | null;
 };
 
+export type Resolution = {
+  nft: boolean,
+  plugin: boolean,
+  erc20: boolean,
+};
+
 export type LedgerEthTransactionService = {
   resolveTransaction: (
     rawTxHex: string,
-    loadConfig: LoadConfig
+    loadConfig: LoadConfig,
+    resolution: Resolution,
   ) => Promise<LedgerEthTransactionResolution>;
 };
