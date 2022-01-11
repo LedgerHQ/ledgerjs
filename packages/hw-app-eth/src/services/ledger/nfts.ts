@@ -32,9 +32,11 @@ export const getNFTInfo = async (
     .catch(axiosErrorHandling);
   if (!response) return;
 
+  // APDU response specification: https://ledgerhq.atlassian.net/wiki/spaces/WALLETCO/pages/3269984297/NFT-1+NFT+Backend+design#NFT-Metadata-BLOB
   const payload = response["payload"];
-  const collectionNameLength = Number(payload.slice(2, 3));
-  const collectionName = payload.slice(3, 3 + collectionNameLength).toString();
+  // Collection name length position: 3rd byte -> caracter 4 to 6
+  const collectionNameLength = parseInt(payload.slice(4, 6), 16);
+  const collectionName = payload.slice(6, 6 + collectionNameLength).toString();
   return {
     contractAddress: contractAddress,
     collectionName: collectionName,
