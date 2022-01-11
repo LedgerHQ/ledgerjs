@@ -2892,12 +2892,12 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     units: [
       {
         name: "CRO",
-        code: "cro",
+        code: "CRO",
         magnitude: 8,
       },
       {
         name: "baseCRO",
-        code: "basecro",
+        code: "baseCRO",
         magnitude: 0,
       },
     ],
