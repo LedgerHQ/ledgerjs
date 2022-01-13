@@ -1,15 +1,15 @@
-import { ethers } from "ethers";
+import { encode, decode } from "@ethersproject/rlp";
 import { BigNumber } from "bignumber.js";
 
 export function decodeTxInfo(rawTx: Buffer) {
   const VALID_TYPES = [1, 2];
   const txType = VALID_TYPES.includes(rawTx[0]) ? rawTx[0] : null;
   const rlpData = txType === null ? rawTx : rawTx.slice(1);
-  const rlpTx = ethers.utils.RLP.decode(rlpData).map((hex) =>
+  const rlpTx = decode(rlpData).map((hex) =>
     Buffer.from(hex.slice(2), "hex")
   );
   let chainIdTruncated = 0;
-  const rlpDecoded = ethers.utils.RLP.decode(rlpData);
+  const rlpDecoded = decode(rlpData);
 
   let decodedTx;
   if (txType === 2) {
@@ -53,7 +53,7 @@ export function decodeTxInfo(rawTx: Buffer) {
   let vrsOffset = 0;
   if (txType === null && rlpTx.length > 6) {
     const rlpVrs = Buffer.from(
-      ethers.utils.RLP.encode(rlpTx.slice(-3)).slice(2),
+      encode(rlpTx.slice(-3)).slice(2),
       "hex"
     );
 
