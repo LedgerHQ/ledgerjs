@@ -108,14 +108,14 @@ const ledgerService: LedgerEthTransactionService = {
                 }
                 return value[seg];
               }, args);
-              provideForContract(address);
+              await provideForContract(address);
             }
           }
         } else {
           log("ethereum", "no infos for selector " + selector);
         }
       }
-      provideForContract(decodedTx.to);
+      await provideForContract(decodedTx.to);
     }
 
     return resolution;
