@@ -5,9 +5,7 @@ export function decodeTxInfo(rawTx: Buffer) {
   const VALID_TYPES = [1, 2];
   const txType = VALID_TYPES.includes(rawTx[0]) ? rawTx[0] : null;
   const rlpData = txType === null ? rawTx : rawTx.slice(1);
-  const rlpTx = decode(rlpData).map((hex) =>
-    Buffer.from(hex.slice(2), "hex")
-  );
+  const rlpTx = decode(rlpData).map((hex) => Buffer.from(hex.slice(2), "hex"));
   let chainIdTruncated = 0;
   const rlpDecoded = decode(rlpData);
 
@@ -52,10 +50,7 @@ export function decodeTxInfo(rawTx: Buffer) {
 
   let vrsOffset = 0;
   if (txType === null && rlpTx.length > 6) {
-    const rlpVrs = Buffer.from(
-      encode(rlpTx.slice(-3)).slice(2),
-      "hex"
-    );
+    const rlpVrs = Buffer.from(encode(rlpTx.slice(-3)).slice(2), "hex");
 
     vrsOffset = rawTx.length - (rlpVrs.length - 1);
 
