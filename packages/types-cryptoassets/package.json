@@ -1,7 +1,7 @@
 {
-  "name": "@ledgerhq/cryptoassets",
-  "version": "6.23.0",
-  "description": "Ledger crypto-assets list",
+  "name": "@ledgerhq/types-cryptoassets",
+  "version": "6.22.0",
+  "description": "Ledger types for crypto assets and tokens",
   "keywords": [
     "Ledger"
   ],
@@ -20,14 +20,10 @@
   "module": "lib-es/index.js",
   "types": "lib/index.d.ts",
   "license": "Apache-2.0",
-  "dependencies": {
-    "invariant": "2"
-  },
   "scripts": {
     "clean": "bash ../../script/clean.sh",
     "build": "bash ../../script/build.sh",
     "watch": "bash ../../script/watch.sh",
     "doc": "bash ../../script/doc.sh"
-  },
-  "gitHead": "dd0dea64b58e5a9125c8a422dcffd29e5ef6abec"
+  }
 }

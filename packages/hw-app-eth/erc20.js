@@ -1,1 +1,1 @@
-module.exports = require("./lib/erc20");
+module.exports = require("./lib/services/ledger/erc20");

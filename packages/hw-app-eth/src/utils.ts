@@ -1,104 +1,77 @@
-/********************************************************************************
- *   Ledger Node JS API
- *   (c) 2016-2017 Ledger
- *
- *  Licensed under the Apache License, Version 2.0 (the "License");
- *  you may not use this file except in compliance with the License.
- *  You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- *  Unless required by applicable law or agreed to in writing, software
- *  distributed under the License is distributed on an "AS IS" BASIS,
- *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- *  See the License for the specific language governing permissions and
- *  limitations under the License.
- ********************************************************************************/
-type Defer<T> = {
-  promise: Promise<T>;
-  resolve: (arg0: T) => void;
-  reject: (arg0: any) => void;
-};
-export function defer<T>(): Defer<T> {
-  let resolve, reject;
-  const promise = new Promise<T>(function (success, failure) {
-    resolve = success;
-    reject = failure;
-  });
-  if (!resolve || !reject) throw "defer() error"; // this never happens and is just to make flow happy
+import { encode, decode } from "@ethersproject/rlp";
+import { BigNumber } from "bignumber.js";
+
+export function decodeTxInfo(rawTx: Buffer) {
+  const VALID_TYPES = [1, 2];
+  const txType = VALID_TYPES.includes(rawTx[0]) ? rawTx[0] : null;
+  const rlpData = txType === null ? rawTx : rawTx.slice(1);
+  const rlpTx = decode(rlpData).map((hex) => Buffer.from(hex.slice(2), "hex"));
+  let chainIdTruncated = 0;
+  const rlpDecoded = decode(rlpData);
+
+  let decodedTx;
+  if (txType === 2) {
+    // EIP1559
+    decodedTx = {
+      data: rlpDecoded[7],
+      to: rlpDecoded[5],
+      chainId: rlpTx[0],
+    };
+  } else if (txType === 1) {
+    // EIP2930
+    decodedTx = {
+      data: rlpDecoded[6],
+      to: rlpDecoded[4],
+      chainId: rlpTx[0],
+    };
+  } else {
+    // Legacy tx
+    decodedTx = {
+      data: rlpDecoded[5],
+      to: rlpDecoded[3],
+      // Default to 1 for non EIP 155 txs
+      chainId: rlpTx.length > 6 ? rlpTx[6] : Buffer.from("0x01", "hex"),
+    };
+  }
+
+  const chainIdSrc = decodedTx.chainId;
+  let chainId = new BigNumber(0);
+  if (chainIdSrc) {
+    // Using BigNumber because chainID could be any uint256.
+    chainId = new BigNumber(chainIdSrc.toString("hex"), 16);
+    const chainIdTruncatedBuf = Buffer.alloc(4);
+    if (chainIdSrc.length > 4) {
+      chainIdSrc.copy(chainIdTruncatedBuf);
+    } else {
+      chainIdSrc.copy(chainIdTruncatedBuf, 4 - chainIdSrc.length);
+    }
+    chainIdTruncated = chainIdTruncatedBuf.readUInt32BE(0);
+  }
+
+  let vrsOffset = 0;
+  if (txType === null && rlpTx.length > 6) {
+    const rlpVrs = Buffer.from(encode(rlpTx.slice(-3)).slice(2), "hex");
+
+    vrsOffset = rawTx.length - (rlpVrs.length - 1);
+
+    // First byte > 0xf7 means the length of the list length doesn't fit in a single byte.
+    if (rlpVrs[0] > 0xf7) {
+      // Increment vrsOffset to account for that extra byte.
+      vrsOffset++;
+
+      // Compute size of the list length.
+      const sizeOfListLen = rlpVrs[0] - 0xf7;
+
+      // Increase rlpOffset by the size of the list length.
+      vrsOffset += sizeOfListLen - 1;
+    }
+  }
 
   return {
-    promise,
-    resolve,
-    reject,
+    decodedTx,
+    txType,
+    chainId,
+    chainIdTruncated,
+    vrsOffset,
   };
-}
-// TODO use bip32-path library
-export function splitPath(path: string): number[] {
-  const result: number[] = [];
-  const components = path.split("/");
-  components.forEach((element) => {
-    let number = parseInt(element, 10);
-
-    if (isNaN(number)) {
-      return; // FIXME shouldn't it throws instead?
-    }
-
-    if (element.length > 1 && element[element.length - 1] === "'") {
-      number += 0x80000000;
-    }
-
-    result.push(number);
-  });
-  return result;
-}
-// TODO use async await
-export function eachSeries<A>(
-  arr: A[],
-  fun: (arg0: A) => Promise<any>
-): Promise<any> {
-  return arr.reduce((p, e) => p.then(() => fun(e)), Promise.resolve());
-}
-export function foreach<T, A>(
-  arr: T[],
-  callback: (arg0: T, arg1: number) => Promise<A>
-): Promise<A[]> {
-  function iterate(index, array, result) {
-    if (index >= array.length) {
-      return result;
-    } else
-      return callback(array[index], index).then(function (res) {
-        result.push(res);
-        return iterate(index + 1, array, result);
-      });
-  }
-
-  return Promise.resolve().then(() => iterate(0, arr, []));
-}
-export function doIf(
-  condition: boolean,
-  callback: () => any | Promise<any>
-): Promise<void> {
-  return Promise.resolve().then(() => {
-    if (condition) {
-      return callback();
-    }
-  });
-}
-export function asyncWhile<T>(
-  predicate: () => boolean,
-  callback: () => Promise<T>
-): Promise<Array<T>> {
-  function iterate(result) {
-    if (!predicate()) {
-      return result;
-    } else {
-      return callback().then((res) => {
-        result.push(res);
-        return iterate(result);
-      });
-    }
-  }
-
-  return Promise.resolve([]).then(iterate);
 }

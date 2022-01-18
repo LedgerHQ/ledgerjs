@@ -1,5 +1,5 @@
-import coins from "../data/exchange/erc20";
-import erc20 from "../data/exchange/coins";
+import erc20 from "../data/exchange/erc20";
+import coins from "../data/exchange/coins";
 const all = [...coins, ...erc20];
 const configs = {};
 
