@@ -12,22 +12,6 @@ import { identifyUSBProductId } from "@ledgerhq/devices";
 import { CantOpenDevice } from "@ledgerhq/errors";
 import { listenDevices } from "./listenDevices";
 let transportInstance;
-
-const DISCONNECT_TIMEOUT = 5000;
-let disconnectTimeout;
-const clearDisconnectTimeout = () => {
-  if (disconnectTimeout) {
-    clearTimeout(disconnectTimeout);
-  }
-};
-
-const setDisconnectTimeout = () => {
-  disconnectTimeout = setTimeout(
-    () => TransportNodeHidSingleton.disconnect(),
-    DISCONNECT_TIMEOUT
-  );
-};
-
 /**
  * node-hid Transport implementation
  * @example
@@ -113,14 +97,12 @@ export default class TransportNodeHidSingleton extends TransportNodeHidNoEvents 
       transportInstance.emit("disconnect");
       transportInstance = null;
     }
-    clearDisconnectTimeout();
   }
 
   /**
    * if path="" is not provided, the library will take the first device
    */
   static open(): Promise<TransportNodeHidSingleton> {
-    clearDisconnectTimeout();
     return Promise.resolve().then(() => {
       if (transportInstance) {
         log("hid-verbose", "reusing opened transport instance");
@@ -156,19 +138,7 @@ export default class TransportNodeHidSingleton extends TransportNodeHidNoEvents 
     });
   }
 
-  /**
-   * Exchange with the device using APDU protocol.
-   * @param apdu
-   * @returns a promise of apdu response
-   */
-  async exchange(apdu: Buffer): Promise<Buffer> {
-    clearDisconnectTimeout();
-    const result = await super.exchange(apdu);
-    setDisconnectTimeout();
-    return result;
-  }
-
-  close(): Promise<void> {
+  close() {
     // intentionally, a close will not effectively close the hid connection
     return Promise.resolve();
   }
