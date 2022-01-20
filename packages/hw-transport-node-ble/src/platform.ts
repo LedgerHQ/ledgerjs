@@ -18,11 +18,11 @@ export const availability: Observable<boolean> = Observable.create(
       observer.next(e === POWERED_ON);
     };
 
-    noble.on("stateChanged", onAvailabilityChanged); // events lib?
+    noble.on("stateChange", onAvailabilityChanged); // events lib?
 
     observer.next(noble.state === POWERED_ON);
     return () => {
-      noble.removeListener("stateChanged", onAvailabilityChanged);
+      noble.removeListener("stateChange", onAvailabilityChanged);
     };
   }
 );
@@ -32,6 +32,17 @@ export const listenDeviceDisconnect = (device: any, onDisconnect: any) => {
   return () => {
     device.removeListener("disconnect", onDisconnect);
   };
+};
+
+// Retrieve the device from list of known devices
+let discoveredDevices = {};
+
+export const getKnownDevice = (deviceOrId: any) => {
+  const id = typeof deviceOrId === "string" ? deviceOrId : deviceOrId.device.id;
+  if (id in discoveredDevices) {
+    return discoveredDevices[id].peripheral;
+  }
+  throw new TransportError("device not found", id);
 };
 
 export const connectDevice = (device: any): Promise<void> =>
@@ -77,11 +88,28 @@ const discoverServiceCharacteristics = (service): Promise<Characteristic[]> =>
 
 export const listen = (): Observable<any> =>
   Observable.create((observer) => {
-    const discoveredDevices = {};
+    discoveredDevices = {};
 
     const onDiscover = (peripheral) => {
       const { uuid: id } = peripheral;
       const { localName } = peripheral.advertisement;
+      const {
+        address,
+        addressType,
+        connectable,
+        advertisement,
+        rssi,
+        services,
+        mtu,
+        state,
+      } = peripheral;
+
+      if (id in discoveredDevices) {
+        //We've already seen this device
+        return;
+      }
+      discoveredDevices[id] = peripheral;
+
       const name =
         localName ||
         (discoveredDevices[id] ? discoveredDevices[id].name : null);
@@ -89,10 +117,20 @@ export const listen = (): Observable<any> =>
         peripheral,
         name,
       };
+
       log("ble-advertisement", id + " (" + String(name) + ")");
       observer.next({
         type: "add",
-        descriptor: peripheral,
+        descriptor: {
+          address,
+          addressType,
+          connectable,
+          advertisement,
+          rssi,
+          services,
+          mtu,
+          state,
+        },
         device: {
           id,
           name,

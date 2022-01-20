@@ -19,6 +19,7 @@ import {
   listenDeviceDisconnect,
   connectDevice,
   isDeviceDisconnected,
+  getKnownDevice,
 } from "./platform";
 
 type Device = any;
@@ -44,19 +45,12 @@ export function setReconnectionConfig(
 const delay = (ms) => new Promise((success) => setTimeout(success, ms));
 
 async function open(deviceOrId: Device | string, needsReconnect: boolean) {
-  let device;
-
-  if (typeof deviceOrId === "string") {
-    if (transportsCache[deviceOrId]) {
-      log("ble-verbose", "Transport in cache, using that.");
-      return transportsCache[deviceOrId];
-    }
-  } else {
-    device = deviceOrId;
-  }
+  const device = getKnownDevice(deviceOrId);
 
   if (!device) {
     throw new CantOpenDevice();
+  } else {
+    log("ble-verbose", "reusing device");
   }
 
   await availability.pipe(first((enabled) => enabled)).toPromise();
