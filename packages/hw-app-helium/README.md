@@ -73,7 +73,7 @@ Get Helium address (public key) for a BIP32 path.
 
 *   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a BIP32 path
 *   `display` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)?** flag to show display
-*   `accountIndex`  index of account address, default = 0 (optional, default `0`)
+*   `accountIndex`  index of account address (optional, default `0`)
 
 ##### Examples
 
@@ -90,7 +90,7 @@ Sign a Helium `PaymentV1` transaction.
 ##### Parameters
 
 *   `txn` **PaymentV1** a PaymentV1 transaction
-*   `accountIndex`  index of account address, default = 0 (optional, default `0`)
+*   `accountIndex`  index of account address (optional, default `0`)
 
 ##### Examples
 
@@ -109,7 +109,7 @@ Sign a Helium `TokenBurnV1` transaction.
 ##### Parameters
 
 *   `txn` **TokenBurnV1** a TokenBurnV1 transaction
-*   `accountIndex`  index of account address, default = 0 (optional, default `0`)
+*   `accountIndex`  index of account address (optional, default `0`)
 
 ##### Examples
 
@@ -128,7 +128,7 @@ Sign a Helium `StakeValidatorV1` transaction.
 ##### Parameters
 
 *   `txn` **StakeValidatorV1** a StakeValidatorV1 transaction
-*   `accountIndex`  index of account address, default = 0 (optional, default `0`)
+*   `accountIndex`  index of account address (optional, default `0`)
 
 ##### Examples
 
@@ -147,7 +147,7 @@ Sign a Helium `UnstakeValidatorV1` transaction.
 ##### Parameters
 
 *   `txn` **UnstakeValidatorV1** a UnstakeValidatorV1 transaction
-*   `accountIndex`  index of account address, default = 0 (optional, default `0`)
+*   `accountIndex`  index of account address (optional, default `0`)
 
 ##### Examples
 
@@ -166,8 +166,8 @@ Sign a Helium `TransferValidatorStakeV1` transaction.
 ##### Parameters
 
 *   `txn` **TransferValidatorStakeV1** a TransferValidatorStakeV1 transaction
-*   `ownerType` **(`"old"` | `"new"`)** 
-*   `accountIndex`  index of account address, default = 0 (optional, default `0`)
+*   `ownerType` **(`"old"` | `"new"`)** whether to sign as the old or new owner in the transfer
+*   `accountIndex`  index of account address (optional, default `0`)
 
 ##### Examples
 

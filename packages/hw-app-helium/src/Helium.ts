@@ -95,7 +95,7 @@ export default class Helium {
    *
    * @param path a BIP32 path
    * @param display flag to show display
-   * @param accountIndex index of account address, default = 0
+   * @param accountIndex index of account address
    * @returns an object with the address field
    *
    * @example
@@ -128,7 +128,7 @@ export default class Helium {
    * Sign a Helium `PaymentV1` transaction.
    *
    * @param txn a PaymentV1 transaction
-   * @param accountIndex index of account address, default = 0
+   * @param accountIndex index of account address
    *
    * @returns an object with the signed transaction and signature
    *
@@ -167,7 +167,7 @@ export default class Helium {
    * Sign a Helium `TokenBurnV1` transaction.
    *
    * @param txn a TokenBurnV1 transaction
-   * @param accountIndex index of account address, default = 0
+   * @param accountIndex index of account address
    *
    * @returns an object with the signed transaction and signature
    *
@@ -206,7 +206,7 @@ export default class Helium {
    * Sign a Helium `StakeValidatorV1` transaction.
    *
    * @param txn a StakeValidatorV1 transaction
-   * @param accountIndex index of account address, default = 0
+   * @param accountIndex index of account address
    *
    * @returns an object with the signed transaction and signature
    *
@@ -247,7 +247,7 @@ export default class Helium {
    * Sign a Helium `UnstakeValidatorV1` transaction.
    *
    * @param txn a UnstakeValidatorV1 transaction
-   * @param accountIndex index of account address, default = 0
+   * @param accountIndex index of account address
    *
    * @returns an object with the signed transaction and signature
    *
@@ -288,7 +288,8 @@ export default class Helium {
    * Sign a Helium `TransferValidatorStakeV1` transaction.
    *
    * @param txn a TransferValidatorStakeV1 transaction
-   * @param accountIndex index of account address, default = 0
+   * @param ownerType whether to sign as the old or new owner in the transfer
+   * @param accountIndex index of account address
    *
    * @returns an object with the signed transaction and signature
    *
