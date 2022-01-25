@@ -36,6 +36,16 @@ const INS = {
   SIGN_TOKEN_BURN: 0x0c,
 };
 
+/**
+ * Helium API
+ *
+ * @param transport a transport for sending commands to a device
+ * @param scrambleKey a scramble key
+ *
+ * @example
+ * import Helium from "@ledgerhq/hw-app-helium";
+ * const helium = new Helium(transport);
+ */
 export default class Helium {
   private transport: Transport;
 
@@ -59,6 +69,14 @@ export default class Helium {
     );
   }
 
+  /**
+   * Get application version.
+   *
+   * @returns version object
+   *
+   * @example
+   * helium.getVersion().then(r => r.version)
+   */
   async getVersion(): Promise<{ version: string }> {
     const [major, minor, patch] = await this.sendToDevice(
       INS.GET_VERSION,
@@ -72,6 +90,17 @@ export default class Helium {
     };
   }
 
+  /**
+   * Get Helium address (public key) for a BIP32 path.
+   *
+   * @param path a BIP32 path
+   * @param display flag to show display
+   * @param accountIndex index of account address, default = 0
+   * @returns an object with the address field
+   *
+   * @example
+   * helium.getAddress("44'/904'/0'/0'/0'").then(r => r.address)
+   */
   async getAddress(
     path: string,
     display?: boolean,
@@ -95,6 +124,19 @@ export default class Helium {
     };
   }
 
+  /**
+   * Sign a Helium `PaymentV1` transaction.
+   *
+   * @param txn a PaymentV1 transaction
+   * @param accountIndex index of account address, default = 0
+   *
+   * @returns an object with the signed transaction and signature
+   *
+   * @example
+   * import { PaymentV1 } from '@helium/transactions'
+   * const txn = new PaymentV1({ ... })
+   * helium.signTransaction(txn).then(r => r.signature)
+   */
   async signPaymentV1(
     txn: PaymentV1,
     accountIndex = 0
@@ -121,6 +163,19 @@ export default class Helium {
     };
   }
 
+  /**
+   * Sign a Helium `TokenBurnV1` transaction.
+   *
+   * @param txn a TokenBurnV1 transaction
+   * @param accountIndex index of account address, default = 0
+   *
+   * @returns an object with the signed transaction and signature
+   *
+   * @example
+   * import { TokenBurnV1 } from '@helium/transactions'
+   * const txn = new TokenBurnV1({ ... })
+   * helium.signTransaction(txn).then(r => r.signature)
+   */
   async signTokenBurnV1(
     txn: TokenBurnV1,
     accountIndex = 0
@@ -147,6 +202,19 @@ export default class Helium {
     };
   }
 
+  /**
+   * Sign a Helium `StakeValidatorV1` transaction.
+   *
+   * @param txn a StakeValidatorV1 transaction
+   * @param accountIndex index of account address, default = 0
+   *
+   * @returns an object with the signed transaction and signature
+   *
+   * @example
+   * import { StakeValidatorV1 } from '@helium/transactions'
+   * const txn = new StakeValidatorV1({ ... })
+   * helium.signTransaction(txn).then(r => r.signature)
+   */
   async signStakeValidatorV1(
     txn: StakeValidatorV1,
     accountIndex = 0
@@ -175,6 +243,19 @@ export default class Helium {
     };
   }
 
+  /**
+   * Sign a Helium `UnstakeValidatorV1` transaction.
+   *
+   * @param txn a UnstakeValidatorV1 transaction
+   * @param accountIndex index of account address, default = 0
+   *
+   * @returns an object with the signed transaction and signature
+   *
+   * @example
+   * import { UnstakeValidatorV1 } from '@helium/transactions'
+   * const txn = new UnstakeValidatorV1({ ... })
+   * helium.signTransaction(txn).then(r => r.signature)
+   */
   async signUnstakeValidatorV1(
     txn: UnstakeValidatorV1,
     accountIndex = 0
@@ -203,6 +284,19 @@ export default class Helium {
     };
   }
 
+  /**
+   * Sign a Helium `TransferValidatorStakeV1` transaction.
+   *
+   * @param txn a TransferValidatorStakeV1 transaction
+   * @param accountIndex index of account address, default = 0
+   *
+   * @returns an object with the signed transaction and signature
+   *
+   * @example
+   * import { TransferValidatorStakeV1 } from '@helium/transactions'
+   * const txn = new TransferValidatorStakeV1({ ... })
+   * helium.signTransaction(txn).then(r => r.signature)
+   */
   async signTransferValidatorStakeV1(
     txn: TransferValidatorStakeV1,
     ownerType: "old" | "new",
