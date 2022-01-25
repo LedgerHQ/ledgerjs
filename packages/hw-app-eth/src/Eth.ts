@@ -1185,10 +1185,6 @@ function provideNFTInformation(
   return transport.send(0xe0, 0x14, 0x00, 0x00, data).then(
     () => true,
     (e) => {
-      if (e && e.statusCode === 0x6a80) {
-        // some issue with providing the data
-        return false;
-      }
       if (e && e.statusCode === 0x6d00) {
         // older version of ETH app => error because we don't allow blind sign when NFT is explicitly requested to be resolved.
         throw new EthAppNftNotSupported();
@@ -1229,15 +1225,8 @@ function setPlugin(transport: Transport, data: string): Promise<boolean> {
   return transport.send(0xe0, 0x16, 0x00, 0x00, buffer).then(
     () => true,
     (e) => {
-      if (e && e.statusCode === 0x6a80) {
-        // this case happen when the plugin name is too short or too long
-        return false;
-      } else if (e && e.statusCode === 0x6984) {
-        // this case happen when the plugin requested is not installed on the device
-        return false;
-      } else if (e && e.statusCode === 0x6d00) {
-        // this case happen for older version of ETH app
-        return false;
+      if (e && e.statusCode === 0x6d00) {
+        throw new EthAppNftNotSupported();
       }
       throw e;
     }
