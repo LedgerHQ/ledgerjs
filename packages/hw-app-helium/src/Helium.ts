@@ -295,7 +295,7 @@ export default class Helium {
    *
    * @example
    * import { TransferValidatorStakeV1 } from '@helium/transactions'
-   * const txn = new TransferValidatorStakeV1({ ... })
+   * const txn = new TransferValidatorStakeV1({ ... }, 'old')
    * helium.signTransaction(txn).then(r => r.signature)
    */
   async signTransferValidatorStakeV1(
