@@ -158,6 +158,7 @@ export default class Eth {
         buffer
       )
       .then((response) => {
+        console.log({ response: response.toString("hex") });
         const publicKeyLength = response[0];
         const addressLength = response[1 + publicKeyLength];
 

@@ -13,5 +13,6 @@ lerna-error.log
 yarn-error.log
 *.swp
 coverage
+.nyc_output
 .vscode/
 .idea

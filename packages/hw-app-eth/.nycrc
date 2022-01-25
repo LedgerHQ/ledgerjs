@@ -1,0 +1,11 @@
+{
+  "all": true,
+  "check-coverage": true,
+  "reporter": ["lcov", "text"],
+  "include": ["src"],
+  "branches": 100,
+  "lines": 100,
+  "functions": 100,
+  "statements": 100,
+  "require": ["ts-node/register"]
+}
