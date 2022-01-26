@@ -21,7 +21,7 @@ Ledger Hardware Wallet Helium JavaScript bindings.
     *   [getAddress](#getaddress)
         *   [Parameters](#parameters-1)
         *   [Examples](#examples-2)
-    *   [signPaymentV1](#signpaymentv1)
+    *   [signPaymentV2](#signpaymentv2)
         *   [Parameters](#parameters-2)
         *   [Examples](#examples-3)
     *   [signTokenBurnV1](#signtokenburnv1)
@@ -36,6 +36,9 @@ Ledger Hardware Wallet Helium JavaScript bindings.
     *   [signTransferValidatorStakeV1](#signtransfervalidatorstakev1)
         *   [Parameters](#parameters-6)
         *   [Examples](#examples-7)
+    *   [signSecurityExchangeV1](#signsecurityexchangev1)
+        *   [Parameters](#parameters-7)
+        *   [Examples](#examples-8)
 
 ### Helium
 
@@ -83,24 +86,24 @@ helium.getAddress("44'/904'/0'/0'/0'").then(r => r.address)
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{index: [number](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Number), address: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String), publicKey: [string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)}>** an object with the address field
 
-#### signPaymentV1
+#### signPaymentV2
 
-Sign a Helium `PaymentV1` transaction.
+Sign a Helium `PaymentV2` transaction.
 
 ##### Parameters
 
-*   `txn` **PaymentV1** a PaymentV1 transaction
+*   `txn` **PaymentV2** a PaymentV2 transaction
 *   `accountIndex`  index of account address (optional, default `0`)
 
 ##### Examples
 
 ```javascript
-import { PaymentV1 } from '@helium/transactions'
-const txn = new PaymentV1({ ... })
+import { PaymentV2 } from '@helium/transactions'
+const txn = new PaymentV2({ ... })
 helium.signTransaction(txn).then(r => r.signature)
 ```
 
-Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{signature: [Buffer](https://nodejs.org/api/buffer.html), txn: PaymentV1}>** an object with the signed transaction and signature
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{signature: [Buffer](https://nodejs.org/api/buffer.html), txn: PaymentV2}>** an object with the signed transaction and signature
 
 #### signTokenBurnV1
 
@@ -178,3 +181,22 @@ helium.signTransaction(txn).then(r => r.signature)
 ```
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{signature: [Buffer](https://nodejs.org/api/buffer.html), txn: TransferValidatorStakeV1}>** an object with the signed transaction and signature
+
+#### signSecurityExchangeV1
+
+Sign a Helium `SecurityExchangeV1` transaction.
+
+##### Parameters
+
+*   `txn` **SecurityExchangeV1** a SecurityExchangeV1 transaction
+*   `accountIndex`  index of account address (optional, default `0`)
+
+##### Examples
+
+```javascript
+import { SecurityExchangeV1 } from '@helium/transactions'
+const txn = new SecurityExchangeV1({ ... })
+helium.signTransaction(txn).then(r => r.signature)
+```
+
+Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{signature: [Buffer](https://nodejs.org/api/buffer.html), txn: SecurityExchangeV1}>** an object with the signed transaction and signature

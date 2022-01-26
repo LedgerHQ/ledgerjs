@@ -2,7 +2,8 @@ import Transport from "@ledgerhq/hw-transport";
 import { StatusCodes } from "@ledgerhq/errors";
 import { Address } from "@helium/crypto";
 import {
-  PaymentV1,
+  PaymentV2,
+  SecurityExchangeV1,
   StakeValidatorV1,
   TokenBurnV1,
   TransferValidatorStakeV1,
@@ -11,7 +12,8 @@ import {
 import proto from "@helium/proto";
 import {
   pathToBuffer,
-  serializePaymentV1,
+  serializePaymentV2,
+  serializeSecurityExchangeV1,
   serializeStakeValidatorV1,
   serializeTokenBurnV1,
   serializeTransferValidatorStakeV1,
@@ -34,6 +36,7 @@ const INS = {
   SIGN_VALIDATOR_TXFER: 0x0a,
   SIGN_VALIDATOR_UNSTAKE: 0x0b,
   SIGN_TOKEN_BURN: 0x0c,
+  SIGN_TRANSFER_SEC_TXN: 0x0d,
 };
 
 /**
@@ -59,7 +62,7 @@ export default class Helium {
       [
         "getVersion",
         "getAddress",
-        "signPaymentV1",
+        "signPaymentV2",
         "signTokenBurnV1",
         "signStakeValidatorV1",
         "signUnstakeValidatorV1",
@@ -125,23 +128,23 @@ export default class Helium {
   }
 
   /**
-   * Sign a Helium `PaymentV1` transaction.
+   * Sign a Helium `PaymentV2` transaction.
    *
-   * @param txn a PaymentV1 transaction
+   * @param txn a PaymentV2 transaction
    * @param accountIndex index of account address
    *
    * @returns an object with the signed transaction and signature
    *
    * @example
-   * import { PaymentV1 } from '@helium/transactions'
-   * const txn = new PaymentV1({ ... })
+   * import { PaymentV2 } from '@helium/transactions'
+   * const txn = new PaymentV2({ ... })
    * helium.signTransaction(txn).then(r => r.signature)
    */
-  async signPaymentV1(
-    txn: PaymentV1,
+  async signPaymentV2(
+    txn: PaymentV2,
     accountIndex = 0
-  ): Promise<{ signature: Buffer; txn: PaymentV1 }> {
-    const payload = serializePaymentV1(txn);
+  ): Promise<{ signature: Buffer; txn: PaymentV2 }> {
+    const payload = serializePaymentV2(txn);
 
     const response = await this.sendToDevice(
       INS.SIGN_PAYMENT,
@@ -152,7 +155,7 @@ export default class Helium {
 
     if (response.length === 1) throw "User has declined.";
 
-    const decoded = proto.helium.blockchain_txn_payment_v1.decode(response);
+    const decoded = proto.helium.blockchain_txn_payment_v2.decode(response);
     const signature = decoded.signature as Buffer;
 
     txn.signature = signature;
@@ -333,6 +336,47 @@ export default class Helium {
     };
   }
 
+  /**
+   * Sign a Helium `SecurityExchangeV1` transaction.
+   *
+   * @param txn a SecurityExchangeV1 transaction
+   * @param accountIndex index of account address
+   *
+   * @returns an object with the signed transaction and signature
+   *
+   * @example
+   * import { SecurityExchangeV1 } from '@helium/transactions'
+   * const txn = new SecurityExchangeV1({ ... })
+   * helium.signTransaction(txn).then(r => r.signature)
+   */
+  async signSecurityExchangeV1(
+    txn: SecurityExchangeV1,
+    accountIndex = 0
+  ): Promise<{ signature: Buffer; txn: SecurityExchangeV1 }> {
+    const payload = serializeSecurityExchangeV1(txn);
+
+    const response = await this.sendToDevice(
+      INS.SIGN_TRANSFER_SEC_TXN,
+      accountIndex,
+      CLA_OFFSET,
+      payload
+    );
+
+    if (response.length === 1) throw "User has declined.";
+
+    const decoded = proto.helium.blockchain_txn_security_exchange_v1.decode(
+      response
+    );
+    const signature = decoded.signature as Buffer;
+
+    txn.signature = signature;
+
+    return {
+      signature,
+      txn,
+    };
+  }
+
   // send chunked if payload size exceeds maximum for a call
   private async sendToDevice(
     instruction: number,
@@ -369,6 +413,12 @@ export default class Helium {
 
     const buf = payload.slice(payload_offset);
     // console.log("send", p2.toString(16), buf.length.toString(16), buf);
+    const adpu = Buffer.concat([
+      Buffer.from([LEDGER_CLA, instruction, p1, p2]),
+      Buffer.from([buf.length]),
+      buf,
+    ]);
+    console.log(adpu.toString("hex"));
     const reply = await this.transport.send(
       LEDGER_CLA,
       instruction,

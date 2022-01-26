@@ -1,10 +1,11 @@
 import { Address } from "@helium/crypto";
 import {
-  PaymentV1,
+  PaymentV2,
   StakeValidatorV1,
   TokenBurnV1,
   TransferValidatorStakeV1,
   UnstakeValidatorV1,
+  SecurityExchangeV1,
 } from "@helium/transactions";
 import BigNumber from "bignumber.js";
 import BIPPath from "bip32-path";
@@ -40,7 +41,28 @@ const serializeNumber = (amount: number | BigNumber | undefined): Buffer => {
   return Buffer.from(u8);
 };
 
-export const serializePaymentV1 = (txn: PaymentV1): Buffer => {
+export const serializePaymentV2 = (txn: PaymentV2): Buffer => {
+  if (txn.payments.length > 1) throw "multiple payments are not supported";
+
+  const { amount, memo } = txn.payments[0];
+  const payee = txn.payments[0].payee as Address;
+
+  const txSerialized = Buffer.concat([
+    serializeNumber(amount),
+    serializeNumber(txn.fee),
+    serializeNumber(txn.nonce),
+    Buffer.from([payee.version]),
+    Buffer.from([payee.keyType]),
+    Buffer.from(payee.publicKey),
+    Buffer.from(memo || ""),
+  ]);
+
+  return Buffer.from(txSerialized);
+};
+
+export const serializeSecurityExchangeV1 = (
+  txn: SecurityExchangeV1
+): Buffer => {
   if (!txn.payee) throw "Payee required";
 
   const payee = txn.payee as Address;

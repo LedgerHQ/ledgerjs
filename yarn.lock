@@ -835,6 +835,15 @@
     create-hash "^1.2.0"
     libsodium-wrappers "^0.7.6"
 
+"@helium/crypto@^3.60.0":
+  version "3.60.0"
+  resolved "https://registry.yarnpkg.com/@helium/crypto/-/crypto-3.60.0.tgz#58be74745d0c7cc3198481dc69f5530393fc7287"
+  integrity sha512-zvDshfSv9wv0PAmmKvZPFP9pnNmR6Q7ZAy+WuGpCD3AxuWv9fiODgKATVuTMhV/QXkkxI+5t8TbGUjTOxsXAmA==
+  dependencies:
+    bs58 "^4.0.1"
+    create-hash "^1.2.0"
+    libsodium-wrappers "^0.7.6"
+
 "@helium/proto@^1.5.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@helium/proto/-/proto-1.5.0.tgz#bf42fad97d46c3e08653176dcf93b0d6b9633212"
@@ -842,12 +851,12 @@
   dependencies:
     protobufjs "^6.8.9"
 
-"@helium/transactions@^3.54.0":
-  version "3.54.0"
-  resolved "https://registry.yarnpkg.com/@helium/transactions/-/transactions-3.54.0.tgz#6121b1b857bd578320d9850c45db72a7938e2faf"
-  integrity sha512-1f/pv+MEdFRR+wO+Wgl+rSHTu49a2g45P+jlxwi2kLTVQgkxyWeXt4bx0e6hCQvYxog6NRs64UOyZ6NmVMKaSA==
+"@helium/transactions@^3.62.0":
+  version "3.62.0"
+  resolved "https://registry.yarnpkg.com/@helium/transactions/-/transactions-3.62.0.tgz#f201b3e502f65b0d0eb400d931064fc850246793"
+  integrity sha512-akmgI7GjW2WLMrT97HJCwSPn9Pz7Rj7p7OoDgoh3XVHLMhTHQbo23yT8lVvVrfNEh9KR3HJXsutOy5xn957yhQ==
   dependencies:
-    "@helium/crypto" "^3.45.0"
+    "@helium/crypto" "^3.60.0"
     "@helium/proto" "^1.5.0"
     "@types/libsodium-wrappers" "^0.7.8"
     long "^4.0.0"
