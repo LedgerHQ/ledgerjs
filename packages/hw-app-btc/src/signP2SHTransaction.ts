@@ -31,6 +31,7 @@ export type SignP2SHTransactionArg = {
   sigHashType?: number;
   segwit?: boolean;
   transactionVersion?: number;
+  initialTimestamp?: number;
 };
 export async function signP2SHTransaction(
   transport: Transport,
@@ -44,6 +45,7 @@ export async function signP2SHTransaction(
     sigHashType,
     segwit,
     transactionVersion,
+    initialTimestamp,
   } = { ...defaultArg, ...arg };
   // Inputs are provided as arrays of [transaction, output_index, redeem script, optional sequence]
   // associatedKeysets are provided as arrays of [path]
@@ -58,6 +60,7 @@ export async function signP2SHTransaction(
   const resuming = false;
   const targetTransaction: Transaction = {
     inputs: [],
+    timestamp: Buffer.alloc(0),
     version: defaultVersion,
   };
   const getTrustedInputCall = segwit ? getTrustedInputBIP143 : getTrustedInput;
@@ -129,6 +132,14 @@ export async function signP2SHTransaction(
         : regularOutputs[i].script;
     const pseudoTX = Object.assign({}, targetTransaction);
     const pseudoTrustedInputs = segwit ? [trustedInputs[i]] : trustedInputs;
+
+    if (initialTimestamp !== undefined) {
+      pseudoTX.timestamp = Buffer.alloc(4);
+      pseudoTX.timestamp.writeUInt32LE(
+        Math.floor(initialTimestamp + (Date.now() - startTime) / 1000),
+        0
+      );
+    }
 
     if (segwit) {
       pseudoTX.inputs = [{ ...pseudoTX.inputs[i], script }];
