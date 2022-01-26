@@ -23,8 +23,6 @@ import {
 const P1_NON_CONFIRM = 0x00;
 const P1_CONFIRM = 0x01;
 
-const MAX_PAYLOAD = 255;
-
 const LEDGER_CLA = 0xe0;
 const CLA_OFFSET = 0x00;
 
@@ -377,54 +375,20 @@ export default class Helium {
     };
   }
 
-  // send chunked if payload size exceeds maximum for a call
   private async sendToDevice(
     instruction: number,
     p1: number,
     p2 = 0x00,
     payload: Buffer
   ) {
-    /*
-     * By default transport will throw if status code is not OK.
-     * For some pyaloads we need to enable blind sign in the app settings
-     * and this is reported with StatusCodes.MISSING_CRITICAL_PARAMETER first byte prefix
-     * so we handle it and show a user friendly error message.
-     */
     const acceptStatusList = [StatusCodes.OK];
 
-    let payload_offset = 0;
-
-    if (payload.length > MAX_PAYLOAD) {
-      while (payload.length - payload_offset > MAX_PAYLOAD) {
-        const buf = payload.slice(payload_offset, payload_offset + MAX_PAYLOAD);
-        payload_offset += MAX_PAYLOAD;
-        // console.log( "send", (p2 | P2_MORE).toString(16), buf.length.toString(16), buf);
-        const reply = await this.transport.send(
-          LEDGER_CLA,
-          instruction,
-          p1,
-          p2,
-          buf,
-          acceptStatusList
-        );
-        this.throwOnFailure(reply);
-      }
-    }
-
-    const buf = payload.slice(payload_offset);
-    // console.log("send", p2.toString(16), buf.length.toString(16), buf);
-    const adpu = Buffer.concat([
-      Buffer.from([LEDGER_CLA, instruction, p1, p2]),
-      Buffer.from([buf.length]),
-      buf,
-    ]);
-    console.log(adpu.toString("hex"));
     const reply = await this.transport.send(
       LEDGER_CLA,
       instruction,
       p1,
       p2,
-      buf,
+      payload,
       acceptStatusList
     );
 
