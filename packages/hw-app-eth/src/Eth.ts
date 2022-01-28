@@ -1181,18 +1181,28 @@ export default class Eth {
 
 // internal helpers
 
+const strictModeHandler = (strictMode: boolean | undefined, error: Error) => {
+  if (!strictMode) {
+    return false;
+  }
+
+  throw error;
+};
+
 function provideERC20TokenInformation(
   transport: Transport,
   data: Buffer,
   loadConfig: LoadConfig
 ): Promise<boolean> {
+  const { strictMode } = loadConfig;
+
   return transport.send(0xe0, 0x0a, 0x00, 0x00, data).then(
     () => true,
     (e) => {
-      if (e && e.statusCode === 0x6d00) {
+      if (e?.statusCode === 0x6d00) {
         // this case happen for older version of ETH app, since older app version had the ERC20 data hardcoded, it's fine to assume it worked.
         // we return a flag to know if the call was effective or not
-        return false;
+        return strictModeHandler(strictMode, e);
       }
       throw e;
     }
@@ -1204,16 +1214,19 @@ function provideNFTInformation(
   data: Buffer,
   loadConfig: LoadConfig
 ): Promise<boolean> {
+  const { strictMode } = loadConfig;
+
   return transport.send(0xe0, 0x14, 0x00, 0x00, data).then(
     () => true,
     (e) => {
-      if (e && e.statusCode === 0x6a80) {
+      if (e?.statusCode === 0x6a80) {
         // some issue with providing the data
-        return false;
+        return strictModeHandler(strictMode, e);
       }
-      if (e && e.statusCode === 0x6d00) {
+
+      if (e?.statusCode === 0x6d00) {
         // older version of ETH app => error because we don't allow blind sign when NFT is explicitly requested to be resolved.
-        throw new EthAppNftNotSupported();
+        return strictModeHandler(strictMode, new EthAppNftNotSupported());
       }
       throw e;
     }
@@ -1226,21 +1239,23 @@ function setExternalPlugin(
   signature: string,
   loadConfig: LoadConfig
 ): Promise<boolean> {
+  const { strictMode } = loadConfig;
   const payloadBuffer = Buffer.from(payload, "hex");
   const signatureBuffer = Buffer.from(signature, "hex");
   const buffer = Buffer.concat([payloadBuffer, signatureBuffer]);
+
   return transport.send(0xe0, 0x12, 0x00, 0x00, buffer).then(
     () => true,
     (e) => {
-      if (e && e.statusCode === 0x6a80) {
+      if (e?.statusCode === 0x6a80) {
         // this case happen when the plugin name is too short or too long
-        return false;
-      } else if (e && e.statusCode === 0x6984) {
+        return strictModeHandler(strictMode, e);
+      } else if (e?.statusCode === 0x6984) {
         // this case happen when the plugin requested is not installed on the device
-        return false;
-      } else if (e && e.statusCode === 0x6d00) {
+        return strictModeHandler(strictMode, e);
+      } else if (e?.statusCode === 0x6d00) {
         // this case happen for older version of ETH app
-        return false;
+        return strictModeHandler(strictMode, e);
       }
       throw e;
     }
@@ -1254,18 +1269,19 @@ function setPlugin(
 ): Promise<boolean> {
   const { strictMode } = loadConfig;
   const buffer = Buffer.from(data, "hex");
+
   return transport.send(0xe0, 0x16, 0x00, 0x00, buffer).then(
     () => true,
     (e) => {
       if (e && e.statusCode === 0x6a80) {
         // this case happen when the plugin name is too short or too long
-        return false;
+        return strictModeHandler(strictMode, e);
       } else if (e && e.statusCode === 0x6984) {
         // this case happen when the plugin requested is not installed on the device
-        return false;
+        return strictModeHandler(strictMode, e);
       } else if (e && e.statusCode === 0x6d00) {
         // this case happen for older version of ETH app
-        return false;
+        return strictModeHandler(strictMode, e);
       }
       throw e;
     }
