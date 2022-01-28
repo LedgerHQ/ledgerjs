@@ -1,6 +1,7 @@
 import type { LoadConfig } from "../types";
 
-const defaultLoadConfig = {
+export const defaultLoadConfig: LoadConfig = {
+  strictMode: false,
   nftExplorerBaseURL: null, // set a value when an official production endpoint is released
   pluginBaseURL: "https://cdn.live.ledger.com",
   extraPlugins: null,

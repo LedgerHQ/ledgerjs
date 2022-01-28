@@ -10,6 +10,9 @@ export type LedgerEthTransactionResolution = {
 };
 
 export type LoadConfig = {
+  // if set to true, the strict mode will throw errors on any case of blind signing,
+  // preventing the transaction completely
+  strictMode?: boolean;
   nftExplorerBaseURL?: string | null;
   // example of payload https://cdn.live.ledger.com/plugins/ethereum/1.json
   // fetch against an api (base url is an api that hosts /plugins/ethereum/${chainId}.json )
