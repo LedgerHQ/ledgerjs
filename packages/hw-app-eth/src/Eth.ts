@@ -237,18 +237,28 @@ export default class Eth {
     // provide to the device resolved information to make it clear sign the signature
     if (resolution) {
       for (const plugin of resolution.plugin) {
-        await setPlugin(this.transport, plugin);
+        await setPlugin(this.transport, plugin, this.loadConfig);
       }
       for (const { payload, signature } of resolution.externalPlugin) {
-        await setExternalPlugin(this.transport, payload, signature);
+        await setExternalPlugin(
+          this.transport,
+          payload,
+          signature,
+          this.loadConfig
+        );
       }
       for (const nft of resolution.nfts) {
-        await provideNFTInformation(this.transport, Buffer.from(nft, "hex"));
+        await provideNFTInformation(
+          this.transport,
+          Buffer.from(nft, "hex"),
+          this.loadConfig
+        );
       }
       for (const data of resolution.erc20Tokens) {
         await provideERC20TokenInformation(
           this.transport,
-          Buffer.from(data, "hex")
+          Buffer.from(data, "hex"),
+          this.loadConfig
         );
       }
     }
@@ -1142,7 +1152,7 @@ export default class Eth {
     console.warn(
       "hw-app-eth: eth.provideERC20TokenInformation is deprecated. signTransaction solves this for you when providing it in `resolution`."
     );
-    return provideERC20TokenInformation(this.transport, data);
+    return provideERC20TokenInformation(this.transport, data, this.loadConfig);
   }
 
   setExternalPlugin(
@@ -1153,14 +1163,19 @@ export default class Eth {
     console.warn(
       "hw-app-eth: eth.setExternalPlugin is deprecated. signTransaction solves this for you when providing it in `resolution`."
     );
-    return setExternalPlugin(this.transport, pluginName, selector);
+    return setExternalPlugin(
+      this.transport,
+      pluginName,
+      selector,
+      this.loadConfig
+    );
   }
 
   setPlugin(data: string): Promise<boolean> {
     console.warn(
       "hw-app-eth: eth.setPlugin is deprecated. signTransaction solves this for you when providing it in `resolution`."
     );
-    return setPlugin(this.transport, data);
+    return setPlugin(this.transport, data, this.loadConfig);
   }
 }
 
@@ -1168,7 +1183,8 @@ export default class Eth {
 
 function provideERC20TokenInformation(
   transport: Transport,
-  data: Buffer
+  data: Buffer,
+  loadConfig: LoadConfig
 ): Promise<boolean> {
   return transport.send(0xe0, 0x0a, 0x00, 0x00, data).then(
     () => true,
@@ -1185,7 +1201,8 @@ function provideERC20TokenInformation(
 
 function provideNFTInformation(
   transport: Transport,
-  data: Buffer
+  data: Buffer,
+  loadConfig: LoadConfig
 ): Promise<boolean> {
   return transport.send(0xe0, 0x14, 0x00, 0x00, data).then(
     () => true,
@@ -1206,7 +1223,8 @@ function provideNFTInformation(
 function setExternalPlugin(
   transport: Transport,
   payload: string,
-  signature: string
+  signature: string,
+  loadConfig: LoadConfig
 ): Promise<boolean> {
   const payloadBuffer = Buffer.from(payload, "hex");
   const signatureBuffer = Buffer.from(signature, "hex");
@@ -1229,7 +1247,12 @@ function setExternalPlugin(
   );
 }
 
-function setPlugin(transport: Transport, data: string): Promise<boolean> {
+function setPlugin(
+  transport: Transport,
+  data: string,
+  loadConfig: LoadConfig
+): Promise<boolean> {
+  const { strictMode } = loadConfig;
   const buffer = Buffer.from(data, "hex");
   return transport.send(0xe0, 0x16, 0x00, 0x00, buffer).then(
     () => true,
