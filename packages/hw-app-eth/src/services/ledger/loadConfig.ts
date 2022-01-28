@@ -6,10 +6,3 @@ export const defaultLoadConfig: LoadConfig = {
   pluginBaseURL: "https://cdn.live.ledger.com",
   extraPlugins: null,
 };
-
-export function getLoadConfig(userLoadConfig?: LoadConfig): LoadConfig {
-  return {
-    ...defaultLoadConfig,
-    ...userLoadConfig,
-  };
-}

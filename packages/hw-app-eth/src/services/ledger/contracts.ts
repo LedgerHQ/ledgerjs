@@ -1,5 +1,4 @@
 import axios from "axios";
-import { getLoadConfig } from "./loadConfig";
 import type { LoadConfig } from "../types";
 import { log } from "@ledgerhq/logs";
 
@@ -18,9 +17,9 @@ export const loadInfosForContractMethod = async (
   contractAddress: string,
   selector: string,
   chainId: number,
-  userLoadConfig: LoadConfig
+  loadConfig: LoadConfig
 ): Promise<ContractMethod | undefined> => {
-  const { pluginBaseURL, extraPlugins } = getLoadConfig(userLoadConfig);
+  const { pluginBaseURL, extraPlugins } = loadConfig;
 
   let data = {};
 

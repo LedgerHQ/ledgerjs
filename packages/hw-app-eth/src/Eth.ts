@@ -20,6 +20,7 @@ import { BigNumber } from "bignumber.js";
 import { decodeTxInfo } from "./utils";
 // NB: these are temporary import for the deprecated fallback mechanism
 import { LedgerEthTransactionResolution, LoadConfig } from "./services/types";
+import { defaultLoadConfig } from "./services/ledger/loadConfig";
 import ledgerService from "./services/ledger";
 import {
   EthAppNftNotSupported,
@@ -76,6 +77,7 @@ const remapTransactionRelatedErrors = (e) => {
 
   return e;
 };
+
 /**
  * Ethereum API
  *
@@ -86,10 +88,13 @@ const remapTransactionRelatedErrors = (e) => {
 
 export default class Eth {
   transport: Transport;
-  loadConfig: LoadConfig;
+  loadConfig: LoadConfig = {};
 
   setLoadConfig(loadConfig: LoadConfig): void {
-    this.loadConfig = loadConfig;
+    this.loadConfig = {
+      ...defaultLoadConfig,
+      ...loadConfig,
+    };
   }
 
   constructor(
@@ -97,8 +102,8 @@ export default class Eth {
     scrambleKey = "w0w",
     loadConfig: LoadConfig = {}
   ) {
+    this.setLoadConfig(loadConfig);
     this.transport = transport;
-    this.loadConfig = loadConfig;
     transport.decorateAppAPIMethods(
       this,
       [

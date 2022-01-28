@@ -1,5 +1,4 @@
 import axios from "axios";
-import { getLoadConfig } from "./loadConfig";
 import type { LoadConfig } from "../types";
 
 type NftInfo = {
@@ -21,9 +20,9 @@ function axiosErrorHandling(e) {
 export const getNFTInfo = async (
   contractAddress: string,
   chainId: number,
-  userLoadConfig: LoadConfig
+  loadConfig: LoadConfig
 ): Promise<NftInfo | undefined> => {
-  const { nftExplorerBaseURL } = getLoadConfig(userLoadConfig);
+  const { nftExplorerBaseURL } = loadConfig;
   if (!nftExplorerBaseURL) return;
   const url = `${nftExplorerBaseURL}/${chainId}/contracts/${contractAddress}`;
   const response = await axios
@@ -55,9 +54,9 @@ export const loadNftPlugin = async (
   contractAddress: string,
   selector: string,
   chainId: number,
-  userLoadConfig: LoadConfig
+  loadConfig: LoadConfig
 ): Promise<string | undefined> => {
-  const { nftExplorerBaseURL } = getLoadConfig(userLoadConfig);
+  const { nftExplorerBaseURL } = loadConfig;
   if (!nftExplorerBaseURL) return;
   const url = `${nftExplorerBaseURL}/${chainId}/contracts/${contractAddress}/plugin-selector/${selector}`;
 
