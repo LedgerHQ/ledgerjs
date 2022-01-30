@@ -1865,8 +1865,8 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        tx: "https://explorer.peercoin.net/tx/$hash",
-        address: "https://explorer.peercoin.net/address/$address",
+        tx: "https://blockbook.peercoin.net/tx/$hash",
+        address: "https://blockbook.peercoin.net/address/$address",
       },
     ],
   },
@@ -2892,12 +2892,12 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     units: [
       {
         name: "CRO",
-        code: "cro",
+        code: "CRO",
         magnitude: 8,
       },
       {
         name: "baseCRO",
-        code: "basecro",
+        code: "baseCRO",
         magnitude: 0,
       },
     ],
