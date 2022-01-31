@@ -121,7 +121,7 @@ export default class Eth {
         "setExternalPlugin",
         "setPlugin",
         "getEIP1024PublicEncryptionKey",
-        "getEIP1024SharedSecret"
+        "getEIP1024SharedSecret",
       ],
       scrambleKey
     );
@@ -1167,14 +1167,14 @@ export default class Eth {
   /**
    * get a shared secret on Curve25519 according to EIP 1024
    * @param path a path in BIP 32 format
-   * @param remotePublicKeyHex remote Curve25519 public key 
+   * @param remotePublicKeyHex remote Curve25519 public key
    * @option boolDisplay optionally enable or not the display
    * @return an object with a shared secret
    * @example
    * eth.getEIP1024SharedSecret("44'/60'/0'/0/0", "87020e80af6e07a6e4697f091eacadb9e7e6629cb7e5a8a371689a3ed53b3d64").then(o => o.sharedSecret)
    */
   getEIP1024SharedSecret(
-    path: string,    
+    path: string,
     remotePublicKeyHex: string,
     boolDisplay?: boolean
   ): Promise<{
@@ -1189,7 +1189,7 @@ export default class Eth {
       buffer.writeUInt32BE(element, 1 + 4 * index);
     });
     offset = 1 + 4 * paths.length;
-    remotePublicKey.copy(buffer, offset);    
+    remotePublicKey.copy(buffer, offset);
     return this.transport
       .send(0xe0, 0x18, boolDisplay ? 0x01 : 0x00, 0x01, buffer)
       .then((response) => {
