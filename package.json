@@ -20,7 +20,7 @@
     "publish": "yarn && lerna run clean && lerna run build && lerna publish --registry=https://registry.npmjs.org/"
   },
   "devDependencies": {
-    "@types/jest": "^27.0.3",
+    "@types/jest": "^27.4.0",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.33.0",
     "browserify": "^17.0.0",
@@ -29,8 +29,8 @@
     "eslint": "7",
     "eslint-config-prettier": "^8.3.0",
     "eslint-plugin-prettier": "^3.4.0",
-    "eslint-plugin-react": "^7.27.1",
-    "jest": "^27.4.5",
+    "eslint-plugin-react": "^7.28.0",
+    "jest": "^27.4.7",
     "lerna": "3.22.1",
     "prettier": "^2.2.1",
     "ts-jest": "^27.1.2",

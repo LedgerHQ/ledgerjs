@@ -1,6 +1,6 @@
 // This implements the resolution of a Transaction using Ledger's own API
 import { log } from "@ledgerhq/logs";
-import { ethers } from "ethers";
+import { Interface } from "@ethersproject/abi";
 
 import {
   LedgerEthTransactionResolution,
@@ -99,7 +99,7 @@ const ledgerService: LedgerEthTransactionService = {
             setExternalPlugin(payload, signature);
           }
           if (erc20OfInterest && erc20OfInterest.length && abi) {
-            const contract = new ethers.utils.Interface(abi);
+            const contract = new Interface(abi);
             const args = contract.parseTransaction(decodedTx).args;
             for (const path of erc20OfInterest) {
               const address = path.split(".").reduce((value, seg) => {
@@ -108,14 +108,14 @@ const ledgerService: LedgerEthTransactionService = {
                 }
                 return value[seg];
               }, args);
-              provideForContract(address);
+              await provideForContract(address);
             }
           }
         } else {
           log("ethereum", "no infos for selector " + selector);
         }
       }
-      provideForContract(decodedTx.to);
+      await provideForContract(decodedTx.to);
     }
 
     return resolution;
