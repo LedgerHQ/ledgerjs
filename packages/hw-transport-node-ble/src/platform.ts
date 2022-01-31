@@ -1,4 +1,4 @@
-import noble, { Characteristic, Service } from "@abandonware/noble";
+import noble, { Characteristic, Service } from "noble-winrt";
 import { Observable } from "rxjs";
 import { log } from "@ledgerhq/logs";
 import {

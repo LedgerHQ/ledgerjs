@@ -33,7 +33,7 @@
     "@ledgerhq/hw-transport": "^6.20.0",
     "@ledgerhq/logs": "^6.10.0",
     "invariant": "^2.2.4",
-    "noble-winrt": "^0.1.1",
+    "noble-winrt": "git://github.com/juan-cortes/noble-winrt#191dc35e3625366c647c3cce6f706d9cf3d3e1d2",
     "rxjs": "6"
   },
   "scripts": {
