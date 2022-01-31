@@ -1185,10 +1185,6 @@ function provideNFTInformation(
   return transport.send(0xe0, 0x14, 0x00, 0x00, data).then(
     () => true,
     (e) => {
-      if (e && e.statusCode === 0x6a80) {
-        // some issue with providing the data
-        return false;
-      }
       if (e && e.statusCode === 0x6d00) {
         // older version of ETH app => error because we don't allow blind sign when NFT is explicitly requested to be resolved.
         throw new EthAppNftNotSupported();
