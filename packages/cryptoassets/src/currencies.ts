@@ -1635,8 +1635,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       {
         tx: "https://moonbeam.moonscan.io/tx/$hash",
         address: "https://moonbeam.moonscan.io/address/$address",
-        token:
-          "https://moonbeam.moonscan.io/token/$contractAddress?a=$address",
+        token: "https://moonbeam.moonscan.io/token/$contractAddress?a=$address",
       },
     ],
   },
