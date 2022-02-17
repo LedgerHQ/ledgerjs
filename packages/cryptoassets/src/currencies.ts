@@ -1932,8 +1932,8 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     type: "CryptoCurrency",
     id: "plcultima",
     coinType: 780,
-    name: "PLCUltima",
-    managerAppName: "PLCUltima",
+    name: "PLC Ultima",
+    managerAppName: "PLC Ultima",
     ticker: "PLCU",
     scheme: "plcultima",
     color: "#002488",
@@ -1946,7 +1946,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     },
     units: [
       {
-        name: "plcultima",
+        name: "PLCU",
         code: "PLCU",
         magnitude: 8,
       },
