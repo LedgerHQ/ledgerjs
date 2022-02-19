@@ -1,15 +1,9 @@
 {
-  "name": "@ledgerhq/hw-app-elrond",
-  "version": "6.19.0",
-  "description": "Ledger Hardware Wallet Elrond Application API",
+  "name": "@ledgerhq/types-live",
+  "version": "6.22.0",
+  "description": "Ledger Live main types.",
   "keywords": [
-    "Ledger",
-    "LedgerWallet",
-    "egld",
-    "Elrond",
-    "NanoS",
-    "Blue",
-    "Hardware Wallet"
+    "Ledger"
   ],
   "repository": {
     "type": "git",
@@ -22,14 +16,14 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "lib/Elrond.js",
-  "module": "lib-es/Elrond.js",
-  "types": "lib/Elrond.d.ts",
+  "main": "lib/index.js",
+  "module": "lib-es/index.js",
+  "types": "lib/index.d.ts",
   "license": "Apache-2.0",
   "dependencies": {
-    "@ledgerhq/errors": "^6.10.0",
-    "@ledgerhq/hw-transport": "^6.19.0",
-    "bip32-path": "^0.4.2"
+    "@ledgerhq/types-cryptoassets": "^6.22.0",
+    "bignumber.js": "9",
+    "rxjs": "6"
   },
   "scripts": {
     "clean": "bash ../../script/clean.sh",

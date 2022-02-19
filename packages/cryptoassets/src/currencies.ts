@@ -618,8 +618,8 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        tx: "https://www.mintscan.io/txs/$hash",
-        address: "https://www.mintscan.io/validators/$address",
+        tx: "https://www.mintscan.io/cosmos/txs/$hash",
+        address: "https://www.mintscan.io/cosmos/validators/$address",
       },
     ],
   },
@@ -1236,7 +1236,41 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
         magnitude: 8,
       },
     ],
-    explorerViews: [],
+    explorerViews: [
+      {
+        tx: "https://v2.explorer.kabuto.sh/transaction/$hash",
+        address: "https://v2.explorer.kabuto.sh/id/$address",
+      },
+    ],
+  },
+  helium: {
+    type: "CryptoCurrency",
+    id: "helium",
+    coinType: 904,
+    name: "Helium",
+    managerAppName: "Helium",
+    ticker: "HNT",
+    scheme: "helium",
+    color: "#474DFF",
+    family: "helium",
+    units: [
+      {
+        name: "HNT",
+        code: "HNT",
+        magnitude: 8,
+      },
+      {
+        name: "bones",
+        code: "bones",
+        magnitude: 0,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://explorer.helium.com/txns/$hash",
+        address: "https://explorer.helium.com/accounts/$address",
+      },
+    ],
   },
   hpb: {
     type: "CryptoCurrency",
@@ -1831,8 +1865,8 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        tx: "https://explorer.peercoin.net/tx/$hash",
-        address: "https://explorer.peercoin.net/address/$address",
+        tx: "https://blockbook.peercoin.net/tx/$hash",
+        address: "https://blockbook.peercoin.net/address/$address",
       },
     ],
   },
@@ -2436,8 +2470,8 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        tx: "https://tzstats.com/operation/$hash",
-        address: "https://tzstats.com/account/$address",
+        tx: "https://tzkt.io/$hash",
+        address: "https://tzkt.io/$address",
       },
     ],
   },
@@ -2616,8 +2650,8 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        tx: "https://www.coinexplorer.net/VTC/transaction/$hash",
-        address: "https://www.coinexplorer.net/VTC/address/$address",
+        tx: "https://vtcblocks.com/tx/$hash",
+        address: "https://vtcblocks.com/address/$address",
       },
     ],
   },
@@ -2858,12 +2892,12 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     units: [
       {
         name: "CRO",
-        code: "cro",
+        code: "CRO",
         magnitude: 8,
       },
       {
         name: "baseCRO",
-        code: "basecro",
+        code: "baseCRO",
         magnitude: 0,
       },
     ],
