@@ -2908,6 +2908,35 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
+  cronos: {
+    type: "CryptoCurrency",
+    id: "cronos",
+    coinType: 60,
+    name: "Cronos",
+    managerAppName: "Cronos",
+    ticker: "CRO",
+    scheme: "cronos",
+    color: "#0e1c37",
+    family: "ethereum",
+    units: [
+      {
+        name: "Cronos",
+        code: "CRO",
+        magnitude: 18,
+      },
+    ],
+    ethereumLikeInfo: {
+      chainId: 25,
+    },
+    explorerViews: [
+      {
+        tx: "https://cronoscan.com/tx/$hash",
+        address: "https://cronoscan.com/address/$address",
+        token:
+          "https://cronoscan.com/token/$contractAddress",
+      },
+    ],
+  },
   // Testnets
   bitcoin_testnet: {
     type: "CryptoCurrency",
