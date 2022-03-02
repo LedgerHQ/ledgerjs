@@ -520,8 +520,8 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        tx: "https://cardanoexplorer.com/tx/$hash",
-        address: "https://cardanoexplorer.com/address/$address",
+        tx: "https://cardanoscan.io/transaction/$hash",
+        address: "https://cardanoscan.io/address/$address",
       },
     ],
   },
