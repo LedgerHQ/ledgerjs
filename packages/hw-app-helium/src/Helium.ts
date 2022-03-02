@@ -1,6 +1,6 @@
 import Transport from "@ledgerhq/hw-transport";
 import { StatusCodes } from "@ledgerhq/errors";
-import { Address } from "@helium/crypto";
+import Address from "@helium/address";
 import {
   PaymentV2,
   SecurityExchangeV1,
