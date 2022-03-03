@@ -54,7 +54,7 @@ const devices: { [key in DeviceModelId]: DeviceModel } = {
   },
   [DeviceModelId.nanoSP]: {
     id: DeviceModelId.nanoSP,
-    productName: "Ledger Nano SP",
+    productName: "Ledger Nano S Plus",
     productIdMM: 0x50,
     legacyUsbProductId: 0x0005,
     usbOnly: true,
@@ -155,7 +155,6 @@ const serviceUuidToInfos: Record<string, BluetoothInfos> = {};
 for (const id in devices) {
   const deviceModel = devices[id];
   const { bluetoothSpec } = deviceModel;
-
   if (bluetoothSpec) {
     for (let i = 0; i < bluetoothSpec.length; i++) {
       const spec = bluetoothSpec[i];

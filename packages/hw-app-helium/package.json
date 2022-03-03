@@ -1,14 +1,14 @@
 {
-    "name": "@ledgerhq/hw-app-solana",
+    "name": "@ledgerhq/hw-app-helium",
     "version": "6.24.1",
-    "description": "Ledger Hardware Wallet Solana Application API",
+    "description": "Ledger Hardware Wallet Helium Application API",
     "keywords": [
         "Ledger",
         "LedgerWallet",
-        "Solana",
-        "sol",
+        "Helium",
+        "HNT",
         "NanoS",
-        "Blue",
+        "NanoX",
         "Hardware Wallet"
     ],
     "repository": {
@@ -22,19 +22,23 @@
     "publishConfig": {
         "access": "public"
     },
-    "main": "lib/Solana.js",
-    "module": "lib-es/Solana.js",
-    "types": "lib/Solana.d.ts",
+    "main": "lib/Helium.js",
+    "module": "lib-es/Helium.js",
+    "types": "lib/Helium.d.ts",
     "license": "Apache-2.0",
     "dependencies": {
+        "@helium/crypto": "^3.45.0",
+        "@helium/proto": "^1.5.0",
+        "@helium/transactions": "^3.62.0",
         "@ledgerhq/errors": "^6.10.0",
         "@ledgerhq/hw-transport": "^6.24.1",
         "@ledgerhq/logs": "^6.10.0",
+        "bignumber.js": "^9.0.1",
         "bip32-path": "^0.4.2"
     },
     "devDependencies": {
         "@ledgerhq/hw-transport-node-speculos": "^6.24.1",
-        "axios": "^0.24.0"
+        "axios": "^0.23.0"
     },
     "scripts": {
         "clean": "bash ../../script/clean.sh",
