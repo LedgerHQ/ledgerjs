@@ -116,7 +116,7 @@ export default class Helium {
       pathBuffer
     );
 
-    const address = Address.fromBin(addressBuffer.slice(1));
+    const address = Address.fromBin(addressBuffer.slice(1, 34));
 
     return {
       index: addressBuffer.slice(0, 1)[0],
