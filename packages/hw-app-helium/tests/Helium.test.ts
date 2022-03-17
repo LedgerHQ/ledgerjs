@@ -1,4 +1,5 @@
 import {
+  PaymentV1,
   PaymentV2,
   StakeValidatorV1,
   TokenBurnV1,
@@ -56,6 +57,35 @@ test("getAddress with display", async () => {
   const { address } = await helium.getAddress(DERIVATION, true);
   expect(address).toEqual(
     "13MLUBBKhTG6pbUdwwFZXnj7P4R7gB6q2janJf3fFipGjLqDV1k"
+  );
+});
+
+test("signPaymentV1", async () => {
+  const transport = await openTransportReplayer(
+    RecordStore.fromString(`
+        => e00800003a0a000000000000000000000000000000010000000000000000019c659d723cc1e810a72e78f7deaf4736a87f10ef8fcfc80100b53327e7ee49a4
+        <= 0a2101351a71c22fefec2231936ad2826b217ece39d9f77fc6c49639926299c38692951221019c659d723cc1e810a72e78f7deaf4736a87f10ef8fcfc80100b53327e7ee49a4180a28013240cb12e89e9208dd674d88d83df56691952eb6dc7ce4c48a8f33b56f8ebeb626d16766b48fe33b9d22fcfabcffd4f5aad72250db8b2bcee677e234cead3e6bb3079000
+    `)
+  );
+  const helium = new Helium(transport);
+  const payee = Address.fromB58(aliceB58);
+  const payer = Address.fromB58(bobB58);
+  const txnToSign = new PaymentV1({
+    amount: 10,
+    payee,
+    nonce: 1,
+    payer,
+  });
+  const { signature, txn } = await helium.signPaymentV1(txnToSign);
+  const expectedSig =
+    "cb12e89e9208dd674d88d83df56691952eb6dc7ce4c48a8f33b56f8ebeb626d16766b48fe33b9d22fcfabcffd4f5aad72250db8b2bcee677e234cead3e6bb307";
+  expect(signature.toString("hex")).toEqual(expectedSig);
+  expect(txn.amount).toBe(10);
+  expect(txn.nonce).toBe(1);
+  expect(txn.payer?.b58).toBe(bobB58);
+  expect(txn.payee?.b58).toBe(aliceB58);
+  expect(Buffer.from(txn.signature as Uint8Array).toString("hex")).toBe(
+    expectedSig
   );
 });
 

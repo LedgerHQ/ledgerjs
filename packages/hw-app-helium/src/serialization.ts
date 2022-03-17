@@ -6,6 +6,7 @@ import {
   TransferValidatorStakeV1,
   UnstakeValidatorV1,
   SecurityExchangeV1,
+  PaymentV1,
 } from "@helium/transactions";
 import BigNumber from "bignumber.js";
 import BIPPath from "bip32-path";
@@ -55,6 +56,21 @@ export const serializePaymentV2 = (txn: PaymentV2): Buffer => {
     Buffer.from([payee.keyType]),
     Buffer.from(payee.publicKey),
     Buffer.from(memo || ""),
+  ]);
+
+  return Buffer.from(txSerialized);
+};
+
+export const serializePaymentV1 = (txn: PaymentV1): Buffer => {
+  const payee = txn.payee as Address;
+
+  const txSerialized = Buffer.concat([
+    serializeNumber(txn.amount),
+    serializeNumber(txn.fee),
+    serializeNumber(txn.nonce),
+    Buffer.from([payee.version]),
+    Buffer.from([payee.keyType]),
+    Buffer.from(payee.publicKey),
   ]);
 
   return Buffer.from(txSerialized);
