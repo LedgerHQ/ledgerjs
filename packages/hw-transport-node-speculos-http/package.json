@@ -31,7 +31,7 @@
     "@ledgerhq/errors": "^6.10.0",
     "@ledgerhq/hw-transport": "^6.24.1",
     "@ledgerhq/logs": "^6.10.0",
-    "axios": "^0.26.0"
+    "axios": "^0.26.1"
   },
   "scripts": {
     "clean": "bash ../../script/clean.sh",
