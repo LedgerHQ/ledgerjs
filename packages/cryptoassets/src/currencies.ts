@@ -2298,11 +2298,11 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        address: "https://explorer.solana.com/",
+        address: "https://explorer.solana.com/address/$address",
         tx: "https://explorer.solana.com/tx/$hash",
       },
       {
-        address: "https://solanabeach.io/",
+        address: "https://solanabeach.io/address/$address",
         tx: "https://solanabeach.io/transaction/$hash",
       },
     ],
@@ -3047,11 +3047,11 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ].map(makeTestnetUnit),
     explorerViews: [
       {
-        address: "https://explorer.solana.com/?cluster=testnet",
+        address: "https://explorer.solana.com/address/$address?cluster=testnet",
         tx: "https://explorer.solana.com/tx/$hash?cluster=testnet",
       },
       {
-        address: "https://solanabeach.io/?cluster=testnet",
+        address: "https://solanabeach.io/address/$address?cluster=testnet",
         tx: "https://solanabeach.io/transaction/$hash?cluster=testnet",
       },
     ],
@@ -3081,11 +3081,11 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ].map(makeTestnetUnit),
     explorerViews: [
       {
-        address: "https://explorer.solana.com/?cluster=devnet",
+        address: "https://explorer.solana.com/address/$address?cluster=devnet",
         tx: "https://explorer.solana.com/tx/$hash?cluster=devnet",
       },
       {
-        address: "https://solanabeach.io/?cluster=devnet",
+        address: "https://solanabeach.io/address/$address?cluster=devnet",
         tx: "https://solanabeach.io/transaction/$hash?cluster=devnet",
       },
     ],
