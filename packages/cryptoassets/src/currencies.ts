@@ -519,8 +519,39 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        tx: "https://cardanoexplorer.com/tx/$hash",
-        address: "https://cardanoexplorer.com/address/$address",
+        tx: "https://cardanoscan.io/transaction/$hash",
+        address: "https://cardanoscan.io/address/$address",
+      },
+    ],
+  },
+  cardano_testnet: {
+    type: "CryptoCurrency",
+    id: "cardano_testnet",
+    coinType: 1815,
+    name: "Cardano (Testnet)",
+    managerAppName: "Cardano ADA",
+    ticker: "tADA",
+    scheme: "cardano_testnet",
+    isTestnetFor: "cardano",
+    color: "#0A1D2C",
+    family: "cardano",
+    blockAvgTime: 20,
+    units: [
+      {
+        name: "ada",
+        code: "tADA",
+        magnitude: 6,
+      },
+      {
+        name: "Lovelace",
+        code: "tLovelace",
+        magnitude: 0,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://testnet.cardanoscan.io/transaction/$hash",
+        address: "https://testnet.cardanoscan.io/address/$address",
       },
     ],
   },
