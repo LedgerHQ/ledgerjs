@@ -3153,7 +3153,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     managerAppName: "Filecoin",
     ticker: "FIL",
     scheme: "filecoin",
-    color: "#000",
+    color: "#0090ff",
     family: "filecoin",
     units: [
       {
