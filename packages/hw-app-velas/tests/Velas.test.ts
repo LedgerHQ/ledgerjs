@@ -14,7 +14,7 @@ test("getAppConfiguration", async () => {
   const velas = new Velas(transport);
   const result = await velas.getAppConfiguration();
   expect(result).toEqual({
-    version: "1.0.0",
+    version: "1.0.6",
     blindSigningEnabled: false,
     pubKeyDisplayMode: 0,
   });
