@@ -26,22 +26,18 @@ If ledger returns error `6808` - enable blind signature in settings (not needed 
 
 #### Table of Contents
 
-- [@blooo/hw-app-velas](#blooohw-app-velas)
-- [Notes](#notes)
-- [Troubleshooting](#troubleshooting)
-- [API](#api)
-    - [Table of Contents](#table-of-contents)
-  - [Velas](#velas)
-    - [Parameters](#parameters)
-    - [Examples](#examples)
-    - [getAddress](#getaddress)
-      - [Parameters](#parameters-1)
-      - [Examples](#examples-1)
-    - [signTransaction](#signtransaction)
-      - [Parameters](#parameters-2)
-      - [Examples](#examples-2)
-    - [getAppConfiguration](#getappconfiguration)
-      - [Examples](#examples-3)
+
+* [Velas](#velas)
+  * [Parameters](#parameters)
+  * [Examples](#examples)
+  * [getAddress](#getaddress)
+    * [Parameters](#parameters-1)
+    * [Examples](#examples-1)
+  * [signTransaction](#signtransaction)
+    * [Parameters](#parameters-2)
+    * [Examples](#examples-2)
+  * [getAppConfiguration](#getappconfiguration)
+    * [Examples](#examples-3)
 
 ### Velas
 
