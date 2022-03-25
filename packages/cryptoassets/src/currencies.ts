@@ -3029,7 +3029,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     managerAppName: "Stacks",
     ticker: "STX",
     scheme: "stacks",
-    color: "#000",
+    color: "#5546ff",
     family: "stacks",
     // currently not available as countervalue and ticker collides with token Stox(STX)
     disableCountervalue: true,
