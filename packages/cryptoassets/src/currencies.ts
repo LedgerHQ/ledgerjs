@@ -3025,7 +3025,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     type: "CryptoCurrency",
     id: "stacks",
     coinType: 5757,
-    name: "stacks",
+    name: "Stacks",
     managerAppName: "Stacks",
     ticker: "STX",
     scheme: "stacks",
