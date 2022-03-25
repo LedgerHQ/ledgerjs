@@ -3149,7 +3149,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     type: "CryptoCurrency",
     id: "filecoin",
     coinType: 461,
-    name: "filecoin",
+    name: "Filecoin",
     managerAppName: "Filecoin",
     ticker: "FIL",
     scheme: "filecoin",
