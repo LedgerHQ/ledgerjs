@@ -3031,8 +3031,6 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     scheme: "stacks",
     color: "#5546ff",
     family: "stacks",
-    // currently not available as countervalue and ticker collides with token Stox(STX)
-    disableCountervalue: true,
     units: [
       {
         name: "STX",
