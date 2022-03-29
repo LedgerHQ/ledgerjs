@@ -2504,6 +2504,64 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
+   tecra: {
+    type: "CryptoCurrency",
+    id: "tecra",
+    coinType: 60,
+    name: "TecraCoin",
+    managerAppName: "TecraCoin",
+    ticker: "TCR",
+    scheme: "tecra",
+    color: "#007BFF",
+    family: "ethereum",
+    ethereumLikeInfo: {
+      chainId: 20531812,
+    },
+    blockAvgTime: 10,
+    units: [
+      {
+        name: "TCR",
+        code: "TCR",
+        magnitude: 8,
+        showAllDigits: true,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://explorer.tecra.space/txs/$hash",
+        address: "https://explorer.tecra.space/address/$address",
+      },
+    ],
+  }, 
+  tecra_testnet: {
+    type: "CryptoCurrency",
+    id: "tecra",
+    coinType: 60,
+    name: "TecraTestnet",
+    managerAppName: "TecraTestnet",
+    ticker: "TCR",
+    scheme: "tecra",
+    color: "#007BFF",
+    family: "ethereum",
+    ethereumLikeInfo: {
+      chainId: 20531811,
+    },
+    blockAvgTime: 10,
+    units: [
+      {
+        name: "TCR",
+        code: "TCR",
+        magnitude: 8,
+        showAllDigits: true,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://explorer.testnet.tecra.space/txs/$hash",
+        address: "https://explorer.testnet.tecra.space/address/$address",
+      },
+    ],
+  },
   tezos: {
     type: "CryptoCurrency",
     id: "tezos",
