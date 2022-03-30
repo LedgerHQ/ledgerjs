@@ -19,7 +19,7 @@ async function runSmokeTest() {
     console.log("app config", appConfig);
 
     // address
-    const addressResult = await velas.getAddress("44'/501'/0'/0'/0'");
+    const addressResult = await velas.getAddress("44'/5655640'/0'/0'/0'");
     console.log("address", {
       address: addressResult.address.toString("hex"),
     });
@@ -29,7 +29,7 @@ async function runSmokeTest() {
       "010001035eb9862fe23e544a2a0969cc157cb31fd72901cc2824d536a67fb8ee911e02363b9ba3a2ebaf40c1cd672a80a8e1932b982cca8264be33c39359701e113c3da20000000000000000000000000000000000000000000000000000000000000000030303030303030303030303030303030303030303030303030303030303030301020200010c020000002a00000000000000",
       "hex"
     );
-    const signaturePromise = velas.signTransaction("44'/501'", txBuffer);
+    const signaturePromise = velas.signTransaction("44'/5655640'", txBuffer);
 
     await approveTransaction();
 

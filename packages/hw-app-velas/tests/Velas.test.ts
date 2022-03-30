@@ -28,7 +28,7 @@ test("getAddress without display", async () => {
         `)
   );
   const velas = new Velas(transport);
-  const { address } = await velas.getAddress("44'/501'/0'/0'/0'", false);
+  const { address } = await velas.getAddress("44'/5655640'/0'/0'/0'", false);
   expect(address.toString("hex")).toEqual(
     "4d65a10662b9759d62bb59048366705454654cf4f9b4b3525cf314429e46c691"
   );
@@ -42,7 +42,7 @@ test("getAddress with display", async () => {
         `)
   );
   const velas = new Velas(transport);
-  const { address } = await velas.getAddress("44'/501'/0'/0'/0'", true);
+  const { address } = await velas.getAddress("44'/5655640'/0'/0'/0'", true);
   expect(address.toString("hex")).toEqual(
     "4d65a10662b9759d62bb59048366705454654cf4f9b4b3525cf314429e46c691"
   );
@@ -60,7 +60,7 @@ test("signTransaction", async () => {
     "010001035eb9862fe23e544a2a0969cc157cb31fd72901cc2824d536a67fb8ee911e02363b9ba3a2ebaf40c1cd672a80a8e1932b982cca8264be33c39359701e113c3da20000000000000000000000000000000000000000000000000000000000000000030303030303030303030303030303030303030303030303030303030303030301020200010c020000002a00000000000000",
     "hex"
   );
-  const { signature } = await velas.signTransaction("44'/501'", transaction);
+  const { signature } = await velas.signTransaction("44'/5655640'", transaction);
   const result = signature.toString("hex");
   expect(result).toEqual(
     "1ad0702faddc8b2072c59547637c10e6affad2f186b69cf3288f2b029de2e309e1d73b73eb925a79f7b0d026ee07203d714e15807267001fbd3914de76a5490e"
@@ -81,7 +81,7 @@ test("chunked payload (payload length > MAX_PAYLOAD)", async () => {
     "010001035eb9862fe23e544a2a0969cc157cb31fd72901cc2824d536a67fb8ee911e02363b9ba3a2ebaf40c1cd672a80a8e1932b982cca8264be33c39359701e113c3da20000000000000000000000000000000000000000000000000000000000000000030303030303030303030303030303030303030303030303030303030303030307020200010c020000002a00000000000000020200010c020000002a00000000000000020200010c020000002a00000000000000020200010c020000002a00000000000000020200010c020000002a00000000000000020200010c020000002a00000000000000020200010c020000002a00000000000000",
     "hex"
   );
-  const { signature } = await velas.signTransaction("44'/501'", transaction);
+  const { signature } = await velas.signTransaction("44'/5655640'", transaction);
   const result = signature.toString("hex");
   expect(result).toEqual(
     "d9ed529ab24ab4e796c006cf85e7e51db85825b31d3477dd3bf8350745b7a9cdc29840442d96dbeca73289a06841655d9f5c342bd6f697dcfdb6dadf8a078404"
