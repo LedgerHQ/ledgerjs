@@ -31,7 +31,7 @@ enum EXTRA_STATUS_CODES {
  * @param scrambleKey a scramble key
  *
  * @example
- * import Velas from "@blooo/hw-app-velas";
+ * import Velas from "@ledgerhq/hw-app-velas";
  * const velas = new Velas(transport);
  */
 export default class Velas {

@@ -3,7 +3,7 @@
 [Github](https://github.com/LedgerHQ/ledgerjs/),
 [Ledger Devs Slack](https://ledger-dev.slack.com/)
 
-## @blooo/hw-app-velas
+## @ledgerhq/hw-app-velas
 
 Ledger Hardware Wallet Velas JavaScript bindings.
 
@@ -25,17 +25,22 @@ If ledger returns error `6808` - enable blind signature in settings (not needed 
 
 #### Table of Contents
 
-*   [Velas](#velas)
-    *   [Parameters](#parameters)
-    *   [Examples](#examples)
-    *   [getAddress](#getaddress)
-        *   [Parameters](#parameters-1)
-        *   [Examples](#examples-1)
-    *   [signTransaction](#signtransaction)
-        *   [Parameters](#parameters-2)
-        *   [Examples](#examples-2)
-    *   [getAppConfiguration](#getappconfiguration)
-        *   [Examples](#examples-3)
+- [@ledgerhq/hw-app-velas](#ledgerhqhw-app-velas)
+- [Notes](#notes)
+- [Troubleshooting](#troubleshooting)
+- [API](#api)
+    - [Table of Contents](#table-of-contents)
+  - [Velas](#velas)
+    - [Parameters](#parameters)
+    - [Examples](#examples)
+    - [getAddress](#getaddress)
+      - [Parameters](#parameters-1)
+      - [Examples](#examples-1)
+    - [signTransaction](#signtransaction)
+      - [Parameters](#parameters-2)
+      - [Examples](#examples-2)
+    - [getAppConfiguration](#getappconfiguration)
+      - [Examples](#examples-3)
 
 ### Velas
 
@@ -49,7 +54,7 @@ Velas API
 #### Examples
 
 ```javascript
-import Velas from "@blooo/hw-app-velas";
+import Velas from "@ledgerhq/hw-app-velas";
 const velas = new Velas(transport);
 ```
 
