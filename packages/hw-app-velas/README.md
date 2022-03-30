@@ -68,7 +68,7 @@ all derivation-path indexes will be promoted to hardened indexes.
 ##### Examples
 
 ```javascript
-velas.getAddress("44'/501'/0'").then(r => r.address)
+velas.getAddress("44'/5655640'/0'").then(r => r.address)
 ```
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{address: [Buffer](https://nodejs.org/api/buffer.html)}>** an object with the address field
@@ -85,7 +85,7 @@ Sign a Velas transaction.
 ##### Examples
 
 ```javascript
-velas.signTransaction("44'/501'/0'", txBuffer).then(r => r.signature)
+velas.signTransaction("44'/5655640'/0'", txBuffer).then(r => r.signature)
 ```
 
 Returns **[Promise](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Promise)<{signature: [Buffer](https://nodejs.org/api/buffer.html)}>** an object with the signature field

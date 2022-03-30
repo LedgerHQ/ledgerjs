@@ -62,7 +62,7 @@ export default class Velas {
    * @returns an object with the address field
    *
    * @example
-   * velas.getAddress("44'/501'/0'").then(r => r.address)
+   * velas.getAddress("44'/5655640'/0'").then(r => r.address)
    */
   async getAddress(
     path: string,
@@ -94,7 +94,7 @@ export default class Velas {
    * @returns an object with the signature field
    *
    * @example
-   * velas.signTransaction("44'/501'/0'", txBuffer).then(r => r.signature)
+   * velas.signTransaction("44'/5655640'/0'", txBuffer).then(r => r.signature)
    */
   async signTransaction(
     path: string,
