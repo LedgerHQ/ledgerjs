@@ -3,7 +3,7 @@
 [Github](https://github.com/LedgerHQ/ledgerjs/),
 [Ledger Devs Slack](https://ledger-dev.slack.com/)
 
-## @blooo/hw-app-velas
+## @ledgerhq/hw-app-velas
 
 Ledger Hardware Wallet Velas JavaScript bindings.
 
@@ -49,7 +49,7 @@ Velas API
 #### Examples
 
 ```javascript
-import Velas from "@blooo/hw-app-velas";
+import Velas from "@ledgerhq/hw-app-velas";
 const velas = new Velas(transport);
 ```
 

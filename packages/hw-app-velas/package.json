@@ -1,5 +1,5 @@
 {
-    "name": "@blooo/hw-app-velas",
+    "name": "@ledgerhq/hw-app-velas",
     "version": "1.0.1",
     "description": "Ledger Hardware Wallet Velas Application API",
     "keywords": [
@@ -13,12 +13,12 @@
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/blooo-io/LedgerHQ-hw-app-velas"
+        "url": "https://github.com/LedgerHQ/ledgerjs"
     },
     "bugs": {
-        "url": "https://github.com/blooo-io/LedgerHQ-hw-app-velas/issues"
+        "url": "https://github.com/LedgerHQ/ledgerjs"
     },
-    "homepage": "https://github.com/blooo-io/LedgerHQ-hw-app-velas",
+    "homepage": "https://github.com/LedgerHQ/ledgerjs",
     "publishConfig": {
         "access": "public"
     },
