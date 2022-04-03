@@ -686,6 +686,30 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
+  coti: {
+    type: "CryptoCurrency",
+    id: "coti",
+    coinType: 6779,
+    name: "coti",
+    managerAppName: "Coti",
+    ticker: "COTI",
+    scheme: "coti",
+    color: "#2BBFDF",
+    family: "coti",
+    units: [
+      {
+        name: "Coti",
+        code: "COTI",
+        magnitude: 8,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://explorer.coti.io/$hash",
+        address: "https://explorer.coti.io/address/$address"
+      },
+    ],
+  },
   dash: {
     type: "CryptoCurrency",
     id: "dash",
