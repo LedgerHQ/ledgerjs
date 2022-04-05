@@ -2069,6 +2069,36 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
+  candle: {
+    type: "CryptoCurrency",
+    id: "candle",
+    coinType: 674,
+    name: "Candle",
+    managerAppName: "Candle",
+    ticker: "CNDL",
+    scheme: "candle",
+    color: "#6d29de",
+    family: "ethereum",
+    ethereumLikeInfo: {
+      baseChain: "mainnet",
+      chainId: 534,
+      networkId: 534,
+    },
+    units: [
+      {
+        name: "CNDL",
+        code: "CNDL",
+        magnitude: 18,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://cndlchain.com/tx/$hash",
+        address: "https://cndlchain.com/address/$address",
+        token: "https://cndlchain.com/token/$contractAddress?a=$address",
+      },
+    ],
+  },
   poswallet: {
     type: "CryptoCurrency",
     id: "poswallet",
