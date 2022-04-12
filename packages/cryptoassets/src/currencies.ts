@@ -2504,7 +2504,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
-  tecra: {
+	tecra: {
     type: "CryptoCurrency",
     id: "tecra",
     coinType: 60,
@@ -2517,7 +2517,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ethereumLikeInfo: {
       chainId: 20531812,
     },
-    blockAvgTime: 10,
+		blockAvgTime: 10,
     units: [
       {
         name: "TCR",
@@ -2532,7 +2532,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
         address: "https://explorer.tecra.space/address/$address",
       },
     ],
-  }, 
+  },
   tecra_testnet: {
     type: "CryptoCurrency",
     id: "tecra",
