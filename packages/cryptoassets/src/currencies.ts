@@ -2504,7 +2504,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
-   tecra: {
+  tecra: {
     type: "CryptoCurrency",
     id: "tecra",
     coinType: 60,
