@@ -494,6 +494,28 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [],
   },
+  quartz: {
+    type: "CryptoCurrency",
+    id: "quartz",
+    coinType: 631,
+    name: "Quartz",
+    managerAppName: "Quartz",
+    ticker: "QTZ",
+    scheme: "quartz",
+    color: "#000000",
+    family: "quartz",
+    units: [
+      {
+        name: "QTZ",
+        code: "QTZ",
+        magnitude: 10,
+      }
+    ],
+    explorerViews: [
+
+    ],
+  },
+
   cardano: {
     type: "CryptoCurrency",
     id: "cardano",
