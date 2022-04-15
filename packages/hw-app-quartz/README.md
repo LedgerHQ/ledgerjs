@@ -1,11 +1,6 @@
-<img src="https://user-images.githubusercontent.com/211411/34776833-6f1ef4da-f618-11e7-8b13-f0697901d6a8.png" height="100" />
+## @ledgerhq/hw-app-quartz
 
-[Github](https://github.com/LedgerHQ/ledgerjs/),
-[Ledger Devs Slack](https://ledger-dev.slack.com/)
-
-## @ledgerhq/hw-app-polkadot
-
-Ledger Hardware Wallet Polkadot JavaScript bindings.
+Ledger Hardware Wallet Quartz JavaScript bindings.
 
 ## API
 
@@ -13,7 +8,7 @@ Ledger Hardware Wallet Polkadot JavaScript bindings.
 
 #### Table of Contents
 
-*   [Polkadot](#polkadot)
+*   [Quartz](#polkadot)
     *   [Parameters](#parameters)
     *   [Examples](#examples)
     *   [getAddress](#getaddress)
@@ -21,9 +16,9 @@ Ledger Hardware Wallet Polkadot JavaScript bindings.
     *   [sign](#sign)
         *   [Parameters](#parameters-2)
 
-### Polkadot
+### Quartz
 
-Polkadot API
+Quartz API
 
 #### Parameters
 
@@ -32,8 +27,8 @@ Polkadot API
 #### Examples
 
 ```javascript
-import Polkadot from "@ledgerhq/hw-app-polkadot";
-const polkadot = new Polkadot(transport)
+import Quartz from "@ledgerhq/hw-app-quartz";
+const quartz = new Quartz(transport)
 ```
 
 #### getAddress
