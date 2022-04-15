@@ -1,12 +1,12 @@
 {
-  "name": "@ledgerhq/hw-app-polkadot",
+  "name": "@ledgerhq/hw-app-quartz",
   "version": "6.27.1",
-  "description": "Ledger Hardware Wallet Polkadot Application API",
+  "description": "Ledger Hardware Wallet Quartz Application API",
   "keywords": [
     "Ledger",
     "LedgerWallet",
-    "dot",
-    "Polkadot",
+    "qtz",
+    "Quartz",
     "NanoS",
     "Blue",
     "Hardware Wallet"
@@ -22,9 +22,9 @@
   "publishConfig": {
     "access": "public"
   },
-  "main": "lib/Polkadot.js",
-  "module": "lib-es/Polkadot.js",
-  "types": "lib/Polkadot.d.ts",
+  "main": "lib/Quartz.js",
+  "module": "lib-es/Quartz.js",
+  "types": "lib/Quartz.d.ts",
   "license": "Apache-2.0",
   "dependencies": {
     "@ledgerhq/errors": "^6.10.0",
