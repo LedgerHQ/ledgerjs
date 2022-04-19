@@ -512,7 +512,10 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       }
     ],
     explorerViews: [
-
+      {
+        tx: "https://quartz.subscan.io/account/$address",
+        address: "https://quartz.subscan.io/extrinsic/$hash",
+      },
     ],
   },
 
