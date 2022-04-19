@@ -2017,8 +2017,8 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        tx: "https://plcultima.info/#/tx/$hash",
-        address: "https://plcultima.info/#/address/$address",
+        tx: "https://plcultima.info/tx/$hash",
+        address: "https://plcultima.info/address/$address",
       },
     ],
   },
