@@ -1596,6 +1596,37 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [],
   },
+  medibloc: {
+    type: "CryptoCurrency",
+    id: "medibloc",
+    coinType: 371,
+    name: "MediBloc",
+    managerAppName: "MediBloc",
+    ticker: "MED",
+    scheme: "med",
+    color: "#16192f",
+    family: "medibloc",
+    // FIXME: enable it back when confirmation number is fixed
+    // blockAvgTime: 8,
+    units: [
+      {
+        name: "Med",
+        code: "MED",
+        magnitude: 6,
+      },
+      {
+        name: "microMed",
+        code: "umed",
+        magnitude: 0,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://www.mintscan.io/medibloc/txs/$hash",
+        address: "https://www.mintscan.io/medibloc/validators/$address",
+      },
+    ],
+  },
   mix: {
     type: "CryptoCurrency",
     id: "mix",
