@@ -2362,6 +2362,30 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
+  solar: {
+    type: "CryptoCurrency",
+    id: "solar",
+    coinType: 3333,
+    name: "Solar",
+    managerAppName: "Solar",
+    ticker: "SXP",
+    scheme: "solar",
+    color: "#ef7945",
+    family: "solar",
+    units: [
+      {
+        name: "SXP",
+        code: "SXP",
+        magnitude: 8,
+      },
+    ],
+    explorerViews: [
+      {
+        address: "https://explorer.solar.org/wallets/$address",
+        tx: "https://explorer.solar.org/transactions/$hash",
+      },
+    ],
+  },
   stakenet: {
     type: "CryptoCurrency",
     id: "stakenet",
