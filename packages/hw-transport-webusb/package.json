@@ -29,7 +29,8 @@
     "@ledgerhq/devices": "^6.27.1",
     "@ledgerhq/errors": "^6.10.0",
     "@ledgerhq/hw-transport": "^6.27.1",
-    "@ledgerhq/logs": "^6.10.0"
+    "@ledgerhq/logs": "^6.10.0",
+    "buffer": "^6.0.3"
   },
   "devDependencies": {
     "@types/w3c-web-usb": "^1.0.5"

@@ -21,6 +21,7 @@ import {
   requestLedgerDevice,
   isSupported,
 } from "./webusb";
+import Buffer = require("buffer/");
 
 const configurationValue = 1;
 const endpointNumber = 3;
