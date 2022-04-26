@@ -1,5 +1,4 @@
 /*
- *
  * ~~ fields ~~
  *
  * id: use by convention lowercased coin name with _ instead of space. if a coin get later rename, we NEVER rename the id for backward compatibility.
