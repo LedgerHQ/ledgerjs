@@ -3223,6 +3223,54 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
+  decimal: {
+    type: "CryptoCurrency",
+    id: "decimal",
+    coinType: 461,
+    name: "Decimal",
+    managerAppName: "Decimal",
+    ticker: "DEL",
+    scheme: "decimal",
+    color: "#0090ff",
+    family: "decimal",
+    units: [
+      {
+        name: "DEL",
+        code: "DEL",
+        magnitude: 18,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://mainnet-explorer-api.decimalchain.ru/api/tx/$hash",
+        address: "https://mainnet-explorer-api.decimalchain.ru/api/address/$address",
+      },
+    ],
+  },
+  decimal_testnet: {
+    type: "CryptoCurrency",
+    id: "decimal",
+    coinType: 461,
+    name: "Decimal",
+    managerAppName: "Decimal",
+    ticker: "DEL",
+    scheme: "decimal",
+    color: "#0090ff",
+    family: "decimal",
+    units: [
+      {
+        name: "DEL",
+        code: "DEL",
+        magnitude: 18,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://testnet-explorer-api.decimalchain.ru/api/tx/$hash",
+        address: "https://testnet-explorer-api.decimalchain.ru/api/address/$address",
+      },
+    ],
+  },
 };
 const cryptocurrenciesByScheme: Record<string, CryptoCurrency> = {};
 const cryptocurrenciesByTicker: Record<string, CryptoCurrency> = {};
