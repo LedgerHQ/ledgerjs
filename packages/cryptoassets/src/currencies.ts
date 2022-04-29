@@ -1453,8 +1453,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        tx:
-          "https://www.kin.org/blockchainInfoPage/?&dataType=public&header=Transaction&id=$hash",
+        tx: "https://www.kin.org/blockchainInfoPage/?&dataType=public&header=Transaction&id=$hash",
         address:
           "https://www.kin.org/blockchainAccount/?&dataType=public&header=accountID&id=$address",
       },
@@ -2004,6 +2003,30 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
+  polkadex: {
+    type: "CryptoCurrency",
+    id: "polkadex",
+    coinType: 799,
+    name: "Polkadex",
+    managerAppName: "Polkadex",
+    ticker: "PDEX",
+    scheme: "polkadex",
+    color: "#E6007A",
+    family: "polkadex",
+    units: [
+      {
+        name: "PDEX",
+        code: "PDEX",
+        magnitude: 12,
+      },
+    ],
+    explorerViews: [
+      {
+        address: "https://polkadex.subscan.io/account/$address",
+        tx: "https://polkadex.subscan.io/extrinsic/$hash",
+      },
+    ],
+  },
   polkadot: {
     type: "CryptoCurrency",
     id: "polkadot",
@@ -2183,8 +2206,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     units: ethereumUnits("SGB", "SGB"),
     explorerViews: [
       {
-        tx:
-          "https://songbird-explorer.flare.network/tx/$hash/internal-transactions",
+        tx: "https://songbird-explorer.flare.network/tx/$hash/internal-transactions",
         address:
           "https://songbird-explorer.flare.network/address/$address/transactions",
       },
