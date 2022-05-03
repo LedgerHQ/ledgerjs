@@ -3223,6 +3223,62 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
+  astar_EVM: {
+    type: "CryptoCurrency",
+    id: "astar_EVM",
+    coinType: 810,
+    name: "Astar",
+    managerAppName: "Astar EVM",
+    ticker: "ASTR",
+    scheme: "astar",
+    color: "#3357D7",
+    family: "astar_evm",
+    units: [
+      {
+        name: "ASTR",
+        code: "ASTR",
+        magnitude: 18,
+      }
+    ],
+    ethereumLikeInfo:{
+      chainId: 592,
+    },
+    explorerViews: [
+      {
+        tx: "https://astar.subscan.io/tx/$hash",
+        address: "https://astar.subscan.io/account/$address",
+        token: "https://astar.subscan.io/erc20_token/$contractAddress"
+      }
+    ]
+  },
+  shiden_EVM: {
+    type: "CryptoCurrency",
+    id: "shiden_EVM",
+    coinType: 809,
+    name: "Shiden",
+    managerAppName: "Shiden EVM",
+    ticker: "SDN",
+    scheme: "shiden",
+    color: "#764BC3",
+    family: "shiden_evm",
+    units: [
+      {
+        name: "SDN",
+        code: "SDN",
+        magnitude: 18,
+      }
+    ],
+    ethereumLikeInfo:{
+      chainId: 336,
+    },
+    explorerViews: [
+      {
+        tx: "https://shiden.subscan.io/tx/$hash",
+        address: "https://shiden.subscan.io/account/$address",
+        token: "https://shiden.subscan.io/erc20_token/$contractAddress"
+      }
+    ]
+  }
 };
 const cryptocurrenciesByScheme: Record<string, CryptoCurrency> = {};
 const cryptocurrenciesByTicker: Record<string, CryptoCurrency> = {};
