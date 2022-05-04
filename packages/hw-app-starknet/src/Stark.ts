@@ -194,7 +194,7 @@ export default class Stark {
    * get and show Starknet public key derived from provided derivation path
    * @param path a path in EIP-2645 format (https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2645.md)
    * @return an object with publicKey
-   *  * @example
+   * @example
    * stark.showPubKey("m/2645'/579218131'/0'/0'").then(o => o.publicKey)
    */
   async showPubKey(path: string): Promise<ResponseAddress> {
