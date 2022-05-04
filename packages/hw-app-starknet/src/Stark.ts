@@ -1,4 +1,4 @@
-/** ******************************************************************************
+/********************************************************************************
  * (c) 2022 Ledger
  *  (c) 2019-2020 Zondax GmbH
  *  (c) 2016-2017 Ledger
@@ -14,7 +14,7 @@
  *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
- ******************************************************************************* */
+ ********************************************************************************/
 import Transport from '@ledgerhq/hw-transport'
 import { serializePath } from './helper'
 import { ResponseAddress, ResponseAppInfo, ResponseBase, ResponseSign, ResponseVersion } from './types'
@@ -72,6 +72,13 @@ function hexToBytes(hex: string) {
     return Uint8Array.from(bytes);
 }
 
+/**
+ * Starknet API
+ *
+ * @example
+ * import Stark from "@ledgerhq/hw-app-starknet";
+ * const stark = new Stark(transport)
+ */
 export default class Stark {
   transport
 
@@ -108,10 +115,18 @@ export default class Stark {
     return Stark.prepareChunks(message, serializePath(path))
   }
 
+  /**
+   * get version of Nano Starknet application
+   * @return an object with a major, minor, patch
+   */
   async getVersion(): Promise<ResponseVersion> {
     return getVersion(this.transport).catch(err => processErrorResponse(err))
   }
 
+  /**
+   * get information about Nano Starknet application 
+   * @return an object with appName, appVersion 
+   */
   async getAppInfo(): Promise<ResponseAppInfo> {
     return this.transport.send(0xb0, 0x01, 0, 0).then(response => {
       const errorCodeData = response.subarray(-2)
@@ -161,6 +176,13 @@ export default class Stark {
     }, processErrorResponse)
   }
 
+  /**
+   * get Starknet public key derived from provided derivation path
+   * @param path a path in EIP-2645 format (https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2645.md)
+   * @return an object with publicKey
+   *  * @example
+   * stark.getPubKey("m/2645'/579218131'/0'/0'").then(o => o.publicKey)
+   */
   async getPubKey(path: string): Promise<ResponseAddress> {
     const serializedPath = Buffer.from(serializePath(path))
     return this.transport
@@ -168,6 +190,13 @@ export default class Stark {
       .then(processGetAddrResponse, processErrorResponse)
   }
 
+  /**
+   * get and show Starknet public key derived from provided derivation path
+   * @param path a path in EIP-2645 format (https://github.com/ethereum/EIPs/blob/master/EIPS/eip-2645.md)
+   * @return an object with publicKey
+   *  * @example
+   * stark.showPubKey("m/2645'/579218131'/0'/0'").then(o => o.publicKey)
+   */
   async showPubKey(path: string): Promise<ResponseAddress> {
     const serializedPath = Buffer.from(serializePath(path))
     return this.transport
@@ -223,6 +252,12 @@ export default class Stark {
       }, processErrorResponse)
   }
 
+   /**
+   * sign the given hash over the Starknet elliptic curve (!! apply a SHA256() on message before computing signature)
+   * @param path a path in EIP-2645 format
+   * @param message hexadecimal hash to sign
+   * @return an object with (r, s, v) signature
+   */
   async sign(path: string, message: Uint8Array) {
     return this.signGetChunks(path, message).then(chunks => {
       return this.signSendChunk(1, chunks.length, chunks[0], INS.SIGN).then(async response => {
@@ -247,10 +282,12 @@ export default class Stark {
     }, processErrorResponse)
   }
 
-  getFelt(hash: string):Uint8Array {
-    return hexToBytes(fixHash(hash));
-  }
-
+  /**
+   * sign the given hash over the Starknet elliptic curve
+   * @param path a path in EIP-2645 format
+   * @param message hexadecimal hash to sign
+   * @return an object with (r, s, v) signature
+   */
   async signFelt(path: string, hash: string, show: boolean = true) {
 
     const felt = hexToBytes(fixHash(hash));

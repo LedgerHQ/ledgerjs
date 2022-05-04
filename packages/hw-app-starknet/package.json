@@ -20,8 +20,10 @@
     "url": "git+https://github.com/LedgerHQ/ledgerjs.git"
   },
   "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1",
-    "build": "bash ../../script/build.sh"
+    "clean": "bash ../../script/clean.sh",
+    "build": "bash ../../script/build.sh",
+    "watch": "bash ../../script/watch.sh",
+    "doc": "bash ../../script/doc.sh"
   },
   "bugs": {
     "url": "https://github.com/LedgerHQ/ledgerjs/issues"
