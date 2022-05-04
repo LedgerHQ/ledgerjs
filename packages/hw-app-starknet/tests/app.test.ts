@@ -4,8 +4,8 @@ import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
 import BN from "bn.js";
 import { ec } from "starknet";
 
-let transport:TransportNodeHid;
-let app:Stark;
+let transport;
+let app;
 
 
 /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
