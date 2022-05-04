@@ -1,11 +1,11 @@
-import StarkwareApp from "../src/index";
+import Stark from "../src/Stark";
 import { LedgerError } from "../src/common";
 import TransportNodeHid from "@ledgerhq/hw-transport-node-hid";
 import BN from "bn.js";
 import { ec } from "starknet";
 
 let transport:TransportNodeHid;
-let app:StarkwareApp;
+let app:Stark;
 
 
 /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
@@ -20,7 +20,7 @@ const HASH_61 = "936e8798681b391af0c57fe0bf5703b9631bea18b4bc84b3940ebab234744";
 
 beforeAll(async () => {
   transport = await TransportNodeHid.create()
-  app = new StarkwareApp(transport)
+  app = new Stark(transport)
 });
 
 

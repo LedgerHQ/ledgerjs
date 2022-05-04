@@ -9,14 +9,9 @@
   ],
   "homepage": "https://github.com/LedgerHQ/ledgerjs",
   "license": "Apache-2.0",
-  "main": "Stark.js",
-  "directories": {
-    "lib": "lib",
-    "test": "__tests__"
-  },
-  "files": [
-    "lib"
-  ],
+  "main": "lib/Stark.js",
+  "module": "lib-es/Stark.js",
+  "types": "lib/Stark.d.ts",
   "publishConfig": {
     "access": "public"
   },
@@ -25,12 +20,15 @@
     "url": "git+https://github.com/LedgerHQ/ledgerjs.git"
   },
   "scripts": {
-    "test": "echo \"Error: run tests from root\" && exit 1"
+    "test": "echo \"Error: run tests from root\" && exit 1",
+    "build": "bash ../../script/build.sh"
   },
   "bugs": {
     "url": "https://github.com/LedgerHQ/ledgerjs/issues"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@ledgerhq/hw-transport": "^6.27.1"
+  },
   "devDependencies": {
     "starknet": "^3.9.0"
   }
