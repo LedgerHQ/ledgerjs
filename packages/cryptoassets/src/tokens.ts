@@ -385,7 +385,6 @@ function convertStellarTokens([
   return {
     type: "TokenCurrency",
     id: `stellar/asset/${assetCode}:${assetIssuer}`,
-    // TODO: ??? STELLAR - what is contractAddress used for?
     contractAddress: assetIssuer,
     parentCurrency: getCryptoCurrencyById("stellar"),
     tokenType: assetType,
