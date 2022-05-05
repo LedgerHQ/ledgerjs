@@ -1,6 +1,4 @@
 /*
- * DEPRECATED => these will eventually be moved into an internal crypto-assets repo
- *
  * ~~ fields ~~
  *
  * id: use by convention lowercased coin name with _ instead of space. if a coin get later rename, we NEVER rename the id for backward compatibility.
@@ -520,8 +518,39 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        tx: "https://cardanoexplorer.com/tx/$hash",
-        address: "https://cardanoexplorer.com/address/$address",
+        tx: "https://cardanoscan.io/transaction/$hash",
+        address: "https://cardanoscan.io/address/$address",
+      },
+    ],
+  },
+  cardano_testnet: {
+    type: "CryptoCurrency",
+    id: "cardano_testnet",
+    coinType: 1815,
+    name: "Cardano (Testnet)",
+    managerAppName: "Cardano ADA",
+    ticker: "tADA",
+    scheme: "cardano_testnet",
+    isTestnetFor: "cardano",
+    color: "#0A1D2C",
+    family: "cardano",
+    blockAvgTime: 20,
+    units: [
+      {
+        name: "ada",
+        code: "tADA",
+        magnitude: 6,
+      },
+      {
+        name: "Lovelace",
+        code: "tLovelace",
+        magnitude: 0,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://testnet.cardanoscan.io/transaction/$hash",
+        address: "https://testnet.cardanoscan.io/address/$address",
       },
     ],
   },
@@ -1712,6 +1741,30 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
+  nervos: {
+    type: "CryptoCurrency",
+    id: "nervos",
+    coinType: 309,
+    name: "Nervos",
+    managerAppName: "Nervos",
+    ticker: "CKB",
+    scheme: "nervos",
+    color: "#3EC58A",
+    family: "nervos",
+    units: [
+      {
+        name: "CKB",
+        code: "CKB",
+        magnitude: 8,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://explorer.nervos.org/transaction/$hash",
+        address: "https://explorer.nervos.org/address/$address",
+      },
+    ],
+  },
   nimiq: {
     type: "CryptoCurrency",
     id: "nimiq",
@@ -2299,11 +2352,11 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [
       {
-        address: "https://explorer.solana.com/",
+        address: "https://explorer.solana.com/address/$address",
         tx: "https://explorer.solana.com/tx/$hash",
       },
       {
-        address: "https://solanabeach.io/",
+        address: "https://solanabeach.io/address/$address",
         tx: "https://solanabeach.io/transaction/$hash",
       },
     ],
@@ -2447,6 +2500,35 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     explorerViews: [
       {
         tx: "https://stellar.expert/explorer/public/tx/$hash",
+      },
+    ],
+  },
+  osmosis: {
+    type: "CryptoCurrency",
+    id: "osmo",
+    coinType: 118,
+    name: "Osmosis",
+    managerAppName: "Cosmos",
+    ticker: "OSMO",
+    scheme: "osmo",
+    color: "#493c9b",
+    family: "osmosis",
+    units: [
+      {
+        name: "Osmosis",
+        code: "OSMO",
+        magnitude: 6,
+      },
+      {
+        name: "Micro-OSMO",
+        code: "uosmo",
+        magnitude: 0,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://www.mintscan.io/osmosis/txs/$hash",
+        address: "https://www.mintscan.io/osmosis/account/$address",
       },
     ],
   },
@@ -2967,18 +3049,44 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
+  ethereum_goerli: {
+    type: "CryptoCurrency",
+    id: "ethereum_goerli",
+    coinType: 1,
+    name: "Ethereum Goerli",
+    managerAppName: "Ethereum",
+    ticker: "ETH",
+    deviceTicker: "ETH",
+    scheme: "ethereum_goerli",
+    color: "#00ff00",
+    units: ethereumUnits("ether", "ETH").map(makeTestnetUnit),
+    isTestnetFor: "ethereum",
+    disableCountervalue: true,
+    family: "ethereum",
+    blockAvgTime: 15,
+    ethereumLikeInfo: {
+      baseChain: "goerli",
+      chainId: 5, // goerli
+      networkId: 5,
+      hardfork: "petersburg",
+    },
+    explorerViews: [
+      {
+        tx: "https://goerli.etherscan.io/tx/$hash",
+        address: "https://goerli.etherscan.io/address/$address",
+      },
+    ],
+  },
   stacks: {
     type: "CryptoCurrency",
     id: "stacks",
     coinType: 5757,
-    name: "stacks",
+    name: "Stacks",
     managerAppName: "Stacks",
     ticker: "STX",
     scheme: "stacks",
-    color: "#000",
+    color: "#5546ff",
     family: "stacks",
-    // currently not available as countervalue and ticker collides with token Stox(STX)
-    disableCountervalue: true,
     units: [
       {
         name: "STX",
@@ -3048,11 +3156,11 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ].map(makeTestnetUnit),
     explorerViews: [
       {
-        address: "https://explorer.solana.com/?cluster=testnet",
+        address: "https://explorer.solana.com/address/$address?cluster=testnet",
         tx: "https://explorer.solana.com/tx/$hash?cluster=testnet",
       },
       {
-        address: "https://solanabeach.io/?cluster=testnet",
+        address: "https://solanabeach.io/address/$address?cluster=testnet",
         tx: "https://solanabeach.io/transaction/$hash?cluster=testnet",
       },
     ],
@@ -3082,11 +3190,11 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ].map(makeTestnetUnit),
     explorerViews: [
       {
-        address: "https://explorer.solana.com/?cluster=devnet",
+        address: "https://explorer.solana.com/address/$address?cluster=devnet",
         tx: "https://explorer.solana.com/tx/$hash?cluster=devnet",
       },
       {
-        address: "https://solanabeach.io/?cluster=devnet",
+        address: "https://solanabeach.io/address/$address?cluster=devnet",
         tx: "https://solanabeach.io/transaction/$hash?cluster=devnet",
       },
     ],
@@ -3095,11 +3203,11 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     type: "CryptoCurrency",
     id: "filecoin",
     coinType: 461,
-    name: "filecoin",
+    name: "Filecoin",
     managerAppName: "Filecoin",
     ticker: "FIL",
     scheme: "filecoin",
-    color: "#000",
+    color: "#0090ff",
     family: "filecoin",
     units: [
       {
