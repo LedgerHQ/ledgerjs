@@ -1595,6 +1595,35 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [],
   },
+  meter: {
+    type: "CryptoCurrency",
+    id: "meter",
+    coinType: 18000,
+    name: "METER",
+    managerAppName: "Meter",
+    ticker: "MTR",
+    scheme: "meter",
+    color: "#5d6ce8",
+    family: "ethereum",
+    units: [
+      {
+        name: "MTR",
+        code: "MTR",
+        magnitude: 12,
+      },
+      {
+        name: "MTRG",
+        code: "eMTRG",
+        magnitude: 0,
+      }
+    ],
+    explorerViews: [
+      {
+        tx: "https://explorer.meter.io/tx/$hash",
+        address: "https://explorer.meter.io/address/$address",
+      },
+    ],
+  },
   mix: {
     type: "CryptoCurrency",
     id: "mix",
