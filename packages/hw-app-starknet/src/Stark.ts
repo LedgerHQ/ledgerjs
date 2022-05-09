@@ -15,9 +15,14 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  ********************************************************************************/
-import Transport from '@ledgerhq/hw-transport'
-import { serializePath } from './helper'
-import { ResponseAddress, ResponseAppInfo, ResponseBase, ResponseSign, ResponseVersion } from './types'
+import Transport from "@ledgerhq/hw-transport";
+import { serializePath } from "./helper";
+import {
+  ResponseAddress,
+  ResponseAppInfo,
+  ResponseSign,
+  ResponseVersion,
+} from "./types";
 import {
   HASH_MAX_LENGTH,
   CHUNK_SIZE,
@@ -29,47 +34,47 @@ import {
   P1_VALUES,
   PAYLOAD_TYPE,
   processErrorResponse,
-} from './common'
+} from "./common";
 
-export { LedgerError }
-export * from './types'
+export { LedgerError };
+export * from "./types";
 
 function processGetAddrResponse(response: Uint8Array) {
-  let partialResponse = response
+  let partialResponse = response;
 
-  const errorCodeData = partialResponse.subarray(-2)
-  const returnCode = errorCodeData[0] * 256 + errorCodeData[1]
+  const errorCodeData = partialResponse.subarray(-2);
+  const returnCode = errorCodeData[0] * 256 + errorCodeData[1];
 
   //get public key len (variable)
-  const PKLEN = partialResponse[0]
-  const publicKey = partialResponse.slice(1, 1 + PKLEN)
+  const PKLEN = partialResponse[0];
+  const publicKey = partialResponse.slice(1, 1 + PKLEN);
 
   //"advance" buffer
-  partialResponse = partialResponse.subarray(1 + PKLEN)
+  partialResponse = partialResponse.subarray(1 + PKLEN);
 
   return {
     publicKey,
     returnCode,
     errorMessage: errorCodeToString(returnCode),
-  }
+  };
 }
 
 /* see https://github.com/0xs34n/starknet.js/blob/develop/src/utils/ellipticCurve.ts#L29 */
 function fixHash(hash: string) {
-  let fixed_hash = hash.replace(/^0x0*/, '');
+  let fixed_hash = hash.replace(/^0x0*/, "");
   if (fixed_hash.length > HASH_MAX_LENGTH) {
-    throw 'invalid hash length';
+    throw "invalid hash length";
   }
-  const s = '0'.repeat(HASH_MAX_LENGTH - fixed_hash.length); 
+  const s = "0".repeat(HASH_MAX_LENGTH - fixed_hash.length);
   fixed_hash = s.concat(fixed_hash);
-  return fixed_hash+"0";
+  return fixed_hash + "0";
 }
 
 function hexToBytes(hex: string) {
-  var bytes: number[] = []
-  for (var c = 0; c < hex.length; c += 2)
-    bytes.push(parseInt(hex.substring(c, c + 2), 16))
-    return Uint8Array.from(bytes);
+  const bytes: number[] = [];
+  for (let c = 0; c < hex.length; c += 2)
+    bytes.push(parseInt(hex.substring(c, c + 2), 16));
+  return Uint8Array.from(bytes);
 }
 
 /**
@@ -80,39 +85,39 @@ function hexToBytes(hex: string) {
  * const stark = new Stark(transport)
  */
 export default class Stark {
-  transport
+  transport;
 
   constructor(transport: Transport) {
-    this.transport = transport
+    this.transport = transport;
     if (!transport) {
-      throw new Error('Transport has not been defined')
+      throw new Error("Transport has not been defined");
     }
   }
 
   static prepareChunks(message: Uint8Array, serializedPathBuffer?: Uint8Array) {
-    const chunks: Uint8Array[] = []
+    const chunks: Uint8Array[] = [];
 
     // First chunk (only path)
     if (serializedPathBuffer !== undefined) {
       // First chunk (only path)
-      chunks.push(serializedPathBuffer!)
+      chunks.push(serializedPathBuffer!);
     }
 
-    const messageBuffer = Uint8Array.from(message)
+    const messageBuffer = Uint8Array.from(message);
 
     for (let i = 0; i < messageBuffer.length; i += CHUNK_SIZE) {
-      let end = i + CHUNK_SIZE
+      let end = i + CHUNK_SIZE;
       if (i > messageBuffer.length) {
-        end = messageBuffer.length
+        end = messageBuffer.length;
       }
-      chunks.push(messageBuffer.subarray(i, end))
+      chunks.push(messageBuffer.subarray(i, end));
     }
 
-    return chunks
+    return chunks;
   }
 
   async signGetChunks(path: string, message: Uint8Array) {
-    return Stark.prepareChunks(message, serializePath(path))
+    return Stark.prepareChunks(message, serializePath(path));
   }
 
   /**
@@ -120,41 +125,43 @@ export default class Stark {
    * @return an object with a major, minor, patch
    */
   async getVersion(): Promise<ResponseVersion> {
-    return getVersion(this.transport).catch(err => processErrorResponse(err))
+    return getVersion(this.transport).catch((err) => processErrorResponse(err));
   }
 
   /**
-   * get information about Nano Starknet application 
-   * @return an object with appName, appVersion 
+   * get information about Nano Starknet application
+   * @return an object with appName, appVersion
    */
   async getAppInfo(): Promise<ResponseAppInfo> {
-    return this.transport.send(0xb0, 0x01, 0, 0).then(response => {
-      const errorCodeData = response.subarray(-2)
-      const returnCode = errorCodeData[0] * 256 + errorCodeData[1]
+    return this.transport.send(0xb0, 0x01, 0, 0).then((response) => {
+      const errorCodeData = response.subarray(-2);
+      const returnCode = errorCodeData[0] * 256 + errorCodeData[1];
 
-      const result: { errorMessage?: string; returnCode?: LedgerError } = {}
+      const result: { errorMessage?: string; returnCode?: LedgerError } = {};
 
-      let appName = 'err'
-      let appVersion = 'err'
-      let flagLen = 0
-      let flagsValue = 0
+      let appName = "err";
+      let appVersion = "err";
+      let flagLen = 0;
+      let flagsValue = 0;
 
       if (response[0] !== 1) {
         // Ledger responds with format ID 1. There is no spec for any format != 1
-        result.errorMessage = 'response format ID not recognized'
-        result.returnCode = LedgerError.DeviceIsBusy
+        result.errorMessage = "response format ID not recognized";
+        result.returnCode = LedgerError.DeviceIsBusy;
       } else {
-        const appNameLen = response[1]
-        appName = response.subarray(2, 2 + appNameLen).toString('ascii')
-        let idx = 2 + appNameLen
-        const appVersionLen = response[idx]
-        idx += 1
-        appVersion = response.subarray(idx, idx + appVersionLen).toString('ascii')
-        idx += appVersionLen
-        const appFlagsLen = response[idx]
-        idx += 1
-        flagLen = appFlagsLen
-        flagsValue = response[idx]
+        const appNameLen = response[1];
+        appName = response.subarray(2, 2 + appNameLen).toString("ascii");
+        let idx = 2 + appNameLen;
+        const appVersionLen = response[idx];
+        idx += 1;
+        appVersion = response
+          .subarray(idx, idx + appVersionLen)
+          .toString("ascii");
+        idx += appVersionLen;
+        const appFlagsLen = response[idx];
+        idx += 1;
+        flagLen = appFlagsLen;
+        flagsValue = response[idx];
       }
 
       return {
@@ -172,8 +179,8 @@ export default class Stark {
         flagOnboarded: (flagsValue & 4) !== 0,
         // eslint-disable-next-line no-bitwise
         flagPINValidated: (flagsValue & 128) !== 0,
-      }
-    }, processErrorResponse)
+      };
+    }, processErrorResponse);
   }
 
   /**
@@ -184,10 +191,12 @@ export default class Stark {
    * stark.getPubKey("m/2645'/579218131'/0'/0'").then(o => o.publicKey)
    */
   async getPubKey(path: string): Promise<ResponseAddress> {
-    const serializedPath = Buffer.from(serializePath(path))
+    const serializedPath = Buffer.from(serializePath(path));
     return this.transport
-      .send(CLA, INS.GET_ADDR, P1_VALUES.ONLY_RETRIEVE, 0, serializedPath, [LedgerError.NoErrors])
-      .then(processGetAddrResponse, processErrorResponse)
+      .send(CLA, INS.GET_ADDR, P1_VALUES.ONLY_RETRIEVE, 0, serializedPath, [
+        LedgerError.NoErrors,
+      ])
+      .then(processGetAddrResponse, processErrorResponse);
   }
 
   /**
@@ -198,19 +207,32 @@ export default class Stark {
    * stark.showPubKey("m/2645'/579218131'/0'/0'").then(o => o.publicKey)
    */
   async showPubKey(path: string): Promise<ResponseAddress> {
-    const serializedPath = Buffer.from(serializePath(path))
+    const serializedPath = Buffer.from(serializePath(path));
     return this.transport
-      .send(CLA, INS.GET_ADDR, P1_VALUES.SHOW_ADDRESS_IN_DEVICE, 0, serializedPath, [LedgerError.NoErrors])
-      .then(processGetAddrResponse, processErrorResponse)
+      .send(
+        CLA,
+        INS.GET_ADDR,
+        P1_VALUES.SHOW_ADDRESS_IN_DEVICE,
+        0,
+        serializedPath,
+        [LedgerError.NoErrors]
+      )
+      .then(processGetAddrResponse, processErrorResponse);
   }
 
-  async signSendChunk(chunkIdx: number, chunkNum: number, chunk: Uint8Array, ins: number = INS.SIGN, p2: number = 0): Promise<ResponseSign> {
-    let payloadType = PAYLOAD_TYPE.ADD
+  async signSendChunk(
+    chunkIdx: number,
+    chunkNum: number,
+    chunk: Uint8Array,
+    ins: number = INS.SIGN,
+    p2 = 0
+  ): Promise<ResponseSign> {
+    let payloadType = PAYLOAD_TYPE.ADD;
     if (chunkIdx === 1) {
-      payloadType = PAYLOAD_TYPE.INIT
+      payloadType = PAYLOAD_TYPE.INIT;
     }
     if (chunkIdx === chunkNum) {
-      payloadType = PAYLOAD_TYPE.LAST
+      payloadType = PAYLOAD_TYPE.LAST;
     }
 
     return this.transport
@@ -221,17 +243,18 @@ export default class Stark {
         LedgerError.SignVerifyError,
       ])
       .then((response: Uint8Array) => {
-
-        const errorCodeData = response.subarray(-2)
-        const returnCode = errorCodeData[0] * 256 + errorCodeData[1]
-        let errorMessage = errorCodeToString(returnCode)
+        const errorCodeData = response.subarray(-2);
+        const returnCode = errorCodeData[0] * 256 + errorCodeData[1];
+        let errorMessage = errorCodeToString(returnCode);
 
         if (
           returnCode === LedgerError.BadKeyHandle ||
           returnCode === LedgerError.DataIsInvalid ||
           returnCode === LedgerError.SignVerifyError
         ) {
-          errorMessage = `${errorMessage} : ${response.subarray(0, response.length - 2).toString()}`
+          errorMessage = `${errorMessage} : ${response
+            .subarray(0, response.length - 2)
+            .toString()}`;
         }
 
         if (returnCode === LedgerError.NoErrors && response.length > 2) {
@@ -242,44 +265,52 @@ export default class Stark {
             hash: response.subarray(65, 65 + 32),
             returnCode: returnCode,
             errorMessage: errorMessage,
-          }
+          };
         }
 
         return {
           returnCode: returnCode,
           errorMessage: errorMessage,
-        }
-      }, processErrorResponse)
+        };
+      }, processErrorResponse);
   }
 
-   /**
+  /**
    * sign the given hash over the Starknet elliptic curve (!! apply a SHA256() on message before computing signature)
    * @param path a path in EIP-2645 format
    * @param message hexadecimal hash to sign
    * @return an object with (r, s, v) signature
    */
   async sign(path: string, message: Uint8Array) {
-    return this.signGetChunks(path, message).then(chunks => {
-      return this.signSendChunk(1, chunks.length, chunks[0], INS.SIGN).then(async response => {
-        let result = {
-          returnCode: response.returnCode,
-          errorMessage: response.errorMessage,
-          hash: null as null | Uint8Array,
-          r: null as null | Uint8Array,
-          s: null as null | Uint8Array,
-          v: null as null | number,
-        }
+    return this.signGetChunks(path, message).then((chunks) => {
+      return this.signSendChunk(1, chunks.length, chunks[0], INS.SIGN).then(
+        async (response) => {
+          let result = {
+            returnCode: response.returnCode,
+            errorMessage: response.errorMessage,
+            hash: null as null | Uint8Array,
+            r: null as null | Uint8Array,
+            s: null as null | Uint8Array,
+            v: null as null | number,
+          };
 
-        for (let i = 1; i < chunks.length; i += 1) {
-          // eslint-disable-next-line no-await-in-loop
-          result = await this.signSendChunk(1 + i, chunks.length, chunks[i], INS.SIGN)
-          if (result.returnCode !== LedgerError.NoErrors) {
-            break
+          for (let i = 1; i < chunks.length; i += 1) {
+            // eslint-disable-next-line no-await-in-loop
+            result = await this.signSendChunk(
+              1 + i,
+              chunks.length,
+              chunks[i],
+              INS.SIGN
+            );
+            if (result.returnCode !== LedgerError.NoErrors) {
+              break;
+            }
           }
-        }
-        return result
-      }, processErrorResponse)
-    }, processErrorResponse)
+          return result;
+        },
+        processErrorResponse
+      );
+    }, processErrorResponse);
   }
 
   /**
@@ -288,12 +319,17 @@ export default class Stark {
    * @param message hexadecimal hash to sign
    * @return an object with (r, s, v) signature
    */
-  async signFelt(path: string, hash: string, show: boolean = true) {
-
+  async signFelt(path: string, hash: string, show = true) {
     const felt = hexToBytes(fixHash(hash));
 
-    return this.signGetChunks(path, felt).then(chunks => {
-      return this.signSendChunk(1, chunks.length, chunks[0], INS.SIGN_FELT, show ? 1 : 0).then(async response => {
+    return this.signGetChunks(path, felt).then((chunks) => {
+      return this.signSendChunk(
+        1,
+        chunks.length,
+        chunks[0],
+        INS.SIGN_FELT,
+        show ? 1 : 0
+      ).then(async (response) => {
         let result = {
           returnCode: response.returnCode,
           errorMessage: response.errorMessage,
@@ -301,18 +337,24 @@ export default class Stark {
           r: null as null | Uint8Array,
           s: null as null | Uint8Array,
           v: null as null | number,
-        }
+        };
         for (let i = 1; i < chunks.length; i += 1) {
           // eslint-disable-next-line no-await-in-loop
-          result = await this.signSendChunk(1 + i, chunks.length, chunks[i], INS.SIGN_FELT, show ? 1 : 0)
+          result = await this.signSendChunk(
+            1 + i,
+            chunks.length,
+            chunks[i],
+            INS.SIGN_FELT,
+            show ? 1 : 0
+          );
           result.hash = undefined;
 
           if (result.returnCode !== LedgerError.NoErrors) {
-            break
+            break;
           }
         }
-        return result
-      }, processErrorResponse)
-    }, processErrorResponse)
+        return result;
+      }, processErrorResponse);
+    }, processErrorResponse);
   }
 }
