@@ -101,7 +101,7 @@ sign the given hash over the Starknet elliptic curve
 
 *   `path` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** a path in EIP-2645 format
 *   `hash` **[string](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String)** 
-*   `show` **[boolean](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/Boolean)**  (optional, default `true`)
+*   `show`   (optional, default `true`)
 *   `message`  hexadecimal hash to sign
 
 Returns **any** an object with (r, s, v) signature
