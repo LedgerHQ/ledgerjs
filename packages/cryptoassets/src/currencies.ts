@@ -1864,6 +1864,30 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
+  parallel: {
+    type: "CryptoCurrency",
+    id: "parallel",
+    coinType: 172,
+    name: "Parallel Finance",
+    managerAppName: "Parallel",
+    ticker: "PARA",
+    scheme: "parallel",
+    color: "#EF18AC",
+    family: "parallel",
+    units: [
+      {
+        name: "PARA",
+        code: "PARA",
+        magnitude: 12,
+      },
+    ],
+    explorerViews: [
+      {
+        address: "https://parallel.subscan.io/account/$address",
+        tx: "https://parallel.subscan.io/extrinsic/$hash",
+      },
+    ],
+  },
   particl: {
     type: "CryptoCurrency",
     id: "particl",
