@@ -1868,7 +1868,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     type: "CryptoCurrency",
     id: "parallel",
     coinType: 354,
-    name: "Parallel Finance",
+    name: "Parallel",
     managerAppName: "Parallel",
     ticker: "PARA",
     scheme: "parallel",
