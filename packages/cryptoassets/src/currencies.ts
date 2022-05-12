@@ -3223,6 +3223,69 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
+  gather: {
+    type: "CryptoCurrency",
+    id: "gather",
+    coinType: 60,
+    name: "Gather",
+    managerAppName: "Gather",
+    ticker: "GTH",
+    scheme: "gather",
+    color: "#3C50E0",
+    family: "ethereum",
+    ethereumLikeInfo: {
+      baseChain: "mainnet",
+      chainId: 192837465,
+      networkId: 192837465,
+    },
+    units: [
+      {
+        name: "GTH",
+        code: "GTH",
+        magnitude: 18,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://explorer.gather.network/tx/$hash",
+        address: "https://explorer.gather.network/address/$address",
+        token: "https://explorer.gather.network/address/$address/tokens/$contractAddress/token-transfers",
+      },
+    ],
+  },
+  gather_testnet: {
+    type: "CryptoCurrency",
+    id: "gather_testnet",
+    coinType: 60,
+    name: "Gather (Testnet)",
+    managerAppName: "Gather",
+    ticker: "GTH",
+    deviceTicker: "GTH",
+    scheme: "gather_testnet",
+    isTestnetFor: "gather",
+    disableCountervalue: true,
+    color: "#3C50E0",
+    family: "ethereum",
+    ethereumLikeInfo: {
+      baseChain: "testnet",
+      chainId: 356256156,
+      networkId: 356256156,
+    },
+    units: [
+      {
+        name: "GTH",
+        code: "GTH",
+        magnitude: 18,
+      },
+    ],
+    explorerViews: [
+      {
+        tx: "https://testnet-explorer.gather.network/tx/$hash",
+        address: "https://testnet-explorer.gather.network/address/$address",
+        token: "https://testnet-explorer.gather.network/address/$address/tokens/$contractAddress/token-transfers",
+      },
+    ],
+  },
 };
 const cryptocurrenciesByScheme: Record<string, CryptoCurrency> = {};
 const cryptocurrenciesByTicker: Record<string, CryptoCurrency> = {};
