@@ -1640,6 +1640,34 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
       },
     ],
   },
+  moonbeam: {
+    type: "CryptoCurrency",
+    id: "moonbeam",
+    coinType: 60,
+    name: "Moonbeam",
+    managerAppName: "Moonbeam",
+    ticker: "GLMR",
+    scheme: "moonbeam",
+    color: "#3D1D5A",
+    family: "ethereum",
+    units: [
+      {
+        name: "GLMR",
+        code: "GLMR",
+        magnitude: 18,
+      },
+    ],
+    ethereumLikeInfo: {
+      chainId: 1284,
+    },
+    explorerViews: [
+      {
+        tx: "https://moonbeam.moonscan.io/tx/$hash",
+        address: "https://moonbeam.moonscan.io/address/$address",
+        token: "https://moonbeam.moonscan.io/token/$contractAddress?a=$address",
+      },
+    ],
+  },
   moonriver: {
     type: "CryptoCurrency",
     id: "moonriver",
