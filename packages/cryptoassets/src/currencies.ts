@@ -1608,7 +1608,7 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     blockAvgTime: 1 * 60,
     units: [
       {
-        name: "MWC",
+        name: "mimblewimble coin",
         code: "MWC",
         magnitude: 9,
       },
@@ -1629,11 +1629,11 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     blockAvgTime: 1 * 60,
     units: [
       {
-        name: "MWC",
+        name: "mimblewimble coin",
         code: "MWC",
         magnitude: 9,
-      },
-    ],
+      }
+    ].map(makeTestnetUnit),
     explorerViews: [],
   },
   mix: {
