@@ -1415,6 +1415,30 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [],
   },
+  shimmer: {
+    type: "CryptoCurrency",
+    id: "shimmer",
+    coinType: 4219,
+    name: "Shimmer",
+    managerAppName: "Shimmer",
+    ticker: "SMR",
+    scheme: "shimmer",
+    color: "#000000",
+    family: "shimmer",
+    units: [
+      {
+        name: "shimmer",
+        code: "SMR",
+        magnitude: 6,
+      },
+      {
+        name: "glow",
+        code: "g",
+        magnitude: 0,
+      },
+    ],
+    explorerViews: [],
+  },  
   iov: {
     type: "CryptoCurrency",
     id: "iov",
