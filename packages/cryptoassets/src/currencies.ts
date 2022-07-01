@@ -964,6 +964,32 @@ const cryptocurrenciesById: Record<string, CryptoCurrency> = {
     ],
     explorerViews: [],
   },
+  ergo: {
+    type: "CryptoCurrency",
+    id: "ergo",
+    coinType: 429,
+    name: "Ergo",
+    managerAppName: "Ergo",
+    blockAvgTime: 120,
+    ticker: "ERG",
+    symbol: "Σ",
+    scheme: "erg",
+    color: "#000000",
+    family: "ergo",
+    units: [
+      {
+        name: "erg",
+        code: "ERG",
+        magnitude: 9,
+      },
+      {
+        name: "nanoERG",
+        code: "nanoERG",
+        magnitude: 0,
+      },
+    ],
+    explorerViews: [],
+  },
   ethereum: {
     type: "CryptoCurrency",
     id: "ethereum",
